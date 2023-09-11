@@ -42,9 +42,37 @@ class _CoursesViewState extends State<CoursesView> {
                       child: Card(
                         color: Colors.amber[colorCodes[index]],
                         child: Container(
-                            padding: EdgeInsets.all(screenHeight * 0.01),
+                            padding: EdgeInsets.all(screenWidth * 0.03),
                             height: screenHeight * 0.1,
-                            child: Text(courses[index].name)),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                    margin: EdgeInsets.only(
+                                        left: screenWidth * 0.02,
+                                        right: screenWidth * 0.04),
+                                    child: Icon(
+                                      courses[index].icon,
+                                      size: screenWidth * 0.12,
+                                    )),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: screenWidth * 0.6,
+                                      child: Text(
+                                        courses[index].name,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )),
                       ),
                     );
                   },
@@ -86,8 +114,29 @@ final List<int> colorCodes = <int>[
   100
 ];
 final List<Course> courses = <Course>[
+  Course(
+      name: 'Diseño de sistemas operativos',
+      examDate: DateTime.now(),
+      weight: 2.0,
+      units: units,
+      secondsStudied: 4000),
   Course(name: 'Test', examDate: DateTime.now()),
+  Course(name: 'Test', examDate: DateTime.now()),
+  Course(name: 'Test', examDate: DateTime.now()),
+  Course(
+      name: 'Diseño de sistemas operativos',
+      examDate: DateTime.now(),
+      weight: 2.0,
+      units: units,
+      secondsStudied: 4000),
   Course(name: 'Test', examDate: DateTime.now()),
   Course(name: 'Test', examDate: DateTime.now()),
   Course(name: 'Test', examDate: DateTime.now())
+];
+
+final List<Unit> units = <Unit>[
+  Unit(name: 'unitname'),
+  Unit(name: 'unitname'),
+  Unit(name: 'unitname'),
+  Unit(name: 'unitname')
 ];
