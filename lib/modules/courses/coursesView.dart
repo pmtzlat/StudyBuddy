@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:study_buddy/main.dart';
+import 'package:study_buddy/models/course_model.dart';
+import 'package:study_buddy/models/unit_model.dart';
 
 class CoursesView extends StatefulWidget {
   const CoursesView({super.key});
@@ -33,16 +35,16 @@ class _CoursesViewState extends State<CoursesView> {
                 child: ListView.builder(
                   scrollDirection: Axis.vertical,
                   shrinkWrap: true,
-                  itemCount: entries.length,
+                  itemCount: courses.length,
                   itemBuilder: (BuildContext context, int index) {
                     return Container(
                       margin: EdgeInsets.all(screenHeight * 0.005),
                       child: Card(
+                        color: Colors.amber[colorCodes[index]],
                         child: Container(
                             padding: EdgeInsets.all(screenHeight * 0.01),
                             height: screenHeight * 0.1,
-                            child: Text(entries[index])),
-                        color: Colors.amber[colorCodes[index]],
+                            child: Text(courses[index].name)),
                       ),
                     );
                   },
@@ -55,5 +57,37 @@ class _CoursesViewState extends State<CoursesView> {
   }
 }
 
-final List<String> entries = <String>['A', 'B', 'C','A', 'B', 'C','A', 'B', 'C','A', 'B', 'C'];
-final List<int> colorCodes = <int>[600, 500, 100, 600, 500, 100, 600, 500, 100, 600, 500, 100];
+final List<String> entries = <String>[
+  'A',
+  'B',
+  'C',
+  'A',
+  'B',
+  'C',
+  'A',
+  'B',
+  'C',
+  'A',
+  'B',
+  'C'
+];
+final List<int> colorCodes = <int>[
+  600,
+  500,
+  100,
+  600,
+  500,
+  100,
+  600,
+  500,
+  100,
+  600,
+  500,
+  100
+];
+final List<Course> courses = <Course>[
+  Course(name: 'Test', examDate: DateTime.now()),
+  Course(name: 'Test', examDate: DateTime.now()),
+  Course(name: 'Test', examDate: DateTime.now()),
+  Course(name: 'Test', examDate: DateTime.now())
+];
