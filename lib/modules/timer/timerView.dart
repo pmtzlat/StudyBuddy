@@ -20,7 +20,7 @@ class _TimerViewState extends State<TimerView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TimerWidget(hours: 1, minutes: 1, seconds: 10,),
+              TimerWidget(hours: 0, minutes: 0, seconds: 5,),
             ],
           )
         ]));

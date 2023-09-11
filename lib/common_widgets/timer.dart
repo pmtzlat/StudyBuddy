@@ -56,6 +56,7 @@ class _TimerWidgetState extends State<TimerWidget> {
     
     stopwatch.start();
     while (stopwatch.isRunning) {
+      if (widget.timerTime == Duration(seconds: 0)) break;
       await Future.delayed(Duration(seconds: 1));
       updatetimer();
     }
