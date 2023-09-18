@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 import 'package:study_buddy/modules/calendar/calendarView.dart';
 import 'package:study_buddy/instance_manager.dart';
 import 'package:study_buddy/modules/graphs/graphsView.dart';
+import 'package:study_buddy/modules/loader/loader.dart';
 import 'package:study_buddy/modules/profile/profileView.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -37,7 +38,7 @@ class StudyBuddyApp extends StatelessWidget {
     
     return MaterialApp(
       title: 'StudyBuddy',
-      home: CalendarView(),
+      home: LoadingScreen(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color.fromARGB(255, 46, 46, 46)),
