@@ -4,7 +4,7 @@ import 'package:study_buddy/modules/courses/coursesView.dart';
 import 'package:study_buddy/modules/graphs/graphsView.dart';
 import 'package:study_buddy/modules/profile/profileView.dart';
 import 'package:study_buddy/modules/timer/timerView.dart';
-
+import 'package:study_buddy/services/logging_service.dart';
 import '../modules/calendar/calendarView.dart';
 
 PageRouteBuilder<dynamic> fadePageRouteBuilder(
@@ -40,6 +40,7 @@ class MyScaffold {
             if (index != activeIndex) {
               switch (index) {
                 case 0:
+                logger.i('Moved to Timer page');
                   Navigator.of(context).push(fadePageRouteBuilder(TimerView()));
 
                   break;
