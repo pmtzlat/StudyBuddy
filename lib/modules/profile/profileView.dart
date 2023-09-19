@@ -16,8 +16,8 @@ class ProfileView extends StatefulWidget {
 class _ProfileViewState extends State<ProfileView> {
   Future<void> _signOut() async {
     try {
-      await FirebaseAuth.instance.signOut(); // Sign out from Firebase
-      await GoogleSignIn().signOut(); // Sign out from Google Sign-In
+      await instanceManager.authService.signOut();
+
       Navigator.of(context).pushReplacement(
           fadePageRouteBuilder(SignInView()) // Navigate to SignInView
           );

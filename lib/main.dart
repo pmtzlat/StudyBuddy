@@ -17,15 +17,12 @@ var instanceManager;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
-  instanceManager = InstanceManager();
-  
 
-  
+  instanceManager = InstanceManager();
 
   runApp(StudyBuddyApp());
 }
@@ -33,15 +30,13 @@ void main() async {
 class StudyBuddyApp extends StatelessWidget {
   StudyBuddyApp({super.key});
   final User? user = FirebaseAuth.instance.currentUser;
-  
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    
     return MaterialApp(
       title: 'StudyBuddy',
-    home: (user != null) ? CalendarView(): SignInView(),
+      home: (user != null) ? CalendarView() : SignInView(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color.fromARGB(255, 46, 46, 46)),
