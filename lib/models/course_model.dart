@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:study_buddy/models/unit_model.dart';
 
-class Course {
+class CourseModel {
   final String name;
   final double weight;
   final DateTime examDate;
-  final List<Unit>? units;
+  final List<UnitModel>? units;
   final int secondsStudied;
   final String color;
   final int iconCode;
@@ -21,7 +21,7 @@ class Course {
   var iconData = IconData(iconCodePointFromDataBase, fontFamily: 'MaterialIcons');
   */ 
 
-  Course(
+  CourseModel(
       {required this.name,
       this.weight = 1.0,
       required this.examDate,
@@ -29,4 +29,8 @@ class Course {
       this.secondsStudied = 0,
       this.color = '#000000',
       this.iconCode = 0xe0bf}) : icon = IconData(iconCode, fontFamily: 'MaterialIcons');
+
+
+
+  
 }

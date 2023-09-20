@@ -37,6 +37,13 @@ dependencies:
   cupertino_icons: ^1.0.2
   navbar_router: ^0.6.1
   animations: ^2.0.8
+  firebase_core: ^2.15.1
+  firebase_auth: ^4.9.0
+  logger: ^2.0.2
+  google_sign_in: ^6.1.5
+  flutter_signin_button: ^2.0.0
+  shared_preferences: ^2.2.1
+  cloud_firestore: ^4.9.1
   
 
 dev_dependencies:

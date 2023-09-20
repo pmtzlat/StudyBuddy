@@ -43,7 +43,7 @@ class _CoursesViewState extends State<CoursesView> {
                         color: Colors.amber[colorCodes[index]],
                         child: Container(
                             padding: EdgeInsets.all(screenWidth * 0.03),
-                            height: 80,
+                            height: screenHeight * 0.1,
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -66,7 +66,7 @@ class _CoursesViewState extends State<CoursesView> {
                                         maxLines: 1,
                                         style: Theme.of(context)
                                             .textTheme
-                                            .bodyMedium,
+                                            .titleSmall,
                                       ),
                                     ),
                                   ],
@@ -113,30 +113,30 @@ final List<int> colorCodes = <int>[
   500,
   100
 ];
-final List<Course> courses = <Course>[
-  Course(
+final List<CourseModel> courses = <CourseModel>[
+  CourseModel(
       name: 'Diseño de sistemas operativos',
       examDate: DateTime.now(),
       weight: 2.0,
       units: units,
       secondsStudied: 4000),
-  Course(name: 'Test', examDate: DateTime.now()),
-  Course(name: 'Test', examDate: DateTime.now()),
-  Course(name: 'Test', examDate: DateTime.now()),
-  Course(
+  CourseModel(name: 'Test', examDate: DateTime.now()),
+  CourseModel(name: 'Test', examDate: DateTime.now()),
+  CourseModel(name: 'Test', examDate: DateTime.now()),
+  CourseModel(
       name: 'Diseño de sistemas operativos',
       examDate: DateTime.now(),
       weight: 2.0,
       units: units,
       secondsStudied: 4000),
-  Course(name: 'Test', examDate: DateTime.now()),
-  Course(name: 'Test', examDate: DateTime.now()),
-  Course(name: 'Test', examDate: DateTime.now())
+  CourseModel(name: 'Test', examDate: DateTime.now()),
+  CourseModel(name: 'Test', examDate: DateTime.now()),
+  CourseModel(name: 'Test', examDate: DateTime.now())
 ];
 
-final List<Unit> units = <Unit>[
-  Unit(name: 'unitname'),
-  Unit(name: 'unitname'),
-  Unit(name: 'unitname'),
-  Unit(name: 'unitname')
+final List<UnitModel> units = <UnitModel>[
+  UnitModel(name: 'unitname'),
+  UnitModel(name: 'unitname'),
+  UnitModel(name: 'unitname'),
+  UnitModel(name: 'unitname')
 ];
