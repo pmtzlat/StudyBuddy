@@ -21,13 +21,14 @@ class InstanceManager {
   
   
   
-  InstanceManager(){startLocalStorage();}
+  InstanceManager(){}
 
 
-  void startLocalStorage() async{
+  Future<void> startLocalStorage() async{
     localStorage =  await SharedPreferences.getInstance();
 
   }
+
 
   
   

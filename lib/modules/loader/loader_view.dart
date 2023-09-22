@@ -15,7 +15,9 @@ class _LoaderViewState extends State<LoaderView> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: [Text('LoaderPage')],
+        children: [CircularProgressIndicator(), // Loading spinner
+            SizedBox(height: 16.0),
+            Text('Loading...'), ],
       ),
     );
   }
