@@ -15,6 +15,7 @@ class SignInController {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Login fallido. Intentalo de nuevo.'),
+        backgroundColor: const Color.fromARGB(255, 253, 96, 85),
       ));
     }
   }

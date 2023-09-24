@@ -4,6 +4,8 @@ import 'package:study_buddy/models/course_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/modules/courses/courses_controller.dart';
 
+import '../../services/logging_service.dart';
+
 class CoursesView extends StatefulWidget {
   const CoursesView({super.key});
 
@@ -120,9 +122,30 @@ class _CoursesViewState extends State<CoursesView> {
                   ),
                 ),
                 ElevatedButton(
-                    onPressed: (){final res = _controller.addCourse(
-                        name: 'test', examDate: DateTime.now());},
-                    child: Text('test add'))
+                  onPressed: () async {
+                    final res = await _controller.addCourse(
+                      name: 'test',
+                      examDate: DateTime.now(),
+                    );
+                    logger.i(res);
+
+                    // Close the bottom sheet
+                    Navigator.of(context).pop();
+
+                    // Show a snackbar based on the value of 'res'
+                    final snackbar = SnackBar(
+                      content: Text(
+                        res == 1
+                            ? 'Asignatura añadida con éxito!'
+                            : 'Error al añadir asignatura. Inténtalo otra vez.',
+                      ),
+                      backgroundColor: res == 1 ? Color.fromARGB(255, 0, 172, 6) : Color.fromARGB(255, 221, 15, 0),
+                    );
+
+                    ScaffoldMessenger.of(context).showSnackBar(snackbar);
+                  },
+                  child: Text('test add'),
+                )
               ],
             ),
           ),
