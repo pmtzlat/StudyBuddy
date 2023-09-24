@@ -1,7 +1,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:study_buddy/modules/calendar/calendarView.dart';
+import 'package:study_buddy/modules/calendar/calendar_view.dart';
 import 'package:study_buddy/modules/sign_in/sign_in_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
 

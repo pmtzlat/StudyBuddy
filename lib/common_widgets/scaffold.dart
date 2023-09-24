@@ -1,11 +1,11 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:study_buddy/modules/courses/coursesView.dart';
-import 'package:study_buddy/modules/graphs/graphsView.dart';
-import 'package:study_buddy/modules/profile/profileView.dart';
-import 'package:study_buddy/modules/timer/timerView.dart';
+import 'package:study_buddy/modules/courses/courses_view.dart';
+import 'package:study_buddy/modules/graphs/graphs_view.dart';
+import 'package:study_buddy/modules/profile/profile_view.dart';
+import 'package:study_buddy/modules/timer/timer_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
-import '../modules/calendar/calendarView.dart';
+import '../modules/calendar/calendar_view.dart';
 
 PageRouteBuilder<dynamic> fadePageRouteBuilder(
   Widget page,
