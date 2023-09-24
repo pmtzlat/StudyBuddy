@@ -10,6 +10,7 @@ class CourseModel {
   final String color;
   final int iconCode;
   final IconData icon;
+  final int sessionTime;
 
   /*
   var iconData = IconData(58717, fontFamily: 'MaterialIcons')
@@ -28,7 +29,9 @@ class CourseModel {
       this.units,
       this.secondsStudied = 0,
       this.color = '#000000',
-      this.iconCode = 0xe0bf}) : icon = IconData(iconCode, fontFamily: 'MaterialIcons');
+      this.iconCode = 0xe0bf,
+      this.sessionTime = 3600, //one hour
+      }) : icon = IconData(iconCode, fontFamily: 'MaterialIcons');
 
 
 

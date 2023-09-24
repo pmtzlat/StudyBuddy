@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/course_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
+import 'package:study_buddy/modules/courses/courses_controller.dart';
 
 class CoursesView extends StatefulWidget {
   const CoursesView({super.key});
@@ -11,6 +12,7 @@ class CoursesView extends StatefulWidget {
 }
 
 class _CoursesViewState extends State<CoursesView> {
+  final _controller = CoursesController();
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
@@ -90,7 +92,6 @@ class _CoursesViewState extends State<CoursesView> {
   }
 
   void showAddCourseSheet(BuildContext context) {
-
     /*- Course title
 - exam date
 - study start date
@@ -118,7 +119,10 @@ class _CoursesViewState extends State<CoursesView> {
                     fontSize: 18.0, // Text size
                   ),
                 ),
-                // Add other widgets as needed
+                ElevatedButton(
+                    onPressed: (){final res = _controller.addCourse(
+                        name: 'test', examDate: DateTime.now());},
+                    child: Text('test add'))
               ],
             ),
           ),
