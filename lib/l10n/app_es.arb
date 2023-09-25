@@ -1,0 +1,23 @@
+{
+    "coursesTitle": "Asignaturas",
+    "addCourse": "Añadir Asignatura",
+    "add" : "Añadir",
+    "courseAddedCorrectly" : "Asignatura añadida con éxito!",
+    "errorAddingCourse": "Error al añadir asignatura. Inténtalo otra vez.",
+    "courseName": "Nombre de Asignatura",
+
+    "calendarTitle": "Calendario",
+
+
+    "progressTitle" : "Progreso",
+
+
+    "timerTitle": "Contador",
+    "start": "Empezar",
+    "stop": "Parar",
+    "reset": "Reempezar",
+
+
+    "logOut": "Cerrar sesión"
+
+}

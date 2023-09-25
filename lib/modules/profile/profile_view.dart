@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/modules/profile/profile_controller.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../common_widgets/scaffold.dart';
 import '../sign_in/sign_in_view.dart';
@@ -34,7 +35,7 @@ class _ProfileViewState extends State<ProfileView> {
                 onPressed: () {
                   _controller.signOut(context); // Call the sign-out function
                 },
-                child: Text('Log Out'),
+                child: Text(AppLocalizations.of(context)!.logOut),
               )
             ],
           )

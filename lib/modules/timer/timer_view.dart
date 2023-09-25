@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:study_buddy/common_widgets/timer.dart';
 import 'package:study_buddy/main.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TimerView extends StatefulWidget {
   const TimerView({super.key});

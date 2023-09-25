@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:study_buddy/main.dart';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -19,7 +20,7 @@ class _CalendarViewState extends State<CalendarView> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [Text('Calendar')],
+              children: [Text(AppLocalizations.of(context)!.calendarTitle)],
             )
           ],
         )

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class TimerWidget extends StatefulWidget {
@@ -32,9 +33,9 @@ class _TimerWidgetState extends State<TimerWidget> {
             '${secondsShown < 10 ? '0${secondsShown}' : secondsShown}'),
         Row(
           children: [
-            ElevatedButton(onPressed: () => startTimer(), child: Text('Start')),
-            ElevatedButton(onPressed: () => pauseTimer(), child: Text('Stop')),
-            ElevatedButton(onPressed: () => resetTimer(), child: Text('Reset'))
+            ElevatedButton(onPressed: () => startTimer(), child: Text(AppLocalizations.of(context)!.start)),
+            ElevatedButton(onPressed: () => pauseTimer(), child: Text(AppLocalizations.of(context)!.stop)),
+            ElevatedButton(onPressed: () => resetTimer(), child: Text(AppLocalizations.of(context)!.reset))
           ],
         )
       ],

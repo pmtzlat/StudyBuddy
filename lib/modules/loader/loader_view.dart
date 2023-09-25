@@ -16,8 +16,7 @@ class _LoaderViewState extends State<LoaderView> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [CircularProgressIndicator(), // Loading spinner
-            SizedBox(height: 16.0),
-            Text('Loading...'), ],
+            SizedBox(height: 16.0),]
       ),
     );
   }

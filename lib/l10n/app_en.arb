@@ -1,0 +1,23 @@
+{
+    "coursesTitle": "Courses",
+    "addCourse": "Add Course",
+    "add" : "Add",
+    "courseAddedCorrectly" : "Course added successfully!",
+    "errorAddingCourse": "Error adding course. Please try again.",
+    "courseName" : "Course Name",
+    "examDate" : "Exam Date",
+
+    "calendarTitle": "Calendar",
+
+
+    "progressTitle" : "Progress",
+
+
+    "timerTitle": "Timer",
+    "start": "Start",
+    "stop": "Stop",
+    "reset": "Reset",
+
+
+    "logOut": "Log Out"
+}

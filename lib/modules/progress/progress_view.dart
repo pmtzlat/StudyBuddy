@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:study_buddy/main.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GraphsView extends StatefulWidget {
   const GraphsView({super.key});
@@ -18,7 +19,7 @@ class _GraphsViewState extends State<GraphsView> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [Text('Graphs')],
+              children: [Text(AppLocalizations.of(context)!.progressTitle)],
             )
           ],
         )
