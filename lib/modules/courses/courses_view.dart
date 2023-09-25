@@ -106,88 +106,107 @@ class _CoursesViewState extends State<CoursesView> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(25.0))),
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 20,
-              right: 20,
-              top: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                _localizations.addCourse,
-                style: TextStyle(
-                  color: Colors.white, // Text color
-                  fontSize: 18.0, // Text size
-                ),
-              ),
-              FormBuilder(
-                  key: courseCreationFormKey,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 20,
-                      ),
-                      FormBuilderTextField(
-                        // Name
-                        name: 'courseName',
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        decoration: InputDecoration(
-                          labelText: _localizations.courseName,
-                        ),
-                        style: TextStyle(color: Colors.white),
-
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(),
-                        ]),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      FormBuilderDateTimePicker(
-                        name: 'examDate',
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        inputType: InputType.date,
-                        enabled: true,
-                        decoration:
-                            InputDecoration(labelText: _localizations.examDate),
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.normal),
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(),
-                        ]),
-                      ),
-                      
-                      FormBuilderSlider(
-                        name: 'weightSlider',
-                        initialValue: 1.0,
-                        min: 0.0,
-                        max: 2.0,
-                        divisions: 20,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(),
-                        ]),
-                      )
-                    ],
-                  )),
-              Center(
-                child: Container(
-                  margin: EdgeInsets.all(20),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await _controller.handleFormSubmission(
-                          courseCreationFormKey, context);
-                    },
-                    child: Text(_localizations.add),
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 20,
+                right: 20,
+                top: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  _localizations.addCourse,
+                  style: TextStyle(
+                    color: Colors.white, // Text color
+                    fontSize: 18.0, // Text size
                   ),
                 ),
-              )
-            ],
+                FormBuilder(
+                    key: courseCreationFormKey,
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 20,
+                        ),
+                        FormBuilderTextField(
+                          // Name
+                          name: 'courseName',
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          decoration: InputDecoration(
+                            labelText: _localizations.courseName,
+                          ),
+                          style: TextStyle(color: Colors.white),
+        
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(),
+                          ]),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        FormBuilderDateTimePicker(
+                          name: 'examDate',
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          inputType: InputType.date,
+                          enabled: true,
+                          decoration:
+                              InputDecoration(labelText: _localizations.examDate),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.normal),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(),
+                          ]),
+                        ),
+                        FormBuilderSlider(
+                          name: 'weightSlider',
+                          initialValue: 1.0,
+                          min: 0.0,
+                          max: 2.0,
+                          divisions: 20,
+                          decoration: InputDecoration(
+                              labelText: _localizations.courseWeight),
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(),
+                          ]),
+                        ),
+                        FormBuilderTextField(
+                          name: 'sessionTime',
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          keyboardType: TextInputType.number,
+                          maxLength: 1,
+                          initialValue: '2',
+                          
+                          decoration: InputDecoration(
+                              labelText: _localizations.sessionTime,
+                              suffix: Text(_localizations.hours)),
+                          style: TextStyle(color: Colors.white),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(),
+                            FormBuilderValidators.numeric()
+                          ]),
+                        ),
+                      ],
+                    )),
+                Center(
+                  child: Container(
+                    margin: EdgeInsets.all(20),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await _controller.handleFormSubmission(
+                            courseCreationFormKey, context);
+                      },
+                      child: Text(_localizations.add),
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         );
       },

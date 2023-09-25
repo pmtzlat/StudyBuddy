@@ -7,7 +7,7 @@ class CourseModel {
   final String examDate;
   final int secondsStudied;
   final String color;
-  final int sessionTime;
+  final int sessionTime; // in seconds
 
   /*
   var iconData = IconData(58717, fontFamily: 'MaterialIcons')

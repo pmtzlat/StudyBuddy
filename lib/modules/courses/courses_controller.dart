@@ -16,21 +16,19 @@ class CoursesController {
     color = '#0000000',
     sessionTime = 3600,
   }) {
-    try{
-    final newCourse = CourseModel(
-        name: name,
-        examDate: examDate,
-        weight: weight,
-        secondsStudied: secondsStudied,
-        color: color,
-        sessionTime: sessionTime
-        );
-    final firebaseCrud = instanceManager.firebaseCrudService;
-    final uid = instanceManager.localStorage.getString('uid') ?? '';
-    
-    return firebaseCrud.addCourseToUser(uid: uid, newCourse: newCourse);
-    }
-    catch(e){
+    try {
+      final newCourse = CourseModel(
+          name: name,
+          examDate: examDate,
+          weight: weight,
+          secondsStudied: secondsStudied,
+          color: color,
+          sessionTime: sessionTime);
+      final firebaseCrud = instanceManager.firebaseCrudService;
+      final uid = instanceManager.localStorage.getString('uid') ?? '';
+
+      return firebaseCrud.addCourseToUser(uid: uid, newCourse: newCourse);
+    } catch (e) {
       logger.e('Error in CoursesController.addCourse: $e');
     }
   }
@@ -48,10 +46,11 @@ class CoursesController {
           .toString();
       final weight =
           courseCreationFormKey.currentState!.fields['weightSlider']!.value;
-      logger.i('name: $name, examDate: $examDate, examWeight: ${(weight is double)}');
+      final session =
+          int.parse(courseCreationFormKey.currentState!.fields['sessionTime']!.value)*3600;
 
       final res =
-          await addCourse(name: name, examDate: examDate, weight: weight);
+          await addCourse(name: name, examDate: examDate, weight: weight, sessionTime: session);
       logger.i(res);
 
       // Close the bottom sheet
@@ -70,8 +69,7 @@ class CoursesController {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(snackbar);
-    }
-    else{
+    } else {
       logger.e("Error validating fields!");
     }
   }

@@ -7,6 +7,8 @@
     "courseName" : "Course Name",
     "examDate" : "Exam Date",
     "courseWeight" : "Course Weight",
+    "sessionTime": "Minimum Study Session Time",
+    "hours": "hours",
 
     "calendarTitle": "Calendar",
 
