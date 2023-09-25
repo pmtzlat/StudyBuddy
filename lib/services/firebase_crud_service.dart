@@ -26,12 +26,11 @@ class FirebaseCrudService {
         final coursesCollectionRef = userDocRef.collection('courses');
         await coursesCollectionRef.add({
           'name': newCourse.name,
-          'weight': newCourse.weight,
+          'weight': newCourse.weight*10, //weight stored as integers, so x10 when writing and /10 when reading
           'examDate': newCourse.examDate.toString(),
           'sessionTime': newCourse.sessionTime,
           'secondsStudied': newCourse.secondsStudied,
           'color': newCourse.color,
-          'iconCode': newCourse.iconCode,
         });
         return 1;
       } else {

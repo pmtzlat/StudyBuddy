@@ -6,6 +6,7 @@
     "errorAddingCourse": "Error adding course. Please try again.",
     "courseName" : "Course Name",
     "examDate" : "Exam Date",
+    "courseWeight" : "Course Weight",
 
     "calendarTitle": "Calendar",
 

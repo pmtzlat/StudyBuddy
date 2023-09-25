@@ -17,7 +17,6 @@ class CoursesView extends StatefulWidget {
 
 class _CoursesViewState extends State<CoursesView> {
   final _controller = CoursesController();
-  
 
   @override
   Widget build(BuildContext context) {
@@ -61,14 +60,6 @@ class _CoursesViewState extends State<CoursesView> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                    margin: EdgeInsets.only(
-                                        left: screenWidth * 0.02,
-                                        right: screenWidth * 0.04),
-                                    child: Icon(
-                                      courses[index].icon,
-                                      size: screenWidth * 0.12,
-                                    )),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -134,7 +125,6 @@ class _CoursesViewState extends State<CoursesView> {
               ),
               FormBuilder(
                   key: courseCreationFormKey,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   child: Column(
                     children: [
                       SizedBox(
@@ -143,10 +133,11 @@ class _CoursesViewState extends State<CoursesView> {
                       FormBuilderTextField(
                         // Name
                         name: 'courseName',
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         decoration: InputDecoration(
-                            labelText: _localizations.courseName,
+                          labelText: _localizations.courseName,
                         ),
-                        style: TextStyle(color:Colors.white),
+                        style: TextStyle(color: Colors.white),
 
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(),
@@ -157,19 +148,31 @@ class _CoursesViewState extends State<CoursesView> {
                       ),
                       FormBuilderDateTimePicker(
                         name: 'examDate',
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         inputType: InputType.date,
                         enabled: true,
-                        decoration: InputDecoration(
-                            labelText: _localizations.examDate,
-                            labelStyle: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.normal)),
+                        decoration:
+                            InputDecoration(labelText: _localizations.examDate),
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 16.0,
                             fontWeight: FontWeight.normal),
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(),
+                        ]),
                       ),
+                      
+                      FormBuilderSlider(
+                        name: 'weightSlider',
+                        initialValue: 1.0,
+                        min: 0.0,
+                        max: 2.0,
+                        divisions: 20,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(),
+                        ]),
+                      )
                     ],
                   )),
               Center(

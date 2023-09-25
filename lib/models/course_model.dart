@@ -4,11 +4,9 @@ import 'package:study_buddy/models/unit_model.dart';
 class CourseModel {
   final String name;
   final double weight;
-  final DateTime examDate;
+  final String examDate;
   final int secondsStudied;
   final String color;
-  final int iconCode;
-  final IconData icon;
   final int sessionTime;
 
   /*
@@ -27,9 +25,8 @@ class CourseModel {
       required this.examDate,
       this.secondsStudied = 0,
       this.color = '#000000',
-      this.iconCode = 0xe0bf,
       this.sessionTime = 3600, //one hour
-      }) : icon = IconData(iconCode, fontFamily: 'MaterialIcons');
+      });
 
 
 

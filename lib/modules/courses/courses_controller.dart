@@ -10,36 +10,53 @@ import '../../services/logging_service.dart';
 class CoursesController {
   addCourse({
     required name,
-    weight = 1.0,
+    weight,
     required examDate,
-    units,
     secondsStudied = 0,
-    color = '#000000',
-    iconCode = 0xe0bf,
-    sessionTime = 3600, //one hour
+    color = '#0000000',
+    sessionTime = 3600,
   }) {
-
-    final newCourse = CourseModel(name: name, examDate: examDate);
+    try{
+    final newCourse = CourseModel(
+        name: name,
+        examDate: examDate,
+        weight: weight,
+        secondsStudied: secondsStudied,
+        color: color,
+        sessionTime: sessionTime
+        );
     final firebaseCrud = instanceManager.firebaseCrudService;
     final uid = instanceManager.localStorage.getString('uid') ?? '';
+    
     return firebaseCrud.addCourseToUser(uid: uid, newCourse: newCourse);
-
+    }
+    catch(e){
+      logger.e('Error in CoursesController.addCourse: $e');
+    }
   }
 
-  Future<void> handleFormSubmission(GlobalKey<FormBuilderState> courseCreationFormKey, BuildContext context) async {
+  Future<void> handleFormSubmission(
+      GlobalKey<FormBuilderState> courseCreationFormKey,
+      BuildContext context) async {
     if (courseCreationFormKey.currentState!.validate()) {
       courseCreationFormKey.currentState!.save();
-      final name = courseCreationFormKey.currentState!.fields['courseName']!.value.toString();
-    
-      final res = await addCourse(
-        name: name,
-        examDate: DateTime.now(),
-      );
+      final name = courseCreationFormKey
+          .currentState!.fields['courseName']!.value
+          .toString();
+      final examDate = courseCreationFormKey
+          .currentState!.fields['examDate']!.value
+          .toString();
+      final weight =
+          courseCreationFormKey.currentState!.fields['weightSlider']!.value;
+      logger.i('name: $name, examDate: $examDate, examWeight: ${(weight is double)}');
+
+      final res =
+          await addCourse(name: name, examDate: examDate, weight: weight);
       logger.i(res);
-    
+
       // Close the bottom sheet
       Navigator.of(context).pop();
-    
+
       // Show a snackbar based on the value of 'res'
       final snackbar = SnackBar(
         content: Text(
@@ -51,8 +68,11 @@ class CoursesController {
             ? Color.fromARGB(255, 0, 172, 6)
             : Color.fromARGB(255, 221, 15, 0),
       );
-    
+
       ScaffoldMessenger.of(context).showSnackBar(snackbar);
+    }
+    else{
+      logger.e("Error validating fields!");
     }
   }
 }
