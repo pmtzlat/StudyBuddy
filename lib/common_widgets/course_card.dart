@@ -17,21 +17,16 @@ class _CourseCardState extends State<CourseCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {Navigator.of(context).push(SlidePageRoute(
-  builder: (context) => CourseDetailView(),
-));
+      onTap: () {
+        Navigator.of(context).push(SlidePageRoute(
+          builder: (context) => CourseDetailView(course: widget.course),
+        ));
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 5),
         child: Card(
           color: Colors.lightBlue,
-          child: Container(
-            padding: EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [Text(widget.course.name)],
-            ),
-          ),
+          child: ListTile(title: Text(widget.course.name)),
         ),
       ),
     );

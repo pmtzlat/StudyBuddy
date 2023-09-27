@@ -7,6 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:study_buddy/common_widgets/scaffold.dart';
 import 'package:study_buddy/services/auth_service.dart';
 import 'package:study_buddy/services/firebase_crud_service.dart';
+import 'package:study_buddy/session_storage.dart';
+
+import 'modules/courses/courses_controller.dart';
 
 class InstanceManager {
 
@@ -19,6 +22,8 @@ class InstanceManager {
   final FirebaseCrudService firebaseCrudService = FirebaseCrudService();
   late SharedPreferences localStorage;
   final connectivity = Connectivity();
+  late CoursesController courseController;
+  final sessionStorage = SessionStorage();
 
   
   
@@ -26,8 +31,9 @@ class InstanceManager {
   InstanceManager(){}
 
 
-  Future<void> startLocalStorage() async{
+  Future<void> startDependantInstances() async{
     localStorage =  await SharedPreferences.getInstance();
+    courseController = CoursesController();
 
   }
 

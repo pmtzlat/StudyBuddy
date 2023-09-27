@@ -24,16 +24,22 @@ class FirebaseCrudService {
       if (userDoc.exists) {
         // User document exists, add the new course to the courses subcollection
         final coursesCollectionRef = userDocRef.collection('courses');
-        await coursesCollectionRef.add({
+
+        // Create a new document with an auto-generated ID and set the 'id' field
+        final newCourseDocRef = await coursesCollectionRef.add({
           'name': newCourse.name,
-          'weight': newCourse.weight *
-              10, //weight stored as integers, so x10 when writing and /10 when reading
+          'weight': newCourse.weight * 10,
           'examDate': newCourse.examDate.toString(),
           'sessionTime': newCourse.sessionTime,
           'secondsStudied': newCourse.secondsStudied,
           'color': newCourse.color,
-          'startStudy': newCourse.startStudy.toString()
+          'startStudy': newCourse.startStudy.toString(),
+          'id': '' // Leave it empty, the auto-generated ID will be added next
         });
+
+        // Update the 'id' field with the auto-generated document ID
+        await newCourseDocRef.update({'id': newCourseDocRef.id});
+
         return 1;
       } else {
         // Handle the case where the user document doesn't exist
@@ -57,7 +63,6 @@ class FirebaseCrudService {
 
       final List<CourseModel> courses = querySnapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        
 
         // Convert the 'weight' from Firestore (integer) to a double by dividing by 10
         final double weight = ((data['weight'] as double) / 10.0);

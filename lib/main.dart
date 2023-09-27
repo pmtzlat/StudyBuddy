@@ -19,6 +19,7 @@ import 'modules/timer/timer_view.dart';
 
 var instanceManager;
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -27,7 +28,7 @@ void main() async {
   );
 
   instanceManager = InstanceManager();
-  await instanceManager.startLocalStorage();
+  await instanceManager.startDependantInstances();
   
   
 

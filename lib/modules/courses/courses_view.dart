@@ -18,12 +18,11 @@ class CoursesView extends StatefulWidget {
 }
 
 class _CoursesViewState extends State<CoursesView> {
-  final _controller = CoursesController();
-  List<CourseModel>? coursesList = [];
+  final _controller = instanceManager.courseController;
 
   Future<List<CourseModel>?> _getActiveCourses() async {
-    coursesList = await _controller.getAllCourses();
-    return coursesList;
+    instanceManager.sessionStorage.savedCourses = await _controller.getAllCourses();
+    return instanceManager.sessionStorage.savedCourses;
   }
 
   @override
@@ -52,7 +51,9 @@ class _CoursesViewState extends State<CoursesView> {
               },
               child: Text(_localizations.addCourse),
             ),
-            loadCourses()
+            instanceManager.sessionStorage.savedCourses == null
+                ? loadCourses()
+                : getCourseList()
           ],
         ));
     ;
@@ -87,25 +88,30 @@ class _CoursesViewState extends State<CoursesView> {
             );
             return Text('Error: ${snapshot.error}');
           } else {
-            if (coursesList!.length == 0) {
+            if (instanceManager.sessionStorage.savedCourses!.length == 0) {
               return Center(
                 child: Text(_localizations.noCoursesYet),
               );
             }
-            return Expanded(
-              child: Container(
-                child: ListView.builder(
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    itemCount: coursesList!.length,
-                    itemBuilder: (context, index) {
-                      final course = coursesList![index];
-                      return CourseCard(course: course);
-                    }),
-              ),
-            );
+            return getCourseList();
           }
         });
+  }
+
+  Expanded getCourseList() {
+    logger.i('coursesList: $instanceManager.sessionStorage.savedCourses');
+    return Expanded(
+            child: Container(
+              child: ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: instanceManager.sessionStorage.savedCourses!.length,
+                  itemBuilder: (context, index) {
+                    final course = instanceManager.sessionStorage.savedCourses![index];
+                    return CourseCard(course: course);
+                  }),
+            ),
+          );
   }
 
   void showAddCourseSheet(BuildContext context) {
@@ -231,7 +237,7 @@ class _CoursesViewState extends State<CoursesView> {
 
                         final newList = await _getActiveCourses();
                         setState(() {
-                          coursesList = newList;
+                          instanceManager.sessionStorage.savedCourses = newList;
                         });
                       },
                       child: Text(_localizations.add),

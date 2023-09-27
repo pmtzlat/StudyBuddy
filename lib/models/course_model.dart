@@ -9,6 +9,7 @@ class CourseModel {
   final String color;
   final int sessionTime; // in seconds
   final DateTime startStudy;
+  final String id;
 
   /*
   var iconData = IconData(58717, fontFamily: 'MaterialIcons')
@@ -18,28 +19,23 @@ class CourseModel {
 
   // Restore from the database to get icon
   var iconData = IconData(iconCodePointFromDataBase, fontFamily: 'MaterialIcons');
-  */ 
+  */
 
-  CourseModel(
-      {required this.name,
-      this.weight = 1.0,
-      required this.examDate,
-      this.secondsStudied = 0,
-      this.color = '#000000',
-      this.sessionTime = 3600, //one hour
-      required this.startStudy, 
-      });
-
+  CourseModel({
+    required this.name,
+    this.weight = 1.0,
+    required this.examDate,
+    this.secondsStudied = 0,
+    this.color = '#000000',
+    this.sessionTime = 3600, //one hour
+    required this.startStudy,
+    this.id = '',
+  });
 
   bool inFuture(DateTime date) {
-
-    if(examDate.isAfter(date)){
+    if (examDate.isAfter(date)) {
       return true;
     }
     return false;
   }
-
-
-
-  
 }

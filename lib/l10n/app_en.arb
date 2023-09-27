@@ -16,7 +16,7 @@
     "wrongDates": "Start date must be before exam date!",
     "errorGettingCourses" : "Error getting your courses. Try again later.",
     "noCoursesYet": "You have no courses added yet! \n Click the button to add one.",
-    "addUnitPage": "Add Unit Page",
+    "addUnits": "Add Units",
 
     "calendarTitle": "Calendar",
 
