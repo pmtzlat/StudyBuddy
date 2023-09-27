@@ -229,7 +229,7 @@ class _CoursesViewState extends State<CoursesView> {
                             courseCreationFormKey, context);
                         logger.i('RES: $res');
 
-                        final newList = await _controller.getAllCourses();
+                        final newList = await _getActiveCourses();
                         setState(() {
                           coursesList = newList;
                         });

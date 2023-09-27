@@ -44,9 +44,7 @@ class StudyBuddyApp extends StatefulWidget {
 class _StudyBuddyAppState extends State<StudyBuddyApp> {
   final User? user = FirebaseAuth.instance.currentUser;
 
-  Future<void> loadData() async {
-    await Future.delayed(Duration(seconds: 2)); // Simulate a 2-second delay
-  }
+  
   
   @override
   void initState(){
