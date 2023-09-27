@@ -6,6 +6,8 @@ import 'package:study_buddy/models/course_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/modules/courses/courses_controller.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../common_widgets/course_card.dart';
+import '../../common_widgets/unit_card.dart';
 import '../../services/logging_service.dart';
 
 class CoursesView extends StatefulWidget {
@@ -17,6 +19,12 @@ class CoursesView extends StatefulWidget {
 
 class _CoursesViewState extends State<CoursesView> {
   final _controller = CoursesController();
+  List<CourseModel>? coursesList = [];
+
+  Future<List<CourseModel>?> _getActiveCourses() async {
+    coursesList = await _controller.getAllCourses();
+    return coursesList;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,61 +52,66 @@ class _CoursesViewState extends State<CoursesView> {
               },
               child: Text(_localizations.addCourse),
             ),
-            Expanded(
-              child: Container(
-                child: ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: courses.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Container(
-                      margin: EdgeInsets.all(screenHeight * 0.005),
-                      child: Card(
-                        child: Container(
-                            padding: EdgeInsets.all(screenWidth * 0.03),
-                            height: screenHeight * 0.1,
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: screenWidth * 0.6,
-                                      child: Text(
-                                        courses[index].name,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            )),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            )
+            loadCourses()
           ],
         ));
     ;
   }
 
+  FutureBuilder<void> loadCourses() {
+    final _localizations = AppLocalizations.of(context)!;
+    var screenHeight = MediaQuery.of(context).size.height;
+    return FutureBuilder(
+        future: _getActiveCourses(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Display a loading indicator while the Future is running
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                  ],
+                ),
+              ],
+            );
+          } else if (snapshot.hasError) {
+            // Display the error message and show the snackbar
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: Colors.red,
+                content: Text(_localizations.errorGettingCourses),
+              ),
+            );
+            return Text('Error: ${snapshot.error}');
+          } else {
+            if (coursesList!.length == 0) {
+              return Center(
+                child: Text(_localizations.noCoursesYet),
+              );
+            }
+            return Expanded(
+              child: Container(
+                child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: coursesList!.length,
+                    itemBuilder: (context, index) {
+                      final course = coursesList![index];
+                      return CourseCard(course: course);
+                    }),
+              ),
+            );
+          }
+        });
+  }
+
   void showAddCourseSheet(BuildContext context) {
     final courseCreationFormKey = GlobalKey<FormBuilderState>();
     final _localizations = AppLocalizations.of(context)!;
-    /*- Course title
-- exam date
-- study start date
-- Course importance
-- minimum study time per day
-- units: unit title, weight
-*/
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.black,
@@ -139,7 +152,7 @@ class _CoursesViewState extends State<CoursesView> {
                             labelText: _localizations.courseName,
                           ),
                           style: TextStyle(color: Colors.white),
-        
+
                           validator: FormBuilderValidators.compose([
                             FormBuilderValidators.required(),
                           ]),
@@ -152,8 +165,23 @@ class _CoursesViewState extends State<CoursesView> {
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           inputType: InputType.date,
                           enabled: true,
-                          decoration:
-                              InputDecoration(labelText: _localizations.examDate),
+                          decoration: InputDecoration(
+                              labelText: _localizations.examDate),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.normal),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(),
+                          ]),
+                        ),
+                        FormBuilderDateTimePicker(
+                          name: 'startStudy',
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          inputType: InputType.date,
+                          enabled: true,
+                          decoration: InputDecoration(
+                              labelText: _localizations.startStudy),
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 16.0,
@@ -181,7 +209,6 @@ class _CoursesViewState extends State<CoursesView> {
                           keyboardType: TextInputType.number,
                           maxLength: 1,
                           initialValue: '2',
-                          
                           decoration: InputDecoration(
                               labelText: _localizations.sessionTime,
                               suffix: Text(_localizations.hours)),
@@ -198,8 +225,14 @@ class _CoursesViewState extends State<CoursesView> {
                     margin: EdgeInsets.all(20),
                     child: ElevatedButton(
                       onPressed: () async {
-                        await _controller.handleFormSubmission(
+                        final res = await _controller.handleFormSubmission(
                             courseCreationFormKey, context);
+                        logger.i('RES: $res');
+
+                        final newList = await _controller.getAllCourses();
+                        setState(() {
+                          coursesList = newList;
+                        });
                       },
                       child: Text(_localizations.add),
                     ),
@@ -213,5 +246,3 @@ class _CoursesViewState extends State<CoursesView> {
     );
   }
 }
-
-final List<CourseModel> courses = <CourseModel>[];

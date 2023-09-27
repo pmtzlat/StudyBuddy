@@ -7,15 +7,22 @@ import 'package:study_buddy/models/course_model.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../services/logging_service.dart';
 
+
 class CoursesController {
-  addCourse({
-    required name,
-    weight,
-    required examDate,
-    secondsStudied = 0,
-    color = '#0000000',
-    sessionTime = 3600,
-  }) {
+
+
+  final firebaseCrud = instanceManager.firebaseCrudService;
+  final uid = instanceManager.localStorage.getString('uid') ?? '';
+
+
+  addCourse(
+      {required name,
+      weight,
+      required examDate,
+      secondsStudied = 0,
+      color = '#0000000',
+      sessionTime = 3600,
+      startStudy = ''}) {
     try {
       final newCourse = CourseModel(
           name: name,
@@ -23,9 +30,8 @@ class CoursesController {
           weight: weight,
           secondsStudied: secondsStudied,
           color: color,
-          sessionTime: sessionTime);
-      final firebaseCrud = instanceManager.firebaseCrudService;
-      final uid = instanceManager.localStorage.getString('uid') ?? '';
+          sessionTime: sessionTime,
+          startStudy: startStudy);
 
       return firebaseCrud.addCourseToUser(uid: uid, newCourse: newCourse);
     } catch (e) {
@@ -33,44 +39,80 @@ class CoursesController {
     }
   }
 
-  Future<void> handleFormSubmission(
+  Future<int?> handleFormSubmission(
       GlobalKey<FormBuilderState> courseCreationFormKey,
+      
       BuildContext context) async {
+        int? res;
     if (courseCreationFormKey.currentState!.validate()) {
       courseCreationFormKey.currentState!.save();
-      final name = courseCreationFormKey
-          .currentState!.fields['courseName']!.value
-          .toString();
-      final examDate = courseCreationFormKey
+      dynamic snackbar;
+      final examDate = DateTime.parse(courseCreationFormKey
           .currentState!.fields['examDate']!.value
-          .toString();
-      final weight =
-          courseCreationFormKey.currentState!.fields['weightSlider']!.value;
-      final session =
-          int.parse(courseCreationFormKey.currentState!.fields['sessionTime']!.value)*3600;
+          .toString());
+      final startStudy = DateTime.parse(courseCreationFormKey
+          .currentState!.fields['startStudy']!.value
+          .toString());
+      if (examDate.isAfter(startStudy)) {
+        final name = courseCreationFormKey
+            .currentState!.fields['courseName']!.value
+            .toString();
 
-      final res =
-          await addCourse(name: name, examDate: examDate, weight: weight, sessionTime: session);
-      logger.i(res);
+        final weight =
+            courseCreationFormKey.currentState!.fields['weightSlider']!.value;
+        final session = int.parse(courseCreationFormKey
+                .currentState!.fields['sessionTime']!.value) *
+            3600;
 
-      // Close the bottom sheet
-      Navigator.of(context).pop();
+        final res = await addCourse(
+            name: name,
+            examDate: examDate,
+            weight: weight,
+            sessionTime: session,
+            startStudy: startStudy);
 
-      // Show a snackbar based on the value of 'res'
-      final snackbar = SnackBar(
-        content: Text(
-          res == 1
-              ? AppLocalizations.of(context)!.courseAddedCorrectly
-              : AppLocalizations.of(context)!.errorAddingCourse,
-        ),
-        backgroundColor: res == 1
-            ? Color.fromARGB(255, 0, 172, 6)
-            : Color.fromARGB(255, 221, 15, 0),
-      );
+
+        // Close the bottom sheet
+        Navigator.of(context).pop();
+
+        // Show a snackbar based on the value of 'res'
+        snackbar = SnackBar(
+          content: Text(
+            res == 1
+                ? AppLocalizations.of(context)!.courseAddedCorrectly
+                : AppLocalizations.of(context)!.errorAddingCourse,
+          ),
+          backgroundColor: res == 1
+              ? Color.fromARGB(255, 0, 172, 6)
+              : Color.fromARGB(255, 221, 15, 0),
+        );
+      } else {
+        // Close the bottom sheet
+        Navigator.of(context).pop();
+
+        snackbar = SnackBar(
+          content: Text(AppLocalizations.of(context)!.wrongDates),
+          backgroundColor: Color.fromARGB(255, 221, 15, 0),
+        );
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(snackbar);
+      return res;
     } else {
       logger.e("Error validating fields!");
     }
+  }
+
+  Future<List<CourseModel>?> getAllCourses() async {
+    try{
+    final courses = await firebaseCrud.getAllCourses(uid: uid);
+    logger.i(courses);
+    return courses;
+    }catch(e){
+      logger.e('Error getting courses: $e');
+      return null;
+
+    }
+
   }
 }

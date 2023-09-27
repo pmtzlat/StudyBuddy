@@ -4,10 +4,11 @@ import 'package:study_buddy/models/unit_model.dart';
 class CourseModel {
   final String name;
   final double weight;
-  final String examDate;
+  final DateTime examDate;
   final int secondsStudied;
   final String color;
   final int sessionTime; // in seconds
+  final DateTime startStudy;
 
   /*
   var iconData = IconData(58717, fontFamily: 'MaterialIcons')
@@ -26,7 +27,17 @@ class CourseModel {
       this.secondsStudied = 0,
       this.color = '#000000',
       this.sessionTime = 3600, //one hour
+      required this.startStudy, 
       });
+
+
+  bool inFuture(DateTime date) {
+
+    if(examDate.isAfter(date)){
+      return true;
+    }
+    return false;
+  }
 
 
 
