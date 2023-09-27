@@ -17,6 +17,8 @@
     "errorGettingCourses" : "Error getting your courses. Try again later.",
     "noCoursesYet": "You have no courses added yet! \n Click the button to add one.",
     "addUnits": "Add Units",
+    "errorDeletingCourse": "Error deleting course!",
+    "courseDeletedCorrectly": "Course deleted successfully",
 
     "calendarTitle": "Calendar",
 

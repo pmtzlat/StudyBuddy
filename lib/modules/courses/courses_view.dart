@@ -21,7 +21,8 @@ class _CoursesViewState extends State<CoursesView> {
   final _controller = instanceManager.courseController;
 
   Future<List<CourseModel>?> _getActiveCourses() async {
-    instanceManager.sessionStorage.savedCourses = await _controller.getAllCourses();
+    instanceManager.sessionStorage.savedCourses =
+        await _controller.getAllCourses();
     return instanceManager.sessionStorage.savedCourses;
   }
 
@@ -30,7 +31,6 @@ class _CoursesViewState extends State<CoursesView> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-
     return instanceManager.scaffold.getScaffold(
         context: context,
         activeIndex: 1,
@@ -62,6 +62,7 @@ class _CoursesViewState extends State<CoursesView> {
   FutureBuilder<void> loadCourses() {
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
+    
     return FutureBuilder(
         future: _getActiveCourses(),
         builder: (context, snapshot) {
@@ -88,7 +89,7 @@ class _CoursesViewState extends State<CoursesView> {
             );
             return Text('Error: ${snapshot.error}');
           } else {
-            if (instanceManager.sessionStorage.savedCourses!.length == 0) {
+            if (instanceManager.sessionStorage.savedCourses.length == 0) {
               return Center(
                 child: Text(_localizations.noCoursesYet),
               );
@@ -99,19 +100,37 @@ class _CoursesViewState extends State<CoursesView> {
   }
 
   Expanded getCourseList() {
-    logger.i('coursesList: $instanceManager.sessionStorage.savedCourses');
     return Expanded(
-            child: Container(
-              child: ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: instanceManager.sessionStorage.savedCourses!.length,
-                  itemBuilder: (context, index) {
-                    final course = instanceManager.sessionStorage.savedCourses![index];
-                    return CourseCard(course: course);
-                  }),
-            ),
-          );
+      child: Container(
+        child: ListView.builder(
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          itemCount: instanceManager.sessionStorage.savedCourses!.length,
+          itemBuilder: (context, index) {
+            final course = instanceManager.sessionStorage.savedCourses![index];
+            return Dismissible(
+              key: Key(course.id),
+              background: Container(
+                color: const Color.fromARGB(255, 255, 77, 65),
+                child: Icon(
+                  Icons.delete,
+                  color: Colors.white,
+                ),
+                alignment: Alignment.centerRight,
+                padding: EdgeInsets.only(right: 20.0),
+              ),
+              onDismissed: (direction) {
+                _controller.deleteCourse(
+                    id: course.id, index: index, context: context);
+
+                _getActiveCourses();
+              },
+              child: CourseCard(course: course),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   void showAddCourseSheet(BuildContext context) {
@@ -233,7 +252,6 @@ class _CoursesViewState extends State<CoursesView> {
                       onPressed: () async {
                         final res = await _controller.handleFormSubmission(
                             courseCreationFormKey, context);
-                        logger.i('RES: $res');
 
                         final newList = await _getActiveCourses();
                         setState(() {

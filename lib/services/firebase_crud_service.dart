@@ -53,6 +53,33 @@ class FirebaseCrudService {
     }
   }
 
+  Future<int> deleteCourse({required String courseId}) async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+    try {
+      if (uid == null) {
+        return -1;
+      }
+
+      final userDocRef = firebaseInstance.collection('users').doc(uid);
+
+      final courseDocRef = userDocRef.collection('courses').doc(courseId);
+      final courseDoc = await courseDocRef.get();
+      
+
+      if (!courseDoc.exists) {
+        return 0;
+      }
+
+      await courseDocRef.delete();
+
+      return 1;
+    } catch (e) {
+      logger.e('Error deleting course in FirebaseCrud: $e');
+      return -1;
+    }
+  }
+
   Future<List<CourseModel>?> getAllCourses({required String uid}) async {
     try {
       final QuerySnapshot querySnapshot = await instanceManager.db
@@ -75,9 +102,9 @@ class FirebaseCrudService {
           color: data['color'] as String,
           sessionTime: data['sessionTime'] as int,
           startStudy: DateTime.parse((data['startStudy'] as String)),
+          id: data['id'] as String,
         );
       }).toList();
-      logger.i('Success getting courses!');
       return courses;
     } catch (e) {
       // Handle any errors that occur during the process.

@@ -7,13 +7,9 @@ import 'package:study_buddy/models/course_model.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../services/logging_service.dart';
 
-
 class CoursesController {
-
-
   final firebaseCrud = instanceManager.firebaseCrudService;
   final uid = instanceManager.localStorage.getString('uid') ?? '';
-
 
   addCourse(
       {required name,
@@ -39,11 +35,27 @@ class CoursesController {
     }
   }
 
+  Future<void> deleteCourse(
+      {required String id, required int index ,required BuildContext context}) async {
+    final res = await firebaseCrud.deleteCourse(courseId: id);
+    instanceManager.sessionStorage.savedCourses.removeAt(index);
+    final snackbar = SnackBar(
+      content: Text(
+        res == 1
+            ? AppLocalizations.of(context)!.courseDeletedCorrectly
+            : AppLocalizations.of(context)!.errorDeletingCourse,
+      ),
+      backgroundColor: res == 1
+          ? Color.fromARGB(255, 0, 172, 6)
+          : Color.fromARGB(255, 221, 15, 0),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackbar);
+  }
+
   Future<int?> handleFormSubmission(
       GlobalKey<FormBuilderState> courseCreationFormKey,
-      
       BuildContext context) async {
-        int? res;
+    int? res;
     if (courseCreationFormKey.currentState!.validate()) {
       courseCreationFormKey.currentState!.save();
       dynamic snackbar;
@@ -70,7 +82,6 @@ class CoursesController {
             weight: weight,
             sessionTime: session,
             startStudy: startStudy);
-
 
         // Close the bottom sheet
         Navigator.of(context).pop();
@@ -104,15 +115,12 @@ class CoursesController {
   }
 
   Future<List<CourseModel>?> getAllCourses() async {
-    try{
-    final courses = await firebaseCrud.getAllCourses(uid: uid);
-    logger.i(courses);
-    return courses;
-    }catch(e){
+    try {
+      final courses = await firebaseCrud.getAllCourses(uid: uid);
+      return courses;
+    } catch (e) {
       logger.e('Error getting courses: $e');
       return null;
-
     }
-
   }
 }
