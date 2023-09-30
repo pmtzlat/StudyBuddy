@@ -20,6 +20,9 @@
     "errorDeletingCourse": "Error deleting course!",
     "courseDeletedCorrectly": "Course deleted successfully",
     "numberOfUnits":"Number of Units",
+    "errorGettingUnits": "Error getting Units. try again later",
+    "noUnitsYet": "You have no units added yet! \n Click the button to add one.",
+    
 
     "calendarTitle": "Calendar",
 

@@ -154,4 +154,5 @@ class CoursesController {
       List<CourseModel> courses) {
     return courses.where((course) => course.inFuture(DateTime.now())).toList();
   }
+  
 }

@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:study_buddy/models/unit_model.dart';
 
 class UnitCard extends StatelessWidget {
-  final int index;
-  GlobalKey<FormBuilderState> unitCreationFormKey;
+  final UnitModel unit;
 
-  UnitCard({
-    required this.index,
-    required this.unitCreationFormKey,
-  });
+  UnitCard({required this.unit});
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +19,8 @@ class UnitCard extends StatelessWidget {
         padding: EdgeInsets.all(8.0),
         child: Row(
           children: [
-            Text('${index + 1}.'),
+            Text('${unit.name}: ${unit.id}'),
             SizedBox(width: 8.0),
-            
           ],
         ),
       ),
