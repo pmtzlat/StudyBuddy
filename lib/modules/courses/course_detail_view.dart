@@ -15,7 +15,6 @@ class CourseDetailView extends StatefulWidget {
 }
 
 class _CourseDetailViewState extends State<CourseDetailView> {
-  final units = [];
   final _controller = instanceManager.courseController;
 
   @override
@@ -42,7 +41,9 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                   ElevatedButton(
                       onPressed: () {}, child: Text(_localizations.addUnit))
                 ],
-              )
+              ),
+              widget.course.units == null ? 
+              Placeholder() : Placeholder()
             ]),
           ),
         ),

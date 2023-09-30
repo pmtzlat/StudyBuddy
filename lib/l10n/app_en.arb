@@ -15,7 +15,7 @@
     "startStudy": "Study Start Date",
     "wrongDates": "Start date must be before exam date!",
     "errorGettingCourses" : "Error getting your courses. Try again later.",
-    "noCoursesYet": "You have no courses added yet! \n Click the button to add one.",
+    "noCoursesYet": "You have no courses with exams in the future added yet! \n Click the button to add one.",
     "addUnits": "Add Units",
     "errorDeletingCourse": "Error deleting course!",
     "courseDeletedCorrectly": "Course deleted successfully",

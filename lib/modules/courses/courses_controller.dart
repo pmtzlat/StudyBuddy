@@ -141,13 +141,17 @@ class CoursesController {
   Future<void> getAllCourses() async {
     try {
       final courses = await firebaseCrud.getAllCourses(uid: uid);
-      if (instanceManager.sessionStorage.savedCourses != null) {
-        logger.i(instanceManager.sessionStorage.savedCourses);
-        logger.i(courses);
-      }
+
       instanceManager.sessionStorage.savedCourses = courses;
+      instanceManager.sessionStorage.activeCourses =
+          filterActiveCourses(courses);
     } catch (e) {
       logger.e('Error getting courses: $e');
     }
+  }
+
+  List<CourseModel> filterActiveCourses(
+      List<CourseModel> courses) {
+    return courses.where((course) => course.inFuture(DateTime.now())).toList();
   }
 }

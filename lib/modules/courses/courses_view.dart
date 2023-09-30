@@ -46,7 +46,7 @@ class _CoursesViewState extends State<CoursesView> {
               },
               child: Text(_localizations.addCourse),
             ),
-            instanceManager.sessionStorage.savedCourses == null
+            instanceManager.sessionStorage.activeCourses == null
                 ? loadCourses()
                 : getCourseList()
           ],
@@ -84,7 +84,7 @@ class _CoursesViewState extends State<CoursesView> {
             );
             return Text('Error: ${snapshot.error}');
           } else {
-            if (instanceManager.sessionStorage.savedCourses.length == 0) {
+            if (instanceManager.sessionStorage.activeCourses.length == 0) {
               return Center(
                 child: Text(_localizations.noCoursesYet),
               );
@@ -100,9 +100,9 @@ class _CoursesViewState extends State<CoursesView> {
         child: ListView.builder(
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
-          itemCount: instanceManager.sessionStorage.savedCourses!.length,
+          itemCount: instanceManager.sessionStorage.activeCourses!.length,
           itemBuilder: (context, index) {
-            final course = instanceManager.sessionStorage.savedCourses![index];
+            final course = instanceManager.sessionStorage.activeCourses![index];
             return Dismissible(
               key: Key(course.id),
               background: Container(
@@ -118,7 +118,7 @@ class _CoursesViewState extends State<CoursesView> {
                 _controller.deleteCourse(
                     id: course.id, index: index, context: context);
 
-                _controller.getAllCourses();
+                loadCourses();
               },
               child: CourseCard(course: course),
             );

@@ -10,6 +10,7 @@ class CourseModel {
   final int sessionTime; // in seconds
   final DateTime startStudy;
   final String id;
+  final List<UnitModel>? units;
 
   /*
   var iconData = IconData(58717, fontFamily: 'MaterialIcons')
@@ -30,6 +31,7 @@ class CourseModel {
     this.sessionTime = 3600, //one hour
     required this.startStudy,
     this.id = '',
+    this.units = null,
   });
 
   bool inFuture(DateTime date) {
