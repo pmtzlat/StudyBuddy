@@ -60,8 +60,7 @@ class CoursesController {
       for (int i = 0; i < units; i++) {
         final unitNum = i + 1;
         final newUnit = UnitModel(name: 'Unit $unitNum', order: unitNum);
-         firebaseCrud
-            .addUnitToCourse(newUnit: newUnit, courseID: id);
+        firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
       }
       return 1;
     } catch (e) {
@@ -106,7 +105,6 @@ class CoursesController {
 
         if (res != null) {
           res = await addUnitsToCourse(id: res, units: units);
-          logger.i("res after units: $res");
         }
 
         // Close the bottom sheet
@@ -140,13 +138,16 @@ class CoursesController {
     }
   }
 
-  Future<List<CourseModel>?> getAllCourses() async {
+  Future<void> getAllCourses() async {
     try {
       final courses = await firebaseCrud.getAllCourses(uid: uid);
-      return courses;
+      if (instanceManager.sessionStorage.savedCourses != null) {
+        logger.i(instanceManager.sessionStorage.savedCourses);
+        logger.i(courses);
+      }
+      instanceManager.sessionStorage.savedCourses = courses;
     } catch (e) {
       logger.e('Error getting courses: $e');
-      return null;
     }
   }
 }

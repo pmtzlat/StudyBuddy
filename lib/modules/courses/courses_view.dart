@@ -20,11 +20,6 @@ class CoursesView extends StatefulWidget {
 class _CoursesViewState extends State<CoursesView> {
   final _controller = instanceManager.courseController;
 
-  Future<List<CourseModel>?> _getActiveCourses() async {
-    instanceManager.sessionStorage.savedCourses =
-        await _controller.getAllCourses();
-    return instanceManager.sessionStorage.savedCourses;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,9 +57,9 @@ class _CoursesViewState extends State<CoursesView> {
   FutureBuilder<void> loadCourses() {
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
-    
+
     return FutureBuilder(
-        future: _getActiveCourses(),
+        future: _controller.getAllCourses(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             // Display a loading indicator while the Future is running
@@ -123,7 +118,7 @@ class _CoursesViewState extends State<CoursesView> {
                 _controller.deleteCourse(
                     id: course.id, index: index, context: context);
 
-                _getActiveCourses();
+                _controller.getAllCourses();
               },
               child: CourseCard(course: course),
             );
@@ -250,7 +245,8 @@ class _CoursesViewState extends State<CoursesView> {
                           maxLength: 2,
                           initialValue: '1',
                           decoration: InputDecoration(
-                              labelText: _localizations.numberOfUnits,),
+                            labelText: _localizations.numberOfUnits,
+                          ),
                           style: TextStyle(color: Colors.white),
                           validator: FormBuilderValidators.compose([
                             FormBuilderValidators.required(),
@@ -263,13 +259,12 @@ class _CoursesViewState extends State<CoursesView> {
                   child: Container(
                     margin: EdgeInsets.all(20),
                     child: ElevatedButton(
-                      onPressed: () async {
+                      onPressed: () async{
                         final res = await _controller.handleFormSubmission(
                             courseCreationFormKey, context);
+                        await _controller.getAllCourses();
 
-                        final newList = await _getActiveCourses();
                         setState(() {
-                          instanceManager.sessionStorage.savedCourses = newList;
                         });
                       },
                       child: Text(_localizations.add),
