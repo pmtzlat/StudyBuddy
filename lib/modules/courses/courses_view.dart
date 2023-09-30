@@ -243,6 +243,20 @@ class _CoursesViewState extends State<CoursesView> {
                             FormBuilderValidators.numeric()
                           ]),
                         ),
+                        FormBuilderTextField(
+                          name: 'units',
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          keyboardType: TextInputType.number,
+                          maxLength: 2,
+                          initialValue: '1',
+                          decoration: InputDecoration(
+                              labelText: _localizations.numberOfUnits,),
+                          style: TextStyle(color: Colors.white),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(),
+                            FormBuilderValidators.numeric()
+                          ]),
+                        ),
                       ],
                     )),
                 Center(

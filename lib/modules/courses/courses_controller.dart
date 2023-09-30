@@ -5,6 +5,7 @@ import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/course_model.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:study_buddy/models/unit_model.dart';
 import '../../services/logging_service.dart';
 
 class CoursesController {
@@ -36,7 +37,9 @@ class CoursesController {
   }
 
   Future<void> deleteCourse(
-      {required String id, required int index ,required BuildContext context}) async {
+      {required String id,
+      required int index,
+      required BuildContext context}) async {
     final res = await firebaseCrud.deleteCourse(courseId: id);
     instanceManager.sessionStorage.savedCourses.removeAt(index);
     final snackbar = SnackBar(
@@ -50,6 +53,21 @@ class CoursesController {
           : Color.fromARGB(255, 221, 15, 0),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackbar);
+  }
+
+  dynamic addUnitsToCourse({required String id, required int units}) {
+    try {
+      for (int i = 0; i < units; i++) {
+        final unitNum = i + 1;
+        final newUnit = UnitModel(name: 'Unit $unitNum', order: unitNum);
+         firebaseCrud
+            .addUnitToCourse(newUnit: newUnit, courseID: id);
+      }
+      return 1;
+    } catch (e) {
+      logger.e('Error adding units: $e');
+      return null;
+    }
   }
 
   Future<int?> handleFormSubmission(
@@ -76,12 +94,20 @@ class CoursesController {
                 .currentState!.fields['sessionTime']!.value) *
             3600;
 
-        final res = await addCourse(
+        final int units = int.parse(
+            courseCreationFormKey.currentState!.fields['units']!.value);
+
+        dynamic res = await addCourse(
             name: name,
             examDate: examDate,
             weight: weight,
             sessionTime: session,
             startStudy: startStudy);
+
+        if (res != null) {
+          res = await addUnitsToCourse(id: res, units: units);
+          logger.i("res after units: $res");
+        }
 
         // Close the bottom sheet
         Navigator.of(context).pop();
@@ -89,11 +115,11 @@ class CoursesController {
         // Show a snackbar based on the value of 'res'
         snackbar = SnackBar(
           content: Text(
-            res == 1
+            res != null
                 ? AppLocalizations.of(context)!.courseAddedCorrectly
                 : AppLocalizations.of(context)!.errorAddingCourse,
           ),
-          backgroundColor: res == 1
+          backgroundColor: res != null
               ? Color.fromARGB(255, 0, 172, 6)
               : Color.fromARGB(255, 221, 15, 0),
         );
