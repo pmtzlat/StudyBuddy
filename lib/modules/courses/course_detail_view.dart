@@ -56,8 +56,6 @@ class _CourseDetailViewState extends State<CourseDetailView> {
     );
   }
 
-  void addUnit() async {}
-
   FutureBuilder<void> loadUnits() {
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
@@ -122,11 +120,16 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                 await widget.course.deleteUnit(unit: unit);
                 setState(() {});
               },
-              child: UnitCard(unit: unit),
+              child:
+                  UnitCard(unit: unit, course: widget.course, notifyParent: refresh),
             );
           },
         ),
       ),
     );
+  }
+
+  void refresh() {
+    setState(() {});
   }
 }

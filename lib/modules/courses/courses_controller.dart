@@ -150,15 +150,33 @@ class CoursesController {
     }
   }
 
-  List<CourseModel> filterActiveCourses(
-      List<CourseModel> courses) {
+  List<CourseModel> filterActiveCourses(List<CourseModel> courses) {
     return courses.where((course) => course.inFuture(DateTime.now())).toList();
   }
 
-  void printActiveCourses(){
-    for(var i in instanceManager.sessionStorage.savedCourses){
-        print(i.name);
+  void printActiveCourses() {
+    for (var i in instanceManager.sessionStorage.savedCourses) {
+      print(i.name);
     }
   }
-  
+
+  Future<void> handleEditUnit(GlobalKey<FormBuilderState> unitFormKey,
+      CourseModel course, UnitModel oldUnit) async {
+    if (unitFormKey.currentState!.validate()) {
+      unitFormKey.currentState!.save();
+
+      final name =
+          unitFormKey.currentState!.fields['unitName']!.value.toString();
+      final weight = unitFormKey.currentState!.fields['weightSlider']!.value;
+
+      final updatedUnit =
+          UnitModel(name: name, order: oldUnit.order, weight: weight);
+
+      dynamic res = await firebaseCrud.editUnit(
+          course: course, unitID: oldUnit.id, updatedUnit: updatedUnit);
+      
+    } else {
+      logger.e('Error validating unit keys!');
+    }
+  }
 }

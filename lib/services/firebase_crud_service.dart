@@ -70,7 +70,7 @@ class FirebaseCrudService {
         final unitData = unitDoc.data() as Map<String, dynamic>;
         final unit = UnitModel(
           name: unitData['name'] ?? '',
-          weight: (unitData['weight'] ?? 1.0).toDouble(),
+          weight: (unitData['weight'] ?? 1.0).toDouble() / 10,
           id: unitDoc.id,
           order: unitData['order'] ?? 0,
         );
@@ -154,7 +154,7 @@ class FirebaseCrudService {
 
     try {
       if (uid == null) {
-        return false; 
+        return false;
       }
 
       final courseDocRef = firebaseInstance
@@ -166,12 +166,12 @@ class FirebaseCrudService {
       final unitData = {
         'name': newUnit.name,
         'weight': newUnit.weight,
-        'order': newUnit.order, 
+        'order': newUnit.order,
       };
 
       await courseDocRef.collection('units').add(unitData);
 
-      return true; 
+      return true;
     } catch (e) {
       logger.e('Error adding new Unit: $e');
       return false;
@@ -241,7 +241,12 @@ class FirebaseCrudService {
       for (final doc in querySnapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
         final currentOrder = data['order'] as int;
-        final newName = 'Unit ${currentOrder - 1}';
+        String newName = '';
+        if (data['name'] == 'Unit $currentOrder') {
+          newName = 'Unit ${currentOrder - 1}';
+        }else{
+          newName = data['name'];
+        }
 
         batch.update(doc.reference, {
           'order': currentOrder - 1,
@@ -255,6 +260,41 @@ class FirebaseCrudService {
     } catch (e) {
       logger.e('Error deleting Unit: $e');
       return false;
+    }
+  }
+
+  Future<int?> editUnit(
+      {required CourseModel course,
+      required String unitID,
+      required UnitModel updatedUnit}) async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+    final courseID = course.id;
+
+    try {
+      // Reference to the 'units' subcollection document
+      final unitReference = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('courses')
+          .doc(courseID)
+          .collection('units')
+          .doc(unitID);
+
+      // Convert weight to integer by multiplying by 10
+      final updatedWeight = (updatedUnit.weight * 10).toInt();
+
+      // Update the unit document with new data
+      await unitReference.update({
+        'name': updatedUnit.name,
+        'weight': updatedWeight,
+        // Add other fields you want to update
+      });
+
+      return 1; // Success
+    } catch (e) {
+      logger.e('Error editing unit: $e');
+      return -1;
     }
   }
 }
