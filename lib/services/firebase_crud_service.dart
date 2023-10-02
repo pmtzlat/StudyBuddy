@@ -40,11 +40,11 @@ class FirebaseCrudService {
 
         return newCourseDocRef.id as String;
       } else {
-        logger.i('User document with UID $uid does not exist.');
+        logger.e('User document with UID $uid does not exist.');
         return null;
       }
     } catch (e) {
-      logger.i('Error adding course to firebase: $e');
+      logger.e('Error adding course to firebase: $e');
       return null;
     }
   }
@@ -76,7 +76,6 @@ class FirebaseCrudService {
         );
         units.add(unit);
       }
-      logger.i('Units: $units');
       return units;
     } catch (e) {
       logger.e('Error getting units for course $courseID: $e');
@@ -155,28 +154,24 @@ class FirebaseCrudService {
 
     try {
       if (uid == null) {
-        return false; // User is not authenticated, return false or handle accordingly
+        return false; 
       }
 
-      // Get a reference to the user's course document
       final courseDocRef = firebaseInstance
           .collection('users')
           .doc(uid)
           .collection('courses')
           .doc(courseID);
 
-      // Create a map with the data for the new unit
       final unitData = {
         'name': newUnit.name,
         'weight': newUnit.weight,
-        'order': newUnit.order, // Assuming 'order' is a property of UnitModel
-        // Add any other properties you want to save for the unit
+        'order': newUnit.order, 
       };
 
-      // Add the new unit to the 'units' subcollection of the course
       await courseDocRef.collection('units').add(unitData);
 
-      return true; // Unit added successfully
+      return true; 
     } catch (e) {
       logger.e('Error adding new Unit: $e');
       return false;

@@ -154,5 +154,11 @@ class CoursesController {
       List<CourseModel> courses) {
     return courses.where((course) => course.inFuture(DateTime.now())).toList();
   }
+
+  void printActiveCourses(){
+    for(var i in instanceManager.sessionStorage.savedCourses){
+        print(i.name);
+    }
+  }
   
 }

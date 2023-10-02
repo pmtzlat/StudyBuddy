@@ -19,8 +19,14 @@ class UnitCard extends StatelessWidget {
         padding: EdgeInsets.all(8.0),
         child: Row(
           children: [
-            Text('${unit.name}: ${unit.id}'),
-            SizedBox(width: 8.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${unit.name}: ${unit.name}'),
+                Text('${unit.id}'),
+                SizedBox(width: 8.0),
+              ],
+            ),
           ],
         ),
       ),

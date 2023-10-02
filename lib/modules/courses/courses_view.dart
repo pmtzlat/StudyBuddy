@@ -20,7 +20,6 @@ class CoursesView extends StatefulWidget {
 class _CoursesViewState extends State<CoursesView> {
   final _controller = instanceManager.courseController;
 
-
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
@@ -114,11 +113,11 @@ class _CoursesViewState extends State<CoursesView> {
                 alignment: Alignment.centerRight,
                 padding: EdgeInsets.only(right: 20.0),
               ),
-              onDismissed: (direction) {
-                _controller.deleteCourse(
+              onDismissed: (direction) async {
+                await _controller.deleteCourse(
                     id: course.id, index: index, context: context);
+                await _controller.getAllCourses();
 
-                loadCourses();
               },
               child: CourseCard(course: course),
             );
@@ -259,13 +258,12 @@ class _CoursesViewState extends State<CoursesView> {
                   child: Container(
                     margin: EdgeInsets.all(20),
                     child: ElevatedButton(
-                      onPressed: () async{
+                      onPressed: () async {
                         final res = await _controller.handleFormSubmission(
                             courseCreationFormKey, context);
                         await _controller.getAllCourses();
 
-                        setState(() {
-                        });
+                        setState(() {});
                       },
                       child: Text(_localizations.add),
                     ),
