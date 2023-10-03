@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:study_buddy/common_widgets/scaffold.dart';
+import 'package:study_buddy/modules/calendar/calendar_controller.dart';
 import 'package:study_buddy/services/auth_service.dart';
 import 'package:study_buddy/services/firebase_crud_service.dart';
 import 'package:study_buddy/session_storage.dart';
@@ -23,6 +24,7 @@ class InstanceManager {
   late SharedPreferences localStorage;
   final connectivity = Connectivity();
   late CoursesController courseController;
+  late CalendarController calendarController;
   final sessionStorage = SessionStorage();
 
   
@@ -34,6 +36,7 @@ class InstanceManager {
   Future<void> startDependantInstances() async{
     localStorage =  await SharedPreferences.getInstance();
     courseController = CoursesController();
+    calendarController = CalendarController();
 
   }
 

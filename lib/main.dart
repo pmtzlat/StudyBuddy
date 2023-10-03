@@ -21,6 +21,10 @@ var instanceManager;
 
 
 void main() async {
+
+  
+    
+  
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
@@ -29,6 +33,9 @@ void main() async {
 
   instanceManager = InstanceManager();
   await instanceManager.startDependantInstances();
+
+  await instanceManager.courseController.getAllCourses();
+  
   
   
 
@@ -61,6 +68,7 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
   @override
   Widget build(BuildContext context) {
     logger.i('uid found on boot: $uid');
+    logger.i('Got all courses! ${instanceManager.sessionStorage.activeCourses}');
   
     return MaterialApp(
       title: 'StudyBuddy',
@@ -84,6 +92,8 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
       ],
     );
   }
+
+  
 
   
 }
