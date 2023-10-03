@@ -1,19 +1,16 @@
 import 'package:flutter/cupertino.dart';
+import 'package:study_buddy/main.dart';
 
 class CalendarController{
 
-  void moveToStageTwo({required PageController controller}){
-    controller.nextPage(
-      duration: Duration(milliseconds: 300),
-      curve: Curves.ease,
-    );
+  void moveToStageTwo(){
+    instanceManager.sessionStorage.calendarBeginPage = 1;
   }
 
-  void moveToStageOne({required PageController controller}){
-    controller.previousPage(
-      duration: Duration(milliseconds: 300),
-      curve: Curves.ease,
-    );
+  void moveToStageThree(){
+    instanceManager.sessionStorage.calendarBeginPage = 2;
   }
+
+  
 
 }

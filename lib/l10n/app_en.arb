@@ -27,6 +27,18 @@
     
 
     "calendarTitle": "Calendar",
+    "configureCalendar":"Start configuring Calendar!",
+    "chooseFreeSchedule":"Check the times you can't study:",
+    "monday":"Monday",
+    "tuesday":"Tuesday",
+    "wednesday":"Wednesday",
+    "thursday":"Thursday",
+    "friday":"Friday",
+    "saturday":"Saturday",
+    "sunday":"Sunday",
+    "nextDay":"Next Day",
+    "calculateSchedule": "Calculate my Study Schedule!",
+    "loadingSchedule": "Loading Schedule...",
 
 
     "progressTitle" : "Progress",

@@ -39,7 +39,10 @@ void main() async {
   
   
 
-  runApp(StudyBuddyApp());
+  runApp(
+    StudyBuddyApp(
+    
+  ));
 }
 
 class StudyBuddyApp extends StatefulWidget {
