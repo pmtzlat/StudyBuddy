@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:study_buddy/main.dart';
+import 'package:study_buddy/models/time_slot.dart';
 import 'package:study_buddy/models/unit_model.dart';
 
 import '../models/course_model.dart';
@@ -244,7 +245,7 @@ class FirebaseCrudService {
         String newName = '';
         if (data['name'] == 'Unit $currentOrder') {
           newName = 'Unit ${currentOrder - 1}';
-        }else{
+        } else {
           newName = data['name'];
         }
 
@@ -294,6 +295,61 @@ class FirebaseCrudService {
       return 1; // Success
     } catch (e) {
       logger.e('Error editing unit: $e');
+      return -1;
+    }
+  }
+
+  Future<int?> addTimeRestraint({required TimeSlot timeSlot}) async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+
+    try {
+      if (uid != null) {
+        final userDocRef = firebaseInstance.collection('users').doc(uid);
+
+        final timeSlotsCollectionRef = userDocRef.collection('timeRestraints');
+
+        await timeSlotsCollectionRef.add({
+          'weekday': timeSlot.weekday,
+          'startTime': timeSlot.startTime,
+          'endTime': timeSlot.endTime,
+          'courseID': timeSlot.courseID,
+        });
+
+        return 1;
+      } else {
+        return -1;
+      }
+    } catch (e) {
+      logger.e('Error adding time restraint: $e');
+      return -1;
+    }
+  }
+
+  Future<int?> deleteRestraints() async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+
+    try {
+      if (uid != null) {
+        final userDocRef = firebaseInstance.collection('users').doc(uid);
+
+        final timeRestrictionsCollectionRef =
+            userDocRef.collection('timeRestraints');
+
+        await timeRestrictionsCollectionRef.get().then((querySnapshot) {
+          querySnapshot.docs.forEach((doc) {
+            doc.reference.delete();
+          });
+        });
+        logger.i('Wiped time Restraints!');
+
+        return 1;
+      } else {
+        return -1;
+      }
+    } catch (e) {
+      logger.e('Error deleting restrictions: $e');
       return -1;
     }
   }

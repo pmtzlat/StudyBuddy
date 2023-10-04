@@ -1,11 +1,11 @@
 class TimeSlot{
 
   final String id;
-  final String weekday;
+  final int weekday;
   final int startTime;
   final int endTime;
   final String courseID;
-  final String unitID;
+  final String? unitID;
 
   TimeSlot({
     this.id = '',
@@ -13,7 +13,28 @@ class TimeSlot{
     required this.startTime, 
     required this.endTime, 
     required this.courseID,
-    required this.unitID
+    this.unitID
   });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TimeSlot &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          weekday == other.weekday &&
+          startTime == other.startTime &&
+          endTime == other.endTime &&
+          courseID == other.courseID &&
+          unitID == other.unitID;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      weekday.hashCode ^
+      startTime.hashCode ^
+      endTime.hashCode ^
+      courseID.hashCode ^
+      unitID.hashCode;
 
 }
