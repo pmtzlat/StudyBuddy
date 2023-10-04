@@ -39,6 +39,7 @@
     "nextDay":"Next Day",
     "calculateSchedule": "Calculate my Study Schedule!",
     "loadingSchedule": "Loading Schedule...",
+    "changeScheduleRestrictions": "Change Schedule Restrictions",
 
 
     "progressTitle" : "Progress",

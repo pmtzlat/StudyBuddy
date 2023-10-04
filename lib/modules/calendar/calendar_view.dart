@@ -98,7 +98,7 @@ class _CalendarViewState extends State<CalendarView> {
       ),
     );
 
-    Widget page4 = LoadedCalendarView();
+    Widget page4 = LoadedCalendarView(notifyParent: refresh);
 
     switch (instanceManager.sessionStorage.schedulePresent) {
       case null:
@@ -116,29 +116,20 @@ class _CalendarViewState extends State<CalendarView> {
             context: context,
             activeIndex: 2,
             body: Text('Error generating schedule'));
-
-      case 1:
-        return instanceManager.scaffold
-            .getScaffold(context: context, activeIndex: 2, body: Placeholder());
     }
-
     return instanceManager.scaffold.getScaffold(
         context: context,
         activeIndex: 2,
-        body: instanceManager.sessionStorage.schedulePresent == null
-            ? PageView(
-                controller: _pageController,
-                physics: NeverScrollableScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                children: [page1, page2, page3, page4])
-            : instanceManager.sessionStorage.schedulePresent == -1
-                ? Placeholder()
-                : LoadedCalendarView());
+        body: LoadedCalendarView(notifyParent: refresh));
   }
 
   void nextPage() {
     _pageController.nextPage(
         duration: Duration(milliseconds: 300), curve: Curves.decelerate);
+    setState(() {});
+  }
+
+  void refresh() {
     setState(() {});
   }
 }

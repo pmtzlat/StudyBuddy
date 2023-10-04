@@ -99,4 +99,8 @@ class CalendarController {
     }
     logger.i(res);
   }
+
+  void checkIfRestraintsExist()async {
+    instanceManager.sessionStorage.schedulePresent = await _firebaseCrud.checkRestraints();
+  }
 }

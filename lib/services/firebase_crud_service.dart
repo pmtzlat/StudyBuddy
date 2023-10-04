@@ -353,4 +353,30 @@ class FirebaseCrudService {
       return -1;
     }
   }
+
+  Future<int?> checkRestraints() async{
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+    try{
+      if (uid != null) {
+      final userDocRef = firebaseInstance.collection('users').doc(uid);
+
+      final timeRestraintsCollectionRef = userDocRef.collection('timeRestraints');
+      final querySnapshot = await timeRestraintsCollectionRef.get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return null;
+      } else {
+        return 1; 
+      }
+    } else {
+      return -1; 
+    }
+
+    }catch(e){
+      logger.e('Error checking restraints: $e');
+      return -1;
+    }
+  }
+
 }

@@ -35,6 +35,7 @@ void main() async {
   await instanceManager.startDependantInstances();
 
   await instanceManager.courseController.getAllCourses();
+  await instanceManager.calendarController.checkIfRestraintsExist();
   
   
   
