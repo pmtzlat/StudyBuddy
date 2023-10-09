@@ -23,7 +23,7 @@ class CalendarController {
     final hoursMatrix = _sessionStorage.checkboxMatrix;
     final deletion = await _firebaseCrud.deleteRestraints();
 
-    if (deletion == -1){
+    if (deletion == -1) {
       _sessionStorage.schedulePresent = -1;
       return;
     }
@@ -89,6 +89,9 @@ class CalendarController {
         }
       }
     }
+    if (result.length == 0){
+      addTimeSlot(0, 0, 0);
+    }
     return result;
   }
 
@@ -100,7 +103,12 @@ class CalendarController {
     logger.i(res);
   }
 
-  void checkIfRestraintsExist()async {
-    instanceManager.sessionStorage.schedulePresent = await _firebaseCrud.checkRestraints();
+  void checkIfRestraintsExist() async {
+    instanceManager.sessionStorage.schedulePresent =
+        await _firebaseCrud.checkRestraints();
+  }
+
+  void calculateSchedule() async {
+    await instanceManager.studyPlanner.calculateSchedule();
   }
 }

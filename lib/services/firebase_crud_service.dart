@@ -33,8 +33,9 @@ class FirebaseCrudService {
           'sessionTime': newCourse.sessionTime,
           'secondsStudied': newCourse.secondsStudied,
           'color': newCourse.color,
-          'startStudy': newCourse.startStudy.toString(),
-          'id': ''
+          'id': '',
+          'orderMatters': newCourse.orderMatters,
+          'revisions': newCourse.revisions,
         });
 
         await newCourseDocRef.update({'id': newCourseDocRef.id});
@@ -199,7 +200,6 @@ class FirebaseCrudService {
           secondsStudied: data['secondsStudied'] as int,
           color: data['color'] as String,
           sessionTime: data['sessionTime'] as int,
-          startStudy: DateTime.parse((data['startStudy'] as String)),
           id: data['id'] as String,
         );
       }).toList();
@@ -354,29 +354,88 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int?> checkRestraints() async{
+  Future<int?> deleteSchedule() async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
-    try{
+
+    try {
       if (uid != null) {
-      final userDocRef = firebaseInstance.collection('users').doc(uid);
+        final userDocRef = firebaseInstance.collection('users').doc(uid);
 
-      final timeRestraintsCollectionRef = userDocRef.collection('timeRestraints');
-      final querySnapshot = await timeRestraintsCollectionRef.get();
+        final timeRestrictionsCollectionRef = userDocRef.collection('schedule');
 
-      if (querySnapshot.docs.isEmpty) {
-        return null;
+        await timeRestrictionsCollectionRef.get().then((querySnapshot) {
+          querySnapshot.docs.forEach((doc) {
+            doc.reference.delete();
+          });
+        });
+        logger.i('Wiped schedule!');
+
+        return 1;
       } else {
-        return 1; 
+        return -1;
       }
-    } else {
-      return -1; 
+    } catch (e) {
+      logger.e('Error deleting schedule: $e');
+      return -1;
     }
+  }
 
-    }catch(e){
+  Future<int?> checkRestraints() async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+    try {
+      if (uid != null) {
+        final userDocRef = firebaseInstance.collection('users').doc(uid);
+
+        final timeRestraintsCollectionRef =
+            userDocRef.collection('timeRestraints');
+        final querySnapshot = await timeRestraintsCollectionRef.get();
+
+        if (querySnapshot.docs.isEmpty) {
+          return null;
+        } else {
+          return 1;
+        }
+      } else {
+        return -1;
+      }
+    } catch (e) {
       logger.e('Error checking restraints: $e');
       return -1;
     }
   }
 
+  Future<List<TimeSlot>?> getScheduleLimits() async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+
+    try {
+      if (uid != null) {
+        final userDocRef = firebaseInstance.collection('users').doc(uid);
+        final timeLimitsCollectionRef = userDocRef.collection('timeRestraints');
+
+        final querySnapshot = await timeLimitsCollectionRef.get();
+
+        List<TimeSlot> timeSlotList = querySnapshot.docs.map<TimeSlot>((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return TimeSlot(
+            weekday: data['weekday'],
+            startTime: data['startTime'],
+            endTime: data['endTime'],
+            courseID: data['courseID'],
+            unitID: data['unitID'],
+          );
+        }).toList();
+
+        return timeSlotList;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      logger.e(
+          'firebaseCrud.getScheduleLimits: error getting schedule limits: $e');
+      return null;
+    }
+  }
 }

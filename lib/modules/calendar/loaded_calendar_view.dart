@@ -13,6 +13,7 @@ class LoadedCalendarView extends StatefulWidget {
 }
 
 class _LoadedCalendarViewState extends State<LoadedCalendarView> {
+  final _controller = instanceManager.calendarController;
   @override
   Widget build(BuildContext context) {
     final _localizations = AppLocalizations.of(context)!;
@@ -25,7 +26,13 @@ class _LoadedCalendarViewState extends State<LoadedCalendarView> {
               widget.notifyParent();
             },
             icon: Icon(Icons.settings),
-            label: Text(_localizations.changeScheduleRestrictions))
+            label: Text(_localizations.changeScheduleRestrictions)),
+        ElevatedButton.icon(
+            onPressed: () {
+              _controller.calculateSchedule();
+            },
+            icon: Icon(Icons.calculate),
+            label: Text('calculate schedule'))
       ],
     );
   }

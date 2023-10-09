@@ -19,7 +19,8 @@ class CoursesController {
       secondsStudied = 0,
       color = '#0000000',
       sessionTime = 3600,
-      startStudy = ''}) {
+      orderMatters = false,
+      revisions = 2}) {
     try {
       final newCourse = CourseModel(
           name: name,
@@ -28,7 +29,8 @@ class CoursesController {
           secondsStudied: secondsStudied,
           color: color,
           sessionTime: sessionTime,
-          startStudy: startStudy);
+          orderMatters: orderMatters, 
+          revisions: revisions);
 
       return firebaseCrud.addCourseToUser(uid: uid, newCourse: newCourse);
     } catch (e) {
@@ -79,10 +81,8 @@ class CoursesController {
       final examDate = DateTime.parse(courseCreationFormKey
           .currentState!.fields['examDate']!.value
           .toString());
-      final startStudy = DateTime.parse(courseCreationFormKey
-          .currentState!.fields['startStudy']!.value
-          .toString());
-      if (examDate.isAfter(startStudy)) {
+
+      if (examDate.isAfter(DateTime.now())) {
         final name = courseCreationFormKey
             .currentState!.fields['courseName']!.value
             .toString();
@@ -96,12 +96,19 @@ class CoursesController {
         final int units = int.parse(
             courseCreationFormKey.currentState!.fields['units']!.value);
 
+        final int revisions = int.parse(
+            courseCreationFormKey.currentState!.fields['revisions']!.value);
+
+        final bool orderMatters =
+            courseCreationFormKey.currentState!.fields['orderMatters']!.value;
+
         dynamic res = await addCourse(
             name: name,
             examDate: examDate,
             weight: weight,
             sessionTime: session,
-            startStudy: startStudy);
+            orderMatters: orderMatters,
+            revisions: revisions);
 
         if (res != null) {
           res = await addUnitsToCourse(id: res, units: units);
@@ -174,7 +181,6 @@ class CoursesController {
 
       dynamic res = await firebaseCrud.editUnit(
           course: course, unitID: oldUnit.id, updatedUnit: updatedUnit);
-      
     } else {
       logger.e('Error validating unit keys!');
     }

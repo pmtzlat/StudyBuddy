@@ -73,6 +73,7 @@ class _CalendarViewState extends State<CalendarView> {
                       nextPage();
 
                       await _controller.addScheduleRestraints();
+                      await _controller.calculateSchedule();
                       setState(() {});
                     },
                     icon: Icon(Icons.done),
@@ -115,7 +116,29 @@ class _CalendarViewState extends State<CalendarView> {
         return instanceManager.scaffold.getScaffold(
             context: context,
             activeIndex: 2,
-            body: Text('Error generating schedule'));
+            body: Column(
+              children: [
+                Text('Error generating schedule.'),
+                ElevatedButton.icon(
+                    onPressed: () {
+                      instanceManager.sessionStorage.schedulePresent = null;
+                      setState(() {});
+                      ;
+                    },
+                    icon: Icon(Icons.restart_alt),
+                    label: Text(_localizations.tryAgain))
+              ],
+            ));
+    }
+    switch (instanceManager.sessionStorage.activeCourses.length) {
+      case 0:
+        return instanceManager.scaffold.getScaffold(
+            context: context,
+            activeIndex: 2,
+            body: Title(
+                color: Colors.black,
+                child: Text(
+                    _localizations.inactiveCalendar)));
     }
     return instanceManager.scaffold.getScaffold(
         context: context,

@@ -117,7 +117,6 @@ class _CoursesViewState extends State<CoursesView> {
                 await _controller.deleteCourse(
                     id: course.id, index: index, context: context);
                 await _controller.getAllCourses();
-
               },
               child: CourseCard(course: course),
             );
@@ -194,21 +193,6 @@ class _CoursesViewState extends State<CoursesView> {
                             FormBuilderValidators.required(),
                           ]),
                         ),
-                        FormBuilderDateTimePicker(
-                          name: 'startStudy',
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          inputType: InputType.date,
-                          enabled: true,
-                          decoration: InputDecoration(
-                              labelText: _localizations.startStudy),
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.normal),
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(),
-                          ]),
-                        ),
                         FormBuilderSlider(
                           name: 'weightSlider',
                           initialValue: 1.0,
@@ -252,6 +236,25 @@ class _CoursesViewState extends State<CoursesView> {
                             FormBuilderValidators.numeric()
                           ]),
                         ),
+                        FormBuilderTextField(
+                          name: 'revisions',
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          keyboardType: TextInputType.number,
+                          maxLength: 2,
+                          initialValue: '2',
+                          decoration: InputDecoration(
+                            labelText: _localizations.numberOfRevisions,
+                          ),
+                          style: TextStyle(color: Colors.white),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(),
+                            FormBuilderValidators.numeric()
+                          ]),
+                        ),
+                        FormBuilderCheckbox(
+                            name: 'orderMatters',
+                            initialValue: false,
+                            title: Text(_localizations.orderMatters))
                       ],
                     )),
                 Center(
