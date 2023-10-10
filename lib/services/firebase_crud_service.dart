@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:study_buddy/main.dart';
-import 'package:study_buddy/models/time_slot.dart';
+import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 
 import '../models/course_model.dart';
@@ -150,36 +150,6 @@ class FirebaseCrudService {
     }
   }
 
-  Future<bool> addUnit({required UnitModel newUnit, required courseID}) async {
-    final uid = instanceManager.localStorage.getString('uid');
-    final firebaseInstance = instanceManager.db;
-
-    try {
-      if (uid == null) {
-        return false;
-      }
-
-      final courseDocRef = firebaseInstance
-          .collection('users')
-          .doc(uid)
-          .collection('courses')
-          .doc(courseID);
-
-      final unitData = {
-        'name': newUnit.name,
-        'weight': newUnit.weight,
-        'order': newUnit.order,
-      };
-
-      await courseDocRef.collection('units').add(unitData);
-
-      return true;
-    } catch (e) {
-      logger.e('Error adding new Unit: $e');
-      return false;
-    }
-  }
-
   Future<List<CourseModel>?> getAllCourses({required String uid}) async {
     try {
       final QuerySnapshot querySnapshot = await instanceManager.db
@@ -201,6 +171,8 @@ class FirebaseCrudService {
           color: data['color'] as String,
           sessionTime: data['sessionTime'] as int,
           id: data['id'] as String,
+          revisions: data['revisions'] as int,
+          orderMatters: data['orderMatters'] as bool,
         );
       }).toList();
       return courses;

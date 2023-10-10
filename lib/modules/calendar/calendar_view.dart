@@ -25,6 +25,7 @@ class _CalendarViewState extends State<CalendarView> {
     final _localizations = AppLocalizations.of(context)!;
     var screenWidth = MediaQuery.of(context).size.width;
     var screenHeight = MediaQuery.of(context).size.height;
+    setState(() {});
 
     Widget page1 = Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -137,8 +138,7 @@ class _CalendarViewState extends State<CalendarView> {
             activeIndex: 2,
             body: Title(
                 color: Colors.black,
-                child: Text(
-                    _localizations.inactiveCalendar)));
+                child: Text(_localizations.inactiveCalendar)));
     }
     return instanceManager.scaffold.getScaffold(
         context: context,

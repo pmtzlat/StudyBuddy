@@ -27,12 +27,14 @@ class _LoadedCalendarViewState extends State<LoadedCalendarView> {
             },
             icon: Icon(Icons.settings),
             label: Text(_localizations.changeScheduleRestrictions)),
-        ElevatedButton.icon(
-            onPressed: () {
-              _controller.calculateSchedule();
-            },
-            icon: Icon(Icons.calculate),
-            label: Text('calculate schedule'))
+        instanceManager.sessionStorage.activeCourses.length != 0
+            ? ElevatedButton.icon(
+                onPressed: () async {
+                  await _controller.calculateSchedule();
+                },
+                icon: Icon(Icons.calculate),
+                label: Text('calculate schedule'))
+            : SizedBox()
       ],
     );
   }

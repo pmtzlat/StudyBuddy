@@ -7,6 +7,9 @@ class TimeSlot {
   final int endTime;
   final String courseID;
   final String? unitID;
+  final String? courseName;
+  final String? unitName;
+
 
   TimeSlot(
       {this.id = '',
@@ -14,7 +17,9 @@ class TimeSlot {
       required this.startTime,
       required this.endTime,
       required this.courseID,
-      this.unitID});
+      this.unitID, 
+      this.courseName,
+      this.unitName});
 
   void print() {
     final weekdays = [

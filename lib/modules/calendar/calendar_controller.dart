@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:study_buddy/main.dart';
-import 'package:study_buddy/models/time_slot.dart';
+import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/session_storage.dart';
 

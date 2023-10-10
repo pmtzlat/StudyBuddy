@@ -29,7 +29,7 @@ class CoursesController {
           secondsStudied: secondsStudied,
           color: color,
           sessionTime: sessionTime,
-          orderMatters: orderMatters, 
+          orderMatters: orderMatters,
           revisions: revisions);
 
       return firebaseCrud.addCourseToUser(uid: uid, newCourse: newCourse);
@@ -43,7 +43,6 @@ class CoursesController {
       required int index,
       required BuildContext context}) async {
     final res = await firebaseCrud.deleteCourse(courseId: id);
-    instanceManager.sessionStorage.savedCourses.removeAt(index);
     final snackbar = SnackBar(
       content: Text(
         res == 1

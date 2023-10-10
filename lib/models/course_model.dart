@@ -15,7 +15,6 @@ class CourseModel {
   bool orderMatters;
   int revisions;
 
-
   /*
   var iconData = IconData(58717, fontFamily: 'MaterialIcons')
 
@@ -55,15 +54,11 @@ class CourseModel {
     final firebaseCrud = instanceManager.firebaseCrudService;
     if (units == null) {
       final newUnit = UnitModel(name: 'Unit 1', order: 1);
-      if (await firebaseCrud.addUnit(newUnit: newUnit, courseID: id)) {
-        units = [newUnit];
-      }
+      await firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
     } else {
       final newUnit = UnitModel(
           name: 'Unit ${units!.length + 1}', order: units!.length + 1);
-      if (await firebaseCrud.addUnit(newUnit: newUnit, courseID: id)) {
-        units!.add(newUnit);
-      }
+      await firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
     }
     await getUnits();
   }
@@ -73,12 +68,11 @@ class CourseModel {
     final unitNum = unit.order;
     await firebaseCrud.deleteUnit(unit: unit, courseID: id);
     await getUnits();
-
   }
 
-  void printUnits(){
-    if(units != null){
-      for(int i=0;i<units!.length; i++){
+  void printUnits() {
+    if (units != null) {
+      for (int i = 0; i < units!.length; i++) {
         logger.i('${units![i].name}, ${units![i].id}');
       }
     }

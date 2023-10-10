@@ -117,6 +117,8 @@ class _CoursesViewState extends State<CoursesView> {
                 await _controller.deleteCourse(
                     id: course.id, index: index, context: context);
                 await _controller.getAllCourses();
+
+                setState(() {});
               },
               child: CourseCard(course: course),
             );
@@ -240,7 +242,7 @@ class _CoursesViewState extends State<CoursesView> {
                           name: 'revisions',
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           keyboardType: TextInputType.number,
-                          maxLength: 2,
+                          maxLength: 1,
                           initialValue: '2',
                           decoration: InputDecoration(
                             labelText: _localizations.numberOfRevisions,
