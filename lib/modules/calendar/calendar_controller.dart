@@ -10,6 +10,7 @@ class CalendarController {
 
   void moveToStageTwo() {
     instanceManager.sessionStorage.calendarBeginPage = 1;
+    instanceManager.sessionStorage.savedWeekday = 0;
   }
 
   void moveToStageThree() {
@@ -89,7 +90,7 @@ class CalendarController {
         }
       }
     }
-    if (result.length == 0){
+    if (result.length == 0) {
       addTimeSlot(0, 0, 0);
     }
     return result;
@@ -109,6 +110,6 @@ class CalendarController {
   }
 
   void calculateSchedule() async {
-    await instanceManager.studyPlanner.calculateSchedule();
+    logger.i(await instanceManager.studyPlanner.calculateSchedule());
   }
 }

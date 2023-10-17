@@ -44,7 +44,7 @@ class _UnitCardState extends State<UnitCard> {
                   ? [
                       Text('Unit ${widget.unit.order}: ${widget.unit.name}'),
                       Text('${widget.unit.id}'),
-                      Text('${widget.unit.weight}'),
+                      Text('${widget.unit.hours / 3600}'),
                       SizedBox(width: 8.0),
                       IconButton(
                           onPressed: () {
@@ -71,17 +71,21 @@ class _UnitCardState extends State<UnitCard> {
                                   initialValue: widget.unit.name,
                                   validator: FormBuilderValidators.compose([]),
                                 ),
-                                FormBuilderSlider(
-                                  name: 'weightSlider',
-                                  initialValue: 1.0,
-                                  min: 0.0,
-                                  max: 2.0,
-                                  divisions: 20,
-                                  decoration: InputDecoration(
-                                      labelText: _localizations.courseWeight),
+                                FormBuilderTextField(
+                                  name: 'hours',
                                   autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
-                                  validator: FormBuilderValidators.compose([]),
+                                  keyboardType: TextInputType.number,
+                                  maxLength: 1,
+                                  initialValue: (widget.unit.hours / 3600).toInt().toString(),
+                                  decoration: InputDecoration(
+                                    labelText: _localizations.unitHours,
+                                  ),
+                                  style: TextStyle(color: Colors.black),
+                                  validator: FormBuilderValidators.compose([
+                                    FormBuilderValidators.required(),
+                                    FormBuilderValidators.numeric()
+                                  ]),
                                 ),
                               ],
                             ),

@@ -74,7 +74,6 @@ class _CalendarViewState extends State<CalendarView> {
                       nextPage();
 
                       await _controller.addScheduleRestraints();
-                      await _controller.calculateSchedule();
                       setState(() {});
                     },
                     icon: Icon(Icons.done),

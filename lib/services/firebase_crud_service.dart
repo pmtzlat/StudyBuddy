@@ -72,7 +72,7 @@ class FirebaseCrudService {
         final unitData = unitDoc.data() as Map<String, dynamic>;
         final unit = UnitModel(
           name: unitData['name'] ?? '',
-          weight: (unitData['weight'] ?? 1.0).toDouble() / 10,
+          hours: unitData['hours'] ?? 3600,
           id: unitDoc.id,
           order: unitData['order'] ?? 0,
         );
@@ -134,7 +134,7 @@ class FirebaseCrudService {
 
       final unitData = {
         'name': newUnit.name,
-        'weight': newUnit.weight * 10,
+        'hours': newUnit.hours,
         'order': newUnit.order,
         'id': ''
       };
@@ -245,7 +245,6 @@ class FirebaseCrudService {
     final courseID = course.id;
 
     try {
-      // Reference to the 'units' subcollection document
       final unitReference = firebaseInstance
           .collection('users')
           .doc(uid)
@@ -254,14 +253,11 @@ class FirebaseCrudService {
           .collection('units')
           .doc(unitID);
 
-      // Convert weight to integer by multiplying by 10
-      final updatedWeight = (updatedUnit.weight * 10).toInt();
+      
 
-      // Update the unit document with new data
       await unitReference.update({
         'name': updatedUnit.name,
-        'weight': updatedWeight,
-        // Add other fields you want to update
+        'hours': updatedUnit.hours,
       });
 
       return 1; // Success

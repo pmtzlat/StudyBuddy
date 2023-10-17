@@ -39,7 +39,7 @@ class InstanceManager {
     localStorage =  await SharedPreferences.getInstance();
     courseController = CoursesController();
     calendarController = CalendarController();
-    studyPlanner = StudyPlanner();
+    studyPlanner = StudyPlanner(firebaseCrud: firebaseCrudService, uid: localStorage.getString('uid') ?? '');
 
   }
 

@@ -3,8 +3,8 @@ import 'package:study_buddy/services/logging_service.dart';
 class TimeSlot {
   final String id;
   final int weekday;
-  final int startTime;
-  final int endTime;
+  int startTime;
+  int endTime;
   final String courseID;
   final String? unitID;
   final String? courseName;
@@ -21,7 +21,7 @@ class TimeSlot {
       this.courseName,
       this.unitName});
 
-  void print() {
+  String getInfoString() {
     final weekdays = [
       'Monday',
       'Tuesday',
@@ -31,8 +31,11 @@ class TimeSlot {
       'Saturday',
       'Sunday'
     ];
-    logger.i('TimeSlot: \n${weekdays[weekday]} ${startTime} - ${endTime} ');
+    final result = 'TimeSlot: \n${weekdays[weekday]} ${startTime} - ${endTime} ';
+    return result;
   }
+
+  
 
   @override
   bool operator ==(Object other) =>

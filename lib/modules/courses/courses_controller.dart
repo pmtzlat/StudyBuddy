@@ -56,11 +56,11 @@ class CoursesController {
     ScaffoldMessenger.of(context).showSnackBar(snackbar);
   }
 
-  dynamic addUnitsToCourse({required String id, required int units}) {
+  dynamic addUnitsToCourse({required String id, required int units, required int sessionTime}) {
     try {
       for (int i = 0; i < units; i++) {
         final unitNum = i + 1;
-        final newUnit = UnitModel(name: 'Unit $unitNum', order: unitNum);
+        final newUnit = UnitModel(name: 'Unit $unitNum', order: unitNum, hours: sessionTime);
         firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
       }
       return 1;
@@ -110,7 +110,7 @@ class CoursesController {
             revisions: revisions);
 
         if (res != null) {
-          res = await addUnitsToCourse(id: res, units: units);
+          res = await addUnitsToCourse(id: res, units: units, sessionTime:  session );
         }
 
         // Close the bottom sheet
@@ -173,10 +173,10 @@ class CoursesController {
 
       final name =
           unitFormKey.currentState!.fields['unitName']!.value.toString();
-      final weight = unitFormKey.currentState!.fields['weightSlider']!.value;
+      final hours = int.parse(unitFormKey.currentState!.fields['hours']!.value);
 
       final updatedUnit =
-          UnitModel(name: name, order: oldUnit.order, weight: weight);
+          UnitModel(name: name, order: oldUnit.order, hours: hours*3600);
 
       dynamic res = await firebaseCrud.editUnit(
           course: course, unitID: oldUnit.id, updatedUnit: updatedUnit);

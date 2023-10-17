@@ -4,7 +4,8 @@ import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 class SchedulerStack {
-  late List<UnitModel> unitsWithRevision;
+  late List<UnitModel> units;
+  late List<UnitModel> revisions;
   int? daysUntilExam;
   double? weight;
   CourseModel course;
@@ -13,11 +14,22 @@ class SchedulerStack {
 
   Future<void> initializeUnitsWithRevision(CourseModel course) async {
     try {
-      unitsWithRevision = await extractUnitsWithRevision(course);
+      units = await extractUnitsWithRevision(course);
+      revisions = createRevisions(course);
     } catch (e) {
-      logger.e('Error initializing unitsWithRevision: $e');
-      unitsWithRevision = [];
+      logger.d('Error initializing unitsWithRevision: $e');
+      units = [];
     }
+  }
+
+  List<UnitModel> createRevisions(CourseModel course) {
+    List<UnitModel> revisions = [];
+
+    for (int x = 0; x < course.revisions; x++) {
+      revisions
+          .add(UnitModel(name: 'Revision session $x', order: x, hours: course.sessionTime));
+    }
+    return revisions;
   }
 
   Future<List<UnitModel>> extractUnitsWithRevision(CourseModel course) async {
@@ -28,10 +40,6 @@ class SchedulerStack {
       units += courseUnits;
       logger.i('Revisons for course ${course.name}: ${course.revisions}');
 
-      for (int x = 0; x < course.revisions; x++) {
-        units.add(
-            UnitModel(name: 'Revision day $x', order: courseUnits.length + x, weight: 2.0));
-      }
       return units;
     } catch (e) {
       logger.e('extractUnitsWithRevision error: $e');
@@ -41,11 +49,15 @@ class SchedulerStack {
 
   void print() {
     String unitString = 'Units:';
-    for (UnitModel unit in unitsWithRevision) {
-      unitString += '\n ${unit.name}, weight: ${unit.weight}';
+    for (UnitModel unit in units) {
+      unitString += '\n ${unit.name}, hours: ${unit.hours/3600}';
     }
-    logger.i(
-        'Stack ${course.name} \n Order matters: ${course.orderMatters} \n $unitString');
+    unitString += '\n Revisons: ';
+    for (UnitModel revision in revisions) {
+      unitString += '\n ${revision.name}, weight: ${revision.hours/3600}';
+    }
+    logger.f(
+        'Stack ${course.name} \n Session Time: ${course.sessionTime / 3600} \n Exam date: ${course.examDate} \n Order matters: ${course.orderMatters} \n Weight: ${course.weight}\n $unitString');
   }
 
   int getDaysUntilExam(DateTime date) {
@@ -67,8 +79,8 @@ class SchedulerStack {
   }
 
   UnitModel? getUnitForTimeSlot(int timeAvailable) {
-    for (UnitModel unit in unitsWithRevision) {
-      if ((unit.weight * course.sessionTime) <= timeAvailable) {
+    for (UnitModel unit in units) {
+      if ((unit.hours/3600) <= timeAvailable) {
         return unit;
       }
       if (course.orderMatters) {

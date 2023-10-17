@@ -23,7 +23,7 @@
     "errorGettingUnits": "Error getting Units. try again later",
     "noUnitsYet": "You have no units added yet! \n Click the button to add one.",
     "unitName": "Unit Name",
-    "unitWeight": "Unit Weight",
+    "unitHours": "Hours to study unit",
     "orderMatters":"Does unit order matter in planning?",
     "numberOfRevisions":"Number of revision days",
     
