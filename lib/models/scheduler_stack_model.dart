@@ -54,7 +54,7 @@ class SchedulerStack {
     }
     unitString += '\n Revisons: ';
     for (UnitModel revision in revisions) {
-      unitString += '\n ${revision.name}, weight: ${revision.hours/3600}';
+      unitString += '\n ${revision.name}, hours: ${revision.hours/3600}';
     }
     logger.f(
         'Stack ${course.name} \n Session Time: ${course.sessionTime / 3600} \n Exam date: ${course.examDate} \n Order matters: ${course.orderMatters} \n Weight: ${course.weight}\n $unitString');

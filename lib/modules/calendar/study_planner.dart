@@ -11,10 +11,12 @@ class StudyPlanner {
   final firebaseCrud;
   final uid;
   late List<SchedulerStack> generalStacks;
+  bool unitsStayInDay;
 
   StudyPlanner({
     required this.firebaseCrud,
     required this.uid,
+    this.unitsStayInDay = false,
   });
 
   Future<String?> calculateSchedule() async {
@@ -67,11 +69,14 @@ class StudyPlanner {
     if (filteredStacks.length == 0) {
       return;
     }
+
     while (filler != null && filteredStacks.length != 0) {
       //logger.i('Gap found: ${filler.getInfoString()}');
       //logger.d(day.getString());
-      day.times.add(getTimeSlotWithUnit(filler, filteredStacks, day));
       
+      if (unitsStayInDay == true) day.getTotalAvailableTime();
+      
+      day.times.add(getTimeSlotWithUnit(filler, filteredStacks, day));
 
       filler = getAvailableTime(day);
     }
@@ -88,7 +93,8 @@ class StudyPlanner {
   TimeSlot getTimeSlotWithUnit(
       TimeSlot gap, List<SchedulerStack> stacks, Day day) {
     calculateWeights(stacks, day);
-    Map<String, dynamic>? selectedUnit = getUnitToFillGap(stacks, gap, day.totalAvailableTime);
+    Map<String, dynamic>? selectedUnit =
+        getUnitToFillGap(stacks, gap, day.totalAvailableTime);
 
     if (selectedUnit == null) {
       return gap;
@@ -145,7 +151,6 @@ class StudyPlanner {
 
   Map<String, dynamic>? getUnitToFillGap(
       List<SchedulerStack> stacks, TimeSlot gap, int availableTime) {
-
     stacks.sort((a, b) => b.weight!.compareTo(a.weight!));
     late Map<String, dynamic>? selectedUnit;
 
@@ -158,7 +163,6 @@ class StudyPlanner {
           generalStacks
               .removeWhere((stack) => stack.course.id == stacks[i].course.id);
           stacks.removeAt(i);
-          
         }
         return selectedUnit;
       }
@@ -166,7 +170,9 @@ class StudyPlanner {
     return null;
   }
 
-  Map<String, dynamic>? selectUnitInStack(SchedulerStack stack, TimeSlot gap, int availableTime) {
+  Map<String, dynamic>? selectUnitInStack(
+      SchedulerStack stack, TimeSlot gap, int availableTime) {
+    //logger.d(availableTime);
     if (stack.revisions.length == 0) {
       for (int i = stack.units.length - 1; i >= 0; i--) {
         final candidateUnit = stack.units[i];
@@ -174,12 +180,10 @@ class StudyPlanner {
         if (candidateUnit.hours == 0) {
           continue;
         }
-        if (candidateUnit.hours / 3600 <=
-            availableTime) {
+        if (candidateUnit.hours / 3600 <= availableTime) {
           final result = {
             'unit': candidateUnit,
-            'sessionTime': calculateSessionTime(
-                candidateUnit, gap),
+            'sessionTime': calculateSessionTime(candidateUnit, gap),
             'courseID': stack.course.id,
             'sessionInfo': '${stack.course.name}: ${candidateUnit.name}'
           };
@@ -193,23 +197,20 @@ class StudyPlanner {
       }
     } else {
       for (int i = stack.revisions.length - 1; i >= 0; i--) {
-        
         final candidateRevision = stack.revisions[i];
         //logger.i('Candidate revision: ${candidateRevision.name}: ${candidateRevision.hours/ 3600} hours');
 
         if (candidateRevision.hours == 0) {
           continue;
         }
-        if (candidateRevision.hours / 3600 <=
-            availableTime) {
+        if (candidateRevision.hours / 3600 <= availableTime) {
           final result = {
             'unit': candidateRevision,
-            'sessionTime': calculateSessionTime(
-                candidateRevision, gap),
+            'sessionTime': calculateSessionTime(candidateRevision, gap),
             'courseID': stack.course.id,
             'sessionInfo': '${stack.course.name}: ${candidateRevision.name}'
           };
-          if (candidateRevision.hours == 0)stack.revisions.removeAt(i);
+          if (candidateRevision.hours == 0) stack.revisions.removeAt(i);
           return result;
         } else {
           if (stack.course.orderMatters) {
@@ -221,16 +222,13 @@ class StudyPlanner {
   }
 
   int calculateSessionTime(UnitModel unit, TimeSlot gap) {
-    
-    final sessionHours = unit.hours /3600;
-    if (sessionHours <= (gap.endTime - gap.startTime +1)){
+    final sessionHours = unit.hours / 3600;
+    if (sessionHours <= (gap.endTime - gap.startTime + 1)) {
       unit.hours = 0;
       return sessionHours.toInt();
-    }
-    else{
-      unit.hours -= (gap.endTime - gap.startTime +1)*3600;
-      return gap.endTime - gap.startTime +1;
-
+    } else {
+      unit.hours -= (gap.endTime - gap.startTime + 1) * 3600;
+      return gap.endTime - gap.startTime + 1;
     }
   }
 
