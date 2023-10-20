@@ -7,16 +7,19 @@ import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/course_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/modules/courses/course_detail_view.dart';
+import 'package:study_buddy/services/logging_service.dart';
 
 class UnitCard extends StatefulWidget {
   final UnitModel unit;
   final CourseModel course;
   final Function notifyParent;
+  final Function showError;
 
   UnitCard(
       {required this.unit,
       required this.course,
-      required Function this.notifyParent});
+      required Function this.notifyParent,
+      required Function this.showError});
 
   @override
   State<UnitCard> createState() => _UnitCardState();
@@ -48,8 +51,12 @@ class _UnitCardState extends State<UnitCard> {
                       SizedBox(width: 8.0),
                       IconButton(
                           onPressed: () {
+                            
+                            
+                            
                             setState(() {
                               editMode = true;
+                              
                             });
                           },
                           icon: Icon(Icons.edit))
@@ -92,8 +99,11 @@ class _UnitCardState extends State<UnitCard> {
                           )),
                       IconButton(
                           onPressed: () async {
-                            await _controller.handleEditUnit(
+                            int? res = await _controller.handleEditUnit(
                                 unitFormKey, widget.course, widget.unit);
+                            if(res == -1){
+                              widget.showError(_localizations.errorEditingUnit);
+                            }
                             await widget.course.getUnits();
                             widget.notifyParent();
 

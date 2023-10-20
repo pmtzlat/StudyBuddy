@@ -7,7 +7,11 @@ import '../models/course_model.dart';
 
 class CourseCard extends StatefulWidget {
   final course;
-  const CourseCard({super.key, required CourseModel this.course});
+  final Function parentRefresh;
+  const CourseCard(
+      {super.key,
+      required CourseModel this.course,
+      required this.parentRefresh});
 
   @override
   State<CourseCard> createState() => _CourseCardState();
@@ -19,7 +23,9 @@ class _CourseCardState extends State<CourseCard> {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(SlidePageRoute(
-          builder: (context) => CourseDetailView(course: widget.course),
+          builder: (context) => CourseDetailView(
+            course: widget.course,
+          ),
         ));
       },
       child: Container(
@@ -31,4 +37,6 @@ class _CourseCardState extends State<CourseCard> {
       ),
     );
   }
+
+  
 }

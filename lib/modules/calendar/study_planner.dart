@@ -16,7 +16,7 @@ class StudyPlanner {
   StudyPlanner({
     required this.firebaseCrud,
     required this.uid,
-    this.unitsStayInDay = false,
+    this.unitsStayInDay = true,
   });
 
   Future<String?> calculateSchedule() async {

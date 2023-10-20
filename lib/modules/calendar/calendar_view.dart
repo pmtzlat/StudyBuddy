@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:study_buddy/common_widgets/hour_picker_form.dart';
 import 'package:study_buddy/main.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/modules/calendar/loaded_calendar_view.dart';
 import 'package:study_buddy/services/logging_service.dart';

@@ -26,6 +26,8 @@
     "unitHours": "Hours to study unit",
     "orderMatters":"Does unit order matter in planning?",
     "numberOfRevisions":"Number of revision days",
+    "errorEditingUnit": "Error editing unit",
+    "errorEditingCourse": "Error editing course",
     
 
     "calendarTitle": "Calendar",

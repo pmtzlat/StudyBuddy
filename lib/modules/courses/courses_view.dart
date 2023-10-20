@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:study_buddy/common_widgets/loading_screen.dart';
 import 'package:study_buddy/main.dart';
-import 'package:study_buddy/models/course_model.dart';
-import 'package:study_buddy/models/unit_model.dart';
-import 'package:study_buddy/modules/courses/courses_controller.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../common_widgets/course_card.dart';
-import '../../common_widgets/unit_card.dart';
-import '../../services/logging_service.dart';
 
 class CoursesView extends StatefulWidget {
   const CoursesView({super.key});
@@ -19,12 +15,18 @@ class CoursesView extends StatefulWidget {
 
 class _CoursesViewState extends State<CoursesView> {
   final _controller = instanceManager.courseController;
+  
+
+  
 
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
+    loadCourses();
+
+
     return instanceManager.scaffold.getScaffold(
         context: context,
         activeIndex: 1,
@@ -46,14 +48,20 @@ class _CoursesViewState extends State<CoursesView> {
               child: Text(_localizations.addCourse),
             ),
             instanceManager.sessionStorage.activeCourses == null
-                ? loadCourses()
+                ? loadingScreen()
                 : getCourseList()
           ],
         ));
     ;
   }
 
-  FutureBuilder<void> loadCourses() {
+  void loadCourses() async {
+    await _controller.getAllCourses();
+    setState(() {
+    });
+  }
+
+  /*FutureBuilder<void> loadCourses() {
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
 
@@ -91,7 +99,7 @@ class _CoursesViewState extends State<CoursesView> {
             return getCourseList();
           }
         });
-  }
+  }*/
 
   Expanded getCourseList() {
     return Expanded(
@@ -120,7 +128,7 @@ class _CoursesViewState extends State<CoursesView> {
 
                 setState(() {});
               },
-              child: CourseCard(course: course),
+              child: CourseCard(course: course, parentRefresh: loadCourses),
             );
           },
         ),
@@ -264,7 +272,7 @@ class _CoursesViewState extends State<CoursesView> {
                     margin: EdgeInsets.all(20),
                     child: ElevatedButton(
                       onPressed: () async {
-                        final res = await _controller.handleFormSubmission(
+                        final res = await _controller.handleAddCourse(
                             courseCreationFormKey, context);
                         await _controller.getAllCourses();
 
@@ -280,5 +288,11 @@ class _CoursesViewState extends State<CoursesView> {
         );
       },
     );
+  }
+
+  
+
+  void refresh() {
+    setState(() {});
   }
 }

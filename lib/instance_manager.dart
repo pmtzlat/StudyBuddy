@@ -27,7 +27,7 @@ class InstanceManager {
   late CoursesController courseController;
   late CalendarController calendarController;
   late StudyPlanner studyPlanner;
-  final sessionStorage = SessionStorage();
+  final SessionStorage sessionStorage = SessionStorage();
 
   
   

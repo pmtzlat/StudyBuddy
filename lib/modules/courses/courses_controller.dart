@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:study_buddy/common_widgets/course_card.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/course_model.dart';
 
@@ -32,7 +33,7 @@ class CoursesController {
           orderMatters: orderMatters,
           revisions: revisions);
 
-      return firebaseCrud.addCourseToUser(uid: uid, newCourse: newCourse);
+      return firebaseCrud.addCourseToUser(newCourse: newCourse);
     } catch (e) {
       logger.e('Error in CoursesController.addCourse: $e');
     }
@@ -56,11 +57,13 @@ class CoursesController {
     ScaffoldMessenger.of(context).showSnackBar(snackbar);
   }
 
-  dynamic addUnitsToCourse({required String id, required int units, required int sessionTime}) {
+  dynamic addUnitsToCourse(
+      {required String id, required int units, required int sessionTime}) {
     try {
       for (int i = 0; i < units; i++) {
         final unitNum = i + 1;
-        final newUnit = UnitModel(name: 'Unit $unitNum', order: unitNum, hours: sessionTime);
+        final newUnit = UnitModel(
+            name: 'Unit $unitNum', order: unitNum, hours: sessionTime);
         firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
       }
       return 1;
@@ -70,7 +73,7 @@ class CoursesController {
     }
   }
 
-  Future<int?> handleFormSubmission(
+  Future<int?> handleAddCourse(
       GlobalKey<FormBuilderState> courseCreationFormKey,
       BuildContext context) async {
     int? res;
@@ -110,7 +113,8 @@ class CoursesController {
             revisions: revisions);
 
         if (res != null) {
-          res = await addUnitsToCourse(id: res, units: units, sessionTime:  session );
+          res = await addUnitsToCourse(
+              id: res, units: units, sessionTime: session);
         }
 
         // Close the bottom sheet
@@ -146,7 +150,8 @@ class CoursesController {
 
   Future<void> getAllCourses() async {
     try {
-      final courses = await firebaseCrud.getAllCourses(uid: uid);
+
+      final courses = await firebaseCrud.getAllCourses();
 
       instanceManager.sessionStorage.savedCourses = courses;
       instanceManager.sessionStorage.activeCourses =
@@ -166,7 +171,7 @@ class CoursesController {
     }
   }
 
-  Future<void> handleEditUnit(GlobalKey<FormBuilderState> unitFormKey,
+  Future<int?> handleEditUnit(GlobalKey<FormBuilderState> unitFormKey,
       CourseModel course, UnitModel oldUnit) async {
     if (unitFormKey.currentState!.validate()) {
       unitFormKey.currentState!.save();
@@ -176,12 +181,56 @@ class CoursesController {
       final hours = int.parse(unitFormKey.currentState!.fields['hours']!.value);
 
       final updatedUnit =
-          UnitModel(name: name, order: oldUnit.order, hours: hours*3600);
+          UnitModel(name: name, order: oldUnit.order, hours: hours * 3600);
 
       dynamic res = await firebaseCrud.editUnit(
           course: course, unitID: oldUnit.id, updatedUnit: updatedUnit);
+
+      return res;
     } else {
       logger.e('Error validating unit keys!');
     }
+  }
+
+  Future<int?> handleEditCourse(
+      GlobalKey<FormBuilderState> courseFormKey, CourseModel course, ) async {
+    
+      if (courseFormKey.currentState!.validate()) {
+        courseFormKey.currentState!.save();
+        final name =
+            courseFormKey.currentState!.fields['courseName']!.value.toString();
+        final weight =
+            courseFormKey.currentState!.fields['weightSlider']!.value;
+        final sessionTime =
+            int.parse(courseFormKey.currentState!.fields['sessionTime']!.value);
+        final examDate = courseFormKey.currentState!.fields['examDate']!.value ?? course.examDate;
+        final orderMatters =
+            courseFormKey.currentState!.fields['orderMatters']!.value;
+        final revisions =
+            int.parse(courseFormKey.currentState!.fields['revisions']!.value);
+
+        if(examDate.isAfter(DateTime.now())){
+        final updatedCourse = CourseModel(
+            id: course.id,
+            name: name,
+            examDate: examDate,
+            weight: weight,
+            sessionTime: sessionTime*3600,
+            orderMatters: orderMatters,
+            revisions: revisions);
+        
+
+
+        final res = await firebaseCrud.editCourse(updatedCourse);
+        return res;
+        }
+        return -2;
+
+
+
+      } else {
+        logger.e('Error validating edited course!');
+      }
+    
   }
 }

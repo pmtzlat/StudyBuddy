@@ -11,9 +11,10 @@ import 'logging_service.dart';
 
 class FirebaseCrudService {
   Future<String?> addCourseToUser(
-      {required String uid, required CourseModel newCourse}) async {
+      { required CourseModel newCourse}) async {
     try {
       // Check if the user document exists
+      final uid = instanceManager.localStorage.getString('uid');
       final connectivityResult =
           await instanceManager.connectivity.checkConnectivity();
       if (connectivityResult == ConnectivityResult.none) {
@@ -150,8 +151,9 @@ class FirebaseCrudService {
     }
   }
 
-  Future<List<CourseModel>?> getAllCourses({required String uid}) async {
+  Future<List<CourseModel>?> getAllCourses() async {
     try {
+      final uid = instanceManager.localStorage.getString('uid');
       final QuerySnapshot querySnapshot = await instanceManager.db
           .collection('users')
           .doc(uid)
@@ -252,8 +254,6 @@ class FirebaseCrudService {
           .doc(courseID)
           .collection('units')
           .doc(unitID);
-
-      
 
       await unitReference.update({
         'name': updatedUnit.name,
@@ -403,6 +403,67 @@ class FirebaseCrudService {
     } catch (e) {
       logger.e(
           'firebaseCrud.getScheduleLimits: error getting schedule limits: $e');
+      return null;
+    }
+  }
+
+  Future<int?> editCourse(CourseModel course) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+      final courseReference = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('courses')
+          .doc(course.id);
+
+      await courseReference.update({
+        'name': course.name,
+        'examDate': course.examDate.toString(),
+        'weight': course.weight * 10,
+        'sessionTime': course.sessionTime,
+        'orderMatters': course.orderMatters,
+        'revisions': course.revisions
+      });
+
+      return 1;
+    } catch (e) {
+      logger.e('Error updating course: $e');
+      return -1;
+    }
+  }
+
+  Future<CourseModel?> getCourse(String courseID) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+      final docSnapshot = await firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('courses')
+          .doc(courseID)
+          .get();
+
+      if (docSnapshot.exists) {
+        final data = docSnapshot.data() as Map<String, dynamic>;
+        final double weight = ((data['weight'] as double) / 10.0);
+
+        return CourseModel(
+          name: data['name'] as String,
+          weight: weight,
+          examDate: DateTime.parse(data['examDate'] as String),
+          secondsStudied: data['secondsStudied'] as int,
+          color: data['color'] as String,
+          sessionTime: data['sessionTime'] as int,
+          id: data['id'] as String,
+          revisions: data['revisions'] as int,
+          orderMatters: data['orderMatters'] as bool,
+        );
+      } else {
+        return null;
+      }
+    } catch (e) {
+      logger.e('Error getting course: $e');
       return null;
     }
   }
