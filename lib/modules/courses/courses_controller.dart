@@ -43,6 +43,7 @@ class CoursesController {
       {required String id,
       required int index,
       required BuildContext context}) async {
+    
     final res = await firebaseCrud.deleteCourse(courseId: id);
     final snackbar = SnackBar(
       content: Text(
@@ -156,6 +157,7 @@ class CoursesController {
       instanceManager.sessionStorage.savedCourses = courses;
       instanceManager.sessionStorage.activeCourses =
           filterActiveCourses(courses);
+      instanceManager.sessionStorage.updatedCoursesView = true;
     } catch (e) {
       logger.e('Error getting courses: $e');
     }
@@ -222,6 +224,7 @@ class CoursesController {
 
 
         final res = await firebaseCrud.editCourse(updatedCourse);
+        instanceManager.sessionStorage.updatedCoursesView = false;
         return res;
         }
         return -2;

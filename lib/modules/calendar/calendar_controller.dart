@@ -68,7 +68,7 @@ class CalendarController {
         if (matrix[i][0] == true) {
           startTime = 0;
           endTime = 0;
-          addTimeSlot(i, startTime, endTime);
+          addTimeSlot(i+1, startTime, endTime);
         }
       } else {
         for (int j = 1; j < matrix[i].length; j++) {
@@ -80,18 +80,18 @@ class CalendarController {
             }
             if (j == matrix[i].length - 1) {
               endTime = j;
-              addTimeSlot(i, startTime, endTime);
+              addTimeSlot(i+1, startTime, endTime);
             }
           }
           if (current == false && previous == true) {
             endTime = j - 1;
-            addTimeSlot(i, startTime, endTime);
+            addTimeSlot(i+1, startTime, endTime);
           }
         }
       }
     }
     if (result.length == 0) {
-      addTimeSlot(0, 0, 0);
+      addTimeSlot(1, 0, 0);
     }
     return result;
   }

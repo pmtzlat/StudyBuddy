@@ -4,6 +4,8 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:study_buddy/common_widgets/loading_screen.dart';
 import 'package:study_buddy/main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:study_buddy/models/course_model.dart';
+import 'package:study_buddy/services/logging_service.dart';
 import '../../common_widgets/course_card.dart';
 
 class CoursesView extends StatefulWidget {
@@ -15,18 +17,31 @@ class CoursesView extends StatefulWidget {
 
 class _CoursesViewState extends State<CoursesView> {
   final _controller = instanceManager.courseController;
-  
 
+  @override
+void initState() {
+  super.initState();
   
+  String courseString =
+      'upDatedCoursesViewCourses: ${instanceManager.sessionStorage.updatedCoursesView}\nCourses:\n';
+
+  if (!instanceManager.sessionStorage.updatedCoursesView) {
+    logger.f('It\'s false!');
+    loadCourses();
+  }
+
+  for (CourseModel course in instanceManager.sessionStorage.activeCourses) {
+    courseString += '${course.name}, ';
+  }
+
+}
 
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    loadCourses();
-
-
+    
     return instanceManager.scaffold.getScaffold(
         context: context,
         activeIndex: 1,
@@ -57,49 +72,8 @@ class _CoursesViewState extends State<CoursesView> {
 
   void loadCourses() async {
     await _controller.getAllCourses();
-    setState(() {
-    });
+    setState(() {});
   }
-
-  /*FutureBuilder<void> loadCourses() {
-    final _localizations = AppLocalizations.of(context)!;
-    var screenHeight = MediaQuery.of(context).size.height;
-
-    return FutureBuilder(
-        future: _controller.getAllCourses(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // Display a loading indicator while the Future is running
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                  ],
-                ),
-              ],
-            );
-          } else if (snapshot.hasError) {
-            // Display the error message and show the snackbar
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                backgroundColor: Colors.red,
-                content: Text(_localizations.errorGettingCourses),
-              ),
-            );
-            return Text('Error: ${snapshot.error}');
-          } else {
-            if (instanceManager.sessionStorage.activeCourses.length == 0) {
-              return Center(
-                child: Text(_localizations.noCoursesYet),
-              );
-            }
-            return getCourseList();
-          }
-        });
-  }*/
 
   Expanded getCourseList() {
     return Expanded(
@@ -122,13 +96,18 @@ class _CoursesViewState extends State<CoursesView> {
                 padding: EdgeInsets.only(right: 20.0),
               ),
               onDismissed: (direction) async {
+                setState(() {
+                  instanceManager.sessionStorage.activeCourses.removeAt(index);
+                });
+
                 await _controller.deleteCourse(
                     id: course.id, index: index, context: context);
-                await _controller.getAllCourses();
 
-                setState(() {});
+                await _controller.getAllCourses();
               },
-              child: CourseCard(course: course, parentRefresh: loadCourses),
+              child: CourseCard(
+                  course: instanceManager.sessionStorage.activeCourses![index],
+                  parentRefresh: loadCourses),
             );
           },
         ),
@@ -289,8 +268,6 @@ class _CoursesViewState extends State<CoursesView> {
       },
     );
   }
-
-  
 
   void refresh() {
     setState(() {});

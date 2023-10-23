@@ -22,7 +22,7 @@ class _CourseCardState extends State<CourseCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(SlidePageRoute(
+        Navigator.of(context).pushReplacement(SlidePageRoute(
           builder: (context) => CourseDetailView(
             course: widget.course,
           ),

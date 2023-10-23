@@ -11,45 +11,67 @@ class StudyPlanner {
   final firebaseCrud;
   final uid;
   late List<SchedulerStack> generalStacks;
-  bool unitsStayInDay;
 
   StudyPlanner({
     required this.firebaseCrud,
     required this.uid,
-    this.unitsStayInDay = true,
   });
 
   Future<String?> calculateSchedule() async {
     try {
       await firebaseCrud.deleteSchedule();
       List<TimeSlot>? scheduleLimits = await firebaseCrud.getScheduleLimits();
-      if (scheduleLimits == null) {
-        logger.e('No restraints found');
-        return null;
-      }
-
-      List<Day>? days = generateDays();
-      if (days == null) {
-        return 'No courses';
-      }
 
       generalStacks = await generateStacks();
       for (SchedulerStack stack in generalStacks) {
         stack.print();
       }
-      await fillRestrictions(days);
 
       List<Day> result = [];
-      while (days.length > 0 && generalStacks.length > 0) {
-        Day furthestDay = days.removeAt(0);
-        //logger.i('Day in focus: \n ${furthestDay.getString()}');
-        fillDayWithSessions(furthestDay, generalStacks);
+      List<List<TimeSlot>>? weekdayRestrictions = null;
 
-        result.add(furthestDay);
-        logger.i(furthestDay.getString());
+      if (scheduleLimits != null) {
+        weekdayRestrictions = separateTimesForWeekday(scheduleLimits);
       }
 
-      if (days.length == 0 && generalStacks.length != 0) {
+      DateTime loopDate =
+          getLastDayOfStudy(instanceManager.sessionStorage.activeCourses)!
+              .subtract(Duration(days: 1));
+      
+      if(loopDate == null){
+        return 'No courses';
+      }
+
+      Day dayToAdd = Day(
+          id: DateTime(
+                  loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0)
+              .toString(),
+          weekday: loopDate.weekday,
+          date: DateTime(
+              loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0));
+
+      while (
+          generalStacks.length != 0 && dayToAdd!.date.isAfter(DateTime.now())) {
+        if (weekdayRestrictions != null)
+          dayToAdd.times =
+              List<TimeSlot>.from(weekdayRestrictions[dayToAdd.weekday - 1]);
+        fillDayWithSessions(dayToAdd, generalStacks);
+
+        result.insert(0, dayToAdd);
+        logger.i(dayToAdd.getString());
+        loopDate = loopDate.subtract(Duration(days: 1));
+        dayToAdd = Day(
+            id: DateTime(
+                    loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0)
+                .toString(),
+            weekday: loopDate.weekday,
+            date: DateTime(
+                loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0));
+      }
+
+      
+
+      if (!dayToAdd.date.isAfter(DateTime.now()) && generalStacks.length != 0) {
         return 'No time';
       }
 
@@ -70,19 +92,23 @@ class StudyPlanner {
       return;
     }
 
+    
+
     while (filler != null && filteredStacks.length != 0) {
-      //logger.i('Gap found: ${filler.getInfoString()}');
-      //logger.d(day.getString());
       
-      if (unitsStayInDay == true) day.getTotalAvailableTime();
-      
+
+      day.getTotalAvailableTime();
+      calculateWeights(filteredStacks, day);
+
       day.times.add(getTimeSlotWithUnit(filler, filteredStacks, day));
 
       filler = getAvailableTime(day);
     }
-    //logger.i(day.getString());
+
   }
 
+ 
+  
   List<SchedulerStack> getFilteredStacks(Day day, List<SchedulerStack> stacks) {
     return stacks
         .where((schedulerStack) =>
@@ -91,10 +117,11 @@ class StudyPlanner {
   }
 
   TimeSlot getTimeSlotWithUnit(
-      TimeSlot gap, List<SchedulerStack> stacks, Day day) {
-    calculateWeights(stacks, day);
+      TimeSlot gap, List<SchedulerStack> filteredStacks, Day day) {
+    
+    //printFilteredStacks(filteredStacks, day, 'getTimeSlotWithUnit');
     Map<String, dynamic>? selectedUnit =
-        getUnitToFillGap(stacks, gap, day.totalAvailableTime);
+        getUnitToFillGap(filteredStacks, gap, day.totalAvailableTime);
 
     if (selectedUnit == null) {
       return gap;
@@ -117,16 +144,10 @@ class StudyPlanner {
     for (SchedulerStack stack in stacks) {
       final daysToExam = getDaysToExam(day, stack);
       if (daysToExam > 0) {
-        stack.weight = (stack.course.weight + (1 / daysToExam)) /
-            pow(
-                2,
-                unitsAlreadyInDay(
-                    day,
-                    stack.course
-                        .id)); // stack.course.name has to be changed to id
-        //logger.i('Stack ${stack.course.name} weight: ${stack.weight}');
+        stack.weight = (stack.course.weight + (1 / daysToExam));
       } else {
-        logger.e('Error: days until exam = 0');
+        logger.e(
+            'Error: days until exam = 0 - day: ${day.date} , stack: ${stack.course.name}, exam: ${stack.course.examDate}');
       }
       ;
     }
@@ -183,7 +204,7 @@ class StudyPlanner {
         if (candidateUnit.hours / 3600 <= availableTime) {
           final result = {
             'unit': candidateUnit,
-            'sessionTime': calculateSessionTime(candidateUnit, gap),
+            'sessionTime': calculateSessionTime(candidateUnit, gap, stack),
             'courseID': stack.course.id,
             'sessionInfo': '${stack.course.name}: ${candidateUnit.name}'
           };
@@ -206,7 +227,7 @@ class StudyPlanner {
         if (candidateRevision.hours / 3600 <= availableTime) {
           final result = {
             'unit': candidateRevision,
-            'sessionTime': calculateSessionTime(candidateRevision, gap),
+            'sessionTime': calculateSessionTime(candidateRevision, gap, stack),
             'courseID': stack.course.id,
             'sessionInfo': '${stack.course.name}: ${candidateRevision.name}'
           };
@@ -221,14 +242,15 @@ class StudyPlanner {
     }
   }
 
-  int calculateSessionTime(UnitModel unit, TimeSlot gap) {
+  int calculateSessionTime(UnitModel unit, TimeSlot gap, SchedulerStack stack) {
     final sessionHours = unit.hours / 3600;
-    if (sessionHours <= (gap.endTime - gap.startTime + 1)) {
-      unit.hours = 0;
-      return sessionHours.toInt();
-    } else {
+    if (sessionHours > (gap.endTime - gap.startTime + 1)) {
       unit.hours -= (gap.endTime - gap.startTime + 1) * 3600;
       return gap.endTime - gap.startTime + 1;
+    } else {
+      unit.hours = 0;
+      stack.weight = stack.weight!/2;
+      return sessionHours.toInt();
     }
   }
 
@@ -251,47 +273,12 @@ class StudyPlanner {
     }
   }
 
-  Future<void> fillRestrictions(List<Day> days) async {
-    try {
-      final restrictions =
-          await instanceManager.firebaseCrudService.getScheduleLimits();
-      if (restrictions != null) {
-        final weekdayRestrictions = separateTimesForWeekday(restrictions);
-        for (Day day in days) {
-          day.times = weekdayRestrictions[day.weekday];
-        }
-      }
-    } catch (e) {
-      logger.e('Error filling days with restrictions: $e');
-    }
-  }
-
   List<List<TimeSlot>> separateTimesForWeekday(List<TimeSlot> restrictions) {
     List<List<TimeSlot>> resultMatrix = [[], [], [], [], [], [], []];
     for (TimeSlot slot in restrictions) {
-      resultMatrix[slot.weekday].add(slot);
+      resultMatrix[slot.weekday - 1].add(slot);
     }
     return resultMatrix;
-  }
-
-  List<Day>? generateDays() {
-    try {
-      DateTime loopDate =
-          getLastDayOfStudy(instanceManager.sessionStorage.activeCourses)!
-              .subtract(Duration(days: 1));
-      List<Day> result = [];
-      while (loopDate.isAfter(DateTime.now()) ||
-          loopDate.isAtSameMomentAs(DateTime.now())) {
-        result.add(Day(weekday: loopDate.weekday - 1, date: loopDate));
-
-        loopDate = loopDate.subtract(Duration(days: 1));
-      }
-
-      return result;
-    } catch (e) {
-      logger.e('Error generating days:$e');
-      return null;
-    }
   }
 
   DateTime? getLastDayOfStudy(dynamic activeCourses) {
@@ -312,10 +299,4 @@ class StudyPlanner {
     return currentDate!;
   }
 
-  void printAllTimeSlots(List<TimeSlot> list) {
-    //logger.i('Timeslots gotten:');
-    for (TimeSlot x in list) {
-      x.getInfoString();
-    }
   }
-}

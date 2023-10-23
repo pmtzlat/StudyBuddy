@@ -26,8 +26,9 @@ class SchedulerStack {
     List<UnitModel> revisions = [];
 
     for (int x = 0; x < course.revisions; x++) {
+      final sessionTime = (course.sessionTime*1.5)/3600;
       revisions
-          .add(UnitModel(name: 'Revision session $x', order: x, hours: course.sessionTime));
+          .add(UnitModel(name: 'Revision session $x', order: x, hours: sessionTime.ceil()*3600));
     }
     return revisions;
   }

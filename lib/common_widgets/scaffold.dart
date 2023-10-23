@@ -97,23 +97,23 @@ class BottomNavBar extends StatelessWidget {
           switch (index) {
             case 0:
               logger.i('Moved to Timer page');
-              Navigator.of(context).push(fadePageRouteBuilder(TimerView()));
+              Navigator.of(context).pushReplacement(fadePageRouteBuilder(TimerView()));
 
               break;
             case 1:
-              Navigator.of(context).push(fadePageRouteBuilder(CoursesView()));
+              Navigator.of(context).pushReplacement(fadePageRouteBuilder(CoursesView()));
 
               break;
             case 2:
-              Navigator.of(context).push(fadePageRouteBuilder(CalendarView()));
+              Navigator.of(context).pushReplacement(fadePageRouteBuilder(CalendarView()));
 
               break;
             case 3:
-              Navigator.of(context).push(fadePageRouteBuilder(GraphsView()));
+              Navigator.of(context).pushReplacement(fadePageRouteBuilder(GraphsView()));
 
               break;
             case 4:
-              Navigator.of(context).push(fadePageRouteBuilder(ProfileView()));
+              Navigator.of(context).pushReplacement(fadePageRouteBuilder(ProfileView()));
 
               break;
           }

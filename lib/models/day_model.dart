@@ -32,16 +32,19 @@ class Day {
           '\n ${slot.startTime} - ${slot.endTime} : ${slot.courseName ?? slot.courseID}';
     }
 
-    return '$date: $weekday\n Times: $timesString';
+    return '$id -> $date: $weekday\n Times: $timesString';
   }
 
   TimeSlot? findLatestTimegap() {
     if (times == null || times.isEmpty) {
+      //logger.e('Times == null or is empty: $times');
       return TimeSlot(
           weekday: weekday, startTime: 0, endTime: 23, courseID: 'available');
     }
 
     times.sort((a, b) => a.startTime.compareTo(b.startTime));
+
+    //logger.d('findLatestTimeGap: ${date}\n Times:\n ${getString()}');
 
     int startTime = -1;
     int endTime = -1;
@@ -51,6 +54,7 @@ class Day {
           startTime = 0;
           endTime = times[0].startTime - 1;
         } else {
+          //logger.e('returning null 1...');
           return null;
         }
       } else {
@@ -61,6 +65,7 @@ class Day {
       for (int i = times.length - 1; i >= 0; i--) {
         if (i == 0) {
           if (times[i].startTime == 0) {
+            //logger.e('returning null 1...');
             return null;
           }
           startTime = 0;
@@ -84,11 +89,13 @@ class Day {
     }
 
     if ((startTime >= 0) && (endTime >= 0)) {
-      return TimeSlot(
+      final result = TimeSlot(
           weekday: weekday,
           startTime: startTime,
           endTime: endTime,
           courseID: 'available');
+      //logger.f('TimeGap found in day: ${result.getInfoString()}');
+      return result;
     }
   }
 }

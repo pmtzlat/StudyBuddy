@@ -33,9 +33,10 @@ class _CourseDetailViewState extends State<CourseDetailView> {
     final _localizations = AppLocalizations.of(context)!;
     loadUnits();
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Center(
+    return instanceManager.scaffold.getScaffold(
+        context: context,
+        activeIndex: 1,
+        body: Center(
         child: SingleChildScrollView(
           child: Card(
             color: Colors.lightBlue,
@@ -179,6 +180,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                 if (res == -2) {
                                   showError(_localizations.wrongDates);
                                 } else {
+                                  
                                   widget.course = await instanceManager
                                       .firebaseCrudService
                                       .getCourse(widget.course.id);
