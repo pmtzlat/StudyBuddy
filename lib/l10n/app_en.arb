@@ -50,6 +50,8 @@
     "addRestriction":"Add Restriction",
     "errorAddingRestraint": "Error adding time restraint!",
     "wrongInputRestraint": "You gave incorrect data!",
+    "viewCustomDays": "View restraints for a specific day",
+    "customDays": "Your custom days",
 
 
     "progressTitle" : "Progress",

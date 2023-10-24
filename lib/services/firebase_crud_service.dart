@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:study_buddy/common_widgets/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
+import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 
@@ -381,8 +382,6 @@ class FirebaseCrudService {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
-    
-
     try {
       List<List<TimeSlot>> restrictions = [
         [],
@@ -448,6 +447,33 @@ class FirebaseCrudService {
       return -1;
     }
   }
+
+  Future<List<Day>> getCustomDays() async {
+  try {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+
+    final userRef = firebaseInstance.collection('users').doc(uid);
+    final timeRestraintsRef = userRef.collection('timeRestraints');
+    final customDaysQuery = timeRestraintsRef.collection('customDays');
+    final customDaysSnapshot = await customDaysQuery.get();
+
+    final customDaysList = customDaysSnapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      return Day(
+        weekday: data['weekday'],
+        id: doc.id,
+        date: DateTime.parse((data['date'] as String)),
+        times: [], // Empty times list
+      );
+    }).toList();
+
+    return customDaysList;
+  } catch (e) {
+    logger.e('Error getting custom days: $e');
+    return [];
+  }
+}
 
   /*Future<List<TimeSlot>?> getScheduleLimits() async {
     final uid = instanceManager.localStorage.getString('uid');

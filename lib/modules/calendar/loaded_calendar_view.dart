@@ -23,30 +23,36 @@ class _LoadedCalendarViewState extends State<LoadedCalendarView> {
     return instanceManager.scaffold.getScaffold(
         context: context,
         activeIndex: 2,
-        body:Column(
-      children: [
-        Container(
+        body: Column(
+          children: [
+            Container(
               margin: EdgeInsets.all(screenWidth * 0.05),
               child: Text(
                 _localizations.calendarTitle,
                 style: Theme.of(context).textTheme.displayMedium,
               ),
             ),
-        ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(context).push(fadePageRouteBuilder(RestrictionsDetailView()));
-            },
-            icon: Icon(Icons.settings),
-            label: Text(_localizations.changeScheduleRestrictions)),
-        instanceManager.sessionStorage.activeCourses.length != 0
-            ? ElevatedButton.icon(
-                onPressed: () async {
-                  await _controller.calculateSchedule();
+            ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          RestrictionsDetailView(), // Replace NewPage with the page you want to navigate to
+                    ),
+                  );
                 },
-                icon: Icon(Icons.calculate),
-                label: Text('calculate schedule'))
-            : SizedBox()
-      ],
-    ));
+                icon: Icon(Icons.settings),
+                label: Text(_localizations.changeScheduleRestrictions)),
+            instanceManager.sessionStorage.activeCourses.length != 0
+                ? ElevatedButton.icon(
+                    onPressed: () async {
+                      await _controller.calculateSchedule();
+                    },
+                    icon: Icon(Icons.calculate),
+                    label: Text('calculate schedule'))
+                : SizedBox()
+          ],
+        ));
   }
 }

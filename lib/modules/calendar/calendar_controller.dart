@@ -226,4 +226,11 @@ class CalendarController {
         endTime: endTime,
         weekday: weekday);
   }
+
+  Future<void> getCustomDays() async{
+    instanceManager.sessionStorage.customDays = await _firebaseCrud.getCustomDays();
+    logger.i('Got custom days! ${instanceManager.sessionStorage.customDays}');
+    
+  }
+
 }

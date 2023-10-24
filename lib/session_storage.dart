@@ -1,4 +1,5 @@
 import 'package:study_buddy/models/course_model.dart';
+import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 
 class SessionStorage {
@@ -11,6 +12,7 @@ class SessionStorage {
   // after a new course is added!!
 
   List<List<TimeSlot>>? weeklyRestrictions;
+  List<Day> customDays = [];
 
   
 

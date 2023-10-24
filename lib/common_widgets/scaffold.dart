@@ -88,7 +88,7 @@ class BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       type: BottomNavigationBarType
-          .fixed, // This is important to show all 5 icons
+          .fixed, 
       currentIndex: activeIndex,
       showSelectedLabels: false,
       showUnselectedLabels: false,
