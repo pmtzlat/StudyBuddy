@@ -15,7 +15,7 @@ class Day {
     List<TimeSlot>? times,
   }) : times = times ?? [];
 
-  void getTotalAvailableTime() {
+  /*void getTotalAvailableTime() {
     int availableTime = 24; // The entire day is initially available.
 
     for (final timeSlot in times) {
@@ -98,4 +98,4 @@ class Day {
       return result;
     }
   }
-}
+*/}

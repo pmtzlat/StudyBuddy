@@ -30,6 +30,8 @@ class _UnitCardState extends State<UnitCard> {
   var editMode = false;
   final unitFormKey = GlobalKey<FormBuilderState>();
 
+  
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -104,7 +106,6 @@ class _UnitCardState extends State<UnitCard> {
                             if(res == -1){
                               widget.showError(_localizations.errorEditingUnit);
                             }
-                            await widget.course.getUnits();
                             widget.notifyParent();
 
                             setState(() {

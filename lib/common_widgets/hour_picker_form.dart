@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:intl/intl.dart';
+import 'package:study_buddy/common_widgets/error_messages.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
@@ -16,7 +18,6 @@ class HourPickerForm extends StatefulWidget {
 class _HourPickerFormState extends State<HourPickerForm> {
   PageController _pageController =
       PageController(initialPage: instanceManager.sessionStorage.savedWeekday);
-  var checkboxMatrix = instanceManager.sessionStorage.checkboxMatrix;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +37,6 @@ class _HourPickerFormState extends State<HourPickerForm> {
         DayForm(
           day: weekdays[i],
           pageController: _pageController,
-          checkboxList: checkboxMatrix[i],
         ),
       );
     }
@@ -59,43 +59,110 @@ class _HourPickerFormState extends State<HourPickerForm> {
 class DayForm extends StatefulWidget {
   final String day;
   final PageController pageController;
-  final List<bool> checkboxList;
   const DayForm(
-      {super.key,
-      required String this.day,
-      required this.pageController,
-      required this.checkboxList});
+      {super.key, required String this.day, required this.pageController});
 
   @override
   State<DayForm> createState() => _DayFormState();
 }
 
 class _DayFormState extends State<DayForm> {
-  List<FormBuilderFieldOption<String>> hourOptions = [];
+  final restraintFormKey = GlobalKey<FormBuilderState>();
+  final _controller = instanceManager.calendarController;
 
   @override
   Widget build(BuildContext context) {
+    var screenHeight = MediaQuery.of(context).size.height;
+    var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    List<Widget> hourWidgets = [];
-    for (int hour = 0; hour < 24; hour++) {
-      String hourString = hour.toString().padLeft(2, '0') + ":00";
-      hourWidgets.add(Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Checkbox(
-              value: widget.checkboxList[hour],
-              onChanged: (newValue) {
-                setState(() {
-                  widget.checkboxList[hour] = newValue!;
-                });
-              }),
-          SizedBox(
-            width: 20,
-          ),
-          Text(hourString)
-        ],
-      ));
+
+    void showPopUp(int weekday) {
+      showGeneralDialog(
+        context: context,
+        barrierDismissible: true,
+        barrierLabel:
+            MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        barrierColor: Colors.black.withOpacity(0.5),
+
+        transitionDuration: Duration(milliseconds: 200),
+
+        // Create the dialog's content
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return Center(
+            child: Card(
+              color: Colors.orange,
+              child: Container(
+                padding: EdgeInsets.all(10),
+                height: screenHeight * 0.28,
+                width: screenWidth * 0.8,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    IconButton(
+                        icon: Icon(Icons.cancel),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        }),
+                    Text(_localizations.addRestriction),
+                    FormBuilder(
+                      key: restraintFormKey,
+                      child: Row(children: [
+                        Expanded(
+                          child: FormBuilderDateTimePicker(
+                            name: 'startTime',
+                            inputType: InputType.time,
+                            format: DateFormat("HH:mm"),
+                            validator: FormBuilderValidators.required(),
+                          ),
+                        ),
+                        Text(' - '),
+                        Expanded(
+                          child: FormBuilderDateTimePicker(
+                            name: 'endTime',
+                            inputType: InputType.time,
+                            format: DateFormat("HH:mm"),
+                            validator: FormBuilderValidators.required(),
+                          ),
+                        ),
+                      ]),
+                    ),
+                    IconButton(
+                        onPressed: () async {
+                          final res = await _controller.addRestraint(
+                              restraintFormKey, weekday);
+                          if (res == -1) {
+                            showRedSnackbar(
+                                context, _localizations.errorAddingRestraint);
+                          } else if (res == 0) {
+                            showRedSnackbar(
+                                context, _localizations.wrongInputRestraint);
+                          }
+                          
+                          await _controller.getRestraints();
+                          setState(() {});
+                          Navigator.of(context).pop();
+                        },
+                        icon: Icon(Icons.check))
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
     }
+
+    final daysStrToNum = {
+      _localizations.monday: 0,
+      _localizations.tuesday: 1,
+      _localizations.wednesday: 2,
+      _localizations.thursday: 3,
+      _localizations.friday: 4,
+      _localizations.saturday: 5,
+      _localizations.sunday: 6,
+    };
+
     return Container(
       child: Column(
         children: [
@@ -131,10 +198,56 @@ class _DayFormState extends State<DayForm> {
                   : SizedBox(),
             ],
           ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(children: hourWidgets),
+          SizedBox(
+            height: screenHeight * 0.025,
+          ),
+          Center(
+            child: IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () => showPopUp((daysStrToNum[widget.day])! + 1),
             ),
+          ),
+          Expanded(
+            child: ListView.builder(
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: instanceManager.sessionStorage
+                    .weeklyRestrictions[daysStrToNum[widget.day]].length,
+                itemBuilder: (context, index) {
+                  final timeSlot = instanceManager.sessionStorage
+                      .weeklyRestrictions[daysStrToNum[widget.day]][index];
+          
+                  return Card(
+                    color: Colors.orange,
+                    child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                                '${timeSlot.timeOfDayToString(timeSlot.startTime)} - ${timeSlot.timeOfDayToString(timeSlot.endTime)}'),
+                            IconButton(
+                                onPressed: () async {
+                                  instanceManager
+                                      .sessionStorage
+                                      .weeklyRestrictions[
+                                          daysStrToNum[widget.day]]
+                                      .removeAt(index);
+                                  final res =
+                                      await _controller.deleteRestraint(timeSlot);
+                                  if (res != 1) {
+                                    showRedSnackbar(context,
+                                        _localizations.errorDeletingRestraint);
+                                  }
+                                  await _controller.getRestraints();
+                                  setState(() {});
+                                },
+                                icon: Icon(Icons.delete))
+                          ],
+                        )),
+                  );
+                }),
           )
         ],
       ),

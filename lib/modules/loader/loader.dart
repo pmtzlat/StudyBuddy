@@ -1,7 +1,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:study_buddy/modules/calendar/calendar_view.dart';
+import 'package:study_buddy/modules/calendar/loaded_calendar_view.dart';
 import 'package:study_buddy/modules/sign_in/sign_in_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
@@ -26,13 +26,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
       
       if (user != null) {
         // User is already signed in, navigate to the home screen
-        Navigator.of(context).pushReplacement(fadePageRouteBuilder(CalendarView())
+        Navigator.of(context).pushReplacement(fadePageRouteBuilder(LoadedCalendarView())
           
         );
         logger.i('User logged in!');
       } else {
         // User is not signed in, navigate to the sign-in screen
-        Navigator.of(context).pushReplacement(fadePageRouteBuilder(CalendarView())
+        Navigator.of(context).pushReplacement(fadePageRouteBuilder(LoadedCalendarView())
         );
         logger.i('User not logged in!');
       }

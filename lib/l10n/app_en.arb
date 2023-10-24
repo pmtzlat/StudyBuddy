@@ -46,6 +46,10 @@
     "changeScheduleRestrictions": "Change Schedule Restrictions",
     "tryAgain":"Try Again",
     "inactiveCalendar": "You need to have courses to have an active calendar!",
+    "errorDeletingRestraint": "Error deleting time restraint!",
+    "addRestriction":"Add Restriction",
+    "errorAddingRestraint": "Error adding time restraint!",
+    "wrongInputRestraint": "You gave incorrect data!",
 
 
     "progressTitle" : "Progress",

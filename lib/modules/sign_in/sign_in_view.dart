@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:study_buddy/modules/calendar/calendar_view.dart';
 import 'package:study_buddy/modules/sign_in/sign_in_controller.dart';
 import 'package:study_buddy/services/auth_service.dart';
 

@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:study_buddy/common_widgets/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
@@ -10,8 +12,7 @@ import '../models/user_model.dart';
 import 'logging_service.dart';
 
 class FirebaseCrudService {
-  Future<String?> addCourseToUser(
-      { required CourseModel newCourse}) async {
+  Future<String?> addCourseToUser({required CourseModel newCourse}) async {
     try {
       // Check if the user document exists
       final uid = instanceManager.localStorage.getString('uid');
@@ -277,12 +278,14 @@ class FirebaseCrudService {
 
         final timeSlotsCollectionRef = userDocRef.collection('timeRestraints');
 
-        await timeSlotsCollectionRef.add({
+        final newRestraintRef = await timeSlotsCollectionRef.add({
           'weekday': timeSlot.weekday,
-          'startTime': timeSlot.startTime,
-          'endTime': timeSlot.endTime,
+          'startTime': timeSlot.timeOfDayToString(timeSlot.startTime),
+          'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
           'courseID': timeSlot.courseID,
         });
+
+        await newRestraintRef.update({'id': newRestraintRef.id});
 
         return 1;
       } else {
@@ -349,7 +352,7 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int?> checkRestraints() async {
+  /*Future<int?> checkRestraints() async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     try {
@@ -372,9 +375,81 @@ class FirebaseCrudService {
       logger.e('Error checking restraints: $e');
       return -1;
     }
+  }*/
+
+  Future<List<List<TimeSlot>>?> getRestraints() async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+
+    
+
+    try {
+      List<List<TimeSlot>> restrictions = [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+      ];
+
+      final userDoc = await firebaseInstance.collection('users').doc(uid).get();
+
+      if (userDoc.exists) {
+        final timeRestraintsCollection =
+            userDoc.reference.collection('timeRestraints');
+        final timeRestraintsQuery = await timeRestraintsCollection.get();
+        if (timeRestraintsQuery.docs.isEmpty) return null;
+
+        for (final doc in timeRestraintsQuery.docs) {
+          final data = doc.data() as Map<String, dynamic>;
+          final timeSlot = TimeSlot(
+            id: doc.id,
+            weekday: data['weekday'],
+            startTime: stringToTimeOfDay24Hr(data['startTime']),
+            endTime: stringToTimeOfDay24Hr(data['endTime']),
+            courseID: data['courseID'],
+            unitID: data['unitID'],
+            courseName: data['courseName'],
+            unitName: data['unitName'],
+          );
+          restrictions[timeSlot.weekday - 1].add(timeSlot);
+        }
+      }
+      logger.i('Got restraints! $restrictions');
+      return restrictions as List<List<TimeSlot>>?;
+    } catch (e) {
+      logger.e('Error getting Restrictions : $e');
+      return null;
+    }
   }
 
-  Future<List<TimeSlot>?> getScheduleLimits() async {
+  Future<int?> deleteRestraint(TimeSlot restraint) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+      final id = restraint.id;
+
+      if (uid == null || uid.isEmpty) {
+        return -1;
+      }
+
+      final userCollection = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('timeRestraints');
+
+      await userCollection.doc(id).delete();
+
+      return 1;
+    } catch (e) {
+      logger.e('Error deleting restraint: $e');
+      return -1;
+    }
+  }
+
+  /*Future<List<TimeSlot>?> getScheduleLimits() async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -405,7 +480,7 @@ class FirebaseCrudService {
           'firebaseCrud.getScheduleLimits: error getting schedule limits: $e');
       return null;
     }
-  }
+  }*/
 
   Future<int?> editCourse(CourseModel course) async {
     try {

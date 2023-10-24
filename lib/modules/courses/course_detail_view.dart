@@ -27,11 +27,21 @@ class _CourseDetailViewState extends State<CourseDetailView> {
   final courseFormKey = GlobalKey<FormBuilderState>();
 
   @override
+  void initState() {
+    super.initState();
+    init();
+  }
+
+  void init() {
+    loadUnits();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    loadUnits();
+    
 
     return instanceManager.scaffold.getScaffold(
         context: context,
@@ -269,14 +279,14 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                   padding: EdgeInsets.only(right: 20.0),
                 ),
                 onDismissed: (direction) async {
-                  widget.course.units!.removeWhere((element) => element.id == unit.id);
+                  widget.course.units!.removeAt(index);
                   await widget.course.deleteUnit(unit: unit);
                   setState(() {});
                 },
                 child: UnitCard(
                   unit: unit,
                   course: widget.course,
-                  notifyParent: refresh,
+                  notifyParent: loadUnits,
                   showError: showError,
                 ),
               );
