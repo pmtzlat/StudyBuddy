@@ -49,7 +49,7 @@ class CalendarController {
     _sessionStorage.schedulePresent = 1;
   }*/
 
-  List<TimeSlot> getTimeSlotsFromMatrix({required matrix}) {
+  /*List<TimeSlot> getTimeSlotsFromMatrix({required matrix}) {
     //TODO: This solution could be more elegant...
 
     List<TimeSlot> result = [];
@@ -99,6 +99,7 @@ class CalendarController {
     }
     return result;
   }
+*/
 
   void printList(List<TimeSlot> list) {
     var res = [];
@@ -129,7 +130,6 @@ class CalendarController {
 
       await instanceManager.firebaseCrudService
           .addTimeRestraint(timeSlot: newSlot);
-
     }
     instanceManager.sessionStorage.weeklyRestrictions =
         await _firebaseCrud.getRestraints();
@@ -169,8 +169,17 @@ class CalendarController {
 
         switch (purpose) {
           case ('generalRestraints'):
+            if (await _firebaseCrud.clearRestrictionsForWeekday(
+                    _firebaseCrud.weekDays[weekday - 1]) ==
+                -1) {
+              return -1;
+            }
+
             for (var timeSlot in provisionalList) {
-              final res = await _firebaseCrud.addTimeRestraint(timeSlot: timeSlot); //EDIT
+              logger.f(
+                  '${timeSlot.startTime.toString()} - ${timeSlot.endTime.toString()}');
+              final res =
+                  await _firebaseCrud.addTimeRestraint(timeSlot: timeSlot);
               if (res != 1) {
                 return -1;
               }
@@ -180,7 +189,6 @@ class CalendarController {
           default:
             return 1;
         }
-        ;
       } else {
         return 0;
       }
@@ -192,55 +200,62 @@ class CalendarController {
 
   Future<List<TimeSlot>> checkRestraintClash(TimeOfDay startTime,
       TimeOfDay endTime, int weekday, List<TimeSlot> provisionalList) async {
-    List<int> itemsToDeleteFromProvisionalList = [];
-    for (var timeslot in provisionalList) {
-      final timeslotStart = timeslot.startTime;
-      final timeslotEnd = timeslot.endTime;
-      bool deleteDBtimeslot = false;
+    try {
+      List<int> itemsToDeleteFromProvisionalList = [];
+      for (var i = provisionalList.length - 1; i >= 0; i--) {
+        final timeslot = provisionalList[i];
+        final timeslotStart = timeslot.startTime;
+        final timeslotEnd = timeslot.endTime;
+        bool deleteDBtimeslot = false;
 
-      if (isTimeBefore(timeslotStart, startTime) &&
-          isTimeBefore(startTime, timeslotEnd)) {
-        startTime = timeslotStart;
+        if (isTimeBefore(timeslotStart, startTime) &&
+            isTimeBefore(startTime, timeslotEnd)) {
+          startTime = timeslotStart;
+        }
+
+        if (isTimeBefore(timeslotStart, endTime) &&
+            isTimeBefore(endTime, timeslotEnd)) {
+          endTime = timeslotEnd;
+        }
+
+        if (isTimeBefore(startTime, timeslotStart) &&
+            isTimeBefore(timeslotStart, endTime)) {
+          deleteDBtimeslot = true;
+        }
+
+        if (isTimeBefore(startTime, timeslotEnd) &&
+            isTimeBefore(timeslotEnd, endTime)) {
+          deleteDBtimeslot = true;
+        }
+
+        if (startTime == timeslotStart && endTime == timeslotEnd) {
+          deleteDBtimeslot = true;
+        }
+
+        if (deleteDBtimeslot) {
+          itemsToDeleteFromProvisionalList.add(i);
+        }
       }
 
-      if (isTimeBefore(timeslotStart, endTime) &&
-          isTimeBefore(endTime, timeslotEnd)) {
-        endTime = timeslotEnd;
+      if (itemsToDeleteFromProvisionalList.isNotEmpty) {
+        for (var index in itemsToDeleteFromProvisionalList) {
+          provisionalList.removeAt(index);
+        }
       }
 
-      if (isTimeBefore(startTime, timeslotStart) &&
-          isTimeBefore(timeslotStart, endTime)) {
-        deleteDBtimeslot = true;
-      }
+      provisionalList.add(TimeSlot(
+          courseID: 'busy',
+          startTime: startTime,
+          endTime: endTime,
+          weekday: weekday));
 
-      if (isTimeBefore(startTime, timeslotEnd) &&
-          isTimeBefore(timeslotEnd, endTime)) {
-        deleteDBtimeslot = true;
-      }
-
-      if (startTime == timeslotStart && endTime == timeslotEnd) {
-        deleteDBtimeslot = true;
-      }
-
-      if (deleteDBtimeslot) {
-        itemsToDeleteFromProvisionalList.add(provisionalList.indexOf(timeslot));
-      }
+      return provisionalList;
+    } catch (e) {
+      logger.e('Error in checkRestraintClash: $e');
+      return [];
     }
+}
 
-    if (!itemsToDeleteFromProvisionalList.isEmpty) {
-      for (var i in itemsToDeleteFromProvisionalList) {
-        provisionalList.removeAt(i);
-      }
-    }
-
-    provisionalList.add(TimeSlot(
-        courseID: 'busy',
-        startTime: startTime,
-        endTime: endTime,
-        weekday: weekday));
-
-    return provisionalList;
-  }
 
   Future<void> getCustomDays() async {
     final days = await _firebaseCrud.getCustomDays();
@@ -274,7 +289,8 @@ class CalendarController {
         }
 
         for (var timeSlot in customSchdule) {
-          final result = await _firebaseCrud.addTimeSlotToCustomDay(res, timeSlot);
+          final result =
+              await _firebaseCrud.addTimeSlotToCustomDay(res, timeSlot);
           if (result != 1) {
             logger.e(
                 'Error: addTimeSlot for TimeSlot ${timeSlot.startTime.toString()} - ${timeSlot.endTime.toString()} returned error');

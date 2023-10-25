@@ -44,7 +44,6 @@ class _HourPickerFormState extends State<HourPickerForm> {
     return PageView(
       controller: _pageController,
       scrollDirection: Axis.horizontal,
-      physics: NeverScrollableScrollPhysics(),
       children: dayFormWidgets,
     );
   }

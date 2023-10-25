@@ -13,6 +13,15 @@ import '../models/user_model.dart';
 import 'logging_service.dart';
 
 class FirebaseCrudService {
+  final weekDays = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday'
+  ];
   Future<String?> addCourseToUser({required CourseModel newCourse}) async {
     try {
       // Check if the user document exists
@@ -267,6 +276,31 @@ class FirebaseCrudService {
     }
   }
 
+  Future<int> clearRestrictionsForWeekday(String weekday) async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+
+    try {
+      final dayDocRef = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('timeRestraints')
+          .doc('timeRestraintsDoc');
+
+      final timeSlotCollectionRef = dayDocRef.collection(weekday);
+      final timeSlotQuerySnapshot = await timeSlotCollectionRef.get();
+
+      for (final timeSlotDoc in timeSlotQuerySnapshot.docs) {
+        await timeSlotDoc.reference.delete();
+      }
+
+      return 1;
+    } catch (e) {
+      logger.e('Error clearing time restraints for day $weekday: $e');
+      return -1;
+    }
+  }
+
   Future<int?> addTimeRestraint({required TimeSlot timeSlot}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
@@ -277,15 +311,7 @@ class FirebaseCrudService {
           
 
           final userDocRef = firebaseInstance.collection('users').doc(uid);
-          final weekday = [
-            'Monday',
-            'Tuesday',
-            'Wednesday',
-            'Thursday',
-            'Friday',
-            'Saturday',
-            'Sunday'
-          ][timeSlot.weekday - 1];
+          final weekday = weekDays[timeSlot.weekday - 1];
           final timeSlotsCollectionRef = userDocRef
               .collection('timeRestraints')
               .doc('timeRestraintsDoc')
@@ -304,6 +330,7 @@ class FirebaseCrudService {
           return -1;
         }
       }
+      return -1;
     } catch (e) {
       logger.e('Error adding time restraint: $e');
       return -1;
@@ -311,25 +338,25 @@ class FirebaseCrudService {
   }
 
   Future<bool?> checkIfRestraintsExist(String uid) async {
-  try {
-    final uid = instanceManager.localStorage.getString('uid');
-    final firebaseInstance = instanceManager.db;
-    final userDocRef = firebaseInstance.collection('users').doc(uid);
-    final timeSlotsDocRef =
-        userDocRef.collection('timeRestraints').doc('timeRestraintsDoc');
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+      final userDocRef = firebaseInstance.collection('users').doc(uid);
+      final timeSlotsDocRef =
+          userDocRef.collection('timeRestraints').doc('timeRestraintsDoc');
 
-    final timeSlotsDocSnapshot = await timeSlotsDocRef.get();
+      final timeSlotsDocSnapshot = await timeSlotsDocRef.get();
 
-    if (!timeSlotsDocSnapshot.exists) {
-      await timeSlotsDocRef.set({'createdAt': DateTime.now().toString()});
-      return false;
+      if (!timeSlotsDocSnapshot.exists) {
+        await timeSlotsDocRef.set({'createdAt': DateTime.now().toString()});
+        return false;
+      }
+      return true;
+    } catch (e) {
+      logger.e('Error checking for Restraints: $e');
+      return null;
     }
-    return true;
-  } catch (e) {
-    logger.e('Error checking for Restraints: $e');
-    return null;
   }
-}
 
   /*Future<int?> deleteRestraints() async {
     final uid = instanceManager.localStorage.getString('uid');
@@ -416,11 +443,11 @@ class FirebaseCrudService {
     final firebaseInstance = instanceManager.db;
 
     try {
-
-      if( (await checkIfRestraintsExist(uid)) == false){
+      if ((await checkIfRestraintsExist(uid)) == false) {
         logger.d('returning null...');
         return null;
-      };
+      }
+      ;
 
       List<List<TimeSlot>> restrictions = [
         [],
@@ -435,21 +462,14 @@ class FirebaseCrudService {
       final userDoc = await firebaseInstance.collection('users').doc(uid).get();
 
       if (userDoc.exists) {
-        final timeSlotsDocRef =
-            userDoc.reference.collection('timeRestraints').doc('timeRestraintsDoc');
+        final timeSlotsDocRef = userDoc.reference
+            .collection('timeRestraints')
+            .doc('timeRestraintsDoc');
 
-        final weekdays = [
-          'Monday',
-          'Tuesday',
-          'Wednesday',
-          'Thursday',
-          'Friday',
-          'Saturday',
-          'Sunday'
-        ];
+        
 
         for (var i = 0; i < 7; i++) {
-          final weekday = weekdays[i];
+          final weekday = weekDays[i];
           final timeRestraintsCollection = timeSlotsDocRef.collection(weekday);
           final timeRestraintsQuery = await timeRestraintsCollection.get();
 
@@ -457,7 +477,7 @@ class FirebaseCrudService {
             final data = doc.data() as Map<String, dynamic>;
             final timeSlot = TimeSlot(
               id: doc.id,
-              weekday: i+1,
+              weekday: i + 1,
               startTime: stringToTimeOfDay24Hr(data['startTime']),
               endTime: stringToTimeOfDay24Hr(data['endTime']),
               courseID: data['courseID'],
@@ -491,15 +511,7 @@ class FirebaseCrudService {
       logger.i('timeslot to delete: ${restraint.id}, ${restraint.weekday}');
 
       final userDocRef = firebaseInstance.collection('users').doc(uid);
-      final weekday = [
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-        'Sunday'
-      ][restraint.weekday - 1];
+      final weekday = weekDays[restraint.weekday - 1];
       final timeSlotsCollectionRef = userDocRef
           .collection('timeRestraints')
           .doc('timeRestraintsDoc')

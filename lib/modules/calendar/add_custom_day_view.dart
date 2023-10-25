@@ -139,7 +139,8 @@ class _AddCustomDayViewState extends State<AddCustomDayView> {
                         if (dateFormKey.currentState!.validate()) {
                           dateFormKey.currentState!.save();
                           showPopUp(dateFormKey.currentState!
-                              .fields['customDate']!.value.weekday);
+                              .fields['customDate']!.value.weekday, 
+                              );
                         }
                       }),
                 ),
