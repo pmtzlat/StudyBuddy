@@ -6,10 +6,10 @@ import 'package:study_buddy/services/logging_service.dart';
 class CourseModel {
   final String name;
   final double weight;
-  final DateTime examDate;
-  final int secondsStudied;
-  final String color;
-  final int sessionTime; // in seconds
+  DateTime examDate;
+  Duration secondsStudied;
+  String color;
+  Duration sessionTime;
   final String id;
   List<UnitModel>? units;
   bool orderMatters;
@@ -29,9 +29,9 @@ class CourseModel {
     required this.name,
     this.weight = 1.0,
     required this.examDate,
-    this.secondsStudied = 0,
+    this.secondsStudied = const Duration(seconds:0),
     this.color = '#000000',
-    this.sessionTime = 3600, //one hour
+    this.sessionTime = const Duration(hours: 2), //one hour
     this.id = '',
     this.units = null,
     this.orderMatters = false,
@@ -53,11 +53,11 @@ class CourseModel {
   Future<void> addUnit() async {
     final firebaseCrud = instanceManager.firebaseCrudService;
     if (units == null) {
-      final newUnit = UnitModel(name: 'Unit 1', order: 1, hours: sessionTime, completed: false);
+      final newUnit = UnitModel(name: 'Unit 1', order: 1, sessionTime: sessionTime, completed: false);
       await firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
     } else {
       final newUnit = UnitModel(
-          name: 'Unit ${units!.length + 1}', order: units!.length + 1, hours: sessionTime, completed: false);
+          name: 'Unit ${units!.length + 1}', order: units!.length + 1, sessionTime: sessionTime, completed: false);
       await firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
     }
     await getUnits();

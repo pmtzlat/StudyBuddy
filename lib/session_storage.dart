@@ -6,7 +6,6 @@ class SessionStorage {
   List<CourseModel>? savedCourses;
   List<CourseModel>? activeCourses;
   int calendarBeginPage = 0;
-  bool updatedCoursesView = false;
 
   //NEEDS: a varibale that saves wether the calendar needs recalculating
   // after a new course is added!!

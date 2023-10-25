@@ -18,9 +18,8 @@ class CoursesController {
       {required name,
       weight,
       required examDate,
-      secondsStudied = 0,
       color = '#0000000',
-      sessionTime = 3600,
+      sessionTime = const Duration(hours: 2),
       orderMatters = false,
       revisions = 2}) {
     try {
@@ -28,7 +27,6 @@ class CoursesController {
           name: name,
           examDate: examDate,
           weight: weight,
-          secondsStudied: secondsStudied,
           color: color,
           sessionTime: sessionTime,
           orderMatters: orderMatters,
@@ -59,12 +57,12 @@ class CoursesController {
   }
 
   dynamic addUnitsToCourse(
-      {required String id, required int units, required int sessionTime}) {
+      {required String id, required int units, required Duration sessionTime}) {
     try {
       for (int i = 0; i < units; i++) {
         final unitNum = i + 1;
         final newUnit = UnitModel(
-            name: 'Unit $unitNum', order: unitNum, hours: sessionTime);
+            name: 'Unit $unitNum', order: unitNum, sessionTime: sessionTime);
         firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
       }
       return 1;
@@ -92,9 +90,8 @@ class CoursesController {
 
         final weight =
             courseCreationFormKey.currentState!.fields['weightSlider']!.value;
-        final session = int.parse(courseCreationFormKey
-                .currentState!.fields['sessionTime']!.value) *
-            3600;
+        final session = doubleToDuration(double.parse(
+            courseCreationFormKey.currentState!.fields['sessionTime']!.value));
 
         final int units = int.parse(
             courseCreationFormKey.currentState!.fields['units']!.value);
@@ -156,7 +153,6 @@ class CoursesController {
       instanceManager.sessionStorage.savedCourses = courses;
       instanceManager.sessionStorage.activeCourses =
           filterActiveCourses(courses);
-      instanceManager.sessionStorage.updatedCoursesView = true;
     } catch (e) {
       logger.e('Error getting courses: $e');
     }
@@ -179,19 +175,16 @@ class CoursesController {
 
       final name =
           unitFormKey.currentState!.fields['unitName']!.value.toString();
-      final hours = int.parse(unitFormKey.currentState!.fields['hours']!.value);
-      final completed =unitFormKey.currentState!.fields['completed']!.value;
+      final sessionTime = doubleToDuration(double.parse(
+          unitFormKey.currentState!.fields['sessionTime']!.value.toString()));
+      final completed = unitFormKey.currentState!.fields['completed']!.value;
 
-      logger.d(completed.runtimeType);
-
-      
 
       final updatedUnit = UnitModel(
           name: name,
           order: oldUnit.order,
-          hours: hours * 3600,
+          sessionTime: sessionTime,
           completed: completed);
-      
 
       dynamic res = await firebaseCrud.editUnit(
           course: course, unitID: oldUnit.id, updatedUnit: updatedUnit);
@@ -211,8 +204,8 @@ class CoursesController {
       final name =
           courseFormKey.currentState!.fields['courseName']!.value.toString();
       final weight = courseFormKey.currentState!.fields['weightSlider']!.value;
-      final sessionTime =
-          int.parse(courseFormKey.currentState!.fields['sessionTime']!.value);
+      final sessionTime = doubleToDuration(double.parse(
+          courseFormKey.currentState!.fields['sessionTime']!.value));
       final examDate = courseFormKey.currentState!.fields['examDate']!.value ??
           course.examDate;
       final orderMatters =
@@ -226,12 +219,11 @@ class CoursesController {
             name: name,
             examDate: examDate,
             weight: weight,
-            sessionTime: sessionTime * 3600,
+            sessionTime: sessionTime,
             orderMatters: orderMatters,
             revisions: revisions);
 
         final res = await firebaseCrud.editCourse(updatedCourse);
-        instanceManager.sessionStorage.updatedCoursesView = false;
         return res;
       }
       return -2;

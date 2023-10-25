@@ -3,6 +3,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:study_buddy/common_widgets/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/course_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
@@ -47,7 +48,7 @@ class _UnitCardState extends State<UnitCard> {
                   ? [
                       Text('Unit ${widget.unit.order}: ${widget.unit.name}'),
                       Text('${widget.unit.id}'),
-                      Text('${widget.unit.hours / 3600}'),
+                      Text('${formatDuration(widget.unit.sessionTime)}'),
                       Row(children: widget.unit.completed ? [Text(_localizations.unitCompleted)] : [Text(_localizations.unitNotCompleted)]), 
                       SizedBox(width: 8.0),
                       IconButton(
@@ -76,14 +77,11 @@ class _UnitCardState extends State<UnitCard> {
                                   validator: FormBuilderValidators.compose([]),
                                 ),
                                 FormBuilderTextField(
-                                  name: 'hours',
+                                  name: 'sessionTime',
                                   autovalidateMode:
                                       AutovalidateMode.onUserInteraction,
                                   keyboardType: TextInputType.number,
-                                  maxLength: 1,
-                                  initialValue: (widget.unit.hours / 3600)
-                                      .toInt()
-                                      .toString(),
+                                  initialValue: '${durationToDouble(widget.unit.sessionTime)}',
                                   decoration: InputDecoration(
                                     labelText: _localizations.unitHours,
                                   ),

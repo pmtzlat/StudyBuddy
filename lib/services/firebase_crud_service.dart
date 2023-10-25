@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:duration/duration.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:study_buddy/common_widgets/datatype_utils.dart';
@@ -42,8 +43,8 @@ class FirebaseCrudService {
           'name': newCourse.name,
           'weight': newCourse.weight * 10,
           'examDate': newCourse.examDate.toString(),
-          'sessionTime': newCourse.sessionTime,
-          'secondsStudied': newCourse.secondsStudied,
+          'sessionTime': newCourse.sessionTime.toString(),
+          'secondsStudied': newCourse.secondsStudied.toString(),
           'color': newCourse.color,
           'id': '',
           'orderMatters': newCourse.orderMatters,
@@ -84,7 +85,7 @@ class FirebaseCrudService {
         final unitData = unitDoc.data() as Map<String, dynamic>;
         final unit = UnitModel(
           name: unitData['name'] ?? '',
-          hours: unitData['hours'] ?? 3600,
+          sessionTime: parseTime(unitData['sessionTime']),
           id: unitDoc.id,
           order: unitData['order'] ?? 0,
           completed: unitData['completed'] ?? false,
@@ -145,7 +146,7 @@ class FirebaseCrudService {
 
       final unitData = {
         'name': newUnit.name,
-        'hours': newUnit.hours,
+        'sessionTime': newUnit.sessionTime.toString(),
         'order': newUnit.order,
         'id': '',
         'completed': newUnit.completed,
@@ -180,9 +181,9 @@ class FirebaseCrudService {
           name: data['name'] as String,
           weight: weight,
           examDate: DateTime.parse((data['examDate'] as String)),
-          secondsStudied: data['secondsStudied'] as int,
+          secondsStudied: parseTime(data['secondsStudied']),
           color: data['color'] as String,
-          sessionTime: data['sessionTime'] as int,
+          sessionTime: parseTime(data['sessionTime']),
           id: data['id'] as String,
           revisions: data['revisions'] as int,
           orderMatters: data['orderMatters'] as bool,
@@ -268,11 +269,10 @@ class FirebaseCrudService {
 
       await unitReference.update({
         'name': updatedUnit.name,
-        'hours': updatedUnit.hours,
+        'sessionTime': updatedUnit.sessionTime.toString(),
         'completed': updatedUnit.completed
       });
-
-      return 1; // Success
+      return 1; 
     } catch (e) {
       logger.e('Error editing unit: $e');
       return -1;
@@ -311,8 +311,6 @@ class FirebaseCrudService {
     try {
       if (uid != null) {
         if (uid != null) {
-          
-
           final userDocRef = firebaseInstance.collection('users').doc(uid);
           final weekday = weekDays[timeSlot.weekday - 1];
           final timeSlotsCollectionRef = userDocRef
@@ -469,8 +467,6 @@ class FirebaseCrudService {
             .collection('timeRestraints')
             .doc('timeRestraintsDoc');
 
-        
-
         for (var i = 0; i < 7; i++) {
           final weekday = weekDays[i];
           final timeRestraintsCollection = timeSlotsDocRef.collection(weekday);
@@ -602,10 +598,25 @@ class FirebaseCrudService {
         'name': course.name,
         'examDate': course.examDate.toString(),
         'weight': course.weight * 10,
-        'sessionTime': course.sessionTime,
+        'sessionTime': course.sessionTime.toString(),
         'orderMatters': course.orderMatters,
         'revisions': course.revisions
       });
+
+      final courseUnits = await getUnitsForCourse(courseID: course.id);
+
+      if (courseUnits != null) {
+        for (var unit in courseUnits!) {
+          final res = await editUnit(
+              course: course,
+              unitID: unit.id,
+              updatedUnit: unit.copyWith(sessionTime: course.sessionTime));
+
+          if (res != 1) {
+            return -1;
+          }
+        }
+      }
 
       return 1;
     } catch (e) {
@@ -633,9 +644,9 @@ class FirebaseCrudService {
           name: data['name'] as String,
           weight: weight,
           examDate: DateTime.parse(data['examDate'] as String),
-          secondsStudied: data['secondsStudied'] as int,
+          secondsStudied: parseTime(data['secondsStudied']),
           color: data['color'] as String,
-          sessionTime: data['sessionTime'] as int,
+          sessionTime: parseTime(data['sessionTime']),
           id: data['id'] as String,
           revisions: data['revisions'] as int,
           orderMatters: data['orderMatters'] as bool,

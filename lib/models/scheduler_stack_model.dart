@@ -1,3 +1,4 @@
+import 'package:study_buddy/common_widgets/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/course_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
@@ -26,9 +27,9 @@ class SchedulerStack {
     List<UnitModel> revisions = [];
 
     for (int x = 0; x < course.revisions; x++) {
-      final sessionTime = (course.sessionTime*1.5)/3600;
+      final sessionTime = doubleToDuration((durationToDouble(course.sessionTime)*1.5));
       revisions
-          .add(UnitModel(name: 'Revision session $x', order: x, hours: sessionTime.ceil()*3600));
+          .add(UnitModel(name: 'Revision session $x', order: x, sessionTime: sessionTime));
     }
     return revisions;
   }
@@ -51,14 +52,14 @@ class SchedulerStack {
   void print() {
     String unitString = 'Units:';
     for (UnitModel unit in units) {
-      unitString += '\n ${unit.name}, hours: ${unit.hours/3600}';
+      unitString += '\n ${unit.name}, hours: ${formatDuration(unit.sessionTime)}';
     }
     unitString += '\n Revisons: ';
     for (UnitModel revision in revisions) {
-      unitString += '\n ${revision.name}, hours: ${revision.hours/3600}';
+      unitString += '\n ${revision.name}, hours: ${formatDuration(revision.sessionTime)}';
     }
     logger.f(
-        'Stack ${course.name} \n Session Time: ${course.sessionTime / 3600} \n Exam date: ${course.examDate} \n Order matters: ${course.orderMatters} \n Weight: ${course.weight}\n $unitString');
+        'Stack ${course.name} \n Session Time: ${formatDuration(course.sessionTime)} \n Exam date: ${course.examDate} \n Order matters: ${course.orderMatters} \n Weight: ${course.weight}\n $unitString');
   }
 
   int getDaysUntilExam(DateTime date) {
@@ -79,9 +80,9 @@ class SchedulerStack {
     weight = course.weight + (1 / getDaysUntilExam(date));
   }
 
-  UnitModel? getUnitForTimeSlot(int timeAvailable) {
+  UnitModel? getUnitForTimeSlot(Duration timeAvailable) {
     for (UnitModel unit in units) {
-      if ((unit.hours/3600) <= timeAvailable) {
+      if ((unit.sessionTime) <= timeAvailable) {
         return unit;
       }
       if (course.orderMatters) {

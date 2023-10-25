@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:study_buddy/common_widgets/datatype_utils.dart';
 import 'package:study_buddy/common_widgets/loading_screen.dart';
 import 'package:study_buddy/common_widgets/unit_card.dart';
 import 'package:study_buddy/services/logging_service.dart';
@@ -69,7 +70,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                         ),
                         Text('Weight: ${widget.course.weight}'),
                         Text(
-                            'Session time: ${widget.course.sessionTime / 3600}'),
+                            'Session time: ${formatDuration(widget.course.sessionTime)}'),
                         Text('Exam Date: ${widget.course.examDate}'),
                         Text('Order Matters: ${widget.course.orderMatters}'),
                         Text('Revisions: ${widget.course.revisions}'),
@@ -131,9 +132,8 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                     autovalidateMode:
                                         AutovalidateMode.onUserInteraction,
                                     keyboardType: TextInputType.number,
-                                    maxLength: 1,
                                     initialValue:
-                                        '${(widget.course.sessionTime / 3600).toInt()}',
+                                        '${durationToDouble(widget.course.sessionTime)}',
                                     decoration: InputDecoration(
                                         labelText: _localizations.sessionTime,
                                         suffix: Text(_localizations.hours)),

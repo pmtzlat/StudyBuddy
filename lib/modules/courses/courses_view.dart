@@ -18,24 +18,7 @@ class CoursesView extends StatefulWidget {
 class _CoursesViewState extends State<CoursesView> {
   final _controller = instanceManager.courseController;
 
-  @override
-void initState() {
-  super.initState();
   
-  String courseString =
-      'upDatedCoursesViewCourses: ${instanceManager.sessionStorage.updatedCoursesView}\nCourses:\n';
-
-  if (!instanceManager.sessionStorage.updatedCoursesView) {
-    logger.f('It\'s false!');
-    loadCourses();
-  }
-
-  for (CourseModel course in instanceManager.sessionStorage.activeCourses) {
-    courseString += '${course.name}, ';
-  }
-
-}
-
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
@@ -199,8 +182,7 @@ void initState() {
                           name: 'sessionTime',
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           keyboardType: TextInputType.number,
-                          maxLength: 1,
-                          initialValue: '2',
+                          initialValue: '2.0',
                           decoration: InputDecoration(
                               labelText: _localizations.sessionTime,
                               suffix: Text(_localizations.hours)),

@@ -25,7 +25,7 @@ TimeOfDay stringToTimeOfDay24Hr(String timeString) {
         int minutes = int.parse(parts[1]);
         return TimeOfDay(hour: hours, minute: minutes);
       } else {
-        // Handle invalid input (return a default time if necessary)
+        
         return TimeOfDay(hour: 0, minute: 0);
       }
     }
@@ -39,4 +39,26 @@ bool stringToBool(String stringValue) {
   } else {
     return false; 
   }
+}
+
+Duration doubleToDuration(double hours) {
+  int totalMinutes = (hours * 60).round();
+  int hoursPart = totalMinutes ~/ 60; 
+  int minutesPart = totalMinutes % 60; 
+
+  return Duration(hours: hoursPart, minutes: minutesPart);
+}
+
+String formatDuration(Duration duration) {
+  final hours = duration.inHours;
+  final minutes = (duration.inMinutes % 60);
+  return '$hours hr $minutes min';
+}
+
+double durationToDouble(Duration duration) {
+  final totalMinutes = duration.inMinutes;
+  final hoursPart = totalMinutes ~/ 60;
+  final minutesPart = totalMinutes % 60;
+
+  return hoursPart + (minutesPart / 60.0); // Convert minutes to hours
 }
