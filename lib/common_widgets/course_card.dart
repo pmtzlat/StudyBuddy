@@ -22,11 +22,21 @@ class _CourseCardState extends State<CourseCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).pushReplacement(SlidePageRoute(
-          builder: (context) => CourseDetailView(
-            course: widget.course,
-          ),
-        ));
+        showGeneralDialog(
+          context: context,
+          barrierDismissible: true,
+          barrierLabel:
+              MaterialLocalizations.of(context).modalBarrierDismissLabel,
+          barrierColor: Colors.black.withOpacity(0.5),
+
+          transitionDuration: Duration(milliseconds: 200),
+
+          // Create the dialog's content
+          pageBuilder: (context, animation, secondaryAnimation) {
+            return CourseDetailView(
+                course: widget.course, refreshParent: widget.parentRefresh);
+          },
+        );
       },
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 5),
@@ -37,6 +47,4 @@ class _CourseCardState extends State<CourseCard> {
       ),
     );
   }
-
-  
 }

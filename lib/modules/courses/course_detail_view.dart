@@ -13,9 +13,11 @@ import '../../models/course_model.dart';
 
 class CourseDetailView extends StatefulWidget {
   CourseModel course;
+  Function refreshParent;
   CourseDetailView(
       {super.key,
-      required CourseModel this.course,});
+      required CourseModel this.course,
+      required this.refreshParent});
 
   @override
   State<CourseDetailView> createState() => _CourseDetailViewState();
@@ -194,7 +196,9 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                   widget.course = await instanceManager
                                       .firebaseCrudService
                                       .getCourse(widget.course.id);
-                                  await _controller.getAllCourses();
+                                  
+                                  await widget.course.getUnits();
+                                  widget.refreshParent();
 
                                   setState(() {
                                     editMode = false;
@@ -217,45 +221,6 @@ class _CourseDetailViewState extends State<CourseDetailView> {
     setState(() {});
   }
 
-  /*FutureBuilder<void> loadUnits() {
-    final _localizations = AppLocalizations.of(context)!;
-    var screenHeight = MediaQuery.of(context).size.height;
-
-    return FutureBuilder(
-        future: widget.course.getUnits(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // Display a loading indicator while the Future is running
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                  ],
-                ),
-              ],
-            );
-          } else if (snapshot.hasError) {
-            // Display the error message and show the snackbar
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                backgroundColor: Colors.red,
-                content: Text(_localizations.errorGettingUnits),
-              ),
-            );
-            return Text('Error: ${snapshot.error}');
-          } else {
-            if (widget.course.units!.isEmpty || widget.course.units == null) {
-              return Center(
-                child: Text(_localizations.noUnitsYet),
-              );
-            }
-            return getUnitList();
-          }
-        });
-  }*/
 
   Expanded getUnitList() {
     return Expanded(
@@ -298,9 +263,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
   }
 
  
-  void refresh() {
-    setState(() {});
-  }
+  
 
   void showError(String message) {
     SnackBar snackBar = SnackBar(

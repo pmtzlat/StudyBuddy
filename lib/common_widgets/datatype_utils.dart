@@ -29,3 +29,14 @@ TimeOfDay stringToTimeOfDay24Hr(String timeString) {
         return TimeOfDay(hour: 0, minute: 0);
       }
     }
+
+
+bool stringToBool(String stringValue) {
+  if (stringValue.toLowerCase() == 'true') {
+    return true;
+  } else if (stringValue.toLowerCase() == 'false') {
+    return false;
+  } else {
+    return false; 
+  }
+}

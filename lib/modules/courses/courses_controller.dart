@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:study_buddy/common_widgets/course_card.dart';
+import 'package:study_buddy/common_widgets/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/course_model.dart';
 
@@ -43,7 +44,6 @@ class CoursesController {
       {required String id,
       required int index,
       required BuildContext context}) async {
-    
     final res = await firebaseCrud.deleteCourse(courseId: id);
     final snackbar = SnackBar(
       content: Text(
@@ -151,7 +151,6 @@ class CoursesController {
 
   Future<void> getAllCourses() async {
     try {
-
       final courses = await firebaseCrud.getAllCourses();
 
       instanceManager.sessionStorage.savedCourses = courses;
@@ -181,9 +180,18 @@ class CoursesController {
       final name =
           unitFormKey.currentState!.fields['unitName']!.value.toString();
       final hours = int.parse(unitFormKey.currentState!.fields['hours']!.value);
+      final completed =unitFormKey.currentState!.fields['completed']!.value;
 
-      final updatedUnit =
-          UnitModel(name: name, order: oldUnit.order, hours: hours * 3600);
+      logger.d(completed.runtimeType);
+
+      
+
+      final updatedUnit = UnitModel(
+          name: name,
+          order: oldUnit.order,
+          hours: hours * 3600,
+          completed: completed);
+      
 
       dynamic res = await firebaseCrud.editUnit(
           course: course, unitID: oldUnit.id, updatedUnit: updatedUnit);
@@ -195,45 +203,40 @@ class CoursesController {
   }
 
   Future<int?> handleEditCourse(
-      GlobalKey<FormBuilderState> courseFormKey, CourseModel course, ) async {
-    
-      if (courseFormKey.currentState!.validate()) {
-        courseFormKey.currentState!.save();
-        final name =
-            courseFormKey.currentState!.fields['courseName']!.value.toString();
-        final weight =
-            courseFormKey.currentState!.fields['weightSlider']!.value;
-        final sessionTime =
-            int.parse(courseFormKey.currentState!.fields['sessionTime']!.value);
-        final examDate = courseFormKey.currentState!.fields['examDate']!.value ?? course.examDate;
-        final orderMatters =
-            courseFormKey.currentState!.fields['orderMatters']!.value;
-        final revisions =
-            int.parse(courseFormKey.currentState!.fields['revisions']!.value);
+    GlobalKey<FormBuilderState> courseFormKey,
+    CourseModel course,
+  ) async {
+    if (courseFormKey.currentState!.validate()) {
+      courseFormKey.currentState!.save();
+      final name =
+          courseFormKey.currentState!.fields['courseName']!.value.toString();
+      final weight = courseFormKey.currentState!.fields['weightSlider']!.value;
+      final sessionTime =
+          int.parse(courseFormKey.currentState!.fields['sessionTime']!.value);
+      final examDate = courseFormKey.currentState!.fields['examDate']!.value ??
+          course.examDate;
+      final orderMatters =
+          courseFormKey.currentState!.fields['orderMatters']!.value;
+      final revisions =
+          int.parse(courseFormKey.currentState!.fields['revisions']!.value);
 
-        if(examDate.isAfter(DateTime.now())){
+      if (examDate.isAfter(DateTime.now())) {
         final updatedCourse = CourseModel(
             id: course.id,
             name: name,
             examDate: examDate,
             weight: weight,
-            sessionTime: sessionTime*3600,
+            sessionTime: sessionTime * 3600,
             orderMatters: orderMatters,
             revisions: revisions);
-        
-
 
         final res = await firebaseCrud.editCourse(updatedCourse);
         instanceManager.sessionStorage.updatedCoursesView = false;
         return res;
-        }
-        return -2;
-
-
-
-      } else {
-        logger.e('Error validating edited course!');
       }
-    
+      return -2;
+    } else {
+      logger.e('Error validating edited course!');
+    }
   }
 }

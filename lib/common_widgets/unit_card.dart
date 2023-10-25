@@ -30,8 +30,6 @@ class _UnitCardState extends State<UnitCard> {
   var editMode = false;
   final unitFormKey = GlobalKey<FormBuilderState>();
 
-  
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -50,15 +48,12 @@ class _UnitCardState extends State<UnitCard> {
                       Text('Unit ${widget.unit.order}: ${widget.unit.name}'),
                       Text('${widget.unit.id}'),
                       Text('${widget.unit.hours / 3600}'),
+                      Row(children: widget.unit.completed ? [Text(_localizations.unitCompleted)] : [Text(_localizations.unitNotCompleted)]), 
                       SizedBox(width: 8.0),
                       IconButton(
                           onPressed: () {
-                            
-                            
-                            
                             setState(() {
                               editMode = true;
-                              
                             });
                           },
                           icon: Icon(Icons.edit))
@@ -86,7 +81,9 @@ class _UnitCardState extends State<UnitCard> {
                                       AutovalidateMode.onUserInteraction,
                                   keyboardType: TextInputType.number,
                                   maxLength: 1,
-                                  initialValue: (widget.unit.hours / 3600).toInt().toString(),
+                                  initialValue: (widget.unit.hours / 3600)
+                                      .toInt()
+                                      .toString(),
                                   decoration: InputDecoration(
                                     labelText: _localizations.unitHours,
                                   ),
@@ -96,6 +93,11 @@ class _UnitCardState extends State<UnitCard> {
                                     FormBuilderValidators.numeric()
                                   ]),
                                 ),
+                                FormBuilderCheckbox(
+                                  name: 'completed',
+                                  title: Text(_localizations.isUnitCompleted),
+                                  initialValue: widget.unit.completed,
+                                )
                               ],
                             ),
                           )),
@@ -103,7 +105,7 @@ class _UnitCardState extends State<UnitCard> {
                           onPressed: () async {
                             int? res = await _controller.handleEditUnit(
                                 unitFormKey, widget.course, widget.unit);
-                            if(res == -1){
+                            if (res == -1) {
                               widget.showError(_localizations.errorEditingUnit);
                             }
                             widget.notifyParent();

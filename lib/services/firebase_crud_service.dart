@@ -87,6 +87,7 @@ class FirebaseCrudService {
           hours: unitData['hours'] ?? 3600,
           id: unitDoc.id,
           order: unitData['order'] ?? 0,
+          completed: unitData['completed'] ?? false,
         );
         units.add(unit);
       }
@@ -146,7 +147,8 @@ class FirebaseCrudService {
         'name': newUnit.name,
         'hours': newUnit.hours,
         'order': newUnit.order,
-        'id': ''
+        'id': '',
+        'completed': newUnit.completed,
       };
 
       final unitRef = await courseRef.collection('units').add(unitData);
@@ -267,6 +269,7 @@ class FirebaseCrudService {
       await unitReference.update({
         'name': updatedUnit.name,
         'hours': updatedUnit.hours,
+        'completed': updatedUnit.completed
       });
 
       return 1; // Success

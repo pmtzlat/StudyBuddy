@@ -53,11 +53,11 @@ class CourseModel {
   Future<void> addUnit() async {
     final firebaseCrud = instanceManager.firebaseCrudService;
     if (units == null) {
-      final newUnit = UnitModel(name: 'Unit 1', order: 1, hours: sessionTime);
+      final newUnit = UnitModel(name: 'Unit 1', order: 1, hours: sessionTime, completed: false);
       await firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
     } else {
       final newUnit = UnitModel(
-          name: 'Unit ${units!.length + 1}', order: units!.length + 1, hours: sessionTime);
+          name: 'Unit ${units!.length + 1}', order: units!.length + 1, hours: sessionTime, completed: false);
       await firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
     }
     await getUnits();

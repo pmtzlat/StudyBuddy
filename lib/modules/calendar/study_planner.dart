@@ -21,7 +21,7 @@ import 'dart:math';
   Future<String?> calculateSchedule() async {
     try {
       await firebaseCrud.deleteSchedule();
-      List<TimeSlot>? scheduleLimits = await firebaseCrud.getScheduleLimits();
+      List<List<TimeSlot>> scheduleLimits = instanceManager.sessionStorage.weeklyRestrictions;
 
       generalStacks = await generateStacks();
       for (SchedulerStack stack in generalStacks) {
@@ -108,7 +108,6 @@ import 'dart:math';
 
   }
 
- 
   
   List<SchedulerStack> getFilteredStacks(Day day, List<SchedulerStack> stacks) {
     return stacks
