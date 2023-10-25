@@ -38,7 +38,7 @@ class _LoadedCalendarViewState extends State<LoadedCalendarView> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          RestrictionsDetailView(), // Replace NewPage with the page you want to navigate to
+                          RestrictionsDetailView(), 
                     ),
                   );
                 },

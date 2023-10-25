@@ -6,22 +6,22 @@ import 'package:study_buddy/common_widgets/error_messages.dart';
 import 'package:study_buddy/common_widgets/hour_picker_form.dart';
 import 'package:study_buddy/main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
-class AddCustomDayView extends StatefulWidget {
-  final Function refreshParent;
-  const AddCustomDayView({super.key, required Function this.refreshParent});
+class CustomDayDetailView extends StatefulWidget {
+  final Day customDay;
+  const CustomDayDetailView({super.key, required this.customDay});
 
   @override
-  State<AddCustomDayView> createState() => _AddCustomDayViewState();
+  State<CustomDayDetailView> createState() => _CustomDayDetailViewState();
 }
 
-class _AddCustomDayViewState extends State<AddCustomDayView> {
+class _CustomDayDetailViewState extends State<CustomDayDetailView> {
   final dateFormKey = GlobalKey<FormBuilderState>();
   final _controller = instanceManager.calendarController;
   final restraintFormKey = GlobalKey<FormBuilderState>();
-  List<TimeSlot> customSchedule = [];
 
   @override
   Widget build(BuildContext context) {
@@ -82,8 +82,12 @@ class _AddCustomDayViewState extends State<AddCustomDayView> {
                     ),
                     IconButton(
                         onPressed: () async {
-                          final res = await _controller.addRestraint(
-                              restraintFormKey, weekday, customSchedule, 'add custom day');
+                          var res = await _controller.addRestraint(
+                              restraintFormKey,
+                              weekday,
+                              widget.customDay.times,
+                              'edit custom day');
+
                           if (res == -1) {
                             showRedSnackbar(
                                 context, _localizations.errorAddingRestraint);
@@ -91,7 +95,18 @@ class _AddCustomDayViewState extends State<AddCustomDayView> {
                             showRedSnackbar(
                                 context, _localizations.wrongInputRestraint);
                           }
-                          logger.i(customSchedule);
+                          res = await _controller.updateTimes(widget.customDay);
+                          if (res == -1) {
+                            showRedSnackbar(
+                                context, _localizations.errorAddingRestraint);
+                          } else if (res == 0) {
+                            showRedSnackbar(
+                                context, _localizations.wrongInputRestraint);
+                          }
+                          _controller.getTimeSlotsForDay(widget.customDay);
+
+                          logger.i(widget.customDay.times);
+
                           setState(() {});
                           Navigator.of(context).pop();
                         },
@@ -111,36 +126,18 @@ class _AddCustomDayViewState extends State<AddCustomDayView> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
-            height: screenHeight*0.6,
+            height: screenHeight * 0.6,
             width: screenWidth * 0.85,
             child: Column(
               children: [
-                Text(_localizations.addCustomDay),
-                FormBuilder(
-                    key: dateFormKey,
-                    child: FormBuilderDateTimePicker(
-                      name: 'customDate',
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      inputType: InputType.date,
-                      enabled: true,
-                      decoration:
-                          InputDecoration(labelText: _localizations.day),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(),
-                      ]),
-                    )),
-                SizedBox(
-                  height: screenHeight * 0.025,
-                ),
+               Text(DateFormat("d MMMM, y").format(widget.customDay.date)),
                 Center(
                   child: IconButton(
                       icon: Icon(Icons.add),
                       onPressed: () {
-                        if (dateFormKey.currentState!.validate()) {
-                          dateFormKey.currentState!.save();
-                          showPopUp(dateFormKey.currentState!
-                              .fields['customDate']!.value.weekday);
-                        }
+                        
+                          showPopUp(widget.customDay.weekday);
+                        
                       }),
                 ),
                 Container(
@@ -148,9 +145,9 @@ class _AddCustomDayViewState extends State<AddCustomDayView> {
                     child: ListView.builder(
                         scrollDirection: Axis.vertical,
                         shrinkWrap: true,
-                        itemCount: customSchedule.length,
+                        itemCount: widget.customDay.times.length,
                         itemBuilder: (context, index) {
-                          final timeSlot = customSchedule[index];
+                          final timeSlot = widget.customDay.times[index];
 
                           return Card(
                             color: Colors.orange,
@@ -165,7 +162,23 @@ class _AddCustomDayViewState extends State<AddCustomDayView> {
                                         '${timeSlot.timeOfDayToString(timeSlot.startTime)} - ${timeSlot.timeOfDayToString(timeSlot.endTime)}'),
                                     IconButton(
                                         onPressed: () async {
-                                          customSchedule.removeAt(index);
+                                          widget.customDay.times
+                                              .removeAt(index);
+                                          final res =
+                                              await _controller.updateTimes(widget.customDay);
+                                          if (res == -1) {
+                                            showRedSnackbar(
+                                                context,
+                                                _localizations
+                                                    .errorAddingRestraint);
+                                          } else if (res == 0) {
+                                            showRedSnackbar(
+                                                context,
+                                                _localizations
+                                                    .wrongInputRestraint);
+                                          }
+                                          _controller.getTimeSlotsForDay(
+                                              widget.customDay);
 
                                           setState(() {});
                                         },
@@ -176,29 +189,6 @@ class _AddCustomDayViewState extends State<AddCustomDayView> {
                         }),
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(onPressed: () async{
-                      final res = await _controller.addCustomDay(dateFormKey, customSchedule);
-                      if (res == -1) {
-                            showRedSnackbar(
-                                context, _localizations.errorAddingCustomDay);
-                          } else if (res == 0) {
-                            showRedSnackbar(
-                                context, _localizations.wrongInputRestraint);
-                          }
-                          else if (res == 2) {
-                            showRedSnackbar(
-                                context, _localizations.customDayDuplicate);
-                          }
-                      Navigator.of(context).pop();
-                      widget.refreshParent();
-
-
-                    }, icon: Icon(Icons.check))
-                  ],
-                )
               ],
             ),
           ),

@@ -105,7 +105,6 @@ class FirebaseCrudService {
         return 0;
       }
 
-      // Delete all unit documents in the "units" subcollection
       final unitCollectionRef = courseDocRef.collection('units');
       final unitQuerySnapshot = await unitCollectionRef.get();
 
@@ -113,7 +112,6 @@ class FirebaseCrudService {
         await unitDoc.reference.delete();
       }
 
-      // Finally, delete the course document itself
       await courseDocRef.delete();
 
       return 1;
@@ -275,22 +273,36 @@ class FirebaseCrudService {
 
     try {
       if (uid != null) {
-        final userDocRef = firebaseInstance.collection('users').doc(uid);
+        if (uid != null) {
+          
 
-        final timeSlotsCollectionRef = userDocRef.collection('timeRestraints');
+          final userDocRef = firebaseInstance.collection('users').doc(uid);
+          final weekday = [
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+            'Sunday'
+          ][timeSlot.weekday - 1];
+          final timeSlotsCollectionRef = userDocRef
+              .collection('timeRestraints')
+              .doc('timeRestraintsDoc')
+              .collection(weekday);
 
-        final newRestraintRef = await timeSlotsCollectionRef.add({
-          'weekday': timeSlot.weekday,
-          'startTime': timeSlot.timeOfDayToString(timeSlot.startTime),
-          'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
-          'courseID': timeSlot.courseID,
-        });
+          final newRestraintRef = await timeSlotsCollectionRef.add({
+            'startTime': timeSlot.timeOfDayToString(timeSlot.startTime),
+            'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
+            'courseID': timeSlot.courseID,
+          });
 
-        await newRestraintRef.update({'id': newRestraintRef.id});
+          await newRestraintRef.update({'id': newRestraintRef.id});
 
-        return 1;
-      } else {
-        return -1;
+          return 1;
+        } else {
+          return -1;
+        }
       }
     } catch (e) {
       logger.e('Error adding time restraint: $e');
@@ -298,7 +310,28 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int?> deleteRestraints() async {
+  Future<bool?> checkIfRestraintsExist(String uid) async {
+  try {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+    final userDocRef = firebaseInstance.collection('users').doc(uid);
+    final timeSlotsDocRef =
+        userDocRef.collection('timeRestraints').doc('timeRestraintsDoc');
+
+    final timeSlotsDocSnapshot = await timeSlotsDocRef.get();
+
+    if (!timeSlotsDocSnapshot.exists) {
+      await timeSlotsDocRef.set({'createdAt': DateTime.now().toString()});
+      return false;
+    }
+    return true;
+  } catch (e) {
+    logger.e('Error checking for Restraints: $e');
+    return null;
+  }
+}
+
+  /*Future<int?> deleteRestraints() async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -324,7 +357,7 @@ class FirebaseCrudService {
       logger.e('Error deleting restrictions: $e');
       return -1;
     }
-  }
+  }*/
 
   Future<int?> deleteSchedule() async {
     final uid = instanceManager.localStorage.getString('uid');
@@ -383,6 +416,12 @@ class FirebaseCrudService {
     final firebaseInstance = instanceManager.db;
 
     try {
+
+      if( (await checkIfRestraintsExist(uid)) == false){
+        logger.d('returning null...');
+        return null;
+      };
+
       List<List<TimeSlot>> restrictions = [
         [],
         [],
@@ -396,30 +435,45 @@ class FirebaseCrudService {
       final userDoc = await firebaseInstance.collection('users').doc(uid).get();
 
       if (userDoc.exists) {
-        final timeRestraintsCollection =
-            userDoc.reference.collection('timeRestraints');
-        final timeRestraintsQuery = await timeRestraintsCollection.get();
-        if (timeRestraintsQuery.docs.isEmpty) return null;
+        final timeSlotsDocRef =
+            userDoc.reference.collection('timeRestraints').doc('timeRestraintsDoc');
 
-        for (final doc in timeRestraintsQuery.docs) {
-          final data = doc.data() as Map<String, dynamic>;
-          final timeSlot = TimeSlot(
-            id: doc.id,
-            weekday: data['weekday'],
-            startTime: stringToTimeOfDay24Hr(data['startTime']),
-            endTime: stringToTimeOfDay24Hr(data['endTime']),
-            courseID: data['courseID'],
-            unitID: data['unitID'],
-            courseName: data['courseName'],
-            unitName: data['unitName'],
-          );
-          restrictions[timeSlot.weekday - 1].add(timeSlot);
+        final weekdays = [
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+          'Sunday'
+        ];
+
+        for (var i = 0; i < 7; i++) {
+          final weekday = weekdays[i];
+          final timeRestraintsCollection = timeSlotsDocRef.collection(weekday);
+          final timeRestraintsQuery = await timeRestraintsCollection.get();
+
+          for (final doc in timeRestraintsQuery.docs) {
+            final data = doc.data() as Map<String, dynamic>;
+            final timeSlot = TimeSlot(
+              id: doc.id,
+              weekday: i+1,
+              startTime: stringToTimeOfDay24Hr(data['startTime']),
+              endTime: stringToTimeOfDay24Hr(data['endTime']),
+              courseID: data['courseID'],
+              unitID: data['unitID'],
+              courseName: data['courseName'],
+              unitName: data['unitName'],
+            );
+            restrictions[i].add(timeSlot);
+          }
         }
       }
+
       logger.i('Got restraints! $restrictions');
       return restrictions as List<List<TimeSlot>>?;
     } catch (e) {
-      logger.e('Error getting Restrictions : $e');
+      logger.e('Error getting Restrictions: $e');
       return null;
     }
   }
@@ -434,12 +488,24 @@ class FirebaseCrudService {
         return -1;
       }
 
-      final userCollection = firebaseInstance
-          .collection('users')
-          .doc(uid)
-          .collection('timeRestraints');
+      logger.i('timeslot to delete: ${restraint.id}, ${restraint.weekday}');
 
-      await userCollection.doc(id).delete();
+      final userDocRef = firebaseInstance.collection('users').doc(uid);
+      final weekday = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday'
+      ][restraint.weekday - 1];
+      final timeSlotsCollectionRef = userDocRef
+          .collection('timeRestraints')
+          .doc('timeRestraintsDoc')
+          .collection(weekday);
+
+      await timeSlotsCollectionRef.doc(id).delete();
 
       return 1;
     } catch (e) {
@@ -449,31 +515,30 @@ class FirebaseCrudService {
   }
 
   Future<List<Day>> getCustomDays() async {
-  try {
-    final uid = instanceManager.localStorage.getString('uid');
-    final firebaseInstance = instanceManager.db;
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
 
-    final userRef = firebaseInstance.collection('users').doc(uid);
-    final timeRestraintsRef = userRef.collection('timeRestraints');
-    final customDaysQuery = timeRestraintsRef.collection('customDays');
-    final customDaysSnapshot = await customDaysQuery.get();
+      final userRef = firebaseInstance.collection('users').doc(uid);
+      final QuerySnapshot customDaysQuery =
+          await userRef.collection('customDays').get();
 
-    final customDaysList = customDaysSnapshot.docs.map((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      return Day(
-        weekday: data['weekday'],
-        id: doc.id,
-        date: DateTime.parse((data['date'] as String)),
-        times: [], // Empty times list
-      );
-    }).toList();
+      final List<Day> customDaysList = customDaysQuery.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return Day(
+          weekday: data['weekday'],
+          id: doc.id,
+          date: DateTime.parse(data['date'] as String),
+          times: <TimeSlot>[], // Empty times list
+        );
+      }).toList();
 
-    return customDaysList;
-  } catch (e) {
-    logger.e('Error getting custom days: $e');
-    return [];
+      return customDaysList;
+    } catch (e) {
+      logger.e('Error getting custom days: $e');
+      return <Day>[];
+    }
   }
-}
 
   /*Future<List<TimeSlot>?> getScheduleLimits() async {
     final uid = instanceManager.localStorage.getString('uid');
@@ -566,6 +631,164 @@ class FirebaseCrudService {
     } catch (e) {
       logger.e('Error getting course: $e');
       return null;
+    }
+  }
+
+  Future<String?> addCustomDay(Day day) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final userRef = firebaseInstance.collection('users').doc(uid);
+
+      final customDaysRef = userRef.collection('customDays');
+
+      final newDocumentRef = await customDaysRef.add({
+        'weekday': day.weekday,
+        'date': day.date.toString(),
+      });
+
+      await newDocumentRef.update({'id': newDocumentRef.id});
+
+      return newDocumentRef.id;
+    } catch (e) {
+      logger.e('Error adding custom day: $e');
+      return null;
+    }
+  }
+
+  Future<int> addTimeSlotToCustomDay(String dayID, TimeSlot timeSlot) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final dayRef = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('customDays')
+          .doc(dayID);
+
+      final Map<String, dynamic> timeSlotData = {
+        'weekday': timeSlot.weekday,
+        'startTime': timeSlot.timeOfDayToString(timeSlot.startTime),
+        'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
+        'duration': timeSlot.duration.toString(),
+        'courseID': timeSlot.courseID,
+        'unitID': timeSlot.unitID,
+        'courseName': timeSlot.courseName,
+        'unitName': timeSlot.unitName,
+        'id': ''
+      };
+
+      final timeSlotRef =
+          await dayRef.collection('timeSlots').add(timeSlotData);
+      await timeSlotRef.update({'id': timeSlotRef.id});
+
+      return 1;
+    } catch (e) {
+      logger.e('Error adding Time Slot: $e');
+      return -1;
+    }
+  }
+
+  Future<int> clearTimesForDay(String dayID) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final dayDocRef = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('customDays')
+          .doc(dayID);
+
+      final timeSlotCollectionRef = dayDocRef.collection('timeSlots');
+      final timeSlotQuerySnapshot = await timeSlotCollectionRef.get();
+
+      for (final timeSlotDoc in timeSlotQuerySnapshot.docs) {
+        await timeSlotDoc.reference.delete();
+      }
+
+      return 1;
+    } catch (e) {
+      logger.e('Error clearing Times for day: $e');
+      return -1;
+    }
+  }
+
+  Future<int> deleteCustomDay(String dayID) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      clearTimesForDay(dayID);
+
+      final dayDocRef = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('customDays')
+          .doc(dayID);
+
+      await dayDocRef.delete();
+
+      return 1;
+    } catch (e) {
+      logger.e('Error deleting Custom Day: $e');
+      return -1;
+    }
+  }
+
+  Future<bool> findDate(String date) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+      final dayQuery = await firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('customDays')
+          .where('date', isEqualTo: date)
+          .get();
+
+      return dayQuery.docs.isNotEmpty;
+    } catch (e) {
+      logger.e('Error finding custom day: $e');
+      return false;
+    }
+  }
+
+  Future<List<TimeSlot>> getTimeSlotsForDay(String dayID) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final timeSlotsCollection = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('customDays')
+          .doc(dayID)
+          .collection('timeSlots');
+
+      final timeSlotsQuery = await timeSlotsCollection.get();
+
+      final List<TimeSlot> timeSlotsList =
+          List<TimeSlot>.from(timeSlotsQuery.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return TimeSlot(
+          id: doc.id,
+          weekday: data['weekday'],
+          startTime: stringToTimeOfDay24Hr(data['startTime']),
+          endTime: stringToTimeOfDay24Hr(data['endTime']),
+          courseID: data['courseID'],
+          unitID: data['unitID'],
+          courseName: data['courseName'],
+          unitName: data['unitName'],
+        );
+      }));
+
+      return timeSlotsList;
+    } catch (e) {
+      logger.e('Error gettimg timeSlots for day: $e');
+      return <TimeSlot>[];
     }
   }
 }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 class TimeSlot {
-  final String id;
-  final int weekday;
+   String id;
+  final int weekday; // from 1 - 7
   TimeOfDay startTime;
   TimeOfDay endTime;
   Duration duration;
@@ -44,7 +44,7 @@ class TimeSlot {
       'Sunday'
     ];
     final result =
-        'TimeSlot: \n${weekdays[weekday]} ${startTime.toString()} - ${endTime.toString()} ';
+        'TimeSlot: \n${weekdays[weekday-1]} ${startTime.toString()} - ${endTime.toString()} ';
     return result;
   }
 

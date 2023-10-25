@@ -13,6 +13,7 @@ class SessionStorage {
 
   List<List<TimeSlot>>? weeklyRestrictions;
   List<Day> customDays = [];
+  List<Day> activeCustomDays = [];
 
   
 

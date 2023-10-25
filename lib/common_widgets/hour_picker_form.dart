@@ -130,7 +130,12 @@ class _DayFormState extends State<DayForm> {
                     IconButton(
                         onPressed: () async {
                           final res = await _controller.addRestraint(
-                              restraintFormKey, weekday);
+                              restraintFormKey,
+                              weekday,
+                              instanceManager.sessionStorage
+                                  .weeklyRestrictions[weekday - 1],
+                              'generalRestraints');
+                          setState(() {});
                           if (res == -1) {
                             showRedSnackbar(
                                 context, _localizations.errorAddingRestraint);
@@ -138,7 +143,7 @@ class _DayFormState extends State<DayForm> {
                             showRedSnackbar(
                                 context, _localizations.wrongInputRestraint);
                           }
-                          
+
                           await _controller.getRestraints();
                           setState(() {});
                           Navigator.of(context).pop();
@@ -216,12 +221,12 @@ class _DayFormState extends State<DayForm> {
                 itemBuilder: (context, index) {
                   final timeSlot = instanceManager.sessionStorage
                       .weeklyRestrictions[daysStrToNum[widget.day]][index];
-          
+
                   return Card(
                     color: Colors.orange,
                     child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -234,8 +239,9 @@ class _DayFormState extends State<DayForm> {
                                       .weeklyRestrictions[
                                           daysStrToNum[widget.day]]
                                       .removeAt(index);
-                                  final res =
-                                      await _controller.deleteRestraint(timeSlot);
+                                  setState(() {});
+                                  final res = await _controller
+                                      .deleteRestraint(timeSlot);
                                   if (res != 1) {
                                     showRedSnackbar(context,
                                         _localizations.errorDeletingRestraint);
