@@ -279,7 +279,7 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int> clearRestrictionsForWeekday(String weekday) async {
+  Future<int> clearGapsForWeekday(String weekday) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -287,8 +287,8 @@ class FirebaseCrudService {
       final dayDocRef = firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('timeRestraints')
-          .doc('timeRestraintsDoc');
+          .collection('timeGaps')
+          .doc('timeGapsDoc');
 
       final timeSlotCollectionRef = dayDocRef.collection(weekday);
       final timeSlotQuerySnapshot = await timeSlotCollectionRef.get();
@@ -299,12 +299,12 @@ class FirebaseCrudService {
 
       return 1;
     } catch (e) {
-      logger.e('Error clearing time restraints for day $weekday: $e');
+      logger.e('Error clearing time gaps for day $weekday: $e');
       return -1;
     }
   }
 
-  Future<int?> addTimeRestraint({required TimeSlot timeSlot}) async {
+  Future<int?> addTimeGap({required TimeSlot timeSlot}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -314,17 +314,17 @@ class FirebaseCrudService {
           final userDocRef = firebaseInstance.collection('users').doc(uid);
           final weekday = weekDays[timeSlot.weekday - 1];
           final timeSlotsCollectionRef = userDocRef
-              .collection('timeRestraints')
-              .doc('timeRestraintsDoc')
+              .collection('timeGaps')
+              .doc('timeGapsDoc')
               .collection(weekday);
 
-          final newRestraintRef = await timeSlotsCollectionRef.add({
+          final newGapRef = await timeSlotsCollectionRef.add({
             'startTime': timeSlot.timeOfDayToString(timeSlot.startTime),
             'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
             'courseID': timeSlot.courseID,
           });
 
-          await newRestraintRef.update({'id': newRestraintRef.id});
+          await newGapRef.update({'id': newGapRef.id});
 
           return 1;
         } else {
@@ -333,18 +333,18 @@ class FirebaseCrudService {
       }
       return -1;
     } catch (e) {
-      logger.e('Error adding time restraint: $e');
+      logger.e('Error adding time gap: $e');
       return -1;
     }
   }
 
-  Future<bool?> checkIfRestraintsExist(String uid) async {
+  Future<bool?> checkIfGapsExist(String uid) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
       final userDocRef = firebaseInstance.collection('users').doc(uid);
       final timeSlotsDocRef =
-          userDocRef.collection('timeRestraints').doc('timeRestraintsDoc');
+          userDocRef.collection('timeGaps').doc('timeGapsDoc');
 
       final timeSlotsDocSnapshot = await timeSlotsDocRef.get();
 
@@ -354,38 +354,12 @@ class FirebaseCrudService {
       }
       return true;
     } catch (e) {
-      logger.e('Error checking for Restraints: $e');
+      logger.e('Error checking for Gaps: $e');
       return null;
     }
   }
 
-  /*Future<int?> deleteRestraints() async {
-    final uid = instanceManager.localStorage.getString('uid');
-    final firebaseInstance = instanceManager.db;
-
-    try {
-      if (uid != null) {
-        final userDocRef = firebaseInstance.collection('users').doc(uid);
-
-        final timeRestrictionsCollectionRef =
-            userDocRef.collection('timeRestraints');
-
-        await timeRestrictionsCollectionRef.get().then((querySnapshot) {
-          querySnapshot.docs.forEach((doc) {
-            doc.reference.delete();
-          });
-        });
-        logger.i('Wiped time Restraints!');
-
-        return 1;
-      } else {
-        return -1;
-      }
-    } catch (e) {
-      logger.e('Error deleting restrictions: $e');
-      return -1;
-    }
-  }*/
+  
 
   Future<int?> deleteSchedule() async {
     final uid = instanceManager.localStorage.getString('uid');
@@ -395,9 +369,9 @@ class FirebaseCrudService {
       if (uid != null) {
         final userDocRef = firebaseInstance.collection('users').doc(uid);
 
-        final timeRestrictionsCollectionRef = userDocRef.collection('schedule');
+        final timeGapsCollectionRef = userDocRef.collection('schedule');
 
-        await timeRestrictionsCollectionRef.get().then((querySnapshot) {
+        await timeGapsCollectionRef.get().then((querySnapshot) {
           querySnapshot.docs.forEach((doc) {
             doc.reference.delete();
           });
@@ -414,43 +388,20 @@ class FirebaseCrudService {
     }
   }
 
-  /*Future<int?> checkRestraints() async {
-    final uid = instanceManager.localStorage.getString('uid');
-    final firebaseInstance = instanceManager.db;
-    try {
-      if (uid != null) {
-        final userDocRef = firebaseInstance.collection('users').doc(uid);
+  
 
-        final timeRestraintsCollectionRef =
-            userDocRef.collection('timeRestraints');
-        final querySnapshot = await timeRestraintsCollectionRef.get();
-
-        if (querySnapshot.docs.isEmpty) {
-          return null;
-        } else {
-          return 1;
-        }
-      } else {
-        return -1;
-      }
-    } catch (e) {
-      logger.e('Error checking restraints: $e');
-      return -1;
-    }
-  }*/
-
-  Future<List<List<TimeSlot>>?> getRestraints() async {
+  Future<List<List<TimeSlot>>?> getGaps() async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
     try {
-      if ((await checkIfRestraintsExist(uid)) == false) {
+      if ((await checkIfGapsExist(uid)) == false) {
         logger.d('returning null...');
         return null;
       }
       ;
 
-      List<List<TimeSlot>> restrictions = [
+      List<List<TimeSlot>> gaps = [
         [],
         [],
         [],
@@ -464,15 +415,15 @@ class FirebaseCrudService {
 
       if (userDoc.exists) {
         final timeSlotsDocRef = userDoc.reference
-            .collection('timeRestraints')
-            .doc('timeRestraintsDoc');
+            .collection('timeGaps')
+            .doc('timeGapsDoc');
 
         for (var i = 0; i < 7; i++) {
           final weekday = weekDays[i];
-          final timeRestraintsCollection = timeSlotsDocRef.collection(weekday);
-          final timeRestraintsQuery = await timeRestraintsCollection.get();
+          final timeGapsCollection = timeSlotsDocRef.collection(weekday);
+          final timeGapsQuery = await timeGapsCollection.get();
 
-          for (final doc in timeRestraintsQuery.docs) {
+          for (final doc in timeGapsQuery.docs) {
             final data = doc.data() as Map<String, dynamic>;
             final timeSlot = TimeSlot(
               id: doc.id,
@@ -484,43 +435,43 @@ class FirebaseCrudService {
               courseName: data['courseName'],
               unitName: data['unitName'],
             );
-            restrictions[i].add(timeSlot);
+            gaps[i].add(timeSlot);
           }
         }
       }
 
-      logger.i('Got restraints! $restrictions');
-      return restrictions as List<List<TimeSlot>>?;
+      logger.i('Got Gaps! $gaps');
+      return gaps as List<List<TimeSlot>>?;
     } catch (e) {
-      logger.e('Error getting Restrictions: $e');
+      logger.e('Error getting Gaps: $e');
       return null;
     }
   }
 
-  Future<int?> deleteRestraint(TimeSlot restraint) async {
+  Future<int?> deleteGap(TimeSlot gap) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
-      final id = restraint.id;
+      final id = gap.id;
 
       if (uid == null || uid.isEmpty) {
         return -1;
       }
 
-      logger.i('timeslot to delete: ${restraint.id}, ${restraint.weekday}');
+      logger.i('timeslot to delete: ${gap.id}, ${gap.weekday}');
 
       final userDocRef = firebaseInstance.collection('users').doc(uid);
-      final weekday = weekDays[restraint.weekday - 1];
+      final weekday = weekDays[gap.weekday - 1];
       final timeSlotsCollectionRef = userDocRef
-          .collection('timeRestraints')
-          .doc('timeRestraintsDoc')
+          .collection('timeGaps')
+          .doc('timeGapsDoc')
           .collection(weekday);
 
       await timeSlotsCollectionRef.doc(id).delete();
 
       return 1;
     } catch (e) {
-      logger.e('Error deleting restraint: $e');
+      logger.e('Error deleting gap: $e');
       return -1;
     }
   }
@@ -551,38 +502,7 @@ class FirebaseCrudService {
     }
   }
 
-  /*Future<List<TimeSlot>?> getScheduleLimits() async {
-    final uid = instanceManager.localStorage.getString('uid');
-    final firebaseInstance = instanceManager.db;
-
-    try {
-      if (uid != null) {
-        final userDocRef = firebaseInstance.collection('users').doc(uid);
-        final timeLimitsCollectionRef = userDocRef.collection('timeRestraints');
-
-        final querySnapshot = await timeLimitsCollectionRef.get();
-
-        List<TimeSlot> timeSlotList = querySnapshot.docs.map<TimeSlot>((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          return TimeSlot(
-            weekday: data['weekday'],
-            startTime: data['startTime'],
-            endTime: data['endTime'],
-            courseID: data['courseID'],
-            unitID: data['unitID'],
-          );
-        }).toList();
-
-        return timeSlotList;
-      } else {
-        return null;
-      }
-    } catch (e) {
-      logger.e(
-          'firebaseCrud.getScheduleLimits: error getting schedule limits: $e');
-      return null;
-    }
-  }*/
+ 
 
   Future<int?> editCourse(CourseModel course) async {
     try {

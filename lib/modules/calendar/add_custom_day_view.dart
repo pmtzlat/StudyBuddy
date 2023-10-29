@@ -20,7 +20,7 @@ class AddCustomDayView extends StatefulWidget {
 class _AddCustomDayViewState extends State<AddCustomDayView> {
   final dateFormKey = GlobalKey<FormBuilderState>();
   final _controller = instanceManager.calendarController;
-  final restraintFormKey = GlobalKey<FormBuilderState>();
+  final gapFormKey = GlobalKey<FormBuilderState>();
   List<TimeSlot> customSchedule = [];
 
   @override
@@ -57,9 +57,9 @@ class _AddCustomDayViewState extends State<AddCustomDayView> {
                         onPressed: () {
                           Navigator.of(context).pop();
                         }),
-                    Text(_localizations.addRestriction),
+                    Text(_localizations.addGap),
                     FormBuilder(
-                      key: restraintFormKey,
+                      key: gapFormKey,
                       child: Row(children: [
                         Expanded(
                           child: FormBuilderDateTimePicker(
@@ -82,14 +82,14 @@ class _AddCustomDayViewState extends State<AddCustomDayView> {
                     ),
                     IconButton(
                         onPressed: () async {
-                          final res = await _controller.addRestraint(
-                              restraintFormKey, weekday, customSchedule, 'add custom day');
+                          final res = await _controller.addGap(
+                              gapFormKey, weekday, customSchedule, 'add custom day');
                           if (res == -1) {
                             showRedSnackbar(
-                                context, _localizations.errorAddingRestraint);
+                                context, _localizations.errorAddingGap);
                           } else if (res == 0) {
                             showRedSnackbar(
-                                context, _localizations.wrongInputRestraint);
+                                context, _localizations.wrongInputGap);
                           }
                           logger.i(customSchedule);
                           setState(() {});
@@ -187,7 +187,7 @@ class _AddCustomDayViewState extends State<AddCustomDayView> {
                                 context, _localizations.errorAddingCustomDay);
                           } else if (res == 0) {
                             showRedSnackbar(
-                                context, _localizations.wrongInputRestraint);
+                                context, _localizations.wrongInputGap);
                           }
                           else if (res == 2) {
                             showRedSnackbar(

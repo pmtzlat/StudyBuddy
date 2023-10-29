@@ -57,7 +57,7 @@ class _CustomDayDetailViewState extends State<CustomDayDetailView> {
                         onPressed: () {
                           Navigator.of(context).pop();
                         }),
-                    Text(_localizations.addRestriction),
+                    Text(_localizations.addGap),
                     FormBuilder(
                       key: restraintFormKey,
                       child: Row(children: [
@@ -82,7 +82,7 @@ class _CustomDayDetailViewState extends State<CustomDayDetailView> {
                     ),
                     IconButton(
                         onPressed: () async {
-                          var res = await _controller.addRestraint(
+                          var res = await _controller.addGap(
                               restraintFormKey,
                               weekday,
                               widget.customDay.times,
@@ -90,18 +90,18 @@ class _CustomDayDetailViewState extends State<CustomDayDetailView> {
 
                           if (res == -1) {
                             showRedSnackbar(
-                                context, _localizations.errorAddingRestraint);
+                                context, _localizations.errorAddingGap);
                           } else if (res == 0) {
                             showRedSnackbar(
-                                context, _localizations.wrongInputRestraint);
+                                context, _localizations.wrongInputGap);
                           }
                           res = await _controller.updateTimes(widget.customDay);
                           if (res == -1) {
                             showRedSnackbar(
-                                context, _localizations.errorAddingRestraint);
+                                context, _localizations.errorAddingGap);
                           } else if (res == 0) {
                             showRedSnackbar(
-                                context, _localizations.wrongInputRestraint);
+                                context, _localizations.wrongInputGap);
                           }
                           _controller.getTimeSlotsForDay(widget.customDay);
 
@@ -170,12 +170,12 @@ class _CustomDayDetailViewState extends State<CustomDayDetailView> {
                                             showRedSnackbar(
                                                 context,
                                                 _localizations
-                                                    .errorAddingRestraint);
+                                                    .errorAddingGap);
                                           } else if (res == 0) {
                                             showRedSnackbar(
                                                 context,
                                                 _localizations
-                                                    .wrongInputRestraint);
+                                                    .wrongInputGap);
                                           }
                                           _controller.getTimeSlotsForDay(
                                               widget.customDay);

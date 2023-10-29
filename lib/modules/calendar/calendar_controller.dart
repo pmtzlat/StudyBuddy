@@ -12,7 +12,6 @@ class CalendarController {
   final _firebaseCrud = instanceManager.firebaseCrudService;
   final uid = instanceManager.localStorage.getString('uid') ?? '';
 
-
   void printList(List<TimeSlot> list) {
     var res = [];
     for (TimeSlot x in list) {
@@ -21,17 +20,16 @@ class CalendarController {
     logger.i(res);
   }
 
-  void getRestraints() async {
-    instanceManager.sessionStorage.weeklyRestrictions =
-        await _firebaseCrud.getRestraints();
+  void getGaps() async {
+    instanceManager.sessionStorage.weeklyGaps = await _firebaseCrud.getGaps();
 
-    if (instanceManager.sessionStorage.weeklyRestrictions == null) {
-      addDefaultRestrictions();
+    if (instanceManager.sessionStorage.weeklyGaps == null) {
+      addDefaultGaps();
     }
   }
 
-  void addDefaultRestrictions() async {
-    logger.i('Adding Default Restrictions...');
+  void addDefaultGaps() async {
+    logger.i('Adding Default Gaps...');
 
     for (var i = 0; i < 7; i++) {
       final newSlot = TimeSlot(
@@ -40,25 +38,23 @@ class CalendarController {
           endTime: TimeOfDay(hour: 9, minute: 0),
           courseID: 'busy');
 
-      await instanceManager.firebaseCrudService
-          .addTimeRestraint(timeSlot: newSlot);
+      await instanceManager.firebaseCrudService.addTimeGap(timeSlot: newSlot);
     }
-    instanceManager.sessionStorage.weeklyRestrictions =
-        await _firebaseCrud.getRestraints();
+    instanceManager.sessionStorage.weeklyGaps = await _firebaseCrud.getGaps();
   }
 
   void calculateSchedule() async {
     logger.i(await instanceManager.studyPlanner.calculateSchedule());
   }
 
-  Future<int?> deleteRestraint(TimeSlot timeSlot) async {
-    final res = await instanceManager.firebaseCrudService
-        .deleteRestraint(timeSlot); //EDIT
+  Future<int?> deleteGap(TimeSlot timeSlot) async {
+    final res =
+        await instanceManager.firebaseCrudService.deleteGap(timeSlot); //EDIT
 
     return res;
   }
 
-  Future<int> addRestraint(GlobalKey<FormBuilderState> key, int weekday,
+  Future<int> addGap(GlobalKey<FormBuilderState> key, int weekday,
       List<TimeSlot> provisionalList, String purpose) async {
     try {
       if (key.currentState!.validate()) {
@@ -76,13 +72,13 @@ class CalendarController {
           return 0;
         }
 
-        provisionalList = await checkRestraintClash(
-            startTime, endTime, weekday, provisionalList);
+        provisionalList =
+            await checkGapClash(startTime, endTime, weekday, provisionalList);
 
         switch (purpose) {
-          case ('generalRestraints'):
-            if (await _firebaseCrud.clearRestrictionsForWeekday(
-                    _firebaseCrud.weekDays[weekday - 1]) ==
+          case ('generalGaps'):
+            if (await _firebaseCrud
+                    .clearGapsForWeekday(_firebaseCrud.weekDays[weekday - 1]) ==
                 -1) {
               return -1;
             }
@@ -90,8 +86,7 @@ class CalendarController {
             for (var timeSlot in provisionalList) {
               logger.f(
                   '${timeSlot.startTime.toString()} - ${timeSlot.endTime.toString()}');
-              final res =
-                  await _firebaseCrud.addTimeRestraint(timeSlot: timeSlot);
+              final res = await _firebaseCrud.addTimeGap(timeSlot: timeSlot);
               if (res != 1) {
                 return -1;
               }
@@ -105,68 +100,68 @@ class CalendarController {
         return 0;
       }
     } catch (e) {
-      logger.e('Error adding restraint: $e');
+      logger.e('Error adding gap: $e');
       return -1;
     }
   }
 
-  Future<List<TimeSlot>> checkRestraintClash(TimeOfDay startTime,
-      TimeOfDay endTime, int weekday, List<TimeSlot> provisionalList) async {
+  Future<List<TimeSlot>> checkGapClash(TimeOfDay newStart, TimeOfDay newEnd,
+      int weekday, List<TimeSlot> provisionalList) async {
     try {
+      if (newStart == newEnd) return provisionalList;
+
       List<int> itemsToDeleteFromProvisionalList = [];
       for (var i = provisionalList.length - 1; i >= 0; i--) {
-        final timeslot = provisionalList[i];
-        final timeslotStart = timeslot.startTime;
-        final timeslotEnd = timeslot.endTime;
-        bool deleteDBtimeslot = false;
+        final old = provisionalList[i];
+        final oldStart = old.startTime;
+        final oldEnd = old.endTime;
+        bool deleteOld = false;
 
-        if (isTimeBefore(timeslotStart, startTime) &&
-            isTimeBefore(startTime, timeslotEnd)) {
-          startTime = timeslotStart;
+        if (isTimeBefore(newStart, oldStart) && isTimeBefore(oldEnd, newEnd))
+          deleteOld = true;
+
+        if (stickyTime('Start', newStart, oldStart, oldEnd)) {
+          newStart = oldStart;
+          deleteOld = true;
         }
 
-        if (isTimeBefore(timeslotStart, endTime) &&
-            isTimeBefore(endTime, timeslotEnd)) {
-          endTime = timeslotEnd;
+        if (stickyTime('End', newEnd, oldStart, oldEnd)) {
+          newEnd = oldEnd;
+          deleteOld = true;
         }
 
-        if (isTimeBefore(startTime, timeslotStart) &&
-            isTimeBefore(timeslotStart, endTime)) {
-          deleteDBtimeslot = true;
-        }
-
-        if (isTimeBefore(startTime, timeslotEnd) &&
-            isTimeBefore(timeslotEnd, endTime)) {
-          deleteDBtimeslot = true;
-        }
-
-        if (startTime == timeslotStart && endTime == timeslotEnd) {
-          deleteDBtimeslot = true;
-        }
-
-        if (deleteDBtimeslot) {
+        if (deleteOld) {
           itemsToDeleteFromProvisionalList.add(i);
         }
       }
+      //logger.f('deleteIndexes: $itemsToDeleteFromProvisionalList');
+      //logger.f('provisinalList: $provisionalList');
 
-      if (itemsToDeleteFromProvisionalList.isNotEmpty) {
-        for (var index in itemsToDeleteFromProvisionalList) {
-          provisionalList.removeAt(index);
-        }
+      for (var index in itemsToDeleteFromProvisionalList) {
+        provisionalList.removeAt(index);
       }
 
       provisionalList.add(TimeSlot(
-          courseID: 'busy',
-          startTime: startTime,
-          endTime: endTime,
+          courseID: 'free',
+          startTime: newStart,
+          endTime: newEnd,
           weekday: weekday));
+
+      String printer = 'ProvisionalList: \n';
+
+      for (var gap in provisionalList) {
+        printer += '\n ${gap.startTime} - ${gap.endTime}';
+      }
+
+      logger.d(printer);
 
       return provisionalList;
     } catch (e) {
-      logger.e('Error in checkRestraintClash: $e');
+      logger.e('Error in check Gap Clash: $e');
       return [];
     }
-}
+  }
+
 
   Future<void> getCustomDays() async {
     final days = await _firebaseCrud.getCustomDays();
@@ -242,4 +237,5 @@ class CalendarController {
   Future<int> deleteCustomDay(String dayID) async {
     return await _firebaseCrud.deleteCustomDay(dayID);
   }
+
 }

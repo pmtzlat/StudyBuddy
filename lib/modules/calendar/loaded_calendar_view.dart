@@ -43,7 +43,7 @@ class _LoadedCalendarViewState extends State<LoadedCalendarView> {
                   );
                 },
                 icon: Icon(Icons.settings),
-                label: Text(_localizations.changeScheduleRestrictions)),
+                label: Text(_localizations.changeScheduleGaps)),
             instanceManager.sessionStorage.activeCourses.length != 0
                 ? ElevatedButton.icon(
                     onPressed: () async {

@@ -35,7 +35,7 @@ void main() async {
   await instanceManager.startDependantInstances();
 
   await instanceManager.courseController.getAllCourses();
-  await instanceManager.calendarController.getRestraints();
+  await instanceManager.calendarController.getGaps();
   await instanceManager.calendarController.getCustomDays();
   
   

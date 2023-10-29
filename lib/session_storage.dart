@@ -10,7 +10,7 @@ class SessionStorage {
   //NEEDS: a varibale that saves wether the calendar needs recalculating
   // after a new course is added!!
 
-  List<List<TimeSlot>>? weeklyRestrictions;
+  List<List<TimeSlot>>? weeklyGaps;
   List<Day> customDays = [];
   List<Day> activeCustomDays = [];
 

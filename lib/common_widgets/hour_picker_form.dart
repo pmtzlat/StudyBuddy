@@ -103,7 +103,7 @@ class _DayFormState extends State<DayForm> {
                         onPressed: () {
                           Navigator.of(context).pop();
                         }),
-                    Text(_localizations.addRestriction),
+                    Text(_localizations.addGap),
                     FormBuilder(
                       key: restraintFormKey,
                       child: Row(children: [
@@ -128,22 +128,22 @@ class _DayFormState extends State<DayForm> {
                     ),
                     IconButton(
                         onPressed: () async {
-                          final res = await _controller.addRestraint(
+                          final res = await _controller.addGap(
                               restraintFormKey,
                               weekday,
                               instanceManager.sessionStorage
-                                  .weeklyRestrictions[weekday - 1],
-                              'generalRestraints');
+                                  .weeklyGaps[weekday - 1],
+                              'generalGaps');
                           setState(() {});
                           if (res == -1) {
                             showRedSnackbar(
-                                context, _localizations.errorAddingRestraint);
+                                context, _localizations.errorAddingGap);
                           } else if (res == 0) {
                             showRedSnackbar(
-                                context, _localizations.wrongInputRestraint);
+                                context, _localizations.wrongInputGap);
                           }
 
-                          await _controller.getRestraints();
+                          await _controller.getGaps();
                           setState(() {});
                           Navigator.of(context).pop();
                         },
@@ -216,10 +216,10 @@ class _DayFormState extends State<DayForm> {
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
                 itemCount: instanceManager.sessionStorage
-                    .weeklyRestrictions[daysStrToNum[widget.day]].length,
+                    .weeklyGaps[daysStrToNum[widget.day]].length,
                 itemBuilder: (context, index) {
                   final timeSlot = instanceManager.sessionStorage
-                      .weeklyRestrictions[daysStrToNum[widget.day]][index];
+                      .weeklyGaps[daysStrToNum[widget.day]][index];
 
                   return Card(
                     color: Colors.orange,
@@ -235,17 +235,17 @@ class _DayFormState extends State<DayForm> {
                                 onPressed: () async {
                                   instanceManager
                                       .sessionStorage
-                                      .weeklyRestrictions[
+                                      .weeklyGaps[
                                           daysStrToNum[widget.day]]
                                       .removeAt(index);
                                   setState(() {});
                                   final res = await _controller
-                                      .deleteRestraint(timeSlot);
+                                      .deleteGap(timeSlot);
                                   if (res != 1) {
                                     showRedSnackbar(context,
-                                        _localizations.errorDeletingRestraint);
+                                        _localizations.errorDeletingGap);
                                   }
-                                  await _controller.getRestraints();
+                                  await _controller.getGaps();
                                   setState(() {});
                                 },
                                 icon: Icon(Icons.delete))
