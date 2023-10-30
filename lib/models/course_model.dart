@@ -13,7 +13,7 @@ class CourseModel {
   final String id;
   List<UnitModel>? units;
   bool orderMatters;
-  int revisions;
+  List<UnitModel> revisions;
 
   /*
   var iconData = IconData(58717, fontFamily: 'MaterialIcons')
@@ -35,7 +35,7 @@ class CourseModel {
     this.id = '',
     this.units = null,
     this.orderMatters = false,
-    this.revisions = 2,
+    this.revisions = const [],
   });
 
   bool inFuture(DateTime date) {
@@ -48,6 +48,14 @@ class CourseModel {
   Future<void> getUnits() async {
     final firebaseCrud = instanceManager.firebaseCrudService;
     units = await firebaseCrud.getUnitsForCourse(courseID: id);
+    printUnits();
+  }
+
+  Future<void> getRevisions() async {
+    final firebaseCrud = instanceManager.firebaseCrudService;
+    revisions = await firebaseCrud.getRevisionsForCourse(courseID: id);
+    printRevisions();
+
   }
 
   Future<void> addUnit() async {
@@ -74,6 +82,14 @@ class CourseModel {
     if (units != null) {
       for (int i = 0; i < units!.length; i++) {
         logger.i('${units![i].name}, ${units![i].id}');
+      }
+    }
+  }
+
+  void printRevisions() {
+    if (revisions != null) {
+      for (int i = 0; i < revisions!.length; i++) {
+        logger.i('${revisions![i].name}, ${revisions![i].id}');
       }
     }
   }

@@ -6,8 +6,8 @@ import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'dart:math';
-
-/*class StudyPlanner {
+/*
+class StudyPlanner {
 
   final firebaseCrud;
   final uid;
@@ -262,6 +262,8 @@ import 'dart:math';
     try {
       List<SchedulerStack> result = [];
       for (CourseModel course in instanceManager.sessionStorage.activeCourses) {
+        await course.getUnits();
+        await course.getRevisions();
         SchedulerStack stack = SchedulerStack(course: course);
         await stack.initializeUnitsWithRevision(course);
         result.add(stack);

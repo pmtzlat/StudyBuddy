@@ -73,7 +73,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                             'Session time: ${formatDuration(widget.course.sessionTime)}'),
                         Text('Exam Date: ${widget.course.examDate}'),
                         Text('Order Matters: ${widget.course.orderMatters}'),
-                        Text('Revisions: ${widget.course.revisions}'),
+                        
                         IconButton(
                             onPressed: () {
                               setState(() {
@@ -168,7 +168,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                     keyboardType: TextInputType.number,
                                     maxLength: 1,
                                     initialValue:
-                                        widget.course.revisions.toString(),
+                                        widget.course.revisions.length.toString(),
                                     decoration: InputDecoration(
                                       labelText:
                                           _localizations.numberOfRevisions,
@@ -198,6 +198,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                       .getCourse(widget.course.id);
                                   
                                   await widget.course.getUnits();
+                                  await widget.course.getRevisions();
                                   widget.refreshParent();
 
                                   setState(() {
@@ -218,6 +219,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
 
   void loadUnits() async {
     await widget.course.getUnits();
+    await widget.course.getRevisions();
     setState(() {});
   }
 

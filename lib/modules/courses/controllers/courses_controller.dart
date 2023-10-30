@@ -8,29 +8,29 @@ import 'package:study_buddy/models/course_model.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/models/unit_model.dart';
-import '../../services/logging_service.dart';
+import '../../../services/logging_service.dart';
 
 class CoursesController {
   final firebaseCrud = instanceManager.firebaseCrudService;
   final uid = instanceManager.localStorage.getString('uid') ?? '';
 
-  addCourse(
-      {required name,
-      weight,
-      required examDate,
-      color = '#0000000',
-      sessionTime = const Duration(hours: 2),
-      orderMatters = false,
-      revisions = 2}) {
+  addCourse({
+    required name,
+    weight,
+    required examDate,
+    color = '#0000000',
+    sessionTime = const Duration(hours: 2),
+    orderMatters = false,
+  }) {
     try {
       final newCourse = CourseModel(
-          name: name,
-          examDate: examDate,
-          weight: weight,
-          color: color,
-          sessionTime: sessionTime,
-          orderMatters: orderMatters,
-          revisions: revisions);
+        name: name,
+        examDate: examDate,
+        weight: weight,
+        color: color,
+        sessionTime: sessionTime,
+        orderMatters: orderMatters,
+      );
 
       return firebaseCrud.addCourseToUser(newCourse: newCourse);
     } catch (e) {
@@ -72,10 +72,32 @@ class CoursesController {
     }
   }
 
+  dynamic addRevisionsToCourse(
+      {required String id,
+      required int revisions,
+      required Duration sessionTime}) {
+    try {
+      for (int i = 0; i < revisions; i++) {
+        final revisionNum = i + 1;
+        final newUnit = UnitModel(
+            name: 'Revision $revisionNum',
+            order: revisionNum,
+            sessionTime:
+                doubleToDuration((durationToDouble(sessionTime) * 1.5)));
+        firebaseCrud.addRevisionToCourse(newUnit: newUnit, courseID: id);
+      }
+      return 1;
+    } catch (e) {
+      logger.e('Error adding units: $e');
+      return null;
+    }
+  }
+
   Future<int?> handleAddCourse(
       GlobalKey<FormBuilderState> courseCreationFormKey,
       BuildContext context) async {
     int? res;
+    try{
     if (courseCreationFormKey.currentState!.validate()) {
       courseCreationFormKey.currentState!.save();
       dynamic snackbar;
@@ -88,6 +110,7 @@ class CoursesController {
             .currentState!.fields['courseName']!.value
             .toString();
 
+        
         final weight =
             courseCreationFormKey.currentState!.fields['weightSlider']!.value;
         final session = doubleToDuration(double.parse(
@@ -102,17 +125,28 @@ class CoursesController {
         final bool orderMatters =
             courseCreationFormKey.currentState!.fields['orderMatters']!.value;
 
-        dynamic res = await addCourse(
-            name: name,
-            examDate: examDate,
-            weight: weight,
-            sessionTime: session,
-            orderMatters: orderMatters,
-            revisions: revisions);
+        
 
+
+        dynamic res = await addCourse(
+          name: name,
+          examDate: examDate,
+          weight: weight,
+          sessionTime: session,
+          orderMatters: orderMatters,
+        );
+
+        int unitsAdded = 0;
         if (res != null) {
-          res = await addUnitsToCourse(
+          unitsAdded = await addUnitsToCourse(
               id: res, units: units, sessionTime: session);
+        }
+
+        int revisionsAdded = 0;
+
+        if (unitsAdded != null) {
+          revisionsAdded =  await addRevisionsToCourse(
+              id: res, revisions: revisions, sessionTime: session);
         }
 
         // Close the bottom sheet
@@ -121,11 +155,11 @@ class CoursesController {
         // Show a snackbar based on the value of 'res'
         snackbar = SnackBar(
           content: Text(
-            res != null
+            revisionsAdded != null
                 ? AppLocalizations.of(context)!.courseAddedCorrectly
                 : AppLocalizations.of(context)!.errorAddingCourse,
           ),
-          backgroundColor: res != null
+          backgroundColor: revisionsAdded != null
               ? Color.fromARGB(255, 0, 172, 6)
               : Color.fromARGB(255, 221, 15, 0),
         );
@@ -143,6 +177,10 @@ class CoursesController {
       return res;
     } else {
       logger.e("Error validating fields!");
+    }
+    }
+    catch(e){
+      logger.e('Error handling add course: $e');
     }
   }
 
@@ -178,7 +216,6 @@ class CoursesController {
       final sessionTime = doubleToDuration(double.parse(
           unitFormKey.currentState!.fields['sessionTime']!.value.toString()));
       final completed = unitFormKey.currentState!.fields['completed']!.value;
-
 
       final updatedUnit = UnitModel(
           name: name,
@@ -220,10 +257,15 @@ class CoursesController {
             examDate: examDate,
             weight: weight,
             sessionTime: sessionTime,
-            orderMatters: orderMatters,
-            revisions: revisions);
+            orderMatters: orderMatters);
 
-        final res = await firebaseCrud.editCourse(updatedCourse);
+        var res = await firebaseCrud.editCourse(updatedCourse);
+
+        if (res == 1) {
+          await firebaseCrud.clearRevisionsForCourse(course.id);
+          res = addRevisionsToCourse(
+              id: course.id, revisions: revisions, sessionTime: sessionTime);
+        }
         return res;
       }
       return -2;

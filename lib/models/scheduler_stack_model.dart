@@ -15,24 +15,13 @@ class SchedulerStack {
 
   Future<void> initializeUnitsWithRevision(CourseModel course) async {
     try {
-      units = await extractUnitsWithRevision(course);
-      revisions = createRevisions(course);
     } catch (e) {
       logger.d('Error initializing unitsWithRevision: $e');
       units = [];
     }
   }
 
-  List<UnitModel> createRevisions(CourseModel course) {
-    List<UnitModel> revisions = [];
-
-    for (int x = 0; x < course.revisions; x++) {
-      final sessionTime = doubleToDuration((durationToDouble(course.sessionTime)*1.5));
-      revisions
-          .add(UnitModel(name: 'Revision session $x', order: x, sessionTime: sessionTime));
-    }
-    return revisions;
-  }
+  
 
   Future<List<UnitModel>> extractUnitsWithRevision(CourseModel course) async {
     try {

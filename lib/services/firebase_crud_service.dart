@@ -48,7 +48,6 @@ class FirebaseCrudService {
           'color': newCourse.color,
           'id': '',
           'orderMatters': newCourse.orderMatters,
-          'revisions': newCourse.revisions,
         });
 
         await newCourseDocRef.update({'id': newCourseDocRef.id});
@@ -99,6 +98,42 @@ class FirebaseCrudService {
     }
   }
 
+  Future<List<UnitModel>?> getRevisionsForCourse({required String courseID}) async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+    try {
+      final courseDocRef = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('courses')
+          .doc(courseID);
+
+      final revisionCollectionRef = courseDocRef.collection('revisions');
+
+      final revisionQuerySnapshot =
+          await revisionCollectionRef.orderBy('order', descending: false).get();
+
+      final List<UnitModel> revisions = [];
+
+      for (final revisionDoc in revisionQuerySnapshot.docs) {
+        final unitData = revisionDoc.data() as Map<String, dynamic>;
+        final unit = UnitModel(
+          name: unitData['name'] ?? '',
+          sessionTime: parseTime(unitData['sessionTime']),
+          id: revisionDoc.id,
+          order: unitData['order'] ?? 0,
+          completed: unitData['completed'] ?? false,
+        );
+        revisions.add(unit);
+      }
+      return revisions;
+    } catch (e) {
+      logger.e('Error getting units for course $courseID: $e');
+      return null;
+    }
+  }
+
+
   Future<int> deleteCourse({required String courseId}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
@@ -122,6 +157,14 @@ class FirebaseCrudService {
       for (final unitDoc in unitQuerySnapshot.docs) {
         await unitDoc.reference.delete();
       }
+
+      final revisionCollectionRef = courseDocRef.collection('revisions');
+      final revisionQuerySnapshot = await revisionCollectionRef.get();
+
+      for (final revisionDoc in revisionQuerySnapshot.docs) {
+        await revisionDoc.reference.delete();
+      }
+
 
       await courseDocRef.delete();
 
@@ -162,6 +205,66 @@ class FirebaseCrudService {
       return null;
     }
   }
+  
+  Future<String?> addRevisionToCourse(
+      {required UnitModel newUnit, required String courseID}) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final courseRef = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('courses')
+          .doc(courseID);
+
+      final revisionData = {
+        'name': newUnit.name,
+        'sessionTime': newUnit.sessionTime.toString(),
+        'order': newUnit.order,
+        'id': '',
+        'completed': newUnit.completed,
+      };
+
+      final revisionRef = await courseRef.collection('revisions').add(revisionData);
+      await revisionRef.update({'id': revisionRef.id});
+
+      return revisionRef.id;
+    } catch (e) {
+      logger
+          .e('Error in Firebase CRUD when adding unit to course $courseID: $e');
+      return null;
+    }
+  }
+
+  Future<int> clearRevisionsForCourse(String courseID) async {
+
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+
+    try {
+      if (uid != null) {
+        final courseDocRef = firebaseInstance.collection('users').doc(uid).collection('courses').doc(courseID);
+
+        final revisionsCollectionRef = courseDocRef.collection('revisions');
+
+        await revisionsCollectionRef.get().then((querySnapshot) {
+          querySnapshot.docs.forEach((doc) {
+            doc.reference.delete();
+          });
+        });
+        logger.i('Wiped revisions!');
+
+        return 1;
+      } else {
+        return -1;
+      }
+    } catch (e) {
+      logger.e('Error deleting schedule: $e');
+      return -1;
+    }
+
+  }
 
   Future<List<CourseModel>?> getAllCourses() async {
     try {
@@ -185,7 +288,6 @@ class FirebaseCrudService {
           color: data['color'] as String,
           sessionTime: parseTime(data['sessionTime']),
           id: data['id'] as String,
-          revisions: data['revisions'] as int,
           orderMatters: data['orderMatters'] as bool,
         );
       }).toList();
@@ -359,8 +461,6 @@ class FirebaseCrudService {
     }
   }
 
-  
-
   Future<int?> deleteSchedule() async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
@@ -387,8 +487,6 @@ class FirebaseCrudService {
       return -1;
     }
   }
-
-  
 
   Future<List<List<TimeSlot>>?> getGaps() async {
     final uid = instanceManager.localStorage.getString('uid');
@@ -502,8 +600,6 @@ class FirebaseCrudService {
     }
   }
 
- 
-
   Future<int?> editCourse(CourseModel course) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
@@ -568,7 +664,6 @@ class FirebaseCrudService {
           color: data['color'] as String,
           sessionTime: parseTime(data['sessionTime']),
           id: data['id'] as String,
-          revisions: data['revisions'] as int,
           orderMatters: data['orderMatters'] as bool,
         );
       } else {
