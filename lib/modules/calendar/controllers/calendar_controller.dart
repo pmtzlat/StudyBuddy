@@ -36,7 +36,7 @@ class CalendarController {
           weekday: i + 1,
           startTime: TimeOfDay(hour: 0, minute: 0),
           endTime: TimeOfDay(hour: 9, minute: 0),
-          courseID: 'busy');
+          courseID: 'free');
 
       await instanceManager.firebaseCrudService.addTimeGap(timeSlot: newSlot);
     }

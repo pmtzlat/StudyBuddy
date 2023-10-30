@@ -26,7 +26,7 @@ class InstanceManager {
   final connectivity = Connectivity();
   late CoursesController courseController;
   late CalendarController calendarController;
-  //late StudyPlanner studyPlanner;
+  late StudyPlanner studyPlanner;
   final SessionStorage sessionStorage = SessionStorage();
 
   
@@ -39,7 +39,7 @@ class InstanceManager {
     localStorage =  await SharedPreferences.getInstance();
     courseController = CoursesController();
     calendarController = CalendarController();
-    //studyPlanner = StudyPlanner(firebaseCrud: firebaseCrudService, uid: localStorage.getString('uid') ?? '');
+    studyPlanner = StudyPlanner(firebaseCrud: firebaseCrudService, uid: localStorage.getString('uid') ?? '');
 
   }
 

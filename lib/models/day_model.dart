@@ -1,3 +1,4 @@
+import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
@@ -6,7 +7,7 @@ class Day {
   final String id;
   final DateTime date;
   List<TimeSlot> times;
-  late int totalAvailableTime;
+  late Duration totalAvailableTime;
 
   Day({
     required this.weekday,
@@ -14,16 +15,6 @@ class Day {
     required this.date,
     List<TimeSlot>? times,
   }) : times = times ?? [];
-
-  /*void getTotalAvailableTime() {
-    int availableTime = 24; // The entire day is initially available.
-
-    for (final timeSlot in times) {
-      availableTime -= (timeSlot.endTime - timeSlot.startTime + 1);
-    }
-
-    totalAvailableTime = availableTime;
-  }
 
   String getString() {
     String timesString = '';
@@ -34,6 +25,70 @@ class Day {
 
     return '$id -> $date: $weekday\n Times: $timesString';
   }
+
+  void getTotalAvailableTime() {
+
+    totalAvailableTime = getTotal(times);
+    //logger.d('new total available: $totalAvailableTime');
+  }
+
+  Future<void> getGaps() async {
+    if(times.isEmpty){Day dayInQuestion = instanceManager.sessionStorage.activeCustomDays
+        .firstWhere((obj) => obj.date == date,
+            orElse: () => Day(id: 'empty', weekday: 0, date: DateTime.now()));
+    
+    if (dayInQuestion.id != 'empty') {
+      times = await instanceManager.firebaseCrudService
+              .getTimeSlotsForDay(dayInQuestion.id) ??
+          [];
+    } else {
+      final List<TimeSlot> timeSlotList = instanceManager.sessionStorage.weeklyGaps[date.weekday-1];
+      final  updated = timeSlotList.map((timeSlot) {
+        return TimeSlot(
+          id: timeSlot.id,
+          weekday: timeSlot.weekday,
+          startTime: timeSlot.startTime,
+          endTime: timeSlot.endTime,
+          courseID: timeSlot.courseID,
+          unitID: timeSlot.unitID,
+          courseName: timeSlot.courseName,
+          unitName: timeSlot.unitName,
+        );
+      }).toList();
+    
+      times = updated;
+      
+    }
+    }
+  }
+
+  Duration getTotal(List<TimeSlot> timeSlots) {
+    Duration totalDuration = Duration.zero;
+
+    for (var timeSlot in timeSlots) {
+      timeSlot.calculateDuration(timeSlot.startTime, timeSlot.endTime);
+      
+      if(timeSlot.courseID == 'free'){ 
+        //logger.d('timeSlot ${timeSlot.startTime} - ${timeSlot.endTime} is free, timeSlot.');
+        totalDuration += timeSlot.duration;}
+    }
+
+    //logger.d('total duration = $totalDuration');
+
+    return totalDuration;
+  }
+
+  /*uration getTotalAvailableTime() {
+    int availableTime = 24; // The entire day is initially available.
+
+    for (final timeSlot in times) {
+      availableTime -= (timeSlot.endTime - timeSlot.startTime + 1);
+    }
+
+    totalAvailableTime = availableTime;
+  }
+
+  
 
   TimeSlot? findLatestTimegap() {
     if (times == null || times.isEmpty) {
@@ -98,4 +153,5 @@ class Day {
       return result;
     }
   }
-*/}
+*/
+}

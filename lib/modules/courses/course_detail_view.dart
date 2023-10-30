@@ -73,6 +73,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                             'Session time: ${formatDuration(widget.course.sessionTime)}'),
                         Text('Exam Date: ${widget.course.examDate}'),
                         Text('Order Matters: ${widget.course.orderMatters}'),
+                        Text('Revisions: ${widget.course.revisions.length}'),
                         
                         IconButton(
                             onPressed: () {

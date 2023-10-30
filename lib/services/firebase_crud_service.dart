@@ -424,6 +424,8 @@ class FirebaseCrudService {
             'startTime': timeSlot.timeOfDayToString(timeSlot.startTime),
             'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
             'courseID': timeSlot.courseID,
+            'duration': timeSlot.duration.toString(),
+            
           });
 
           await newGapRef.update({'id': newGapRef.id});
@@ -832,4 +834,6 @@ class FirebaseCrudService {
       return <TimeSlot>[];
     }
   }
+
+  
 }

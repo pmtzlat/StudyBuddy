@@ -27,16 +27,11 @@ TimeOfDay addDurationToTimeOfDay(TimeOfDay time, Duration duration) {
   newHour = newHour.clamp(0, 23);
   newMinute = newMinute.clamp(0, 59);
 
-  
-
   return TimeOfDay(hour: newHour, minute: newMinute);
 }
 
 bool stickyTime(
     String type, TimeOfDay timeInQuestion, TimeOfDay start, TimeOfDay end) {
-
-  
-
   if (type == 'Start') {
     if (isTimeBefore(start, timeInQuestion) &&
         isTimeBefore(timeInQuestion, end)) {
@@ -114,9 +109,23 @@ double durationToDouble(Duration duration) {
   final hoursPart = totalMinutes ~/ 60;
   final minutesPart = totalMinutes % 60;
 
-  double result = hoursPart + (minutesPart / 60.0); 
+  double result = hoursPart + (minutesPart / 60.0);
 
-  
   return double.parse(result.toStringAsFixed(2));
 }
 
+TimeOfDay subtractDurationFromTimeOfDay(TimeOfDay time, Duration duration) {
+  // Convert TimeOfDay to total minutes since midnight
+  final timeMinutes = time.hour * 60 + time.minute;
+
+  final durationMinutes = duration.inMinutes;
+
+  var resultMinutes = timeMinutes - durationMinutes;
+
+  if (resultMinutes < 0) {
+    resultMinutes = 0;
+  }
+  final hours = resultMinutes ~/ 60;
+  final minutes = resultMinutes % 60;
+  return TimeOfDay(hour: hours, minute: minutes);
+}

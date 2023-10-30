@@ -13,8 +13,12 @@ class SchedulerStack {
 
   SchedulerStack({required this.course});
 
-  Future<void> initializeUnitsWithRevision(CourseModel course) async {
+  Future<void> initializeUnitsAndRevision(CourseModel course) async {
     try {
+      units = course.units!;
+      revisions = course.revisions;
+      daysUntilExam = getDaysUntilExam(course.examDate);
+
     } catch (e) {
       logger.d('Error initializing unitsWithRevision: $e');
       units = [];

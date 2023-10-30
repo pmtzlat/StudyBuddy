@@ -44,7 +44,7 @@ class _LoadedCalendarViewState extends State<LoadedCalendarView> {
                 },
                 icon: Icon(Icons.settings),
                 label: Text(_localizations.changeScheduleGaps)),
-            instanceManager.sessionStorage.activeCourses.length != 0
+            (instanceManager.sessionStorage.activeCourses.length != 0) && (instanceManager.sessionStorage.weeklyGaps != null)
                 ? ElevatedButton.icon(
                     onPressed: () async {
                       await _controller.calculateSchedule();

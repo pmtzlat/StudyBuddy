@@ -33,6 +33,17 @@ class TimeSlot {
     return Duration(hours: hours, minutes: minutes);
   }
 
+  void calculateDuration(TimeOfDay start, TimeOfDay end) {
+    final startMinutes = start.hour * 60 + start.minute;
+    final endMinutes = end.hour * 60 + end.minute;
+    final minutesDifference = endMinutes - startMinutes;
+    final minutes = minutesDifference % 60;
+    final hours = (minutesDifference - minutes) ~/ 60;
+
+    //logger.d('New duration for timeSlot $startTime - $endTime -> $hours : $minutes');
+    duration =  Duration(hours: hours, minutes: minutes);
+  }
+
   String getInfoString() {
     final weekdays = [
       'Monday',
@@ -44,7 +55,7 @@ class TimeSlot {
       'Sunday'
     ];
     final result =
-        'TimeSlot: \n${weekdays[weekday-1]} ${startTime.toString()} - ${endTime.toString()} ';
+        'TimeSlot: \n${weekdays[weekday-1]} ${startTime.toString()} - ${endTime.toString()} : $courseName';
     return result;
   }
 
