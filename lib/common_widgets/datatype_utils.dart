@@ -27,7 +27,7 @@ TimeOfDay addDurationToTimeOfDay(TimeOfDay time, Duration duration) {
   newHour = newHour.clamp(0, 23);
   newMinute = newMinute.clamp(0, 59);
 
-  logger.t('${time.hour}:${time.minute} -> $newHour:$newMinute');
+  
 
   return TimeOfDay(hour: newHour, minute: newMinute);
 }
@@ -38,43 +38,34 @@ bool stickyTime(
   
 
   if (type == 'Start') {
-    logger.i('Start = $timeInQuestion');
     if (isTimeBefore(start, timeInQuestion) &&
         isTimeBefore(timeInQuestion, end)) {
-      logger.w('$type $timeInQuestion is between $start - $end');
       return true;
     }
 
     if (start == timeInQuestion || timeInQuestion == end) {
-      logger.w('$type $timeInQuestion is equal to $start or $end');
       return true;
     }
 
     if (timeInQuestion == addDurationToTimeOfDay(end, Duration(minutes: 1))) {
-      logger.w('$type $timeInQuestion = $end +1');
       return true;
     }
-    logger.i('$type is independent');
     return false;
   }
 
   if (type == 'End') {
     if (isTimeBefore(start, timeInQuestion) &&
         isTimeBefore(timeInQuestion, end)) {
-      logger.w('$type $timeInQuestion is between $start - $end');
       return true;
     }
 
     if (start == timeInQuestion || timeInQuestion == end) {
-      logger.w('$type $timeInQuestion is equal to $start or $end');
       return true;
     }
 
     if (start == addDurationToTimeOfDay(timeInQuestion, Duration(minutes: 1))) {
-      logger.w('$type $timeInQuestion = $start -1');
       return true;
     }
-    logger.i('$type is independent');
     return false;
   }
   return false;

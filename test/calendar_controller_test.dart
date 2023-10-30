@@ -993,62 +993,432 @@ void main() {
         });
       });
       group('new one starts and ends inside two different ones:', () {
-        test('t(new.start = old1.start, new.end = old2.end)', () {
+        test('t(new.start = old1.start, new.end = old2.end)', () async {
           // Test logic for t(new.start = old1.start, new.end = old2.end)
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 10, minute: 00);
+          final end = TimeOfDay(hour: 13, minute: 00);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
         test('t(new.start = old1.start + a, new.end = old2.end) where 1 < a',
-            () {
+            () async {
           // Test logic for t(new.start = old1.start + a, new.end = old2.end) where 1 < a
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 10, minute: 30);
+          final end = TimeOfDay(hour: 13, minute: 00);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
         test('t(new.start = old1.start, new.end = old2.end - a) where 1 < a',
-            () {
+            () async {
           // Test logic for t(new.start = old1.start, new.end = old2.end - a) where 1 < a
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 10, minute: 00);
+          final end = TimeOfDay(hour: 12, minute: 30);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
         test(
             't(new.start = old1.start + a, new.start = old2.end - a) where 1 < a',
-            () {
+            () async {
           // Test logic for t(new.start = old1.start + a, new.start = old2.end - a) where 1 < a
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 10, minute: 30);
+          final end = TimeOfDay(hour: 12, minute: 30);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
-        test('t(new.start = old1.end, new.end = old2.start)', () {
+        test('t(new.start = old1.end, new.end = old2.start)', () async {
           // Test logic for t(new.start = old1.end, new.end = old2.start)
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 11, minute: 00);
+          final end = TimeOfDay(hour: 12, minute: 00);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
       });
 
       group('new one is independent:', () {
         test(
             'new.start = old1.start - a, new.end = old1.start - b where a > b > 2',
-            () {
+            () async {
           // Test logic for t(new.start = old1.start - a, new.end = old1.start - b) where a > b > 2
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 6, minute: 00);
+          final end = TimeOfDay(hour: 9, minute: 55);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 6, minute: 0),
+                endTime: TimeOfDay(hour: 9, minute: 55),
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
 
         test(
             'new.start = old1.end + a, new.end = old2.start - b where a, b > 2',
-            () {
+            () async {
           // Test logic for t(new.start = old1.end + a, new.end = old2.start - b) where a, b > 2
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 11, minute: 05);
+          final end = TimeOfDay(hour: 11, minute: 55);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 11, minute: 05),
+                endTime: TimeOfDay(hour: 11, minute: 55),
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
 
         test('new.start = old2.end + a, new.end = old2.end + b where a < b',
-            () {
+            () async {
           // Test logic for t(new.start = old2.end + a, new.end = old2.end + b) where a < b
+
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 13, minute: 05);
+          final end = TimeOfDay(hour: 19, minute: 55);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 13, minute: 05),
+                endTime: TimeOfDay(hour: 19, minute: 55),
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
       });
 
       group('new one encloses both:', () {
-        test('t(new.start = old1.start, new.end = old2.end)', () {
-          // Test logic for t(new.start = old1.start, new.end = old2.end)
-        });
-
         test('t(new.start = old1.start - a, new.end = old2.end) where a > 1',
-            () {
+            () async {
           // Test logic for t(new.start = old1.start - a, new.end = old2.end) where a > 1
+
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 9, minute: 55);
+          final end = TimeOfDay(hour: 13, minute: 0);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: start,
+                endTime: end,
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
 
-        test('t(new.start = old1.start, new.end = old2.end + a)', () {
+        test('t(new.start = old1.start, new.end = old2.end + a)', () async {
           // Test logic for t(new.start = old1.start, new.end = old2.end + a)
+
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 10, minute: 00);
+          final end = TimeOfDay(hour: 13, minute: 05);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: start,
+                endTime: end,
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
 
-        test('t(new.start = old1.start - a, new.end = old2.end + a)', () {
+        test('t(new.start = old1.start - a, new.end = old2.end + a)', () async {
           // Test logic for t(new.start = old1.start - a, new.end = old2.end + a)
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 9, minute: 55);
+          final end = TimeOfDay(hour: 13, minute: 05);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: start,
+                endTime: end,
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
       });
     });
@@ -1060,114 +1430,720 @@ void main() {
         // Tests for 2 present but with one timelot separated that isn't affected
 
         group('new one starts and ends inside two different ones:', () {
-          test('t(new.start = old1.start, new.end = old2.end)', () {
+          test('t(new.start = old1.start, new.end = old2.end)', () async {
             // Test logic for t(new.start = old1.start, new.end = old2.end)
-          });
+            final weekday = 1;
 
+            final provisionalList = <TimeSlot>[
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final controller = CalendarController();
+            final start = TimeOfDay(hour: 10, minute: 00);
+            final end = TimeOfDay(hour: 13, minute: 00);
+
+            final expectedResult = [
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final result = await controller.checkGapClash(
+                start, end, weekday, provisionalList);
+
+            expect(result, expectedResult);
+          });
           test('t(new.start = old1.start + a, new.end = old2.end) where 1 < a',
-              () {
+              () async {
             // Test logic for t(new.start = old1.start + a, new.end = old2.end) where 1 < a
+            final weekday = 1;
+
+            final provisionalList = <TimeSlot>[
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final controller = CalendarController();
+            final start = TimeOfDay(hour: 10, minute: 30);
+            final end = TimeOfDay(hour: 13, minute: 00);
+
+            final expectedResult = [
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final result = await controller.checkGapClash(
+                start, end, weekday, provisionalList);
+
+            expect(result, expectedResult);
           });
           test('t(new.start = old1.start, new.end = old2.end - a) where 1 < a',
-              () {
+              () async {
             // Test logic for t(new.start = old1.start, new.end = old2.end - a) where 1 < a
+            final weekday = 1;
+
+            final provisionalList = <TimeSlot>[
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final controller = CalendarController();
+            final start = TimeOfDay(hour: 10, minute: 00);
+            final end = TimeOfDay(hour: 12, minute: 30);
+
+            final expectedResult = [
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final result = await controller.checkGapClash(
+                start, end, weekday, provisionalList);
+
+            expect(result, expectedResult);
           });
           test(
               't(new.start = old1.start + a, new.start = old2.end - a) where 1 < a',
-              () {
+              () async {
             // Test logic for t(new.start = old1.start + a, new.start = old2.end - a) where 1 < a
+            final weekday = 1;
+
+            final provisionalList = <TimeSlot>[
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final controller = CalendarController();
+            final start = TimeOfDay(hour: 10, minute: 30);
+            final end = TimeOfDay(hour: 12, minute: 30);
+
+            final expectedResult = [
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final result = await controller.checkGapClash(
+                start, end, weekday, provisionalList);
+
+            expect(result, expectedResult);
           });
-          test('t(new.start = old1.end, new.end = old2.start)', () {
+          test('t(new.start = old1.end, new.end = old2.start)', () async {
             // Test logic for t(new.start = old1.end, new.end = old2.start)
+            final weekday = 1;
+
+            final provisionalList = <TimeSlot>[
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final controller = CalendarController();
+            final start = TimeOfDay(hour: 11, minute: 00);
+            final end = TimeOfDay(hour: 12, minute: 00);
+
+            final expectedResult = [
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final result = await controller.checkGapClash(
+                start, end, weekday, provisionalList);
+
+            expect(result, expectedResult);
           });
         });
 
         group('new one is independent:', () {
           test(
-              't(new.start = old1.start - a, new.end = old1.start - b) where a > b > 2',
-              () {
+              'new.start = old1.start - a, new.end = old1.start - b where a > b > 2',
+              () async {
             // Test logic for t(new.start = old1.start - a, new.end = old1.start - b) where a > b > 2
+            final weekday = 1;
+
+            final provisionalList = <TimeSlot>[
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final controller = CalendarController();
+            final start = TimeOfDay(hour: 6, minute: 00);
+            final end = TimeOfDay(hour: 9, minute: 55);
+
+            final expectedResult = [
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 6, minute: 0),
+                  endTime: TimeOfDay(hour: 9, minute: 55),
+                  courseID: 'free'),
+            ];
+
+            final result = await controller.checkGapClash(
+                start, end, weekday, provisionalList);
+
+            expect(result, expectedResult);
           });
 
           test(
-              't(new.start = old1.end + a, new.end = old2.start - b) where a, b > 2',
-              () {
+              'new.start = old1.end + a, new.end = old2.start - b where a, b > 2',
+              () async {
             // Test logic for t(new.start = old1.end + a, new.end = old2.start - b) where a, b > 2
+            final weekday = 1;
+
+            final provisionalList = <TimeSlot>[
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final controller = CalendarController();
+            final start = TimeOfDay(hour: 11, minute: 05);
+            final end = TimeOfDay(hour: 11, minute: 55);
+
+            final expectedResult = [
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 11, minute: 05),
+                  endTime: TimeOfDay(hour: 11, minute: 55),
+                  courseID: 'free'),
+            ];
+
+            final result = await controller.checkGapClash(
+                start, end, weekday, provisionalList);
+
+            expect(result, expectedResult);
           });
 
-          test(
-              't(new.start = old2.end + a, new.end = old2.end + b) where a < b',
-              () {
+          test('new.start = old2.end + a, new.end = old2.end + b where a < b',
+              () async {
             // Test logic for t(new.start = old2.end + a, new.end = old2.end + b) where a < b
+
+            final weekday = 1;
+
+            final provisionalList = <TimeSlot>[
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final controller = CalendarController();
+            final start = TimeOfDay(hour: 13, minute: 05);
+            final end = TimeOfDay(hour: 19, minute: 55);
+
+            final expectedResult = [
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 13, minute: 05),
+                  endTime: TimeOfDay(hour: 19, minute: 55),
+                  courseID: 'free'),
+            ];
+
+            final result = await controller.checkGapClash(
+                start, end, weekday, provisionalList);
+
+            expect(result, expectedResult);
           });
         });
 
         group('new one encloses both:', () {
-          test('t(new.start = old1.start, new.end = old2.end)', () {
-            // Test logic for t(new.start = old1.start, new.end = old2.end)
-          });
-
           test('t(new.start = old1.start - a, new.end = old2.end) where a > 1',
-              () {
+              () async {
             // Test logic for t(new.start = old1.start - a, new.end = old2.end) where a > 1
+
+            final weekday = 1;
+
+            final provisionalList = <TimeSlot>[
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final controller = CalendarController();
+            final start = TimeOfDay(hour: 9, minute: 55);
+            final end = TimeOfDay(hour: 13, minute: 0);
+
+            final expectedResult = [
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: start,
+                  endTime: end,
+                  courseID: 'free'),
+            ];
+
+            final result = await controller.checkGapClash(
+                start, end, weekday, provisionalList);
+
+            expect(result, expectedResult);
           });
 
-          test('t(new.start = old1.start, new.end = old2.end + a)', () {
+          test('t(new.start = old1.start, new.end = old2.end + a)', () async {
             // Test logic for t(new.start = old1.start, new.end = old2.end + a)
+
+            final weekday = 1;
+
+            final provisionalList = <TimeSlot>[
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final controller = CalendarController();
+            final start = TimeOfDay(hour: 10, minute: 00);
+            final end = TimeOfDay(hour: 13, minute: 05);
+
+            final expectedResult = [
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: start,
+                  endTime: end,
+                  courseID: 'free'),
+            ];
+
+            final result = await controller.checkGapClash(
+                start, end, weekday, provisionalList);
+
+            expect(result, expectedResult);
           });
 
-          test('t(new.start = old1.start - a, new.end = old2.end + a)', () {
+          test('t(new.start = old1.start - a, new.end = old2.end + a)',
+              () async {
             // Test logic for t(new.start = old1.start - a, new.end = old2.end + a)
+            final weekday = 1;
+
+            final provisionalList = <TimeSlot>[
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 10, minute: 0),
+                  endTime: TimeOfDay(hour: 11, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 12, minute: 0),
+                  endTime: TimeOfDay(hour: 13, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+            ];
+
+            final controller = CalendarController();
+            final start = TimeOfDay(hour: 9, minute: 55);
+            final end = TimeOfDay(hour: 13, minute: 05);
+
+            final expectedResult = [
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: TimeOfDay(hour: 22, minute: 0),
+                  endTime: TimeOfDay(hour: 23, minute: 0),
+                  courseID: 'free'),
+              TimeSlot(
+                  weekday: weekday,
+                  startTime: start,
+                  endTime: end,
+                  courseID: 'free'),
+            ];
+
+            final result = await controller.checkGapClash(
+                start, end, weekday, provisionalList);
+
+            expect(result, expectedResult);
           });
         });
-      });
-
-      group(
-          'new one starts and ends between two different ones, with one in the middle:',
-          () {
-        test('new.start = old1.start, new.end = old3.end', () {
-          // Test logic for new.start = old1.start, new.end = old3.end
-        });
-        
-        test('new.start = old1.start + a, new.end = old3.end where 1 < a', () {
-          // Test logic for new.start = old1.start + a, new.end = old3.end where 1 < a
-        });
-        
-        test('new.start = old1.start, new.end = old3.end - a where 1 < a', () {
-          // Test logic for new.start = old1.start, new.end = old3.end - a where 1 < a
-        });
-        
-        test('new.start = old1.start + a, new.start = old3.end - a where 1 < a',
-            () {
-          // Test logic for new.start = old1.start + a, new.start = old3.end - a where 1 < a
-        });
-        
-        test('new.start = old1.end, new.end = old3.start', () {
-          // Test logic for new.start = old1.end, new.end = old3.start
-        });
-        
-        
-      });
-
-      group('new one is independent:', () {
-        // Tests for when the new one is independent
       });
 
       group('new one encloses all three:', () {
-        test('new.start = old1.start, new.end = old3.end', () {
+        test('new.start = old1.start, new.end = old3.end', () async {
           // Test logic for new.start = old1.start, new.end = old3.end
+
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 22, minute: 0),
+                endTime: TimeOfDay(hour: 23, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 10, minute: 00);
+          final end = TimeOfDay(hour: 23, minute: 00);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: start,
+                endTime: end,
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
-        
-        test('new.start = old1.start - a, new.end = old3.end where a > 1', () {
+
+        test('new.start = old1.start - a, new.end = old3.end where a > 1',
+            () async {
           // Test logic for new.start = old1.start - a, new.end = old3.end where a > 1
+
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 22, minute: 0),
+                endTime: TimeOfDay(hour: 23, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 9, minute: 55);
+          final end = TimeOfDay(hour: 23, minute: 00);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: start,
+                endTime: end,
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
-        
-        test('new.start = old1.start, new.end = old3.end + a', () {
+
+        test('new.start = old1.start, new.end = old3.end + a', () async {
           // Test logic for new.start = old1.start, new.end = old3.end + a
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 22, minute: 0),
+                endTime: TimeOfDay(hour: 23, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 10, minute: 00);
+          final end = TimeOfDay(hour: 23, minute: 05);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: start,
+                endTime: end,
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
-        
-        test('new.start = old1.start - a, new.end = old3.end + a', () {
+
+        test('new.start = old1.start - a, new.end = old3.end + a', () async {
           // Test logic for new.start = old1.start - a, new.end = old3.end + a
+
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 22, minute: 0),
+                endTime: TimeOfDay(hour: 23, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 9, minute: 55);
+          final end = TimeOfDay(hour: 23, minute: 05);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: start,
+                endTime: end,
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
+        });
+      });
+      group('new one is between first and 3rd:', () {
+        test('new.start = old1.start+x, new.end = old3.end-x', () async {
+          final weekday = 1;
+
+          final provisionalList = <TimeSlot>[
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 11, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 12, minute: 0),
+                endTime: TimeOfDay(hour: 13, minute: 0),
+                courseID: 'free'),
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 22, minute: 0),
+                endTime: TimeOfDay(hour: 23, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final controller = CalendarController();
+          final start = TimeOfDay(hour: 10, minute: 55);
+          final end = TimeOfDay(hour: 22, minute: 05);
+
+          final expectedResult = [
+            TimeSlot(
+                weekday: weekday,
+                startTime: TimeOfDay(hour: 10, minute: 0),
+                endTime: TimeOfDay(hour: 23, minute: 0),
+                courseID: 'free'),
+          ];
+
+          final result = await controller.checkGapClash(
+              start, end, weekday, provisionalList);
+
+          expect(result, expectedResult);
         });
       });
     });

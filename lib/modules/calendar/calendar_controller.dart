@@ -104,6 +104,7 @@ class CalendarController {
       return -1;
     }
   }
+  
 
   Future<List<TimeSlot>> checkGapClash(TimeOfDay newStart, TimeOfDay newEnd,
       int weekday, List<TimeSlot> provisionalList) async {
@@ -134,9 +135,7 @@ class CalendarController {
           itemsToDeleteFromProvisionalList.add(i);
         }
       }
-      //logger.f('deleteIndexes: $itemsToDeleteFromProvisionalList');
-      //logger.f('provisinalList: $provisionalList');
-
+      
       for (var index in itemsToDeleteFromProvisionalList) {
         provisionalList.removeAt(index);
       }
@@ -147,14 +146,7 @@ class CalendarController {
           endTime: newEnd,
           weekday: weekday));
 
-      String printer = 'ProvisionalList: \n';
-
-      for (var gap in provisionalList) {
-        printer += '\n ${gap.startTime} - ${gap.endTime}';
-      }
-
-      logger.d(printer);
-
+      
       return provisionalList;
     } catch (e) {
       logger.e('Error in check Gap Clash: $e');
