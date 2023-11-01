@@ -160,7 +160,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                   ),
                                   FormBuilderCheckbox(
                                       name: 'orderMatters',
-                                      initialValue: false,
+                                      initialValue: widget.course.orderMatters,
                                       title: Text(_localizations.orderMatters)),
                                   FormBuilderTextField(
                                     name: 'revisions',

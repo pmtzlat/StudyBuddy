@@ -48,24 +48,22 @@ class StudyPlanner {
               loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0));
       while (
           generalStacks.length != 0 && dayToAdd!.date.isAfter(DateTime.now())) {
-      //logger.f(dayToAdd.getString());
-      
-      await fillDayWithSessions(dayToAdd, generalStacks);
+        //logger.f(dayToAdd.getString());
 
-      logger.e(dayToAdd.getString());
+        await fillDayWithSessions(dayToAdd, generalStacks);
 
-      result.insert(0, dayToAdd);
-      loopDate = loopDate.subtract(Duration(days: 1));
-      dayToAdd = Day(
-          id: DateTime(
-                  loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0)
-              .toString(),
-          weekday: loopDate.weekday,
-          date: DateTime(
-              loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0));
+        logger.e(dayToAdd.getString());
+
+        result.insert(0, dayToAdd);
+        loopDate = loopDate.subtract(Duration(days: 1));
+        dayToAdd = Day(
+            id: DateTime(
+                    loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0)
+                .toString(),
+            weekday: loopDate.weekday,
+            date: DateTime(
+                loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0));
       }
-
-
 
       if (!dayToAdd.date.isAfter(DateTime.now()) && generalStacks.length != 0) {
         return 'No time';
@@ -79,10 +77,8 @@ class StudyPlanner {
     }
   }
 
-  Future<void> fillDayWithSessions(Day day, List<SchedulerStack> stacks) async{
+  Future<void> fillDayWithSessions(Day day, List<SchedulerStack> stacks) async {
     try {
-      
-      
       //logger.d('fillDayWithSessions');
       await day.getGaps();
       day.getTotalAvailableTime();
@@ -94,30 +90,32 @@ class StudyPlanner {
         //logger.w('empty filtered stacks');
         return;
       }
-      
+
       day.times.sort((a, b) {
         final aEndMinutes = a.endTime.hour * 60 + a.endTime.minute;
         final bEndMinutes = b.endTime.hour * 60 + b.endTime.minute;
-        return  aEndMinutes - bEndMinutes ;
+        return aEndMinutes - bEndMinutes;
       });
-
-      
 
       late TimeSlot gap;
       var newTimes = <TimeSlot>[];
 
-      while (day.totalAvailableTime != Duration.zero &&
-          filteredStacks.length != 0) {
-        calculateWeights(filteredStacks, day);
+      if (filteredStacks.length == 0) {
+        return;
+      }
+
+      calculateWeights(filteredStacks, day);
+
+      while (day.totalAvailableTime != Duration.zero) {
         gap = day.times.last;
         //logger.t('chosen gap: ${gap.startTime} - ${gap.endTime}');
 
         newTimes.add(getTimeSlotWithUnit(gap, filteredStacks, day));
-        
+
         day.getTotalAvailableTime();
         //logger.w(day.totalAvailableTime);
 
-;
+        ;
       }
 
       day.times = newTimes;
@@ -140,7 +138,7 @@ class StudyPlanner {
     try {
       //logger.d('getTimeSlotWithUnit');
       Map<String, dynamic>? selectedUnit =
-          getUnitToFillGap(filteredStacks, gap, day.totalAvailableTime);
+          selectCourseAndUnit(filteredStacks, gap, day.totalAvailableTime);
 
       if (selectedUnit == null) {
         day.times.remove(gap);
@@ -209,24 +207,18 @@ class StudyPlanner {
     }
   }
 
-  int unitsAlreadyInDay(Day day, String courseID) {
-    //logger.d(unitsAlreadyInDay);
-    int count = 0;
-    for (TimeSlot slot in day.times) {
-      if (slot.courseID == courseID) count++;
-    }
-    //logger.f('units in Day: $count');
-    return count;
-  }
-
-  Map<String, dynamic>? getUnitToFillGap(
+  Map<String, dynamic>? selectCourseAndUnit(
       List<SchedulerStack> stacks, TimeSlot gap, Duration availableTime) {
     //logger.d('getUnitToFillGap');
     stacks.sort((a, b) => b.weight!.compareTo(a.weight!));
     late Map<String, dynamic>? selectedUnit;
 
     for (int i = 0; i < stacks.length; i++) {
-      selectedUnit = selectUnitInStack(stacks[i], gap, availableTime);
+      logger.w('Weight of ${stacks[i].course.name}: ${stacks[i].weight}');
+      if (i != stacks.length - 1 &&
+          (stacks[i].weight == stacks[i + 1].weight &&
+          stacks[i].unitsInDay > stacks[i + 1].unitsInDay)) continue;
+      selectedUnit = selectUnit(stacks[i], gap, availableTime);
 
       if (selectedUnit != null) {
         if (stacks[i].units.isEmpty) {
@@ -241,7 +233,7 @@ class StudyPlanner {
     return null;
   }
 
-  Map<String, dynamic>? selectUnitInStack(
+  Map<String, dynamic>? selectUnit(
       SchedulerStack stack, TimeSlot gap, Duration availableTime) {
     //logger.d('selectUnitInStack');
     //logger.d(availableTime);
@@ -249,7 +241,7 @@ class StudyPlanner {
       for (int i = stack.units.length - 1; i >= 0; i--) {
         final candidateUnit = stack.units[i];
         //logger.i('Candidate unit: ${candidateUnit.name}: ${candidateUnit.hours/ 3600} hours');
-        if (candidateUnit.sessionTime == Duration.zero) {
+        if (candidateUnit.sessionTime == Duration.zero || candidateUnit.completed == true) {
           continue;
         }
         if (candidateUnit.sessionTime <= availableTime) {
@@ -259,7 +251,8 @@ class StudyPlanner {
             'courseID': stack.course.id,
             'sessionInfo': '${stack.course.name}: ${candidateUnit.name}'
           };
-          if (candidateUnit.sessionTime == Duration.zero) stack.units.removeAt(i);
+          if (candidateUnit.sessionTime == Duration.zero)
+            stack.units.removeAt(i);
           return result;
         } else {
           if (stack.course.orderMatters) {
@@ -301,7 +294,6 @@ class StudyPlanner {
       final sessionHours = unit.sessionTime;
       //logger.w('$sessionHours, ${gap.duration}');
       if (sessionHours > (gap.duration)) {
-        
         unit.sessionTime -= gap.duration;
         //logger.w('Sessiontime: ${gap.duration}');
 
@@ -309,6 +301,9 @@ class StudyPlanner {
       } else {
         unit.sessionTime = Duration.zero;
         stack.weight = stack.weight! / 2;
+        stack.unitsInDay++;
+        logger.d(
+            'Stack ${stack.course.name} weight divided by 2! - ${stack.weight}');
 
         //logger.w('Sessiontime: ${sessionHours}');
 

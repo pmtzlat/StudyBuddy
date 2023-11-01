@@ -10,13 +10,14 @@ class SchedulerStack {
   int? daysUntilExam;
   double? weight;
   CourseModel course;
+  int unitsInDay = 0;
 
   SchedulerStack({required this.course});
 
   Future<void> initializeUnitsAndRevision(CourseModel course) async {
     try {
-      units = course.units!;
-      revisions = course.revisions;
+      units = course.units!.where((unit) => unit.completed == false).toList();
+      revisions = course.revisions.where((result) => result.completed == false).toList();
       daysUntilExam = getDaysUntilExam(course.examDate);
 
     } catch (e) {
