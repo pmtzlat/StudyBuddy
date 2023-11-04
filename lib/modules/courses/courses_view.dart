@@ -27,7 +27,7 @@ class _CoursesViewState extends State<CoursesView> {
     
     return instanceManager.scaffold.getScaffold(
         context: context,
-        activeIndex: 1,
+        activeIndex: 0,
         body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,

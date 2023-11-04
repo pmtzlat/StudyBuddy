@@ -10,9 +10,9 @@ class DayEventsWidget extends StatefulWidget {
 class _DayEventsWidgetState extends State<DayEventsWidget> {
 
   PageController _pageController =
-      PageController(initialPage: 0);
+      PageController(initialPage: 1);
 
-  List<Widget> pages = [];
+  List<Widget> pages = [Placeholder(), Placeholder(), Placeholder()];
   @override
   Widget build(BuildContext context) {
     return PageView(

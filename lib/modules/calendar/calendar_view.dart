@@ -23,7 +23,7 @@ class _CalendarViewState extends State<CalendarView> {
     final _localizations = AppLocalizations.of(context)!;
     return instanceManager.scaffold.getScaffold(
         context: context,
-        activeIndex: 2,
+        activeIndex: 1,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

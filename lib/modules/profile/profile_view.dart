@@ -24,7 +24,7 @@ class _ProfileViewState extends State<ProfileView> {
   Widget build(BuildContext context) {
     return instanceManager.scaffold.getScaffold(
       context: context,
-      activeIndex: 4,
+      activeIndex: 2,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

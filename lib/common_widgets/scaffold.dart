@@ -1,11 +1,8 @@
-import 'package:animations/animations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:study_buddy/modules/calendar/calendar_view.dart';
 import 'package:study_buddy/modules/courses/courses_view.dart';
-import 'package:study_buddy/modules/progress/progress_view.dart';
 import 'package:study_buddy/modules/profile/profile_view.dart';
-import 'package:study_buddy/modules/timer/timer_view.dart';
-import 'package:study_buddy/services/logging_service.dart';
 
 PageRouteBuilder<dynamic> fadePageRouteBuilder(
   Widget page,
@@ -87,8 +84,7 @@ class BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      type: BottomNavigationBarType
-          .fixed, 
+      type: BottomNavigationBarType.fixed,
       currentIndex: activeIndex,
       showSelectedLabels: false,
       showUnselectedLabels: false,
@@ -96,24 +92,19 @@ class BottomNavBar extends StatelessWidget {
         if (index != activeIndex) {
           switch (index) {
             case 0:
-              logger.i('Moved to Timer page');
-              Navigator.of(context).pushReplacement(fadePageRouteBuilder(TimerView()));
+              Navigator.of(context)
+                  .pushReplacement(fadePageRouteBuilder(CoursesView()));
 
               break;
             case 1:
-              Navigator.of(context).pushReplacement(fadePageRouteBuilder(CoursesView()));
+              Navigator.of(context)
+                  .pushReplacement(fadePageRouteBuilder(CalendarView()));
 
               break;
+
             case 2:
-              Navigator.of(context).pushReplacement(fadePageRouteBuilder(CalendarView()));
-
-              break;
-            case 3:
-              Navigator.of(context).pushReplacement(fadePageRouteBuilder(GraphsView()));
-
-              break;
-            case 4:
-              Navigator.of(context).pushReplacement(fadePageRouteBuilder(ProfileView()));
+              Navigator.of(context)
+                  .pushReplacement(fadePageRouteBuilder(ProfileView()));
 
               break;
           }
@@ -121,20 +112,12 @@ class BottomNavBar extends StatelessWidget {
       },
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Icon(Icons.timer),
-          label: 'Timer',
-        ),
-        BottomNavigationBarItem(
           icon: Icon(Icons.list),
           label: 'List',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.calendar_today),
           label: 'Calendar',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.auto_graph),
-          label: 'Graph',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),
