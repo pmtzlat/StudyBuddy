@@ -1,6 +1,6 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:study_buddy/modules/calendar/loaded_calendar_view.dart';
+import 'package:study_buddy/modules/calendar/calendar_view.dart';
 import 'package:study_buddy/modules/courses/courses_view.dart';
 import 'package:study_buddy/modules/progress/progress_view.dart';
 import 'package:study_buddy/modules/profile/profile_view.dart';
@@ -105,7 +105,7 @@ class BottomNavBar extends StatelessWidget {
 
               break;
             case 2:
-              Navigator.of(context).pushReplacement(fadePageRouteBuilder(LoadedCalendarView()));
+              Navigator.of(context).pushReplacement(fadePageRouteBuilder(CalendarView()));
 
               break;
             case 3:

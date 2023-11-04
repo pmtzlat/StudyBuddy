@@ -22,25 +22,6 @@ class CalendarController {
 
   void getGaps() async {
     instanceManager.sessionStorage.weeklyGaps = await _firebaseCrud.getGaps();
-
-    if (instanceManager.sessionStorage.weeklyGaps == null) {
-      addDefaultGaps();
-    }
-  }
-
-  void addDefaultGaps() async {
-    logger.i('Adding Default Gaps...');
-
-    for (var i = 0; i < 7; i++) {
-      final newSlot = TimeSlot(
-          weekday: i + 1,
-          startTime: TimeOfDay(hour: 0, minute: 0),
-          endTime: TimeOfDay(hour: 9, minute: 0),
-          courseID: 'free');
-
-      await instanceManager.firebaseCrudService.addTimeGap(timeSlot: newSlot);
-    }
-    instanceManager.sessionStorage.weeklyGaps = await _firebaseCrud.getGaps();
   }
 
   void calculateSchedule() async {
@@ -104,7 +85,19 @@ class CalendarController {
       return -1;
     }
   }
-  
+
+  void getCurrentDays() async {
+    try {
+      instanceManager.sessionStorage.loadedCalendarDays =
+          await _firebaseCrud.getCurrentDays(DateTime.now());
+      logger.i('Got current Days!');
+      for (var day in instanceManager.sessionStorage.loadedCalendarDays) {
+        logger.i(day.getString());
+      }
+    } catch (e) {
+      logger.e('Error getting current days (in calendarController): $e');
+    }
+  }
 
   Future<List<TimeSlot>> checkGapClash(TimeOfDay newStart, TimeOfDay newEnd,
       int weekday, List<TimeSlot> provisionalList) async {
@@ -135,7 +128,7 @@ class CalendarController {
           itemsToDeleteFromProvisionalList.add(i);
         }
       }
-      
+
       for (var index in itemsToDeleteFromProvisionalList) {
         provisionalList.removeAt(index);
       }
@@ -146,14 +139,12 @@ class CalendarController {
           endTime: newEnd,
           weekday: weekday));
 
-      
       return provisionalList;
     } catch (e) {
       logger.e('Error in check Gap Clash: $e');
       return [];
     }
   }
-
 
   Future<void> getCustomDays() async {
     final days = await _firebaseCrud.getCustomDays();
@@ -175,6 +166,11 @@ class CalendarController {
         if (await _firebaseCrud.findDate(date.toString())) {
           logger.e('Day Already in customdays list!');
           return 2;
+        }
+
+        if (customSchdule.isEmpty) {
+          logger.e('No timeSlots added to day!');
+          return 3;
         }
 
         Day customDay = Day(
@@ -229,5 +225,4 @@ class CalendarController {
   Future<int> deleteCustomDay(String dayID) async {
     return await _firebaseCrud.deleteCustomDay(dayID);
   }
-
 }

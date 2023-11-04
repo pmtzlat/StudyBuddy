@@ -47,7 +47,7 @@
     "nextDay":"Next Day",
     "calculateSchedule": "Calculate my Study Schedule!",
     "loadingSchedule": "Loading Schedule...",
-    "changeScheduleGaps": "Change Schedule Gaps",
+    "changeScheduleGaps": "Change your availability",
     "tryAgain":"Try Again",
     "inactiveCalendar": "You need to have courses to have an active calendar!",
     "errorDeletingGap": "Error deleting time gap!",
@@ -61,6 +61,7 @@
     "errorAddingCustomDay": "Error Adding Custom Day",
     "errorDeletingCustomDay": "Error deleting custom day!",
     "customDayDuplicate":"That day has already been created!",
+    "customDayEmpty": "You didn't add anything to that day!",
 
 
     "progressTitle" : "Progress",

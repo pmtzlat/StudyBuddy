@@ -5,7 +5,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:study_buddy/instance_manager.dart';
-import 'package:study_buddy/modules/calendar/loaded_calendar_view.dart';
+import 'package:study_buddy/modules/calendar/calendar_view.dart';
 import 'package:study_buddy/modules/progress/progress_view.dart';
 import 'package:study_buddy/modules/loader/loader.dart';
 import 'package:study_buddy/modules/profile/profile_view.dart';
@@ -37,6 +37,8 @@ void main() async {
   await instanceManager.courseController.getAllCourses();
   await instanceManager.calendarController.getGaps();
   await instanceManager.calendarController.getCustomDays();
+  await instanceManager.calendarController.getCurrentDays();
+  
   
   
   
@@ -77,7 +79,7 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
   
     return MaterialApp(
       title: 'StudyBuddy',
-      home: (user != null) ? LoadedCalendarView() : SignInView(),
+      home: (user != null) ? CalendarView() : SignInView(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color.fromARGB(255, 46, 46, 46)),

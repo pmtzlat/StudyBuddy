@@ -98,7 +98,8 @@ class FirebaseCrudService {
     }
   }
 
-  Future<List<UnitModel>?> getRevisionsForCourse({required String courseID}) async {
+  Future<List<UnitModel>?> getRevisionsForCourse(
+      {required String courseID}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     try {
@@ -133,6 +134,120 @@ class FirebaseCrudService {
     }
   }
 
+  Future<String?> addCalendarDay(Day day) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final userRef = firebaseInstance.collection('users').doc(uid);
+
+      final customDaysRef = userRef.collection('calendarDays');
+
+      final newDocumentRef = await customDaysRef.add({
+        'weekday': day.weekday,
+        'date': day.date.toString(),
+      });
+
+      await newDocumentRef.update({'id': newDocumentRef.id});
+
+      logger.i('Added calendar day: ${day.date}');
+
+      return newDocumentRef.id;
+    } catch (e) {
+      logger.e('Error adding calendar day: $e');
+    }
+  }
+
+  Future<List<Day>> getCurrentDays(DateTime date) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      Future<void> addDay(DateTime day, List<Day> result,
+          final userCalendarDaysCollection) async {
+        final querySnapshot = await userCalendarDaysCollection
+            .where('date', isEqualTo: date.toString())
+            .get();
+        if (querySnapshot.docs.isNotEmpty) {
+          final doc = querySnapshot.docs.first;
+          final matchingDay = Day(
+              weekday: doc['weekday'],
+              id: doc['id'],
+              date: DateTime.parse(doc['date'] as String),
+              times: <TimeSlot>[]);
+
+          if (matchingDay != null) {
+            result.add(matchingDay);
+          }
+        }
+      }
+
+      List<Day> result = [];
+
+      final userCalendarDaysCollection = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays');
+
+      addDay(
+          date.subtract(Duration(days: 1)), result, userCalendarDaysCollection);
+      addDay(date, result, userCalendarDaysCollection);
+      addDay(date.add(Duration(days: 1)), result, userCalendarDaysCollection);
+
+      return result;
+    } catch (e) {
+      logger.e('Error getting current days: $e');
+      return [];
+    }
+  }
+
+  Future<int> clearTimesForCalendarDay(String dayID) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final dayDocRef = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays')
+          .doc(dayID);
+
+      final timeSlotCollectionRef = dayDocRef.collection('timeSlots');
+      final timeSlotQuerySnapshot = await timeSlotCollectionRef.get();
+
+      for (final timeSlotDoc in timeSlotQuerySnapshot.docs) {
+        await timeSlotDoc.reference.delete();
+      }
+
+      return 1;
+    } catch (e) {
+      logger.e('Error clearing Times for day: $e');
+      return -1;
+    }
+  }
+
+  Future<int> deleteAllCalendarDays() async {
+    try {
+      final firebaseInstance = instanceManager.db;
+      final uid = instanceManager.localStorage.getString('uid');
+
+      final userCalendarDaysCollection = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays');
+
+      final querySnapshot = await userCalendarDaysCollection.get();
+
+      for (final doc in querySnapshot.docs) {
+        await clearTimesForCalendarDay(doc['id']);
+        await doc.reference.delete();
+      }
+      return 1;
+    } catch (e) {
+      logger.e('Error deleting calendar days: $e');
+      return -1;
+    }
+  }
 
   Future<int> deleteCourse({required String courseId}) async {
     final uid = instanceManager.localStorage.getString('uid');
@@ -164,7 +279,6 @@ class FirebaseCrudService {
       for (final revisionDoc in revisionQuerySnapshot.docs) {
         await revisionDoc.reference.delete();
       }
-
 
       await courseDocRef.delete();
 
@@ -205,7 +319,7 @@ class FirebaseCrudService {
       return null;
     }
   }
-  
+
   Future<String?> addRevisionToCourse(
       {required UnitModel newUnit, required String courseID}) async {
     try {
@@ -226,7 +340,8 @@ class FirebaseCrudService {
         'completed': newUnit.completed,
       };
 
-      final revisionRef = await courseRef.collection('revisions').add(revisionData);
+      final revisionRef =
+          await courseRef.collection('revisions').add(revisionData);
       await revisionRef.update({'id': revisionRef.id});
 
       return revisionRef.id;
@@ -238,13 +353,16 @@ class FirebaseCrudService {
   }
 
   Future<int> clearRevisionsForCourse(String courseID) async {
-
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
     try {
       if (uid != null) {
-        final courseDocRef = firebaseInstance.collection('users').doc(uid).collection('courses').doc(courseID);
+        final courseDocRef = firebaseInstance
+            .collection('users')
+            .doc(uid)
+            .collection('courses')
+            .doc(courseID);
 
         final revisionsCollectionRef = courseDocRef.collection('revisions');
 
@@ -263,7 +381,6 @@ class FirebaseCrudService {
       logger.e('Error deleting schedule: $e');
       return -1;
     }
-
   }
 
   Future<List<CourseModel>?> getAllCourses() async {
@@ -374,7 +491,7 @@ class FirebaseCrudService {
         'sessionTime': updatedUnit.sessionTime.toString(),
         'completed': updatedUnit.completed
       });
-      return 1; 
+      return 1;
     } catch (e) {
       logger.e('Error editing unit: $e');
       return -1;
@@ -425,7 +542,6 @@ class FirebaseCrudService {
             'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
             'courseID': timeSlot.courseID,
             'duration': timeSlot.duration.toString(),
-            
           });
 
           await newGapRef.update({'id': newGapRef.id});
@@ -490,14 +606,22 @@ class FirebaseCrudService {
     }
   }
 
-  Future<List<List<TimeSlot>>?> getGaps() async {
+  Future<List<List<TimeSlot>>> getGaps() async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
+    
 
     try {
       if ((await checkIfGapsExist(uid)) == false) {
-        logger.d('returning null...');
-        return null;
+        return [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+      ];
       }
       ;
 
@@ -514,9 +638,8 @@ class FirebaseCrudService {
       final userDoc = await firebaseInstance.collection('users').doc(uid).get();
 
       if (userDoc.exists) {
-        final timeSlotsDocRef = userDoc.reference
-            .collection('timeGaps')
-            .doc('timeGapsDoc');
+        final timeSlotsDocRef =
+            userDoc.reference.collection('timeGaps').doc('timeGapsDoc');
 
         for (var i = 0; i < 7; i++) {
           final weekday = weekDays[i];
@@ -541,10 +664,18 @@ class FirebaseCrudService {
       }
 
       logger.i('Got Gaps! $gaps');
-      return gaps as List<List<TimeSlot>>?;
+      return gaps as List<List<TimeSlot>>;
     } catch (e) {
       logger.e('Error getting Gaps: $e');
-      return null;
+      return [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+      ];
     }
   }
 
@@ -734,7 +865,41 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int> clearTimesForDay(String dayID) async {
+  Future<int> addTimeSlotToCalendarDay(String dayID, TimeSlot timeSlot) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final dayRef = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays')
+          .doc(dayID);
+
+      final Map<String, dynamic> timeSlotData = {
+        'weekday': timeSlot.weekday,
+        'startTime': timeSlot.timeOfDayToString(timeSlot.startTime),
+        'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
+        'duration': timeSlot.duration.toString(),
+        'courseID': timeSlot.courseID,
+        'unitID': timeSlot.unitID,
+        'courseName': timeSlot.courseName,
+        'unitName': timeSlot.unitName,
+        'id': ''
+      };
+
+      final timeSlotRef =
+          await dayRef.collection('timeSlots').add(timeSlotData);
+      await timeSlotRef.update({'id': timeSlotRef.id});
+
+      return 1;
+    } catch (e) {
+      logger.e('Error adding Time Slot: $e');
+      return -1;
+    }
+  }
+
+  Future<int> clearTimesForCustomDay(String dayID) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
@@ -764,7 +929,7 @@ class FirebaseCrudService {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
-      clearTimesForDay(dayID);
+      await clearTimesForCustomDay(dayID);
 
       final dayDocRef = firebaseInstance
           .collection('users')
@@ -834,6 +999,4 @@ class FirebaseCrudService {
       return <TimeSlot>[];
     }
   }
-
-  
 }

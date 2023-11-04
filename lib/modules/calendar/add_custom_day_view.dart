@@ -193,6 +193,10 @@ class _AddCustomDayViewState extends State<AddCustomDayView> {
                             showRedSnackbar(
                                 context, _localizations.customDayDuplicate);
                           }
+                          else if (res == 3) {
+                            showRedSnackbar(
+                                context, _localizations.customDayEmpty);
+                          }
                       Navigator.of(context).pop();
                       widget.refreshParent();
 

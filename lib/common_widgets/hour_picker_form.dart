@@ -131,8 +131,8 @@ class _DayFormState extends State<DayForm> {
                           final res = await _controller.addGap(
                               restraintFormKey,
                               weekday,
-                              instanceManager.sessionStorage
-                                  .weeklyGaps[weekday - 1],
+                              instanceManager
+                                  .sessionStorage.weeklyGaps[weekday - 1],
                               'generalGaps');
                           setState(() {});
                           if (res == -1) {
@@ -213,46 +213,44 @@ class _DayFormState extends State<DayForm> {
           ),
           Expanded(
             child: ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: instanceManager.sessionStorage
-                    .weeklyGaps[daysStrToNum[widget.day]].length,
-                itemBuilder: (context, index) {
-                  final timeSlot = instanceManager.sessionStorage
-                      .weeklyGaps[daysStrToNum[widget.day]][index];
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    itemCount: instanceManager.sessionStorage
+                        .weeklyGaps[daysStrToNum[widget.day]].length,
+                    itemBuilder: (context, index) {
+                      final timeSlot = instanceManager.sessionStorage
+                          .weeklyGaps[daysStrToNum[widget.day]][index];
 
-                  return Card(
-                    color: Colors.orange,
-                    child: Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.05),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                                '${timeSlot.timeOfDayToString(timeSlot.startTime)} - ${timeSlot.timeOfDayToString(timeSlot.endTime)}'),
-                            IconButton(
-                                onPressed: () async {
-                                  instanceManager
-                                      .sessionStorage
-                                      .weeklyGaps[
-                                          daysStrToNum[widget.day]]
-                                      .removeAt(index);
-                                  setState(() {});
-                                  final res = await _controller
-                                      .deleteGap(timeSlot);
-                                  if (res != 1) {
-                                    showRedSnackbar(context,
-                                        _localizations.errorDeletingGap);
-                                  }
-                                  await _controller.getGaps();
-                                  setState(() {});
-                                },
-                                icon: Icon(Icons.delete))
-                          ],
-                        )),
-                  );
-                }),
+                      return Card(
+                        color: Colors.orange,
+                        child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth * 0.05),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                    '${timeSlot.timeOfDayToString(timeSlot.startTime)} - ${timeSlot.timeOfDayToString(timeSlot.endTime)}'),
+                                IconButton(
+                                    onPressed: () async {
+                                      instanceManager.sessionStorage
+                                          .weeklyGaps[daysStrToNum[widget.day]]
+                                          .removeAt(index);
+                                      setState(() {});
+                                      final res =
+                                          await _controller.deleteGap(timeSlot);
+                                      if (res != 1) {
+                                        showRedSnackbar(context,
+                                            _localizations.errorDeletingGap);
+                                      }
+                                      await _controller.getGaps();
+                                      setState(() {});
+                                    },
+                                    icon: Icon(Icons.delete))
+                              ],
+                            )),
+                      );
+                    }),
           )
         ],
       ),

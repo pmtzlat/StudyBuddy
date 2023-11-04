@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:study_buddy/modules/calendar/loaded_calendar_view.dart';
+import 'package:study_buddy/modules/calendar/calendar_view.dart';
 
 import '../../common_widgets/scaffold.dart';
 import '../../main.dart';
@@ -10,7 +10,7 @@ class SignInController {
       await instanceManager.authService.signInWithGoogle();
 
       Navigator.of(context).pushReplacement(
-        fadePageRouteBuilder(LoadedCalendarView()),
+        fadePageRouteBuilder(CalendarView()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

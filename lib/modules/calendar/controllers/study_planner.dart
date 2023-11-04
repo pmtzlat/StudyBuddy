@@ -63,13 +63,32 @@ class StudyPlanner {
             weekday: loopDate.weekday,
             date: DateTime(
                 loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0));
+
       }
 
       if (!dayToAdd.date.isAfter(DateTime.now()) && generalStacks.length != 0) {
         return 'No time';
       }
 
-      //save days to db
+      if(await firebaseCrud.deleteAllCalendarDays() == -1){
+        return 'Error deleting all calendar days';
+      }
+      logger.i('Success deleting calendar Days!');
+      
+
+      for (var day in result) {
+        var dayID = await firebaseCrud.addCalendarDay(day);
+        if (dayID == null) {
+          return 'Failure writing days to Firebase';
+        }
+
+        var res = 1;
+        for (var timeSlot in day.times) {
+          res = await firebaseCrud.addTimeSlotToCalendarDay(dayID, timeSlot);
+
+          if (res == -1) return 'Error saving to FireBase';
+        }
+      }
 
       return 'Success';
     } catch (e) {
@@ -152,8 +171,10 @@ class StudyPlanner {
           weekday: day.weekday,
           startTime: startTime,
           endTime: gap.endTime,
-          courseName: selectedUnit['sessionInfo'],
-          courseID: selectedUnit['courseID']);
+          courseName: selectedUnit['sessionInfo'][0],
+          courseID: selectedUnit['courseID'],
+          unitName: selectedUnit['sessionInfo'][1],
+          unitID: selectedUnit['unitID']);
 
       gap.endTime = startTime;
       gap.calculateDuration(gap.startTime, gap.endTime);
@@ -214,10 +235,10 @@ class StudyPlanner {
     late Map<String, dynamic>? selectedUnit;
 
     for (int i = 0; i < stacks.length; i++) {
-      logger.w('Weight of ${stacks[i].course.name}: ${stacks[i].weight}');
+      //logger.w('Weight of ${stacks[i].course.name}: ${stacks[i].weight}');
       if (i != stacks.length - 1 &&
           (stacks[i].weight == stacks[i + 1].weight &&
-          stacks[i].unitsInDay > stacks[i + 1].unitsInDay)) continue;
+              stacks[i].unitsInDay > stacks[i + 1].unitsInDay)) continue;
       selectedUnit = selectUnit(stacks[i], gap, availableTime);
 
       if (selectedUnit != null) {
@@ -241,7 +262,8 @@ class StudyPlanner {
       for (int i = stack.units.length - 1; i >= 0; i--) {
         final candidateUnit = stack.units[i];
         //logger.i('Candidate unit: ${candidateUnit.name}: ${candidateUnit.hours/ 3600} hours');
-        if (candidateUnit.sessionTime == Duration.zero || candidateUnit.completed == true) {
+        if (candidateUnit.sessionTime == Duration.zero ||
+            candidateUnit.completed == true) {
           continue;
         }
         if (candidateUnit.sessionTime <= availableTime) {
@@ -249,7 +271,8 @@ class StudyPlanner {
             'unit': candidateUnit,
             'sessionTime': calculateSessionTime(candidateUnit, gap, stack),
             'courseID': stack.course.id,
-            'sessionInfo': '${stack.course.name}: ${candidateUnit.name}'
+            'sessionInfo': [stack.course.name,candidateUnit.name],
+            'unitID': candidateUnit.id
           };
           if (candidateUnit.sessionTime == Duration.zero)
             stack.units.removeAt(i);
@@ -273,15 +296,24 @@ class StudyPlanner {
             'unit': candidateRevision,
             'sessionTime': calculateSessionTime(candidateRevision, gap, stack),
             'courseID': stack.course.id,
-            'sessionInfo': '${stack.course.name}: ${candidateRevision.name}'
+            'sessionInfo': [stack.course.name, candidateRevision.name],
+            'unitID': candidateRevision.id
           };
           if (candidateRevision.sessionTime == Duration.zero)
             stack.revisions.removeAt(i);
           return result;
         } else {
-          if (stack.course.orderMatters) {
-            return null;
-          }
+          final result = {
+            'unit': candidateRevision,
+            'sessionTime': calculateSessionTime(candidateRevision, gap, stack),
+            'courseID': stack.course.id,
+            'sessionInfo': [stack.course.name, candidateRevision.name],
+            'unitID': candidateRevision.id
+          };
+          if (candidateRevision.sessionTime == Duration.zero)
+            stack.revisions.removeAt(i);
+          return result;
+          
         }
       }
     }
@@ -302,8 +334,8 @@ class StudyPlanner {
         unit.sessionTime = Duration.zero;
         stack.weight = stack.weight! / 2;
         stack.unitsInDay++;
-        logger.d(
-            'Stack ${stack.course.name} weight divided by 2! - ${stack.weight}');
+        //logger.d(
+          //  'Stack ${stack.course.name} weight divided by 2! - ${stack.weight}');
 
         //logger.w('Sessiontime: ${sessionHours}');
 
