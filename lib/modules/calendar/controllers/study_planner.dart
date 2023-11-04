@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:study_buddy/common_widgets/datatype_utils.dart';
+import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/course_model.dart';
 import 'package:study_buddy/models/day_model.dart';

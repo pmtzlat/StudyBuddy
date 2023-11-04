@@ -8,7 +8,7 @@ import 'package:study_buddy/models/course_model.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/models/unit_model.dart';
-import '../../../services/logging_service.dart';
+import '../../lib/services/logging_service.dart';
 
 class CoursesController {
   final firebaseCrud = instanceManager.firebaseCrudService;

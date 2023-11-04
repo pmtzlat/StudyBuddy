@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:study_buddy/common_widgets/datatype_utils.dart';
+import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
@@ -90,11 +90,7 @@ class CalendarController {
     try {
       instanceManager.sessionStorage.loadedCalendarDays =
           await _firebaseCrud.getCurrentDays(DateTime.now());
-      logger.i(
-          'Got current Days! ${instanceManager.sessionStorage.loadedCalendarDays.length}');
-      for (var day in instanceManager.sessionStorage.loadedCalendarDays) {
-        logger.i(day.getString());
-      }
+      
     } catch (e) {
       logger.e('Error getting current days (in calendarController): $e');
     }

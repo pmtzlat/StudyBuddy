@@ -62,6 +62,7 @@
     "errorDeletingCustomDay": "Error deleting custom day!",
     "customDayDuplicate":"That day has already been created!",
     "customDayEmpty": "You didn't add anything to that day!",
+    "noTimeSlotsInDay": "Free time!",
 
 
     "progressTitle" : "Progress",

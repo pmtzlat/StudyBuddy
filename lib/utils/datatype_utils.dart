@@ -30,6 +30,12 @@ TimeOfDay addDurationToTimeOfDay(TimeOfDay time, Duration duration) {
   return TimeOfDay(hour: newHour, minute: newMinute);
 }
 
+String timeOfDayToStr(TimeOfDay time) {
+  final hours = time.hour.toString().padLeft(2, '0');
+  final minutes = time.minute.toString().padLeft(2, '0');
+  return '$hours:$minutes';
+}
+
 bool stickyTime(
     String type, TimeOfDay timeInQuestion, TimeOfDay start, TimeOfDay end) {
   if (type == 'Start') {

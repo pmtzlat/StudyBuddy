@@ -63,7 +63,7 @@ class _CalendarViewState extends State<CalendarView> {
             ),
             Center(
               child: Container(
-                  height: screenHeight * 0.55,
+                  height: screenHeight * 0.584,
                   width: screenWidth * 0.8,
                   child: DayEventsWidget()),
             )

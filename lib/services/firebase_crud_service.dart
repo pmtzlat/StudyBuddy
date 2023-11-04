@@ -3,7 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:duration/duration.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:study_buddy/common_widgets/datatype_utils.dart';
+import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
@@ -658,10 +658,10 @@ class FirebaseCrudService {
               weekday: i + 1,
               startTime: stringToTimeOfDay24Hr(data['startTime']),
               endTime: stringToTimeOfDay24Hr(data['endTime']),
-              courseID: data['courseID'],
-              unitID: data['unitID'],
-              courseName: data['courseName'],
-              unitName: data['unitName'],
+              courseID: data['courseID'] ?? '',
+              unitID: data['unitID'] ?? '',
+              courseName: data['courseName'] ?? '',
+              unitName: data['unitName'] ?? '',
             );
             gaps[i].add(timeSlot);
           }
@@ -1049,7 +1049,6 @@ class FirebaseCrudService {
         return timeSlots;
       }
 
-      logger.i(dayID);
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 

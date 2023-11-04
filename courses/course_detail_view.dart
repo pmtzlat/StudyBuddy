@@ -7,10 +7,10 @@ import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/common_widgets/loading_screen.dart';
 import 'package:study_buddy/common_widgets/unit_card.dart';
 import 'package:study_buddy/services/logging_service.dart';
-import '../../main.dart';
+import '../lib/main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../models/course_model.dart';
+import '../lib/models/course_model.dart';
 
 class CourseDetailView extends StatefulWidget {
   CourseModel course;

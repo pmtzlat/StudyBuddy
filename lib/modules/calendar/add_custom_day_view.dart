@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl/intl.dart';
-import 'package:study_buddy/common_widgets/error_messages.dart';
+import 'package:study_buddy/utils/error_messages.dart';
 import 'package:study_buddy/common_widgets/hour_picker_form.dart';
 import 'package:study_buddy/main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
