@@ -90,7 +90,8 @@ class CalendarController {
     try {
       instanceManager.sessionStorage.loadedCalendarDays =
           await _firebaseCrud.getCurrentDays(DateTime.now());
-      logger.i('Got current Days!');
+      logger.i(
+          'Got current Days! ${instanceManager.sessionStorage.loadedCalendarDays.length}');
       for (var day in instanceManager.sessionStorage.loadedCalendarDays) {
         logger.i(day.getString());
       }

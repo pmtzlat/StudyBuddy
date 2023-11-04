@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:study_buddy/common_widgets/day_events_widget.dart';
 import 'package:study_buddy/common_widgets/scaffold.dart';
 import 'package:study_buddy/instance_manager.dart';
 import 'package:study_buddy/main.dart';
@@ -34,7 +35,7 @@ class _CalendarViewState extends State<CalendarView> {
               ),
             ),
             Container(
-              height: screenHeight*0.15,
+              height: screenHeight * 0.15,
               child: Column(
                 children: [
                   ElevatedButton.icon(
@@ -42,14 +43,14 @@ class _CalendarViewState extends State<CalendarView> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                RestrictionsDetailView(), 
+                            builder: (context) => RestrictionsDetailView(),
                           ),
                         );
                       },
                       icon: Icon(Icons.settings),
                       label: Text(_localizations.changeScheduleGaps)),
-                  (instanceManager.sessionStorage.activeCourses.length != 0) && (instanceManager.sessionStorage.weeklyGaps != null)
+                  (instanceManager.sessionStorage.activeCourses.length != 0) &&
+                          (instanceManager.sessionStorage.weeklyGaps != null)
                       ? ElevatedButton.icon(
                           onPressed: () async {
                             await _controller.calculateSchedule();
@@ -62,15 +63,10 @@ class _CalendarViewState extends State<CalendarView> {
             ),
             Center(
               child: Container(
-                height: screenHeight*0.55,
-                width: screenWidth*0.8,
-                color: Colors.yellow,
-            
-              ),
+                  height: screenHeight * 0.55,
+                  width: screenWidth * 0.8,
+                  child: DayEventsWidget()),
             )
-              
-
-
           ],
         ));
   }

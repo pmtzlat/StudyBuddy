@@ -163,10 +163,13 @@ class FirebaseCrudService {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
-      Future<void> addDay(DateTime day, List<Day> result,
-          final userCalendarDaysCollection) async {
+      Future<Day> _getDay(DateTime day) async {
+        final userCalendarDaysCollection = firebaseInstance
+            .collection('users')
+            .doc(uid)
+            .collection('calendarDays');
         final querySnapshot = await userCalendarDaysCollection
-            .where('date', isEqualTo: date.toString())
+            .where('date', isEqualTo: day.toString())
             .get();
         if (querySnapshot.docs.isNotEmpty) {
           final doc = querySnapshot.docs.first;
@@ -177,22 +180,25 @@ class FirebaseCrudService {
               times: <TimeSlot>[]);
 
           if (matchingDay != null) {
-            result.add(matchingDay);
+            matchingDay.times =
+                await getTimeSlotsForCalendarDay(matchingDay.id);
+            return matchingDay;
           }
         }
+
+        return Day(
+            weekday: day.weekday, date: day, id: day.toString(), times: []);
       }
 
       List<Day> result = [];
 
-      final userCalendarDaysCollection = firebaseInstance
-          .collection('users')
-          .doc(uid)
-          .collection('calendarDays');
+      DateTime justDay = DateTime(date.year, date.month, date.day, 0, 0, 0, 0);
 
-      addDay(
-          date.subtract(Duration(days: 1)), result, userCalendarDaysCollection);
-      addDay(date, result, userCalendarDaysCollection);
-      addDay(date.add(Duration(days: 1)), result, userCalendarDaysCollection);
+      result.add(await _getDay(justDay.subtract(Duration(days: 1))));
+      result.add(await _getDay(
+        justDay,
+      ));
+      result.add(await _getDay(justDay.add(Duration(days: 1))));
 
       return result;
     } catch (e) {
@@ -609,19 +615,18 @@ class FirebaseCrudService {
   Future<List<List<TimeSlot>>> getGaps() async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
-    
 
     try {
       if ((await checkIfGapsExist(uid)) == false) {
         return [
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-      ];
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+          [],
+        ];
       }
       ;
 
@@ -964,7 +969,7 @@ class FirebaseCrudService {
     }
   }
 
-  Future<List<TimeSlot>> getTimeSlotsForDay(String dayID) async {
+  Future<List<TimeSlot>> getTimeSlotsForCustomDay(String dayID) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
@@ -992,6 +997,87 @@ class FirebaseCrudService {
           unitName: data['unitName'],
         );
       }));
+
+      return timeSlotsList;
+    } catch (e) {
+      logger.e('Error gettimg timeSlots for day: $e');
+      return <TimeSlot>[];
+    }
+  }
+
+  Future<List<TimeSlot>> getTimeSlotsForCalendarDay(String dayID) async {
+    try {
+      List<TimeSlot> sortTimeSlots(List<TimeSlot> timeSlots) {
+        timeSlots.sort((a, b) {
+          final aStartHour = a.startTime.hour;
+          final aStartMinute = a.startTime.minute;
+          final bStartHour = b.startTime.hour;
+          final bStartMinute = b.startTime.minute;
+
+          if (aStartHour < bStartHour) {
+            return -1;
+          } else if (aStartHour > bStartHour) {
+            return 1;
+          } else {
+            if (aStartMinute < bStartMinute) {
+              return -1;
+            } else if (aStartMinute > bStartMinute) {
+              return 1;
+            } else {
+              final aEndHour = a.endTime.hour;
+              final aEndMinute = a.endTime.minute;
+              final bEndHour = b.endTime.hour;
+              final bEndMinute = b.endTime.minute;
+
+              if (aEndHour < bEndHour) {
+                return -1;
+              } else if (aEndHour > bEndHour) {
+                return 1;
+              } else {
+                if (aEndMinute < bEndMinute) {
+                  return -1;
+                } else if (aEndMinute > bEndMinute) {
+                  return 1;
+                } else {
+                  return 0;
+                }
+              }
+            }
+          }
+        });
+
+        return timeSlots;
+      }
+
+      logger.i(dayID);
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final timeSlotsCollection = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays')
+          .doc(dayID)
+          .collection('timeSlots');
+
+      final timeSlotsQuery = await timeSlotsCollection.get();
+
+      List<TimeSlot> timeSlotsList =
+          List<TimeSlot>.from(timeSlotsQuery.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return TimeSlot(
+          id: doc.id,
+          weekday: data['weekday'],
+          startTime: stringToTimeOfDay24Hr(data['startTime']),
+          endTime: stringToTimeOfDay24Hr(data['endTime']),
+          courseID: data['courseID'],
+          unitID: data['unitID'],
+          courseName: data['courseName'],
+          unitName: data['unitName'],
+        );
+      }));
+
+      timeSlotsList = sortTimeSlots(timeSlotsList);
 
       return timeSlotsList;
     } catch (e) {

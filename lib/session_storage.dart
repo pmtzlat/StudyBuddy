@@ -5,7 +5,6 @@ import 'package:study_buddy/models/time_slot_model.dart';
 class SessionStorage {
   List<CourseModel>? savedCourses;
   List<CourseModel>? activeCourses;
-  int calendarBeginPage = 0;
 
   //NEEDS: a varibale that saves wether the calendar needs recalculating
   // after a new course is added!!
@@ -16,7 +15,7 @@ class SessionStorage {
 
   List<Day> loadedCalendarDays = [];
 
-  
+
 
   var savedWeekday = 0;
   int? schedulePresent;

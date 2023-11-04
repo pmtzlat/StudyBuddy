@@ -8,8 +8,18 @@ class DayEventsWidget extends StatefulWidget {
 }
 
 class _DayEventsWidgetState extends State<DayEventsWidget> {
+
+  PageController _pageController =
+      PageController(initialPage: 0);
+
+  List<Widget> pages = [];
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return PageView(
+      controller: _pageController,
+      scrollDirection: Axis.horizontal,
+      children: pages,
+
+    );
   }
 }
