@@ -158,52 +158,38 @@ class FirebaseCrudService {
     }
   }
 
-  Future<List<Day>> getCurrentDays(DateTime date) async {
+  Future<Day> getCalendarDay(DateTime date) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
-      Future<Day> _getDay(DateTime day) async {
-        final userCalendarDaysCollection = firebaseInstance
-            .collection('users')
-            .doc(uid)
-            .collection('calendarDays');
-        final querySnapshot = await userCalendarDaysCollection
-            .where('date', isEqualTo: day.toString())
-            .get();
-        if (querySnapshot.docs.isNotEmpty) {
-          final doc = querySnapshot.docs.first;
-          final matchingDay = Day(
-              weekday: doc['weekday'],
-              id: doc['id'],
-              date: DateTime.parse(doc['date'] as String),
-              times: <TimeSlot>[]);
+      final userCalendarDaysCollection = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays');
+      final querySnapshot = await userCalendarDaysCollection
+          .where('date', isEqualTo: date.toString())
+          .get();
+      if (querySnapshot.docs.isNotEmpty) {
+        final doc = querySnapshot.docs.first;
+        final matchingDay = Day(
+            weekday: doc['weekday'],
+            id: doc['id'],
+            date: DateTime.parse(doc['date'] as String),
+            times: <TimeSlot>[]);
 
-          if (matchingDay != null) {
-            matchingDay.times =
-                await getTimeSlotsForCalendarDay(matchingDay.id);
-            return matchingDay;
-          }
+        if (matchingDay != null) {
+          matchingDay.times = await getTimeSlotsForCalendarDay(matchingDay.id);
+          return matchingDay;
         }
-
-        return Day(
-            weekday: day.weekday, date: day, id: day.toString(), times: []);
       }
 
-      List<Day> result = [];
-
-      DateTime justDay = DateTime(date.year, date.month, date.day, 0, 0, 0, 0);
-
-      result.add(await _getDay(justDay.subtract(Duration(days: 1))));
-      result.add(await _getDay(
-        justDay,
-      ));
-      result.add(await _getDay(justDay.add(Duration(days: 1))));
-
-      return result;
+      return Day(
+          weekday: date.weekday, date: date, id: date.toString(), times: []);
     } catch (e) {
       logger.e('Error getting current days: $e');
-      return [];
+      return Day(
+          weekday: date.weekday, date: date, id: date.toString(), times: []);
     }
   }
 

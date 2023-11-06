@@ -27,7 +27,7 @@ class _CourseCardState extends State<CourseCard> {
           barrierDismissible: true,
           barrierLabel:
               MaterialLocalizations.of(context).modalBarrierDismissLabel,
-          barrierColor: Colors.black.withOpacity(0.5),
+          barrierColor: Colors.transparent,
 
           transitionDuration: Duration(milliseconds: 200),
 

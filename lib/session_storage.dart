@@ -13,9 +13,11 @@ class SessionStorage {
   List<Day> customDays = [];
   List<Day> activeCustomDays = [];
 
-  List<Day> loadedCalendarDays = [];
+  Day loadedCalendarDay = Day(
+      date: DateTime.now(), weekday: DateTime.now().weekday, id: 'Placeholder');
 
-
+  DateTime currentDay = DateTime.now();
+  bool dayLoaded = false;
 
   var savedWeekday = 0;
   int? schedulePresent;

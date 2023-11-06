@@ -86,11 +86,17 @@ class CalendarController {
     }
   }
 
-  void getCurrentDays() async {
+  void getCalendarDay(DateTime date) async {
     try {
-      instanceManager.sessionStorage.loadedCalendarDays =
-          await _firebaseCrud.getCurrentDays(DateTime.now());
-      
+      instanceManager.sessionStorage.currentDay =
+          DateTime(date.year, date.month, date.day);
+      var savedDate = instanceManager.sessionStorage.currentDay;
+      instanceManager.sessionStorage.loadedCalendarDay =
+          await _firebaseCrud.getCalendarDay(savedDate);
+
+      instanceManager.sessionStorage.dayLoaded = true;
+      logger.i(
+          'Got current Day! ${instanceManager.sessionStorage.loadedCalendarDay.getString()}');
     } catch (e) {
       logger.e('Error getting current days (in calendarController): $e');
     }

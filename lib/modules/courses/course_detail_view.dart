@@ -46,16 +46,13 @@ class _CourseDetailViewState extends State<CourseDetailView> {
     final _localizations = AppLocalizations.of(context)!;
     
 
-    return instanceManager.scaffold.getScaffold(
-        context: context,
-        activeIndex: 1,
-        body: Center(
+    return Center(
         child: SingleChildScrollView(
           child: Card(
             color: Colors.lightBlue,
             child: Container(
               height: screenHeight * 0.8,
-              width: screenWidth * 0.9,
+              width: screenWidth * 0.95,
               padding: EdgeInsets.all(30),
               child: editMode == false
                   ? Column(
@@ -214,7 +211,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
             ),
           ),
         ),
-      ),
+      
     );
   }
 

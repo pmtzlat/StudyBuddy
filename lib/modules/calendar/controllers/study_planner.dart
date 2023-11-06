@@ -63,18 +63,16 @@ class StudyPlanner {
             weekday: loopDate.weekday,
             date: DateTime(
                 loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0));
-
       }
 
       if (!dayToAdd.date.isAfter(DateTime.now()) && generalStacks.length != 0) {
         return 'No time';
       }
 
-      if(await firebaseCrud.deleteAllCalendarDays() == -1){
+      if (await firebaseCrud.deleteAllCalendarDays() == -1) {
         return 'Error deleting all calendar days';
       }
       logger.i('Success deleting calendar Days!');
-      
 
       for (var day in result) {
         var dayID = await firebaseCrud.addCalendarDay(day);
@@ -84,9 +82,11 @@ class StudyPlanner {
 
         var res = 1;
         for (var timeSlot in day.times) {
-          res = await firebaseCrud.addTimeSlotToCalendarDay(dayID, timeSlot);
+          if (timeSlot.courseID != 'free') {
+            res = await firebaseCrud.addTimeSlotToCalendarDay(dayID, timeSlot);
 
-          if (res == -1) return 'Error saving to FireBase';
+            if (res == -1) return 'Error saving to FireBase';
+          }
         }
       }
 
@@ -271,7 +271,7 @@ class StudyPlanner {
             'unit': candidateUnit,
             'sessionTime': calculateSessionTime(candidateUnit, gap, stack),
             'courseID': stack.course.id,
-            'sessionInfo': [stack.course.name,candidateUnit.name],
+            'sessionInfo': [stack.course.name, candidateUnit.name],
             'unitID': candidateUnit.id
           };
           if (candidateUnit.sessionTime == Duration.zero)
@@ -313,7 +313,6 @@ class StudyPlanner {
           if (candidateRevision.sessionTime == Duration.zero)
             stack.revisions.removeAt(i);
           return result;
-          
         }
       }
     }
@@ -335,7 +334,7 @@ class StudyPlanner {
         stack.weight = stack.weight! / 2;
         stack.unitsInDay++;
         //logger.d(
-          //  'Stack ${stack.course.name} weight divided by 2! - ${stack.weight}');
+        //  'Stack ${stack.course.name} weight divided by 2! - ${stack.weight}');
 
         //logger.w('Sessiontime: ${sessionHours}');
 

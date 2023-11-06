@@ -30,7 +30,7 @@ void main() async {
   await instanceManager.courseController.getAllCourses();
   await instanceManager.calendarController.getGaps();
   await instanceManager.calendarController.getCustomDays();
-  await instanceManager.calendarController.getCurrentDays();
+  await instanceManager.calendarController.getCalendarDay(DateTime.now());
   
   
   
