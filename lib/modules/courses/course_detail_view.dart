@@ -145,7 +145,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                         AutovalidateMode.onUserInteraction,
                                     inputType: InputType.date,
                                     enabled: true,
-                                    initialDate: widget.course.examDate,
+                                    initialValue: widget.course.examDate,
                                     decoration: InputDecoration(
                                         labelText: _localizations.examDate),
                                     style: TextStyle(

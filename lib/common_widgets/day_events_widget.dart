@@ -16,8 +16,7 @@ class _DayEventsWidgetState extends State<DayEventsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return  CalendarDayTimes(
-              day: instanceManager.sessionStorage.loadedCalendarDay);
+    return  CalendarDayTimes();
        
   }
 }

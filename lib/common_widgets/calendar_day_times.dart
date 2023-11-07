@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:intl/intl.dart';
 import 'package:study_buddy/common_widgets/time_slot_card.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/day_model.dart';
@@ -8,9 +10,9 @@ import 'package:study_buddy/modules/loader/loader.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 class CalendarDayTimes extends StatefulWidget {
-  Day day;
-
-  CalendarDayTimes({super.key, required this.day});
+  CalendarDayTimes({
+    super.key,
+  });
 
   @override
   State<CalendarDayTimes> createState() => _CalendarDayTimesState();
@@ -18,11 +20,21 @@ class CalendarDayTimes extends StatefulWidget {
 
 class _CalendarDayTimesState extends State<CalendarDayTimes> {
   final _controller = instanceManager.calendarController;
+  final dayFormKey = GlobalKey<FormBuilderState>();
+  late Day day;
+
+  @override
+  void initState() {
+    super.initState();
+    day = instanceManager.sessionStorage.loadedCalendarDay;
+  }
 
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
+    var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
+    logger.i(day);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -38,14 +50,19 @@ class _CalendarDayTimesState extends State<CalendarDayTimes> {
 
                 await _controller
                     .getCalendarDay(instanceManager.sessionStorage.currentDay);
-                widget.day = instanceManager.sessionStorage.loadedCalendarDay;
-                setState(() {
-                });
+                day = instanceManager.sessionStorage.loadedCalendarDay;
+                setState(() {});
               },
               icon: Icon(Icons.arrow_left),
             ),
-            Text(
-                '${widget.day.date.day} - ${widget.day.date.month} - ${widget.day.date.year}'),
+            GestureDetector(
+              child: Text(
+                  '${day.date.day} - ${day.date.month} - ${day.date.year}'),
+              onTap: () {
+                logger.i(day.date);
+                _showDatePicker(context);
+              },
+            ),
             IconButton(
               onPressed: () async {
                 instanceManager.sessionStorage.currentDay = instanceManager
@@ -54,9 +71,8 @@ class _CalendarDayTimesState extends State<CalendarDayTimes> {
 
                 await _controller
                     .getCalendarDay(instanceManager.sessionStorage.currentDay);
-                widget.day = instanceManager.sessionStorage.loadedCalendarDay;
-                setState(() {
-                });
+                day = instanceManager.sessionStorage.loadedCalendarDay;
+                setState(() {});
               },
               icon: Icon(Icons.arrow_right),
             )
@@ -65,9 +81,33 @@ class _CalendarDayTimesState extends State<CalendarDayTimes> {
         TimeShower(
             screenHeight: screenHeight,
             localizations: _localizations,
-            times: widget.day.times)
+            times: day.times)
       ],
     );
+  }
+
+  Future<void> _showDatePicker(BuildContext context) async {
+    final DateTime? selectedDate = await showDatePicker(
+      context: context,
+      initialDate: day.date,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light(),
+          child: child!,
+        );
+      },
+    );
+
+    if (selectedDate != null) {
+      instanceManager.sessionStorage.currentDay = selectedDate;
+
+      await _controller
+          .getCalendarDay(instanceManager.sessionStorage.currentDay);
+      day = instanceManager.sessionStorage.loadedCalendarDay;
+      setState(() {});
+    }
   }
 }
 
