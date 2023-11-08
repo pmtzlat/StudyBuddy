@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:study_buddy/common_widgets/day_events_widget.dart';
+import 'package:study_buddy/common_widgets/calendar_day_times.dart';
 import 'package:study_buddy/common_widgets/scaffold.dart';
 import 'package:study_buddy/instance_manager.dart';
 import 'package:study_buddy/main.dart';
@@ -16,6 +16,9 @@ class CalendarView extends StatefulWidget {
 
 class _CalendarViewState extends State<CalendarView> {
   final _controller = instanceManager.calendarController;
+  GlobalKey<CalendarDayTimesState> _timesKey = GlobalKey();
+  late CalendarDayTimes events = CalendarDayTimes(key: _timesKey);
+
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
@@ -54,6 +57,10 @@ class _CalendarViewState extends State<CalendarView> {
                       ? ElevatedButton.icon(
                           onPressed: () async {
                             await _controller.calculateSchedule();
+
+                            setState(() {
+                              _timesKey.currentState!.update();
+                            });
                           },
                           icon: Icon(Icons.calculate),
                           label: Text('calculate schedule'))
@@ -65,7 +72,7 @@ class _CalendarViewState extends State<CalendarView> {
               child: Container(
                   height: screenHeight * 0.584,
                   width: screenWidth * 0.8,
-                  child: DayEventsWidget()),
+                  child: events),
             )
           ],
         ));

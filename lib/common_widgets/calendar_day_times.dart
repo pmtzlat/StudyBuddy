@@ -11,14 +11,14 @@ import 'package:study_buddy/services/logging_service.dart';
 
 class CalendarDayTimes extends StatefulWidget {
   CalendarDayTimes({
-    super.key,
-  });
+    required Key key,
+  }) : super(key: key);
 
   @override
-  State<CalendarDayTimes> createState() => _CalendarDayTimesState();
+  State<CalendarDayTimes> createState() => CalendarDayTimesState();
 }
 
-class _CalendarDayTimesState extends State<CalendarDayTimes> {
+class CalendarDayTimesState extends State<CalendarDayTimes> {
   final _controller = instanceManager.calendarController;
   final dayFormKey = GlobalKey<FormBuilderState>();
   late Day day;
@@ -29,12 +29,18 @@ class _CalendarDayTimesState extends State<CalendarDayTimes> {
     day = instanceManager.sessionStorage.loadedCalendarDay;
   }
 
+  void update() {
+    setState(() {
+      day = instanceManager.sessionStorage.loadedCalendarDay;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    logger.i(day);
+
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -60,7 +66,7 @@ class _CalendarDayTimesState extends State<CalendarDayTimes> {
                   '${day.date.day} - ${day.date.month} - ${day.date.year}'),
               onTap: () {
                 logger.i(day.date);
-                _showDatePicker(context);
+                _showDatePicker(context, day);
               },
             ),
             IconButton(
@@ -86,7 +92,7 @@ class _CalendarDayTimesState extends State<CalendarDayTimes> {
     );
   }
 
-  Future<void> _showDatePicker(BuildContext context) async {
+  Future<void> _showDatePicker(BuildContext context, Day day) async {
     final DateTime? selectedDate = await showDatePicker(
       context: context,
       initialDate: day.date,

@@ -16,6 +16,27 @@ bool isTimeBefore(TimeOfDay time1, TimeOfDay time2) {
   return res;
 }
 
+DateTime stripTime(DateTime dateTime) {
+  return DateTime(dateTime.year, dateTime.month, dateTime.day);
+}
+
+bool areDatesEqual(DateTime dateTime1, DateTime dateTime2) {
+  return dateTime1.year == dateTime2.year &&
+         dateTime1.month == dateTime2.month &&
+         dateTime1.day == dateTime2.day;
+}
+
+bool isSecondDayNext(DateTime firstDateTime, DateTime secondDateTime) {
+  final firstDate =
+      DateTime(firstDateTime.year, firstDateTime.month, firstDateTime.day);
+  final secondDate =
+      DateTime(secondDateTime.year, secondDateTime.month, secondDateTime.day);
+
+  final differenceInDays = secondDate.difference(firstDate).inDays;
+
+  return differenceInDays == 1;
+}
+
 TimeOfDay addDurationToTimeOfDay(TimeOfDay time, Duration duration) {
   int totalMinutes = time.hour * 60 + time.minute;
 

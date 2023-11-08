@@ -25,7 +25,8 @@ class CalendarController {
   }
 
   void calculateSchedule() async {
-    logger.i(await instanceManager.studyPlanner.calculateSchedule());
+    logger.i('Result of calculating new schedule: ${await instanceManager.studyPlanner.calculateSchedule()}');
+    await getCalendarDay(stripTime(DateTime.now()));
   }
 
   Future<int?> deleteGap(TimeSlot timeSlot) async {
@@ -86,7 +87,7 @@ class CalendarController {
     }
   }
 
-  void getCalendarDay(DateTime date) async {
+  Future<void> getCalendarDay(DateTime date) async {
     try {
       instanceManager.sessionStorage.currentDay =
           DateTime(date.year, date.month, date.day);

@@ -21,7 +21,7 @@ class _RestrictionsDetailViewState extends State<RestrictionsDetailView> {
 
     return instanceManager.scaffold.getScaffold(
         context: context,
-        activeIndex: 2,
+        activeIndex: 1,
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

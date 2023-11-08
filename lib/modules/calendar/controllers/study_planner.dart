@@ -52,7 +52,7 @@ class StudyPlanner {
 
         await fillDayWithSessions(dayToAdd, generalStacks);
 
-        logger.e(dayToAdd.getString());
+        logger.w(dayToAdd.getString());
 
         result.insert(0, dayToAdd);
         loopDate = loopDate.subtract(Duration(days: 1));
@@ -65,7 +65,21 @@ class StudyPlanner {
                 loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0));
       }
 
-      if (!dayToAdd.date.isAfter(DateTime.now()) && generalStacks.length != 0) {
+      final now = DateTime.now();
+      
+
+      if (areDatesEqual(dayToAdd.date, now)) {
+            
+        final newStart = now.add(Duration(hours: 1));
+        if (!isSecondDayNext(now, newStart)) {
+          dayToAdd.headStart(dateTimeToTimeOfDay(newStart));
+          await fillDayWithSessions(dayToAdd, generalStacks);
+          logger.w(dayToAdd.getString());
+          result.insert(0, dayToAdd);
+        }
+      }
+
+      if (generalStacks.length != 0) {
         return 'No time';
       }
 
