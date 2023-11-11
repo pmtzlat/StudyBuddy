@@ -49,6 +49,8 @@ class StudyPlanner {
       while (
           generalStacks.length != 0 && dayToAdd!.date.isAfter(DateTime.now())) {
         //logger.f(dayToAdd.getString());
+        await dayToAdd.getGaps();
+        dayToAdd.getTotalAvailableTime();
 
         await fillDayWithSessions(dayToAdd, generalStacks);
 
@@ -66,13 +68,15 @@ class StudyPlanner {
       }
 
       final now = DateTime.now();
-      
 
-      if (areDatesEqual(dayToAdd.date, now)) {
-            
+      if (areDatesEqual(dayToAdd.date, now) && generalStacks.length != 0) {
         final newStart = now.add(Duration(hours: 1));
         if (!isSecondDayNext(now, newStart)) {
-          dayToAdd.headStart(dateTimeToTimeOfDay(newStart)); // this doesn't work right. It gives back shit before 9 when my current time is 9.
+          await dayToAdd.getGaps();
+          dayToAdd.headStart(dateTimeToTimeOfDay(newStart));
+          dayToAdd.getTotalAvailableTime();
+
+          //logger.d(dayToAdd.getString());
           await fillDayWithSessions(dayToAdd, generalStacks);
           logger.w(dayToAdd.getString());
           result.insert(0, dayToAdd);
@@ -113,8 +117,7 @@ class StudyPlanner {
   Future<void> fillDayWithSessions(Day day, List<SchedulerStack> stacks) async {
     try {
       //logger.d('fillDayWithSessions');
-      await day.getGaps();
-      day.getTotalAvailableTime();
+
       //logger.w(day.getString());
       //logger.w(day.totalAvailableTime);
 
