@@ -31,8 +31,11 @@ void main() async {
   await instanceManager.calendarController.getGaps();
   await instanceManager.calendarController.getCustomDays();
   await instanceManager.calendarController.getCalendarDay(now);
-  synced = await instanceManager.localStorageCustomOperations.updateDateHandling();
-  if (synced == 1) await instanceManager.courseController.updateUnitCompletion();
+  synced =
+      await instanceManager.localStorageCustomOperations.updateDateHandling();
+  if (synced == 1) {
+    await instanceManager.courseController.updateUnitCompletion();
+  }
 
   runApp(StudyBuddyApp());
 }
@@ -61,27 +64,24 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
     logger
         .i('Got all courses! ${instanceManager.sessionStorage.activeCourses}');
 
-    if(synced != 1){
-
+    if (synced != 1) {
       return MaterialApp(
-      title: 'StudyBuddy',
-      home: DesyncView(),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 46, 46, 46)),
-        useMaterial3: true,
-      ),
-      supportedLocales: [Locale('es'), Locale('en')],
-      localizationsDelegates: [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        FormBuilderLocalizations.delegate,
-      ],
-    );
-
-
+        title: 'StudyBuddy',
+        home: DesyncView(),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color.fromARGB(255, 46, 46, 46)),
+          useMaterial3: true,
+        ),
+        supportedLocales: [Locale('es'), Locale('en')],
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          FormBuilderLocalizations.delegate,
+        ],
+      );
     }
 
     return MaterialApp(

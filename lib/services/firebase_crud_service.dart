@@ -532,7 +532,7 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int?> addTimeGap({required TimeSlot timeSlot}) async {
+  Future<int?> addGeneralTimeSlot({required TimeSlot timeSlot}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -665,6 +665,7 @@ class FirebaseCrudService {
               unitID: data['unitID'] ?? '',
               courseName: data['courseName'] ?? '',
               unitName: data['unitName'] ?? '',
+              completed: data['completed'] ?? false,
             );
             gaps[i].add(timeSlot);
           }
@@ -859,6 +860,7 @@ class FirebaseCrudService {
         'unitID': timeSlot.unitID,
         'courseName': timeSlot.courseName,
         'unitName': timeSlot.unitName,
+        'completed': timeSlot.completed,
         'id': ''
       };
 
@@ -893,6 +895,7 @@ class FirebaseCrudService {
         'unitID': timeSlot.unitID,
         'courseName': timeSlot.courseName,
         'unitName': timeSlot.unitName,
+        'completed': timeSlot.completed,
         'id': ''
       };
 
@@ -998,6 +1001,7 @@ class FirebaseCrudService {
           unitID: data['unitID'],
           courseName: data['courseName'],
           unitName: data['unitName'],
+          completed: data['completed'] ?? false,
         );
       }));
 
@@ -1076,6 +1080,7 @@ class FirebaseCrudService {
           unitID: data['unitID'],
           courseName: data['courseName'],
           unitName: data['unitName'],
+          completed: data['completed'] ?? false,
         );
       }));
 
@@ -1129,4 +1134,89 @@ class FirebaseCrudService {
       return -1;
     }
   }
+
+  Future<int> markCalendarTimeSlotAsComplete(String dayID, String timeSlotID) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final timeSlotReference = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays')
+          .doc(dayID)
+          .collection('timeSlots')
+          .doc(timeSlotID);
+
+      await timeSlotReference.update({'completed': true});
+      return 1;
+    } catch (e) {
+      logger.e('Error marking timeSlot as complete: $e');
+      return -1;
+    }
+  }
+
+Future<int> markUnitAsIncomplete(String courseID, String unitID) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final unitReference = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('courses')
+          .doc(courseID)
+          .collection('units')
+          .doc(unitID);
+
+      final unitSnapshot = await unitReference.get();
+
+      if (unitSnapshot.exists) {
+        await unitReference.update({'completed': false});
+      } else {
+        final revisionReference = firebaseInstance
+            .collection('users')
+            .doc(uid)
+            .collection('courses')
+            .doc(courseID)
+            .collection('revisions')
+            .doc(unitID);
+
+        final revisionSnapshot = await revisionReference.get();
+
+        if (revisionSnapshot.exists) {
+          await revisionReference.update({'completed': false});
+        } else {
+          return -1;
+        }
+      }
+      logger.i('Changed unit to incomplete!');
+      return 1;
+    } catch (e) {
+      logger.e('Error marking Unit as completed: $e');
+      return -1;
+    }
+  }
+
+  Future<int> markCalendarTimeSlotAsIncomplete(String dayID, String timeSlotID) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final timeSlotReference = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays')
+          .doc(dayID)
+          .collection('timeSlots')
+          .doc(timeSlotID);
+
+      await timeSlotReference.update({'completed': false});
+      return 1;
+    } catch (e) {
+      logger.e('Error marking timeSlot as complete: $e');
+      return -1;
+    }
+  }
+
 }

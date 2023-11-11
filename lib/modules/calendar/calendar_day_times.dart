@@ -87,7 +87,8 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
         TimeShower(
             screenHeight: screenHeight,
             localizations: _localizations,
-            times: day.times)
+            times: day.times,
+            updateParent: update,)
       ],
     );
   }
@@ -122,18 +123,24 @@ class TimeShower extends StatefulWidget {
       {super.key,
       required this.screenHeight,
       required AppLocalizations localizations,
-      required this.times})
+      required this.times,
+      required this.updateParent})
       : _localizations = localizations;
 
   final double screenHeight;
   final AppLocalizations _localizations;
   final List<TimeSlot> times;
+  final Function updateParent;
 
   @override
   State<TimeShower> createState() => _TimeShowerState();
 }
 
 class _TimeShowerState extends State<TimeShower> {
+
+  void update(){
+    widget.updateParent();
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -148,7 +155,7 @@ class _TimeShowerState extends State<TimeShower> {
                   itemCount: widget.times.length,
                   itemBuilder: (context, index) {
                     var timeSlot = widget.times[index];
-                    return TimeSlotCard(timeSlot: timeSlot);
+                    return TimeSlotCard(timeSlot: timeSlot, updateParent: update,);
                   }),
             ),
     );

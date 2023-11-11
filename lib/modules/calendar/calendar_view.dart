@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:study_buddy/common_widgets/calendar_day_times.dart';
+import 'package:study_buddy/modules/calendar/calendar_day_times.dart';
 import 'package:study_buddy/common_widgets/scaffold.dart';
 import 'package:study_buddy/instance_manager.dart';
 import 'package:study_buddy/main.dart';

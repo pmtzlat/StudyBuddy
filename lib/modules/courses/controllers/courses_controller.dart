@@ -107,7 +107,7 @@ class CoursesController {
             .currentState!.fields['examDate']!.value
             .toString());
 
-        if (examDate.isAfter(instanceManager.now)) {
+        if (examDate.isAfter(DateTime.now())) {
           final name = courseCreationFormKey
               .currentState!.fields['courseName']!.value
               .toString();
@@ -313,13 +313,16 @@ class CoursesController {
         //logger.i('Marking unit ${timeSlot.unitName} ${timeSlot.unitID} as complete...');
         int res = await firebaseCrud.markUnitAsComplete(course, unit);
         if (res != 1) return -1;
+        res = await firebaseCrud.markCalendarTimeSlotAsComplete(course, unit);
+        if (res != 1) return -1;
 
         //logger.i('Unit ${timeSlot.unitName} marked as complete');
       }
 
       return 1;
     } catch (e) {
-      logger.e('Error marking units complete for day ${date}: $e');
+      logger.e('Error marking units completed for day ${date}: $e');
+      await instanceManager.localStorage.setString('newDate', instanceManager.localStorage.getString('oldDate'));
       return -1;
     }
   }
