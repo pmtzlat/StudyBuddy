@@ -9,6 +9,14 @@ class SignInController {
     try {
       await instanceManager.authService.signInWithGoogle();
 
+      await instanceManager.startDependantInstances();
+
+      await instanceManager.courseController.getAllCourses();
+      await instanceManager.calendarController.getGaps();
+      await instanceManager.calendarController.getCustomDays();
+      await instanceManager.calendarController.getCalendarDay(now);
+      await instanceManager.localStorageCustomOperations.updateDateHandling();
+
       Navigator.of(context).pushReplacement(
         fadePageRouteBuilder(CalendarView()),
       );

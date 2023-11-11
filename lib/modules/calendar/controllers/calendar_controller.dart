@@ -221,12 +221,16 @@ class CalendarController {
   }
 
   Future<void> getTimeSlotsForDay(Day day) async {
+    
     final times = await _firebaseCrud.getTimeSlotsForDay(day.id);
     day.times = times;
     if (day.times == null) day.times = [];
+
   }
 
   Future<int> deleteCustomDay(String dayID) async {
     return await _firebaseCrud.deleteCustomDay(dayID);
   }
+
+  
 }

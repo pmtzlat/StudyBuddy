@@ -158,7 +158,7 @@ class FirebaseCrudService {
     }
   }
 
-  Future<Day> getCalendarDay(DateTime date) async {
+  Future<Day?> getCalendarDayByDate(DateTime date) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
@@ -179,9 +179,26 @@ class FirebaseCrudService {
             times: <TimeSlot>[]);
 
         if (matchingDay != null) {
-          matchingDay.times = await getTimeSlotsForCalendarDay(matchingDay.id);
           return matchingDay;
         }
+      }
+
+      return null;
+    } catch (e) {
+      logger.e('Error getting day by ID: $e');
+      return Day(
+          weekday: date.weekday, date: date, id: date.toString(), times: []);
+    }
+  }
+
+  Future<Day> getCalendarDay(DateTime date) async {
+    try {
+      final Day? matchingDay = await getCalendarDayByDate(date);
+
+      if (matchingDay != null) {
+        matchingDay.times = await getTimeSlotsForCalendarDay(matchingDay.id);
+
+        return matchingDay;
       }
 
       return Day(
@@ -1068,6 +1085,48 @@ class FirebaseCrudService {
     } catch (e) {
       logger.e('Error gettimg timeSlots for day: $e');
       return <TimeSlot>[];
+    }
+  }
+
+  Future<int> markUnitAsComplete(String courseID, String unitID) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final unitReference = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('courses')
+          .doc(courseID)
+          .collection('units')
+          .doc(unitID);
+
+      final unitSnapshot = await unitReference.get();
+
+      if (unitSnapshot.exists) {
+        await unitReference.update({'completed': true});
+      } else {
+        final revisionReference = firebaseInstance
+            .collection('users')
+            .doc(uid)
+            .collection('courses')
+            .doc(courseID)
+            .collection('revisions')
+            .doc(unitID);
+
+        final revisionSnapshot = await revisionReference.get();
+
+        if (revisionSnapshot.exists) {
+          await revisionReference.update({'completed': true});
+        } else {
+          return -1;
+        }
+      }
+
+      return 1;
+    } catch (e) {
+      logger.e('Error marking Unit as complete: $e');
+      return -1;
     }
   }
 }

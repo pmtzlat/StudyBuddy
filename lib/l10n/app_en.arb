@@ -74,5 +74,7 @@
     "reset": "Reset",
 
 
-    "logOut": "Log Out"
+    "logOut": "Log Out",
+
+    "desyncMsg":"Please use the real, correct date in your device for the App to work properly!"
 }

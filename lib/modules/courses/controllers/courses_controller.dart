@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:study_buddy/common_widgets/course_card.dart';
+import 'package:study_buddy/models/day_model.dart';
+import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/course_model.dart';
@@ -97,89 +99,84 @@ class CoursesController {
       GlobalKey<FormBuilderState> courseCreationFormKey,
       BuildContext context) async {
     int? res;
-    try{
-    if (courseCreationFormKey.currentState!.validate()) {
-      courseCreationFormKey.currentState!.save();
-      dynamic snackbar;
-      final examDate = DateTime.parse(courseCreationFormKey
-          .currentState!.fields['examDate']!.value
-          .toString());
+    try {
+      if (courseCreationFormKey.currentState!.validate()) {
+        courseCreationFormKey.currentState!.save();
+        dynamic snackbar;
+        final examDate = DateTime.parse(courseCreationFormKey
+            .currentState!.fields['examDate']!.value
+            .toString());
 
-      if (examDate.isAfter(DateTime.now())) {
-        final name = courseCreationFormKey
-            .currentState!.fields['courseName']!.value
-            .toString();
+        if (examDate.isAfter(instanceManager.now)) {
+          final name = courseCreationFormKey
+              .currentState!.fields['courseName']!.value
+              .toString();
 
-        
-        final weight =
-            courseCreationFormKey.currentState!.fields['weightSlider']!.value;
-        final session = doubleToDuration(double.parse(
-            courseCreationFormKey.currentState!.fields['sessionTime']!.value));
+          final weight =
+              courseCreationFormKey.currentState!.fields['weightSlider']!.value;
+          final session = doubleToDuration(double.parse(courseCreationFormKey
+              .currentState!.fields['sessionTime']!.value));
 
-        final int units = int.parse(
-            courseCreationFormKey.currentState!.fields['units']!.value);
+          final int units = int.parse(
+              courseCreationFormKey.currentState!.fields['units']!.value);
 
-        final int revisions = int.parse(
-            courseCreationFormKey.currentState!.fields['revisions']!.value);
+          final int revisions = int.parse(
+              courseCreationFormKey.currentState!.fields['revisions']!.value);
 
-        final bool orderMatters =
-            courseCreationFormKey.currentState!.fields['orderMatters']!.value;
+          final bool orderMatters =
+              courseCreationFormKey.currentState!.fields['orderMatters']!.value;
 
-        
+          dynamic res = await addCourse(
+            name: name,
+            examDate: examDate,
+            weight: weight,
+            sessionTime: session,
+            orderMatters: orderMatters,
+          );
 
+          int unitsAdded = 0;
+          if (res != null) {
+            unitsAdded = await addUnitsToCourse(
+                id: res, units: units, sessionTime: session);
+          }
 
-        dynamic res = await addCourse(
-          name: name,
-          examDate: examDate,
-          weight: weight,
-          sessionTime: session,
-          orderMatters: orderMatters,
-        );
+          int revisionsAdded = 0;
 
-        int unitsAdded = 0;
-        if (res != null) {
-          unitsAdded = await addUnitsToCourse(
-              id: res, units: units, sessionTime: session);
+          if (unitsAdded != null) {
+            revisionsAdded = await addRevisionsToCourse(
+                id: res, revisions: revisions, sessionTime: session);
+          }
+
+          // Close the bottom sheet
+          Navigator.of(context).pop();
+
+          // Show a snackbar based on the value of 'res'
+          snackbar = SnackBar(
+            content: Text(
+              revisionsAdded != null
+                  ? AppLocalizations.of(context)!.courseAddedCorrectly
+                  : AppLocalizations.of(context)!.errorAddingCourse,
+            ),
+            backgroundColor: revisionsAdded != null
+                ? Color.fromARGB(255, 0, 172, 6)
+                : Color.fromARGB(255, 221, 15, 0),
+          );
+        } else {
+          // Close the bottom sheet
+          Navigator.of(context).pop();
+
+          snackbar = SnackBar(
+            content: Text(AppLocalizations.of(context)!.wrongDates),
+            backgroundColor: Color.fromARGB(255, 221, 15, 0),
+          );
         }
 
-        int revisionsAdded = 0;
-
-        if (unitsAdded != null) {
-          revisionsAdded =  await addRevisionsToCourse(
-              id: res, revisions: revisions, sessionTime: session);
-        }
-
-        // Close the bottom sheet
-        Navigator.of(context).pop();
-
-        // Show a snackbar based on the value of 'res'
-        snackbar = SnackBar(
-          content: Text(
-            revisionsAdded != null
-                ? AppLocalizations.of(context)!.courseAddedCorrectly
-                : AppLocalizations.of(context)!.errorAddingCourse,
-          ),
-          backgroundColor: revisionsAdded != null
-              ? Color.fromARGB(255, 0, 172, 6)
-              : Color.fromARGB(255, 221, 15, 0),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(snackbar);
+        return res;
       } else {
-        // Close the bottom sheet
-        Navigator.of(context).pop();
-
-        snackbar = SnackBar(
-          content: Text(AppLocalizations.of(context)!.wrongDates),
-          backgroundColor: Color.fromARGB(255, 221, 15, 0),
-        );
+        logger.e("Error validating fields!");
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(snackbar);
-      return res;
-    } else {
-      logger.e("Error validating fields!");
-    }
-    }
-    catch(e){
+    } catch (e) {
       logger.e('Error handling add course: $e');
     }
   }
@@ -271,6 +268,59 @@ class CoursesController {
       return -2;
     } else {
       logger.e('Error validating edited course!');
+    }
+  }
+
+  Future<int> updateUnitCompletion() async {
+    try {
+      final startDate =
+          DateTime.parse(instanceManager.localStorage.getString('oldDate'));
+      final endDate =
+          DateTime.parse(instanceManager.localStorage.getString('newDate'));
+
+      DateTime dayInQuestion = startDate;
+
+      while (endDate.isAfter(dayInQuestion)) {
+        int res = await markUnitsCompletedIfInPreviousDays(dayInQuestion);
+        if (res != 1) return -1;
+        dayInQuestion = dayInQuestion.add(Duration(days: 1));
+      }
+
+      logger.i('Success marking past units as done!');
+
+      return 1;
+    } catch (e) {
+      logger.e('Error marking past events as \'complete\'');
+      return -1;
+    }
+  }
+
+  Future<int> markUnitsCompletedIfInPreviousDays(DateTime date) async {
+    try {
+      logger.i('updating Day ${date.toString()}');
+      final day = await firebaseCrud.getCalendarDayByDate(date);
+      if (day == null) return 1;
+      //logger.i('Got course ID: ${day.date.toString()}');
+      
+      final List<TimeSlot> timeSlotsInDay =
+          await firebaseCrud.getTimeSlotsForCalendarDay(day.id);
+      //logger.i(
+      //  'Got timeSlots for day ${day.date.toString()}: ${timeSlotsInDay.length}');
+
+      for (var timeSlot in timeSlotsInDay) {
+        final unit = timeSlot.unitID;
+        final course = timeSlot.courseID;
+        //logger.i('Marking unit ${timeSlot.unitName} ${timeSlot.unitID} as complete...');
+        int res = await firebaseCrud.markUnitAsComplete(course, unit);
+        if (res != 1) return -1;
+
+        //logger.i('Unit ${timeSlot.unitName} marked as complete');
+      }
+
+      return 1;
+    } catch (e) {
+      logger.e('Error marking units complete for day ${date}: $e');
+      return -1;
     }
   }
 }

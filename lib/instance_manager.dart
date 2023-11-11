@@ -3,12 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:ntp/ntp.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:study_buddy/common_widgets/scaffold.dart';
 import 'package:study_buddy/modules/calendar/controllers/calendar_controller.dart';
 import 'package:study_buddy/modules/calendar/controllers/study_planner.dart';
 import 'package:study_buddy/services/auth_service.dart';
 import 'package:study_buddy/services/firebase_crud_service.dart';
+import 'package:study_buddy/services/local_storage_service.dart';
+import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/session_storage.dart';
 
 import 'modules/courses/controllers/courses_controller.dart';
@@ -27,6 +30,7 @@ class InstanceManager {
   late CoursesController courseController;
   late CalendarController calendarController;
   late StudyPlanner studyPlanner;
+  late LocalStorageService localStorageCustomOperations;
   final SessionStorage sessionStorage = SessionStorage();
 
   
@@ -40,6 +44,9 @@ class InstanceManager {
     courseController = CoursesController();
     calendarController = CalendarController();
     studyPlanner = StudyPlanner(firebaseCrud: firebaseCrudService, uid: localStorage.getString('uid') ?? '');
+    localStorageCustomOperations = LocalStorageService(localStorage: localStorage);
+
+
 
   }
 
