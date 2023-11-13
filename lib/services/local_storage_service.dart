@@ -9,6 +9,8 @@ class LocalStorageService {
   LocalStorageService({required SharedPreferences this.localStorage});
 
   Future<int> updateDateHandling() async {
+    logger.i('Previous Old date: ${localStorage.getString('oldDate')?? 'Not found'}');
+    logger.i('Previus New date: ${localStorage.getString('newDate')?? 'Not found'}');
     final now = await NTP.now();
     if (stripTime(now) != stripTime(DateTime.now())) {
       logger.e('Current Date doesn\'t match server!');
@@ -17,13 +19,13 @@ class LocalStorageService {
     final String oldNewDate = localStorage.getString('newDate') ??
         stripTime(now.subtract(const Duration(days: 1))).toString();
 
-    logger.i('Old newdate: ${oldNewDate}');
+    //logger.i('Old newdate: ${oldNewDate}');
     
     localStorage.setString('oldDate', oldNewDate);
     localStorage.setString('newDate', stripTime(now).toString());
 
-    logger.i('Old date: ${localStorage.getString('oldDate')}');
-    logger.i('New date: ${localStorage.getString('newDate')}');
+    logger.i('Current Old date: ${localStorage.getString('oldDate')}');
+    logger.i('Current New date: ${localStorage.getString('newDate')}');
     return 1;
   }
 }

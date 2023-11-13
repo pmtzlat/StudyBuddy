@@ -27,15 +27,17 @@ void main() async {
   now = await NTP.now();
   await instanceManager.startDependantInstances();
 
-  await instanceManager.courseController.getAllCourses();
-  await instanceManager.calendarController.getGaps();
-  await instanceManager.calendarController.getCustomDays();
-  await instanceManager.calendarController.getCalendarDay(now);
   synced =
       await instanceManager.localStorageCustomOperations.updateDateHandling();
   if (synced == 1) {
     await instanceManager.courseController.updateUnitCompletion();
   }
+
+  await instanceManager.courseController.getAllCourses();
+  await instanceManager.calendarController.getGaps();
+  await instanceManager.calendarController.getCustomDays();
+  await instanceManager.calendarController.getCalendarDay(now);
+  
 
   runApp(StudyBuddyApp());
 }

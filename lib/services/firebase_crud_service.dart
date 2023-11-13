@@ -162,6 +162,7 @@ class FirebaseCrudService {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
+      
 
       final userCalendarDaysCollection = firebaseInstance
           .collection('users')
@@ -179,6 +180,7 @@ class FirebaseCrudService {
             times: <TimeSlot>[]);
 
         if (matchingDay != null) {
+          logger.i('Got day for $date');
           return matchingDay;
         }
       }
@@ -1151,7 +1153,7 @@ class FirebaseCrudService {
       await timeSlotReference.update({'completed': true});
       return 1;
     } catch (e) {
-      logger.e('Error marking timeSlot as complete: $e');
+      logger.e('Error marking calendar timeSlot as complete: $e\n dayID: $dayID, timeSlotID: $timeSlotID');
       return -1;
     }
   }

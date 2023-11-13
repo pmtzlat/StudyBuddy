@@ -238,13 +238,13 @@ class CalendarController {
       await getCalendarDay(instanceManager.sessionStorage.currentDay);
 
       if (allTimeSlotsForUnitAreCompleted(timeSlot.unitID, timeSlot.id)){
-        logger.i('Changing unit to incomplete...');
+        //logger.i('Changing unit to incomplete...');
         await _firebaseCrud.markUnitAsComplete(
             timeSlot.courseID, timeSlot.unitID);}
-      logger.i('Success marking timeSlot as complete!');
+      //logger.i('Success marking timeSlot as complete!');
       return 1;
     } catch (e) {
-      logger.e('Error marking timeSlot as complete: $e');
+      logger.e('Error marking calendar timeSlot as complete (calendarController): $e');
       return -1;
     }
   }
@@ -254,10 +254,10 @@ class CalendarController {
       await _firebaseCrud.markCalendarTimeSlotAsIncomplete(dayID, timeSlot.id);
       await getCalendarDay(instanceManager.sessionStorage.currentDay);
       if (!allTimeSlotsForUnitAreCompleted(timeSlot.unitID, timeSlot.id)){
-        logger.i('Changing unit to incomplete...');
+        //logger.i('Changing unit to incomplete...');
         await _firebaseCrud.markUnitAsIncomplete(
             timeSlot.courseID, timeSlot.unitID);}
-      logger.i('Success marking timeSlot as not complete!');
+      //logger.i('Success marking timeSlot as not complete!');
       return 1;
     } catch (e) {
       logger.e('Error marking timeSlot as not complete: $e');
@@ -275,7 +275,7 @@ class CalendarController {
         }
       }
     }
-    logger.i('All timeSlots for this unit have been completed!');
+    //logger.i('All timeSlots for this unit have been completed!');
     return true;
   }
 }

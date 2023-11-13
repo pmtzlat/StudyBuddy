@@ -300,7 +300,8 @@ class CoursesController {
       logger.i('updating Day ${date.toString()}');
       final day = await firebaseCrud.getCalendarDayByDate(date);
       if (day == null) return 1;
-      //logger.i('Got course ID: ${day.date.toString()}');
+      
+      logger.i('DayID: ${day.id}');
       
       final List<TimeSlot> timeSlotsInDay =
           await firebaseCrud.getTimeSlotsForCalendarDay(day.id);
@@ -313,7 +314,7 @@ class CoursesController {
         //logger.i('Marking unit ${timeSlot.unitName} ${timeSlot.unitID} as complete...');
         int res = await firebaseCrud.markUnitAsComplete(course, unit);
         if (res != 1) return -1;
-        res = await firebaseCrud.markCalendarTimeSlotAsComplete(course, unit);
+        res = await firebaseCrud.markCalendarTimeSlotAsComplete(day.id, timeSlot.id);
         if (res != 1) return -1;
 
         //logger.i('Unit ${timeSlot.unitName} marked as complete');
