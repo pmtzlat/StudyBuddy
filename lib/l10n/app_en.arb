@@ -37,6 +37,8 @@
     "calendarTitle": "Calendar",
     "configureCalendar":"Start configuring Calendar!",
     "chooseFreeSchedule":"Check the times you can study:",
+    "needsRecalculation":"Update schedule",
+    "needsRecalculationInfo":"You have made unsaved changes that affect your schedule.",
     "monday":"Monday",
     "tuesday":"Tuesday",
     "wednesday":"Wednesday",

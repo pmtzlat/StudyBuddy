@@ -22,8 +22,8 @@ DateTime stripTime(DateTime dateTime) {
 
 bool areDatesEqual(DateTime dateTime1, DateTime dateTime2) {
   return dateTime1.year == dateTime2.year &&
-         dateTime1.month == dateTime2.month &&
-         dateTime1.day == dateTime2.day;
+      dateTime1.month == dateTime2.month &&
+      dateTime1.day == dateTime2.day;
 }
 
 bool isSecondDayNext(DateTime firstDateTime, DateTime secondDateTime) {
@@ -155,4 +155,14 @@ TimeOfDay subtractDurationFromTimeOfDay(TimeOfDay time, Duration duration) {
   final hours = resultMinutes ~/ 60;
   final minutes = resultMinutes % 60;
   return TimeOfDay(hour: hours, minute: minutes);
+}
+
+String getUnitOrRevision(String unitName) {
+  if (unitName.contains('Revision')) {
+    return 'Revision';
+  } else if (unitName.contains('Unit')) {
+    return 'Unit';
+  } else {
+    return 'Unknown';
+  }
 }

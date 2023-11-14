@@ -3,8 +3,8 @@ import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 
 class SessionStorage {
-  List<CourseModel>? savedCourses;
-  List<CourseModel>? activeCourses;
+  List<CourseModel> savedCourses =[];
+  List<CourseModel> activeCourses = [];
 
   //NEEDS: a varibale that saves wether the calendar needs recalculating
   // after a new course is added!!
@@ -24,4 +24,5 @@ class SessionStorage {
   List<String> leftoverCourses = [];
 
   bool needsRecalculation = false;
+  List<String> incompletePreviousDays = [];
 }

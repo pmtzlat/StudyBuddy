@@ -83,17 +83,77 @@ class FirebaseCrudService {
       for (final unitDoc in unitQuerySnapshot.docs) {
         final unitData = unitDoc.data() as Map<String, dynamic>;
         final unit = UnitModel(
-          name: unitData['name'] ?? '',
-          sessionTime: parseTime(unitData['sessionTime']),
-          id: unitDoc.id,
-          order: unitData['order'] ?? 0,
-          completed: unitData['completed'] ?? false,
-        );
+            name: unitData['name'] ?? '',
+            sessionTime: parseTime(unitData['sessionTime']),
+            id: unitDoc.id,
+            order: unitData['order'] ?? 0,
+            completed: unitData['completed'] ?? false,
+            completionTime: parseTime(
+                unitData['completionTime'] ?? Duration.zero.toString()));
         units.add(unit);
       }
       return units;
     } catch (e) {
       logger.e('Error getting units for course $courseID: $e');
+      return null;
+    }
+  }
+
+  Future<int> updateUnitCompletionTime(String courseID, String unitID,
+      String revisionOrUnit, Duration newCompletionTime) async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+    try {
+      final unitRef = await firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('courses')
+          .doc(courseID)
+          .collection(revisionOrUnit)
+          .doc(unitID);
+
+      await unitRef.update({'completionTime': newCompletionTime.toString()});
+
+      return 1;
+    } catch (e) {
+      logger.e('Error updating unit completion time for unit $unitID: $e');
+      return -1;
+    }
+  }
+
+  Future<UnitModel?> getSpecificUnit(
+      String courseID, String unitID, String revisionOrUnit) async {
+    //logger.i(
+       // 'Getting specific unit: courseID: $courseID, $unitID, $revisionOrUnit');
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+    try {
+      final unitDoc = await firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('courses')
+          .doc(courseID)
+          .collection(revisionOrUnit)
+          .doc(unitID)
+          .get();
+
+      if (unitDoc.exists) {
+        //logger.i('Exists');
+        final unitData = unitDoc.data() as Map<String, dynamic>;
+
+        return UnitModel(
+            name: unitData['name'] ?? '',
+            sessionTime: parseTime(unitData['sessionTime']),
+            id: unitDoc.id,
+            order: unitData['order'] ?? 0,
+            completed: unitData['completed'] ?? false,
+            completionTime: parseTime(
+                unitData['completionTime'] ?? Duration.zero.toString()));
+      } else {
+        return null;
+      }
+    } catch (e) {
+      logger.e('Error getting specific unit $unitID: $e');
       return null;
     }
   }
@@ -124,6 +184,8 @@ class FirebaseCrudService {
           id: revisionDoc.id,
           order: unitData['order'] ?? 0,
           completed: unitData['completed'] ?? false,
+          completionTime:
+              parseTime(unitData['completionTime'] ?? Duration.zero.toString()),
         );
         revisions.add(unit);
       }
@@ -162,7 +224,6 @@ class FirebaseCrudService {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
-      
 
       final userCalendarDaysCollection = firebaseInstance
           .collection('users')
@@ -318,6 +379,7 @@ class FirebaseCrudService {
         'order': newUnit.order,
         'id': '',
         'completed': newUnit.completed,
+        'completionTime': newUnit.completionTime.toString()
       };
 
       final unitRef = await courseRef.collection('units').add(unitData);
@@ -349,6 +411,7 @@ class FirebaseCrudService {
         'order': newUnit.order,
         'id': '',
         'completed': newUnit.completed,
+        'completionTime': newUnit.completionTime.toString()
       };
 
       final revisionRef =
@@ -500,7 +563,8 @@ class FirebaseCrudService {
       await unitReference.update({
         'name': updatedUnit.name,
         'sessionTime': updatedUnit.sessionTime.toString(),
-        'completed': updatedUnit.completed
+        'completed': updatedUnit.completed,
+        'completionTime': updatedUnit.completionTime.toString()
       });
       return 1;
     } catch (e) {
@@ -1137,7 +1201,8 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int> markCalendarTimeSlotAsComplete(String dayID, String timeSlotID) async {
+  Future<int> markCalendarTimeSlotAsComplete(
+      String dayID, String timeSlotID) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
@@ -1153,12 +1218,13 @@ class FirebaseCrudService {
       await timeSlotReference.update({'completed': true});
       return 1;
     } catch (e) {
-      logger.e('Error marking calendar timeSlot as complete: $e\n dayID: $dayID, timeSlotID: $timeSlotID');
+      logger.e(
+          'Error marking calendar timeSlot as complete: $e\n dayID: $dayID, timeSlotID: $timeSlotID');
       return -1;
     }
   }
 
-Future<int> markUnitAsIncomplete(String courseID, String unitID) async {
+  Future<int> markUnitAsIncomplete(String courseID, String unitID) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
@@ -1200,7 +1266,8 @@ Future<int> markUnitAsIncomplete(String courseID, String unitID) async {
     }
   }
 
-  Future<int> markCalendarTimeSlotAsIncomplete(String dayID, String timeSlotID) async {
+  Future<int> markCalendarTimeSlotAsIncomplete(
+      String dayID, String timeSlotID) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
@@ -1220,5 +1287,4 @@ Future<int> markUnitAsIncomplete(String courseID, String unitID) async {
       return -1;
     }
   }
-
 }

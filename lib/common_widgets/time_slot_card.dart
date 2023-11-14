@@ -30,7 +30,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                   .getCalendarDay(instanceManager.sessionStorage.currentDay);
           } else {
             if (await _controller.markTimeSlotAsIncomplete(
-                instanceManager.sessionStorage.loadedCalendarDay.id,
+                instanceManager.sessionStorage.loadedCalendarDay,
                 widget.timeSlot)==1)
               await _controller
                   .getCalendarDay(instanceManager.sessionStorage.currentDay);

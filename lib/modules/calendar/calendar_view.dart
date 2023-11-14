@@ -23,6 +23,35 @@ class _CalendarViewState extends State<CalendarView> {
   late CalendarDayTimes events = CalendarDayTimes(key: _timesKey);
 
   @override
+  void initState() {
+    super.initState();
+    // Add a post frame callback to show the dialog after the page has been rendered.
+    if(!instanceManager.sessionStorage.incompletePreviousDays.isEmpty) {WidgetsBinding.instance?.addPostFrameCallback((_) {
+      _showDialog();
+    });}
+  }
+
+  void _showDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Page Rendered'),
+          content: Text('The page has finished rendering.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
@@ -40,24 +69,33 @@ class _CalendarViewState extends State<CalendarView> {
                 style: Theme.of(context).textTheme.displayMedium,
               ),
             ),
-            Container(
-              height: screenHeight * 0.15,
-              child: Column(
-                children: [
-                  ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RestrictionsDetailView(),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.settings),
-                      label: Text(_localizations.changeScheduleGaps)),
-                  (instanceManager.sessionStorage.activeCourses.length != 0) &&
-                          (instanceManager.sessionStorage.weeklyGaps != null)
-                      ? ElevatedButton.icon(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  height: screenHeight * 0.15,
+                  child: Column(
+                    children: [
+                      ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RestrictionsDetailView(),
+                              ),
+                            );
+                          },
+                          icon: Icon(Icons.settings),
+                          label: Text(_localizations.changeScheduleGaps)),
+                      instanceManager.sessionStorage.needsRecalculation
+                          ? Text(
+                              _localizations.needsRecalculationInfo,
+                              style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Color.fromARGB(255, 219, 164, 0)),
+                            )
+                          : const SizedBox(),
+                      ElevatedButton.icon(
                           onPressed: () async {
                             final result =
                                 await _controller.calculateSchedule();
@@ -88,11 +126,31 @@ class _CalendarViewState extends State<CalendarView> {
                               _timesKey.currentState!.update();
                             });
                           },
-                          icon: Icon(Icons.calculate),
-                          label: Text('calculate schedule'))
-                      : SizedBox(),
-                ],
-              ),
+                          icon:
+                              instanceManager.sessionStorage.needsRecalculation
+                                  ? const Icon(
+                                      Icons.warning_amber_outlined,
+                                      color: Colors.black,
+                                    )
+                                  : const Icon(Icons.calculate),
+                          label:
+                              instanceManager.sessionStorage.needsRecalculation
+                                  ? Text(
+                                      _localizations.needsRecalculation,
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                      ),
+                                    )
+                                  : Text(_localizations.calculateSchedule),
+                          style:
+                              instanceManager.sessionStorage.needsRecalculation
+                                  ? ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.amber)
+                                  : ElevatedButton.styleFrom()),
+                    ],
+                  ),
+                ),
+              ],
             ),
             Center(
               child: Container(

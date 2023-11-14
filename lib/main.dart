@@ -9,6 +9,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:study_buddy/modules/desync_page.dart';
 import 'package:study_buddy/modules/sign_in/sign_in_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
+import 'package:study_buddy/utils/datatype_utils.dart';
 import 'firebase_options.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -30,14 +31,17 @@ void main() async {
   synced =
       await instanceManager.localStorageCustomOperations.updateDateHandling();
   if (synced == 1) {
-    await instanceManager.courseController.updateUnitCompletion();
+    instanceManager.sessionStorage.incompletePreviousDays =
+        await instanceManager.calendarController.getIncompletePreviousDays(
+            DateTime.parse(instanceManager.localStorage.getString('oldDate')));
+    logger.i(instanceManager.sessionStorage.incompletePreviousDays);
+    //await instanceManager.courseController.updateUnitCompletion();
   }
 
   await instanceManager.courseController.getAllCourses();
   await instanceManager.calendarController.getGaps();
   await instanceManager.calendarController.getCustomDays();
   await instanceManager.calendarController.getCalendarDay(now);
-  
 
   runApp(StudyBuddyApp());
 }
