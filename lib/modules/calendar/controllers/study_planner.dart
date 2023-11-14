@@ -19,7 +19,10 @@ class StudyPlanner {
     required this.uid,
   });
 
-  Future<String?> calculateSchedule() async {
+  Future<int> calculateSchedule() async {
+    // 1 = Success
+    // 0 = No time
+    // -1 = Error
     try {
       //logger.d('calculateSchedule');
       await firebaseCrud.deleteSchedule();
@@ -36,7 +39,7 @@ class StudyPlanner {
               .subtract(Duration(days: 1));
 
       if (loopDate == null) {
-        return 'No courses';
+        return 1;
       }
 
       Day dayToAdd = Day(
@@ -84,18 +87,20 @@ class StudyPlanner {
       }
 
       if (generalStacks.length != 0) {
-        return 'No time';
+        instanceManager.sessionStorage.leftoverCourses = <String>[];
+        saveLeftoverCourses(generalStacks);
+        return 0;
       }
 
       if (await firebaseCrud.deleteAllCalendarDays() == -1) {
-        return 'Error deleting all calendar days';
+        return -1;
       }
       logger.i('Success deleting calendar Days!');
 
       for (var day in result) {
         var dayID = await firebaseCrud.addCalendarDay(day);
         if (dayID == null) {
-          return 'Failure writing days to Firebase';
+          return -1;
         }
 
         var res = 1;
@@ -103,15 +108,37 @@ class StudyPlanner {
           if (timeSlot.courseID != 'free') {
             res = await firebaseCrud.addTimeSlotToCalendarDay(dayID, timeSlot);
 
-            if (res == -1) return 'Error saving to FireBase';
+            if (res == -1) return -1;
           }
         }
       }
 
-      return 'Success';
+      return 1;
     } catch (e) {
       logger.e('Error recalculating schedule: $e');
+      return -1;
     }
+  }
+
+  void saveLeftoverCourses(List<SchedulerStack> stacks) {
+    var leftovers = instanceManager.sessionStorage.leftoverCourses;
+    for (var course in stacks) {
+      String toAdd = '';
+      toAdd += ' ${course.course.name}: \n';
+      if (course.units != null) {
+        for (var unit in course.units!) {
+          toAdd += '${unit.name}, ';
+        }
+      }
+      if (course.revisions != null) {
+        for (var revision in course.revisions!) {
+          toAdd += '${revision.name}, ';
+        }
+      }
+      logger.d(toAdd);
+      leftovers.add(toAdd);
+    }
+
   }
 
   Future<void> fillDayWithSessions(Day day, List<SchedulerStack> stacks) async {

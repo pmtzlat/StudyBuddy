@@ -21,4 +21,7 @@ class SessionStorage {
 
   var savedWeekday = 0;
   int? schedulePresent;
+  List<String> leftoverCourses = [];
+
+  bool needsRecalculation = false;
 }

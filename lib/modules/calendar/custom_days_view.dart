@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:study_buddy/utils/error_messages.dart';
+import 'package:study_buddy/utils/error_&_success_messages.dart';
 import 'package:study_buddy/main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/modules/calendar/add_custom_day_view.dart';

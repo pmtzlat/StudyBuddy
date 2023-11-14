@@ -24,10 +24,14 @@ class CalendarController {
     instanceManager.sessionStorage.weeklyGaps = await _firebaseCrud.getGaps();
   }
 
-  void calculateSchedule() async {
+  Future<int> calculateSchedule() async {
+    var result = await instanceManager.studyPlanner.calculateSchedule();
     logger.i(
-        'Result of calculating new schedule: ${await instanceManager.studyPlanner.calculateSchedule()}');
-    await getCalendarDay(stripTime(DateTime.now()));
+        'Result of calculating new schedule: ${result}');
+    logger.i(instanceManager.sessionStorage.leftoverCourses.length);
+
+    return result;
+
   }
 
   Future<int?> deleteGap(TimeSlot timeSlot) async {

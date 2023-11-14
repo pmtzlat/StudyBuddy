@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:ntp/ntp.dart';
 import 'package:study_buddy/modules/calendar/calendar_day_times.dart';
 import 'package:study_buddy/common_widgets/scaffold.dart';
 import 'package:study_buddy/instance_manager.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/modules/calendar/restrictions_detail_view.dart';
+import 'package:study_buddy/utils/datatype_utils.dart';
+import 'package:study_buddy/utils/error_&_success_messages.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -56,7 +59,30 @@ class _CalendarViewState extends State<CalendarView> {
                           (instanceManager.sessionStorage.weeklyGaps != null)
                       ? ElevatedButton.icon(
                           onPressed: () async {
-                            await _controller.calculateSchedule();
+                            final result =
+                                await _controller.calculateSchedule();
+                            switch (result) {
+                              case (1):
+                                showGreenSnackbar(context,
+                                    _localizations.recalculationSuccessful);
+
+                              case (-1):
+                                showErrorDialogForRecalc(
+                                    context,
+                                    _localizations.recalcErrorTitle,
+                                    _localizations.recalcErrorBody,
+                                    false);
+
+                              case (0):
+                                showErrorDialogForRecalc(
+                                    context,
+                                    _localizations.recalcNoTimeTitle,
+                                    _localizations.recalcNoTimeBody,
+                                    true);
+                            }
+
+                            await _controller
+                                .getCalendarDay(stripTime(await NTP.now()));
 
                             setState(() {
                               _timesKey.currentState!.update();
