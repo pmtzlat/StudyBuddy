@@ -24,5 +24,5 @@ class SessionStorage {
   List<String> leftoverCourses = [];
 
   bool needsRecalculation = false;
-  List<String> incompletePreviousDays = [];
+  Map<String,List<TimeSlot>> incompletePreviousDays = {};
 }

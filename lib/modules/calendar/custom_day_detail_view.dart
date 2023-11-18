@@ -95,7 +95,7 @@ class _CustomDayDetailViewState extends State<CustomDayDetailView> {
                             showRedSnackbar(
                                 context, _localizations.wrongInputGap);
                           }
-                          res = await _controller.updateTimes(widget.customDay);
+                          res = await _controller.updateCustomDayTimes(widget.customDay);
                           if (res == -1) {
                             showRedSnackbar(
                                 context, _localizations.errorAddingGap);
@@ -103,7 +103,7 @@ class _CustomDayDetailViewState extends State<CustomDayDetailView> {
                             showRedSnackbar(
                                 context, _localizations.wrongInputGap);
                           }
-                          _controller.getTimeSlotsForDay(widget.customDay);
+                          _controller.getTimeSlotsForCustomDay(widget.customDay);
 
                           logger.i(widget.customDay.times);
 
@@ -165,7 +165,7 @@ class _CustomDayDetailViewState extends State<CustomDayDetailView> {
                                           widget.customDay.times
                                               .removeAt(index);
                                           final res =
-                                              await _controller.updateTimes(widget.customDay);
+                                              await _controller.updateCustomDayTimes(widget.customDay);
                                           if (res == -1) {
                                             showRedSnackbar(
                                                 context,
@@ -177,7 +177,7 @@ class _CustomDayDetailViewState extends State<CustomDayDetailView> {
                                                 _localizations
                                                     .wrongInputGap);
                                           }
-                                          _controller.getTimeSlotsForDay(
+                                          _controller.getTimeSlotsForCustomDay(
                                               widget.customDay);
 
                                           setState(() {});

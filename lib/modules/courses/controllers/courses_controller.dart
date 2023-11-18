@@ -33,6 +33,7 @@ class CoursesController {
         sessionTime: sessionTime,
         orderMatters: orderMatters,
       );
+      instanceManager.sessionStorage.needsRecalculation = true;
 
       return firebaseCrud.addCourseToUser(newCourse: newCourse);
     } catch (e) {
@@ -55,17 +56,20 @@ class CoursesController {
           ? Color.fromARGB(255, 0, 172, 6)
           : Color.fromARGB(255, 221, 15, 0),
     );
+    if (res == 1) {
+      instanceManager.sessionStorage.needsRecalculation = true;
+    }
     ScaffoldMessenger.of(context).showSnackBar(snackbar);
   }
 
-  dynamic addUnitsToCourse(
-      {required String id, required int units, required Duration sessionTime}) {
+  Future<int?> addUnitsToCourse(
+      {required String id, required int units, required Duration sessionTime}) async {
     try {
       for (int i = 0; i < units; i++) {
         final unitNum = i + 1;
         final newUnit = UnitModel(
             name: 'Unit $unitNum', order: unitNum, sessionTime: sessionTime);
-        firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
+        await firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
       }
       return 1;
     } catch (e) {
@@ -74,10 +78,10 @@ class CoursesController {
     }
   }
 
-  dynamic addRevisionsToCourse(
+  Future<int?> addRevisionsToCourse(
       {required String id,
       required int revisions,
-      required Duration sessionTime}) {
+      required Duration sessionTime}) async {
     try {
       for (int i = 0; i < revisions; i++) {
         final revisionNum = i + 1;
@@ -86,7 +90,7 @@ class CoursesController {
             order: revisionNum,
             sessionTime:
                 doubleToDuration((durationToDouble(sessionTime) * 1.5)));
-        firebaseCrud.addRevisionToCourse(newUnit: newUnit, courseID: id);
+        await firebaseCrud.addRevisionToCourse(newUnit: newUnit, courseID: id);
       }
       return 1;
     } catch (e) {
@@ -134,13 +138,13 @@ class CoursesController {
             orderMatters: orderMatters,
           );
 
-          int unitsAdded = 0;
+          int? unitsAdded = 0;
           if (res != null) {
-            unitsAdded = await addUnitsToCourse(
+            unitsAdded =  await addUnitsToCourse(
                 id: res, units: units, sessionTime: session);
           }
 
-          int revisionsAdded = 0;
+          int? revisionsAdded = 0;
 
           if (unitsAdded != null) {
             revisionsAdded = await addRevisionsToCourse(
@@ -161,6 +165,7 @@ class CoursesController {
                 ? Color.fromARGB(255, 0, 172, 6)
                 : Color.fromARGB(255, 221, 15, 0),
           );
+          if(revisionsAdded != null) instanceManager.sessionStorage.needsRecalculation = true;
         } else {
           // Close the bottom sheet
           Navigator.of(context).pop();
@@ -222,6 +227,7 @@ class CoursesController {
 
       dynamic res = await firebaseCrud.editUnit(
           course: course, unitID: oldUnit.id, updatedUnit: updatedUnit);
+      if(res==1) instanceManager.sessionStorage.needsRecalculation = true;
 
       return res;
     } else {
@@ -262,6 +268,7 @@ class CoursesController {
           await firebaseCrud.clearRevisionsForCourse(course.id);
           res = addRevisionsToCourse(
               id: course.id, revisions: revisions, sessionTime: sessionTime);
+          if(res == 1) instanceManager.sessionStorage.needsRecalculation = true; 
         }
         return res;
       }
@@ -271,59 +278,41 @@ class CoursesController {
     }
   }
 
-  Future<int> updateUnitCompletion() async {
-    try {
-      final startDate =
-          DateTime.parse(instanceManager.localStorage.getString('oldDate'));
-      final endDate =
-          DateTime.parse(instanceManager.localStorage.getString('newDate'));
-
-      DateTime dayInQuestion = startDate;
-
-      while (endDate.isAfter(dayInQuestion)) {
-        int res = await markUnitsCompletedIfInPreviousDays(dayInQuestion);
-        if (res != 1) return -1;
-        dayInQuestion = dayInQuestion.add(Duration(days: 1));
-      }
-
-      logger.i('Success marking past units as done!');
-
-      return 1;
-    } catch (e) {
-      logger.e('Error marking past events as \'complete\'');
-      return -1;
-    }
-  }
+  
 
   Future<int> markUnitsCompletedIfInPreviousDays(DateTime date) async {
     try {
       logger.i('updating Day ${date.toString()}');
       final day = await firebaseCrud.getCalendarDayByDate(date);
       if (day == null) return 1;
-      
+
       logger.i('DayID: ${day.id}');
-      
+
       final List<TimeSlot> timeSlotsInDay =
           await firebaseCrud.getTimeSlotsForCalendarDay(day.id);
-      //logger.i(
-      //  'Got timeSlots for day ${day.date.toString()}: ${timeSlotsInDay.length}');
+      logger.i(
+          'Got timeSlots for day ${day.date.toString()}: ${timeSlotsInDay.length}');
 
       for (var timeSlot in timeSlotsInDay) {
         final unit = timeSlot.unitID;
         final course = timeSlot.courseID;
-        //logger.i('Marking unit ${timeSlot.unitName} ${timeSlot.unitID} as complete...');
+        logger.i(
+            'Marking unit ${timeSlot.unitName} ${timeSlot.unitID} as complete...');
         int res = await firebaseCrud.markUnitAsComplete(course, unit);
         if (res != 1) return -1;
-        res = await firebaseCrud.markCalendarTimeSlotAsComplete(day.id, timeSlot.id);
+        res = await firebaseCrud.markCalendarTimeSlotAsComplete(
+            day.id, timeSlot.id);
         if (res != 1) return -1;
 
-        //logger.i('Unit ${timeSlot.unitName} marked as complete');
+        logger.i('Unit ${timeSlot.unitName} marked as complete');
+        logger.i('TimeSlot ${timeSlot.id} marked as complete');
       }
 
       return 1;
     } catch (e) {
       logger.e('Error marking units completed for day ${date}: $e');
-      await instanceManager.localStorage.setString('newDate', instanceManager.localStorage.getString('oldDate'));
+      await instanceManager.localStorage.setString(
+          'newDate', instanceManager.localStorage.getString('oldDate'));
       return -1;
     }
   }

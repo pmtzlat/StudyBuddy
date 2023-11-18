@@ -10,8 +10,10 @@ import 'package:study_buddy/modules/loader/loader.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 class CalendarDayTimes extends StatefulWidget {
+  Function updateParent;
   CalendarDayTimes({
     required Key key,
+    required this.updateParent,
   }) : super(key: key);
 
   @override
@@ -29,10 +31,13 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
     day = instanceManager.sessionStorage.loadedCalendarDay;
   }
 
-  void update() {
+  void updateParent() {
+    logger.i('Calendar Day Times: updateParents');
     setState(() {
       day = instanceManager.sessionStorage.loadedCalendarDay;
     });
+    widget.updateParent();
+
   }
 
   @override
@@ -88,7 +93,7 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
             screenHeight: screenHeight,
             localizations: _localizations,
             times: day.times,
-            updateParent: update,)
+            updateAllParents: updateParent,)
       ],
     );
   }
@@ -124,13 +129,13 @@ class TimeShower extends StatefulWidget {
       required this.screenHeight,
       required AppLocalizations localizations,
       required this.times,
-      required this.updateParent})
+      required this.updateAllParents})
       : _localizations = localizations;
 
   final double screenHeight;
   final AppLocalizations _localizations;
   final List<TimeSlot> times;
-  final Function updateParent;
+  final Function updateAllParents;
 
   @override
   State<TimeShower> createState() => _TimeShowerState();
@@ -138,8 +143,9 @@ class TimeShower extends StatefulWidget {
 
 class _TimeShowerState extends State<TimeShower> {
 
-  void update(){
-    widget.updateParent();
+  void updateParents(){
+    logger.i('TimeShower: updateParents');
+    widget.updateAllParents();
   }
   @override
   Widget build(BuildContext context) {
@@ -155,7 +161,7 @@ class _TimeShowerState extends State<TimeShower> {
                   itemCount: widget.times.length,
                   itemBuilder: (context, index) {
                     var timeSlot = widget.times[index];
-                    return TimeSlotCard(timeSlot: timeSlot, updateParent: update,);
+                    return TimeSlotCard(timeSlot: timeSlot, updateAllParents: updateParents,);
                   }),
             ),
     );

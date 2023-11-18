@@ -5,9 +5,9 @@ import 'package:study_buddy/utils/datatype_utils.dart';
 
 class TimeSlotCard extends StatefulWidget {
   final TimeSlot timeSlot;
-  final Function updateParent;
+  final Function updateAllParents;
   const TimeSlotCard(
-      {super.key, required TimeSlot this.timeSlot, required this.updateParent});
+      {super.key, required TimeSlot this.timeSlot, required this.updateAllParents});
 
   @override
   State<TimeSlotCard> createState() => _TimeSlotCardState();
@@ -32,11 +32,11 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
             if (await _controller.markTimeSlotAsIncomplete(
                 instanceManager.sessionStorage.loadedCalendarDay,
                 widget.timeSlot)==1)
-              await _controller
-                  .getCalendarDay(instanceManager.sessionStorage.currentDay);
+              {await _controller
+                  .getCalendarDay(instanceManager.sessionStorage.currentDay);}
           }
 
-          widget.updateParent();
+          widget.updateAllParents();
         },
         child: (checked == true)
             ? Icon(Icons.check_box)

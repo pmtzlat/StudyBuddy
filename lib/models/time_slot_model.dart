@@ -13,6 +13,7 @@ class TimeSlot {
   final String courseName;
   final String unitName;
   bool completed;
+  final String dayID;
 
   TimeSlot(
       {this.id = '',
@@ -23,7 +24,8 @@ class TimeSlot {
       this.unitID= '',
       this.courseName = '',
       this.unitName= '',
-      this.completed = false})
+      this.completed = false,
+      this.dayID = ''})
       : duration = _calculateDuration(startTime, endTime);
 
   static Duration _calculateDuration(TimeOfDay start, TimeOfDay end) {

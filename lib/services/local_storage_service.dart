@@ -22,7 +22,7 @@ class LocalStorageService {
     //logger.i('Old newdate: ${oldNewDate}');
     
     //localStorage.setString('oldDate', oldNewDate);
-    localStorage.setString('oldDate', '2023-11-10 00:00:00.000');
+    localStorage.setString('oldDate', '2023-11-14 00:00:00.000');
     localStorage.setString('newDate', stripTime(now).toString());
 
     logger.i('Current Old date: ${localStorage.getString('oldDate')}');

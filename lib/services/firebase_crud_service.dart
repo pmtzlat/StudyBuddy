@@ -238,7 +238,7 @@ class FirebaseCrudService {
             weekday: doc['weekday'],
             id: doc['id'],
             date: DateTime.parse(doc['date'] as String),
-            times: <TimeSlot>[]);
+            times: <TimeSlot>[],);
 
         if (matchingDay != null) {
           logger.i('Got day for $date');
@@ -543,7 +543,7 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int?> editUnit(
+  Future<int> editUnit(
       {required CourseModel course,
       required String unitID,
       required UnitModel updatedUnit}) async {
@@ -927,7 +927,8 @@ class FirebaseCrudService {
         'courseName': timeSlot.courseName,
         'unitName': timeSlot.unitName,
         'completed': timeSlot.completed,
-        'id': ''
+        'id': '',
+        'dayID': dayID,
       };
 
       final timeSlotRef =
@@ -962,7 +963,8 @@ class FirebaseCrudService {
         'courseName': timeSlot.courseName,
         'unitName': timeSlot.unitName,
         'completed': timeSlot.completed,
-        'id': ''
+        'id': '',
+        'dayID': dayID,
       };
 
       final timeSlotRef =
@@ -1068,6 +1070,7 @@ class FirebaseCrudService {
           courseName: data['courseName'],
           unitName: data['unitName'],
           completed: data['completed'] ?? false,
+          dayID: data['dayID'] ?? '',
         );
       }));
 
@@ -1147,6 +1150,7 @@ class FirebaseCrudService {
           courseName: data['courseName'],
           unitName: data['unitName'],
           completed: data['completed'] ?? false,
+          dayID: data['dayID'] ?? '',
         );
       }));
 
@@ -1287,4 +1291,6 @@ class FirebaseCrudService {
       return -1;
     }
   }
+
+  
 }

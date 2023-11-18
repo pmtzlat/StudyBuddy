@@ -58,7 +58,7 @@ class _CustomDaysViewState extends State<CustomDaysView> {
                   var day = instanceManager.sessionStorage.activeCustomDays[index];
                   return GestureDetector(
                     onTap: () async{
-                      await _controller.getTimeSlotsForDay(day);
+                      await _controller.getTimeSlotsForCustomDay(day);
 
 
                       showGeneralDialog(

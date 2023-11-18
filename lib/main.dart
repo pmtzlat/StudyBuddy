@@ -31,11 +31,9 @@ void main() async {
   synced =
       await instanceManager.localStorageCustomOperations.updateDateHandling();
   if (synced == 1) {
-    instanceManager.sessionStorage.incompletePreviousDays =
-        await instanceManager.calendarController.getIncompletePreviousDays(
+    await instanceManager.calendarController.getIncompletePreviousDays(
             DateTime.parse(instanceManager.localStorage.getString('oldDate')));
-    logger.i(instanceManager.sessionStorage.incompletePreviousDays);
-    //await instanceManager.courseController.updateUnitCompletion();
+    
   }
 
   await instanceManager.courseController.getAllCourses();

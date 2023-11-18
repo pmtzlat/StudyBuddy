@@ -32,12 +32,12 @@ void showErrorDialogForRecalc(
       transitionDuration: Duration(milliseconds: 200),
       pageBuilder: (context, animation, secondaryAnimation) {
         return Center(
-          child: Container(
-            height: (showLeftovers == false)
-                ? screenHeight * 0.4
-                : screenHeight * 0.75,
-            child: Card(
+          child: Card(
+            child: Flexible(
               child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: screenHeight * 0.7, // Set your maximum height
+                ),
                 width: screenWidth * 0.9,
                 padding: EdgeInsets.symmetric(
                     horizontal: screenWidth * 0.1,
@@ -61,28 +61,34 @@ void showErrorDialogForRecalc(
                     ),
                     Text(body),
                     SizedBox(height: screenHeight * 0.03),
-                    (showLeftovers == true)
-                        ? Container(
-                            height: screenHeight * 0.2,
+                    if (showLeftovers)
+                      Flexible(
+                        child: Container(
+                            constraints: BoxConstraints(
+                              maxHeight:
+                                  screenHeight * 0.2, // Set your maximum height
+                            ),
                             child: MediaQuery.removePadding(
                               context: context,
                               removeTop: true,
                               removeBottom: true,
-                              child: Scrollbar(
-                                thumbVisibility: true,
-                                child: ListView.builder(
-                                    itemCount: instanceManager
-                                        .sessionStorage.leftoverCourses.length,
-                                    itemBuilder: (context, index) {
-                                      final currentItem = instanceManager
-                                          .sessionStorage
-                                          .leftoverCourses[index];
-
-                                      return Text('$currentItem \n');
-                                    }),
+                              child: Flexible(
+                                child: Scrollbar(
+                                  thumbVisibility: true,
+                                  child: ListView.builder(
+                                      itemCount: instanceManager
+                                          .sessionStorage.leftoverCourses.length,
+                                      itemBuilder: (context, index) {
+                                        final currentItem = instanceManager
+                                            .sessionStorage
+                                            .leftoverCourses[index];
+                              
+                                        return Text('$currentItem \n');
+                                      }),
+                                ),
                               ),
-                            ))
-                        : SizedBox(),
+                            )),
+                      )
                   ],
                 ),
               ),

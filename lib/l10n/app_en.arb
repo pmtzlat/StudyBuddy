@@ -70,6 +70,12 @@
     "recalcErrorBody":"There was an error when recalculating your schedule. \nTry again later. ",
     "recalcNoTimeTitle": "No time!",
     "recalcNoTimeBody":"Based on your availability, the days left until your exams, and the amount of time you want to dedicate to each topic/course, there is not enough time to study everything. You can reduce the session time or the number of revision days for some courses, or change your availablity to suit your needs. These are the courses that didn't have any space left: ",
+    "completePreviousDaysTitle":"Mark previous days as complete?",
+    "completePreviousDaysDesc": "There are past days that have study sessions that are not marked as complete. Do you want to mark them as complete? If you don't want to mark them as complete, you can leave them as incomplete", 
+    "leaveAsIs": "Leave them",
+    "recalculateWithMissedSections":"Recalculate schedule",
+    "markAsComplete": "Mark as complete",
+
 
 
     "progressTitle" : "Progress",

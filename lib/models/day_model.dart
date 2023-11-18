@@ -41,7 +41,7 @@ class Day {
 
       if (dayInQuestion.id != 'empty') {
         times = await instanceManager.firebaseCrudService
-                .getTimeSlotsForDay(dayInQuestion.id) ??
+                .getTimeSlotsForCustomDay(dayInQuestion.id) ??
             [];
       } else {
         final List<TimeSlot> timeSlotList =
