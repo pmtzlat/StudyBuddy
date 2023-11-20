@@ -10,12 +10,14 @@ class Day {
   final DateTime date;
   List<TimeSlot> times;
   late Duration totalAvailableTime;
+  bool notifiedIncompleteness;
 
   Day({
     required this.weekday,
     this.id = '',
     required this.date,
     List<TimeSlot>? times,
+    this.notifiedIncompleteness = false,
   }) : times = times ?? [];
 
   String getString() {

@@ -33,8 +33,7 @@ void showErrorDialogForRecalc(
       pageBuilder: (context, animation, secondaryAnimation) {
         return Center(
           child: Card(
-            child: Flexible(
-              child: Container(
+            child:  Container(
                 constraints: BoxConstraints(
                   maxHeight: screenHeight * 0.7, // Set your maximum height
                 ),
@@ -62,18 +61,16 @@ void showErrorDialogForRecalc(
                     Text(body),
                     SizedBox(height: screenHeight * 0.03),
                     if (showLeftovers)
-                      Flexible(
-                        child: Container(
+                       Container(
                             constraints: BoxConstraints(
                               maxHeight:
-                                  screenHeight * 0.2, // Set your maximum height
+                                  screenHeight * 0.18, // Set your maximum height
                             ),
                             child: MediaQuery.removePadding(
                               context: context,
                               removeTop: true,
                               removeBottom: true,
-                              child: Flexible(
-                                child: Scrollbar(
+                              child:  Scrollbar(
                                   thumbVisibility: true,
                                   child: ListView.builder(
                                       itemCount: instanceManager
@@ -86,13 +83,11 @@ void showErrorDialogForRecalc(
                                         return Text('$currentItem \n');
                                       }),
                                 ),
-                              ),
                             )),
-                      )
+                      
                   ],
                 ),
               ),
-            ),
           ),
         );
       });

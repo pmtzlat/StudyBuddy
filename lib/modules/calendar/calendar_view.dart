@@ -21,23 +21,21 @@ class CalendarView extends StatefulWidget {
 }
 
 class _CalendarViewState extends State<CalendarView> {
-  late bool needsUpdate;
+  late bool autoRecalc;
   final _controller = instanceManager.calendarController;
   GlobalKey<CalendarDayTimesState> _timesKey = GlobalKey();
   late CalendarDayTimes events = CalendarDayTimes(
     key: _timesKey,
     updateParent: () {
       logger.i(instanceManager.sessionStorage.needsRecalculation);
-      setState(() {
-        needsUpdate = instanceManager.sessionStorage.needsRecalculation;
-      });
+      
     },
   );
 
   @override
   void initState() {
     super.initState();
-
+    autoRecalc = false;
     // Add a post frame callback to show the dialog after the page has been rendered.
     if (!instanceManager.sessionStorage.incompletePreviousDays.isEmpty) {
       WidgetsBinding.instance?.addPostFrameCallback((_) {
@@ -45,15 +43,65 @@ class _CalendarViewState extends State<CalendarView> {
             instanceManager.sessionStorage.incompletePreviousDays);
       });
     }
-    needsUpdate = instanceManager.sessionStorage.needsRecalculation;
+
+    
+  }
+
+  void _showRecalculationAdvice(BuildContext context) {
+    final _localizations = AppLocalizations.of(context)!;
+    var screenHeight = MediaQuery.of(context).size.height;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning,
+                color: Colors.amber,
+                size: 40.0,
+              ),
+              SizedBox(width: 10.0),
+              Text(_localizations.warning),
+            ],
+          ),
+          content: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(_localizations.keepOrRecalc),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.popUntil(context, (route) => route.isFirst);
+              },
+              child: Text(_localizations.keep),
+            ),
+            SizedBox(width: 10.0), // Add some spacing between buttons
+            ElevatedButton(
+              onPressed: () {
+                //Navigator.of(context).pop();
+                setState(() {
+                  autoRecalc = true;
+                });
+                Navigator.popUntil(context, (route) => route.isFirst);
+              },
+              child: Text(_localizations.recalc),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showPrevDayCompletionDialog(Map<String, List<TimeSlot>> dictionary) {
-    // TODO: show dialog to mark past days as complete or not complete
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
     List<String> keys = dictionary.keys.toList();
+    bool leftDaysUnsaved = false;
     logger.i(dictionary);
 
     showGeneralDialog(
@@ -80,6 +128,7 @@ class _CalendarViewState extends State<CalendarView> {
                   Text(_localizations.completePreviousDaysDesc),
                   Container(
                     height: screenHeight * 0.4,
+                    width: screenWidth*0.8,
                     child: PageView.builder(
                       controller: pageController,
                       itemCount: keys.length,
@@ -87,71 +136,87 @@ class _CalendarViewState extends State<CalendarView> {
                       itemBuilder: (context, index) {
                         // Return a widget for each page based on the array item
                         DateTime dateInQuestion = DateTime.parse(keys[index]);
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Center(
-                                      child: Text(dateInQuestion.toString())),
-                                ]),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Column(
+                        return Container(
+                          width: screenWidth*0.75,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    ElevatedButton(
-                                        onPressed: () {
-                                          instanceManager.sessionStorage
-                                              .needsRecalculation = true;
-                                          if (index < keys.length - 1) {
-                                            dateInQuestion = dateInQuestion
-                                                .add(Duration(days: 1));
-                                            pageController.nextPage(
-                                                duration:
-                                                    Duration(milliseconds: 300),
-                                                curve: Curves.easeInOut);
-                                          } else {
-                                            instanceManager.sessionStorage
-                                                    .incompletePreviousDays =
-                                                <String, List<TimeSlot>>{};
-                                            Navigator.pop(context);
-                                            setState(() {});
-                                          }
-                                        },
-                                        child: Text(_localizations.leaveAsIs)),
-                                    ElevatedButton(
-                                        onPressed: () async {
-                                          logger.i(dictionary[
-                                              dateInQuestion.toString()]);
-                                          instanceManager.calendarController
-                                              .markTimeSlotListAsComplete(
-                                                  dictionary[dateInQuestion
-                                                      .toString()]);
-                                          if (index < keys.length - 1) {
-                                            dateInQuestion = dateInQuestion
-                                                .add(Duration(days: 1));
-                                            pageController.nextPage(
-                                                duration:
-                                                    Duration(milliseconds: 300),
-                                                curve: Curves.easeInOut);
-                                          } else {
-                                            Navigator.pop(context);
-                                            instanceManager.sessionStorage
-                                                    .incompletePreviousDays =
-                                                <String, List<TimeSlot>>{};
-                                            setState(() {});
-                                          }
-                                        },
-                                        child: Text(
-                                            _localizations.markAsComplete)),
-                                  ],
-                                ),
-                              ],
-                            )
-                          ],
+                                    Center(
+                                        child: Text(dateInQuestion.toString())),
+                                  ]),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Column(
+                                    children: [
+                                      ElevatedButton(
+                                          onPressed: () {
+                                            _controller.markDayAsNotified(
+                                                dateInQuestion);
+                        
+                                            leftDaysUnsaved = true;
+                                            if (index < keys.length - 1) {
+                                              dateInQuestion = dateInQuestion
+                                                  .add(Duration(days: 1));
+                                              pageController.nextPage(
+                                                  duration:
+                                                      Duration(milliseconds: 300),
+                                                  curve: Curves.easeInOut);
+                                            } else {
+                                              instanceManager.sessionStorage
+                                                      .incompletePreviousDays =
+                                                  <String, List<TimeSlot>>{};
+                        
+                                              if (leftDaysUnsaved) {
+                                                _showRecalculationAdvice(context);
+                                              } else {
+                                                Navigator.pop(context);
+                                              }
+                        
+                                              setState(() {});
+                                            }
+                                          },
+                                          child: Text(_localizations.leaveAsIs)),
+                                      ElevatedButton(
+                                          onPressed: () async {
+                                            _controller.markDayAsNotified(
+                                                dateInQuestion);
+                                            logger.i(dictionary[
+                                                dateInQuestion.toString()]);
+                                            instanceManager.calendarController
+                                                .markTimeSlotListAsComplete(
+                                                    dictionary[dateInQuestion
+                                                        .toString()]);
+                                            if (index < keys.length - 1) {
+                                              dateInQuestion = dateInQuestion
+                                                  .add(Duration(days: 1));
+                                              pageController.nextPage(
+                                                  duration:
+                                                      Duration(milliseconds: 300),
+                                                  curve: Curves.easeInOut);
+                                            } else {
+                                              instanceManager.sessionStorage
+                                                      .incompletePreviousDays =
+                                                  <String, List<TimeSlot>>{};
+                                              if (leftDaysUnsaved) {
+                                                _showRecalculationAdvice(context);
+                                              } else {
+                                                Navigator.pop(context);
+                                              }
+                                            }
+                                          },
+                                          child: Text(
+                                              _localizations.markAsComplete)),
+                                    ],
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
                         );
                       },
                     ),
@@ -175,10 +240,16 @@ class _CalendarViewState extends State<CalendarView> {
       case (-1):
         showErrorDialogForRecalc(context, _localizations.recalcErrorTitle,
             _localizations.recalcErrorBody, false);
+        setState(() {
+          instanceManager.sessionStorage.needsRecalculation = true;
+        });
 
       case (0):
         showErrorDialogForRecalc(context, _localizations.recalcNoTimeTitle,
             _localizations.recalcNoTimeBody, true);
+        setState(() {
+          instanceManager.sessionStorage.needsRecalculation = true;
+        });
     }
 
     await _controller.getCalendarDay(stripTime(await NTP.now()));
@@ -193,6 +264,11 @@ class _CalendarViewState extends State<CalendarView> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
+    if (autoRecalc) {
+      handleScheduleCalculation(context, _localizations);
+      autoRecalc = false;
+    }
+    ;
     return instanceManager.scaffold.getScaffold(
         context: context,
         activeIndex: 1,

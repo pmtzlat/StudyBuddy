@@ -124,7 +124,7 @@ class FirebaseCrudService {
   Future<UnitModel?> getSpecificUnit(
       String courseID, String unitID, String revisionOrUnit) async {
     //logger.i(
-       // 'Getting specific unit: courseID: $courseID, $unitID, $revisionOrUnit');
+    // 'Getting specific unit: courseID: $courseID, $unitID, $revisionOrUnit');
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     try {
@@ -208,6 +208,7 @@ class FirebaseCrudService {
       final newDocumentRef = await customDaysRef.add({
         'weekday': day.weekday,
         'date': day.date.toString(),
+        'notifiedIncompleteness': day.notifiedIncompleteness,
       });
 
       await newDocumentRef.update({'id': newDocumentRef.id});
@@ -238,7 +239,8 @@ class FirebaseCrudService {
             weekday: doc['weekday'],
             id: doc['id'],
             date: DateTime.parse(doc['date'] as String),
-            times: <TimeSlot>[],);
+            times: <TimeSlot>[],
+            notifiedIncompleteness: doc['notifiedIncompleteness']);
 
         if (matchingDay != null) {
           logger.i('Got day for $date');
@@ -248,7 +250,7 @@ class FirebaseCrudService {
 
       return null;
     } catch (e) {
-      logger.e('Error getting day by ID: $e');
+      logger.e('Error getting day $date by ID: $e');
       return Day(
           weekday: date.weekday, date: date, id: date.toString(), times: []);
     }
@@ -1292,5 +1294,20 @@ class FirebaseCrudService {
     }
   }
 
-  
+  Future<void> markCalendarDayAsNotified(String dayID) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final dayRef = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays')
+          .doc(dayID);
+
+      await dayRef.update({'notifiedIncompleteness': true});
+    } catch (e) {
+      logger.e('FirebaseCrud Error in marking day as notified: $e');
+    }
+  }
 }

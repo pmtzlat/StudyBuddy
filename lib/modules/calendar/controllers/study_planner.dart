@@ -135,7 +135,7 @@ class StudyPlanner {
           toAdd += '${revision.name}, ';
         }
       }
-      logger.d(toAdd);
+      //logger.d(toAdd);
       leftovers.add(toAdd);
     }
 

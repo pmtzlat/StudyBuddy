@@ -334,7 +334,7 @@ class CalendarController {
           timeSlot.courseID, timeSlot.unitID);
 
       //logger.i('Success marking timeSlot as not complete!');
-      instanceManager.sessionStorage.needsRecalculation = true;
+      if(DateTime.now().isAfter(day.date)) instanceManager.sessionStorage.needsRecalculation = true;
       return 1;
     } catch (e) {
       logger.e('Error marking timeSlot as not complete: $e');
@@ -347,6 +347,7 @@ class CalendarController {
       final now = stripTime(DateTime.now());
 
       while (now.isAfter(date)) {
+        
         final obtainedDay = await _firebaseCrud.getCalendarDay(date);
 
         bool addToResult = false;
@@ -358,13 +359,24 @@ class CalendarController {
             listOfTimeSlots.add(timeSlot);
           }
         }
-        if (addToResult)
+        if (addToResult && !obtainedDay.notifiedIncompleteness)
           instanceManager.sessionStorage
               .incompletePreviousDays[date.toString()] = listOfTimeSlots;
         date = date.add(const Duration(days: 1));
       }
     } catch (e) {
       logger.e('Error getting previous inComplete days: $e');
+    }
+  }
+
+  Future<void> markDayAsNotified(DateTime date)async {
+    try{
+      Day dayToChange = await _firebaseCrud.getCalendarDayByDate(date);
+      await _firebaseCrud.markCalendarDayAsNotified(dayToChange.id);
+
+
+    }catch(e){
+      logger.e('Error marking Day as notified: $e');
     }
   }
 }
