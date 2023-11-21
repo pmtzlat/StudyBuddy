@@ -72,6 +72,7 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
               onTap: () {
                 logger.i(day.date);
                 _showDatePicker(context, day);
+                
               },
             ),
             IconButton(
@@ -118,7 +119,8 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
       await _controller
           .getCalendarDay(instanceManager.sessionStorage.currentDay);
       day = instanceManager.sessionStorage.loadedCalendarDay;
-      setState(() {});
+      updateParent();
+      
     }
   }
 }
