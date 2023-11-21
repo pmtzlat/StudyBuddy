@@ -63,7 +63,9 @@ class CoursesController {
   }
 
   Future<int?> addUnitsToCourse(
-      {required String id, required int units, required Duration sessionTime}) async {
+      {required String id,
+      required int units,
+      required Duration sessionTime}) async {
     try {
       for (int i = 0; i < units; i++) {
         final unitNum = i + 1;
@@ -140,7 +142,7 @@ class CoursesController {
 
           int? unitsAdded = 0;
           if (res != null) {
-            unitsAdded =  await addUnitsToCourse(
+            unitsAdded = await addUnitsToCourse(
                 id: res, units: units, sessionTime: session);
           }
 
@@ -165,7 +167,8 @@ class CoursesController {
                 ? Color.fromARGB(255, 0, 172, 6)
                 : Color.fromARGB(255, 221, 15, 0),
           );
-          if(revisionsAdded != null) instanceManager.sessionStorage.needsRecalculation = true;
+          if (revisionsAdded != null)
+            instanceManager.sessionStorage.needsRecalculation = true;
         } else {
           // Close the bottom sheet
           Navigator.of(context).pop();
@@ -218,16 +221,23 @@ class CoursesController {
       final sessionTime = doubleToDuration(double.parse(
           unitFormKey.currentState!.fields['sessionTime']!.value.toString()));
       final completed = unitFormKey.currentState!.fields['completed']!.value;
+      final completionTime;
+      if (completed == false) {
+        completionTime = Duration.zero;
+      } else {
+        completionTime = sessionTime;
+      }
 
       final updatedUnit = UnitModel(
           name: name,
           order: oldUnit.order,
           sessionTime: sessionTime,
-          completed: completed);
+          completed: completed,
+          completionTime: completionTime);
 
       dynamic res = await firebaseCrud.editUnit(
           course: course, unitID: oldUnit.id, updatedUnit: updatedUnit);
-      if(res==1) instanceManager.sessionStorage.needsRecalculation = true;
+      if (res == 1) instanceManager.sessionStorage.needsRecalculation = true;
 
       return res;
     } else {
@@ -265,10 +275,9 @@ class CoursesController {
         var res = await firebaseCrud.editCourse(updatedCourse);
 
         if (res == 1) {
-          await firebaseCrud.clearRevisionsForCourse(course.id);
-          res = addRevisionsToCourse(
-              id: course.id, revisions: revisions, sessionTime: sessionTime);
-          if(res == 1) instanceManager.sessionStorage.needsRecalculation = true; 
+          res = await handleChangeInRevisions(revisions, course);
+          if (res == 1)
+            instanceManager.sessionStorage.needsRecalculation = true;
         }
         return res;
       }
@@ -278,7 +287,45 @@ class CoursesController {
     }
   }
 
-  
+  Future<int> handleChangeInRevisions(int revisions, CourseModel course) async {
+    try {
+      var res;
+      int currentRevisions = course.revisions.length;
+      logger.i('CurrentRevisions: $currentRevisions');
+      logger.i('revisions: $revisions');
+      if (revisions > currentRevisions) {
+        logger.i('new revisions is >= current revisions');
+        while (revisions > currentRevisions) {
+          currentRevisions++;
+          final newUnit = UnitModel(
+              name: 'Revision $currentRevisions',
+              order: currentRevisions,
+              sessionTime: doubleToDuration(
+                  (durationToDouble(course.sessionTime) * 1.5)));
+          logger.i('Adding new revision: ${newUnit.name}');
+          res = await firebaseCrud.addRevisionToCourse(
+              newUnit: newUnit, courseID: course.id);
+          if (res == null) return -1;
+          
+        }
+      }
+
+      else if (revisions < currentRevisions) {
+        logger.i('new revisions is < current revisions');
+        while (revisions < currentRevisions) {
+          logger.i('Removing new revision: ${currentRevisions}');
+          res = await firebaseCrud.removeRevisionFromCourse(
+              currentRevisions, course.id);
+          if (res == null) return -1;
+          currentRevisions--;
+        }
+      }
+      return 1;
+    } catch (e) {
+      logger.e('Error handling change in revisions: $e');
+      return -1;
+    }
+  }
 
   Future<int> markUnitsCompletedIfInPreviousDays(DateTime date) async {
     try {

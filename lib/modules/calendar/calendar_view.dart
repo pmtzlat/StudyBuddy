@@ -28,6 +28,9 @@ class _CalendarViewState extends State<CalendarView> {
     key: _timesKey,
     updateParent: () {
       logger.i(instanceManager.sessionStorage.needsRecalculation);
+      setState(() {
+        
+      });
       
     },
   );
@@ -236,6 +239,9 @@ class _CalendarViewState extends State<CalendarView> {
     switch (result) {
       case (1):
         showGreenSnackbar(context, _localizations.recalculationSuccessful);
+        setState(() {
+          instanceManager.sessionStorage.needsRecalculation = false;
+        });
 
       case (-1):
         showErrorDialogForRecalc(context, _localizations.recalcErrorTitle,
@@ -264,6 +270,7 @@ class _CalendarViewState extends State<CalendarView> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
+    logger.w('Needs recalc: ${instanceManager.sessionStorage.needsRecalculation}');
     if (autoRecalc) {
       handleScheduleCalculation(context, _localizations);
       autoRecalc = false;

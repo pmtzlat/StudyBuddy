@@ -78,6 +78,7 @@
     "keepOrRecalc":"You have decided to leave some sessions incomplete. Do you want to recalculate a new schedule to include the missed sessions?",
     "keep":"Leave incomplete",
     "recalc":"Recalculate",
+    "editUnitCompletionInCoursesPage":"If you want to change as past session's completeness, you can edit that course's units in the 'Courses' page",
 
 
 

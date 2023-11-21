@@ -218,6 +218,7 @@ class FirebaseCrudService {
       return newDocumentRef.id;
     } catch (e) {
       logger.e('Error adding calendar day: $e');
+      return '';
     }
   }
 
@@ -272,6 +273,28 @@ class FirebaseCrudService {
       logger.e('Error getting current days: $e');
       return Day(
           weekday: date.weekday, date: date, id: date.toString(), times: []);
+    }
+  }
+
+  Future<DateTime?> getCalendarDayDateByDayID(String dayID) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final userCalendarDaysCollection = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays');
+      final querySnapshot =
+          await userCalendarDaysCollection.where('id', isEqualTo: dayID).get();
+      if (querySnapshot.docs.isNotEmpty) {
+        final doc = querySnapshot.docs.first;
+        return DateTime.parse(doc['date']);
+      }
+      return null;
+    } catch (e) {
+      logger.e('Error getting date for day by id: $e');
+      return null;
     }
   }
 
@@ -455,6 +478,30 @@ class FirebaseCrudService {
       }
     } catch (e) {
       logger.e('Error deleting schedule: $e');
+      return -1;
+    }
+  }
+
+  Future<int> removeRevisionFromCourse(int order, String courseID) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final revisionsCollection = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('courses')
+          .doc(courseID)
+          .collection('revisions');
+      final querySnapshot =
+          await revisionsCollection.where('order', isEqualTo: order).get();
+
+      await querySnapshot.docs.forEach((doc) {
+        doc.reference.delete();
+      });
+      return 1;
+    } catch (e) {
+      logger.e('Error deleting revision $order from course $courseID: $e');
       return -1;
     }
   }
@@ -656,7 +703,7 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int?> deleteSchedule() async {
+  Future<int?> deleteNotPastCalendarDays() async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -664,15 +711,29 @@ class FirebaseCrudService {
       if (uid != null) {
         final userDocRef = firebaseInstance.collection('users').doc(uid);
 
-        final timeGapsCollectionRef = userDocRef.collection('schedule');
+        final timeGapsCollectionRef = userDocRef.collection('calendarDays');
+
+        final currentDate = stripTime(DateTime.now());
 
         await timeGapsCollectionRef.get().then((querySnapshot) {
-          querySnapshot.docs.forEach((doc) {
-            doc.reference.delete();
+          querySnapshot.docs.forEach((doc) async {
+            if (doc.data().containsKey('date')) {
+              final dateField =
+                  DateTime.parse(doc['date'] ?? DateTime.now().toString());
+              final date = stripTime(dateField);
+
+              // Compare with the current date and delete the document
+              // if the date is equal to or after the current date
+              if (date.isAtSameMomentAs(currentDate) ||
+                  date.isAfter(currentDate)) {
+                await clearTimesForCalendarDay(doc['id']);
+                doc.reference.delete();
+              }
+            }
           });
         });
-        logger.i('Wiped schedule!');
 
+        logger.i('Deleted present and future schedule entries!');
         return 1;
       } else {
         return -1;
@@ -931,6 +992,7 @@ class FirebaseCrudService {
         'completed': timeSlot.completed,
         'id': '',
         'dayID': dayID,
+        'date': timeSlot.date.toString()
       };
 
       final timeSlotRef =
@@ -967,6 +1029,7 @@ class FirebaseCrudService {
         'completed': timeSlot.completed,
         'id': '',
         'dayID': dayID,
+        'date': timeSlot.date.toString(),
       };
 
       final timeSlotRef =
@@ -1073,6 +1136,7 @@ class FirebaseCrudService {
           unitName: data['unitName'],
           completed: data['completed'] ?? false,
           dayID: data['dayID'] ?? '',
+          date: DateTime.parse(data['date']),
         );
       }));
 
@@ -1153,6 +1217,7 @@ class FirebaseCrudService {
           unitName: data['unitName'],
           completed: data['completed'] ?? false,
           dayID: data['dayID'] ?? '',
+          date: DateTime.parse(data['date']),
         );
       }));
 

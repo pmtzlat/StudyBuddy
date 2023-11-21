@@ -201,6 +201,7 @@ class CalendarController {
         }
 
         for (var timeSlot in customSchdule) {
+          timeSlot.date = date;
           final result =
               await _firebaseCrud.addTimeSlotToCustomDay(res, timeSlot);
           if (result != 1) {
@@ -227,6 +228,7 @@ class CalendarController {
       return -1;
     }
     for (var slot in day.times) {
+      slot.date = day.date;
       res = await _firebaseCrud.addTimeSlotToCustomDay(day.id, slot);
       if (res != 1) {
         return -1;
@@ -267,7 +269,7 @@ class CalendarController {
         return -1;
       }
       ;
-      if (unit.completionTime == unit.sessionTime) {
+      if (unit.completionTime >= unit.sessionTime) {
         //logger.i('Changing unit to complete...');
         await _firebaseCrud.markUnitAsComplete(
             timeSlot.courseID, timeSlot.unitID);

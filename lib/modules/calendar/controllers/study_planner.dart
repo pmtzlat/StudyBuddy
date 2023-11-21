@@ -25,7 +25,7 @@ class StudyPlanner {
     // -1 = Error
     try {
       //logger.d('calculateSchedule');
-      await firebaseCrud.deleteSchedule();
+      //await firebaseCrud.deleteSchedule();
 
       generalStacks = await generateStacks();
       for (SchedulerStack stack in generalStacks) {
@@ -92,10 +92,10 @@ class StudyPlanner {
         return 0;
       }
 
-      if (await firebaseCrud.deleteAllCalendarDays() == -1) {
+      if (await firebaseCrud.deleteNotPastCalendarDays() == -1) {
         return -1;
       }
-      logger.i('Success deleting calendar Days!');
+      //logger.i('Success deleting calendar Days!');
 
       for (var day in result) {
         var dayID = await firebaseCrud.addCalendarDay(day);
@@ -106,6 +106,8 @@ class StudyPlanner {
         var res = 1;
         for (var timeSlot in day.times) {
           if (timeSlot.courseID != 'free') {
+            
+            timeSlot.date = day.date;
             res = await firebaseCrud.addTimeSlotToCalendarDay(dayID, timeSlot);
 
             if (res == -1) return -1;
@@ -286,7 +288,7 @@ class StudyPlanner {
       selectedUnit = selectUnit(stacks[i], gap, availableTime);
 
       if (selectedUnit != null) {
-        if (stacks[i].units.isEmpty) {
+        if (stacks[i].units.isEmpty && stacks[i].revisions.isEmpty) {
           //logger.i('Removed stack: ${stacks[i].course.name}');
           generalStacks
               .removeWhere((stack) => stack.course.id == stacks[i].course.id);
@@ -328,9 +330,10 @@ class StudyPlanner {
         }
       }
     } else {
+      //logger.i(stack.revisions);
       for (int i = stack.revisions.length - 1; i >= 0; i--) {
         final candidateRevision = stack.revisions[i];
-        //logger.i('Candidate revision: ${candidateRevision.name}: ${candidateRevision.hours/ 3600} hours');
+        //logger.i('Candidate revision: ${candidateRevision.name}');
 
         if (candidateRevision.sessionTime == Duration.zero) {
           continue;

@@ -82,7 +82,9 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                         ElevatedButton(
                             onPressed: () async {
                               await widget.course.addUnit();
-                              setState(() {});
+                              setState(() {
+                                instanceManager.sessionStorage.needsRecalculation = true;
+                              });
                             },
                             child: Text(_localizations.addUnit)),
                         widget.course.units == null
@@ -246,7 +248,9 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                 onDismissed: (direction) async {
                   widget.course.units!.removeAt(index);
                   await widget.course.deleteUnit(unit: unit);
-                  setState(() {});
+                  setState(() {
+                    instanceManager.sessionStorage.needsRecalculation = true;
+                  });
                 },
                 child: UnitCard(
                   unit: unit,

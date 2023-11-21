@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
+import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
+import 'package:study_buddy/utils/error_&_success_messages.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TimeSlotCard extends StatefulWidget {
   final TimeSlot timeSlot;
   final Function updateAllParents;
   const TimeSlotCard(
-      {super.key, required TimeSlot this.timeSlot, required this.updateAllParents});
+      {super.key,
+      required TimeSlot this.timeSlot,
+      required this.updateAllParents});
 
   @override
   State<TimeSlotCard> createState() => _TimeSlotCardState();
@@ -18,22 +23,31 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
+    final _localizations = AppLocalizations.of(context)!;
 
     Widget checkBox(bool checked) {
       return GestureDetector(
         onTap: () async {
+          if (DateTime.now().isAfter(widget.timeSlot.date!)) {
+            showRedSnackbar(
+                context, _localizations.editUnitCompletionInCoursesPage);
+            return;
+          }
           if (widget.timeSlot.completed == false) {
             if (await _controller.markTimeSlotAsComplete(
-                instanceManager.sessionStorage.loadedCalendarDay.id,
-                widget.timeSlot)==1)
+                    instanceManager.sessionStorage.loadedCalendarDay.id,
+                    widget.timeSlot) ==
+                1)
               await _controller
                   .getCalendarDay(instanceManager.sessionStorage.currentDay);
           } else {
             if (await _controller.markTimeSlotAsIncomplete(
-                instanceManager.sessionStorage.loadedCalendarDay,
-                widget.timeSlot)==1)
-              {await _controller
-                  .getCalendarDay(instanceManager.sessionStorage.currentDay);}
+                    instanceManager.sessionStorage.loadedCalendarDay,
+                    widget.timeSlot) ==
+                1) {
+              await _controller
+                  .getCalendarDay(instanceManager.sessionStorage.currentDay);
+            }
           }
 
           widget.updateAllParents();

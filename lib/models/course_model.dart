@@ -48,13 +48,13 @@ class CourseModel {
   Future<void> getUnits() async {
     final firebaseCrud = instanceManager.firebaseCrudService;
     units = await firebaseCrud.getUnitsForCourse(courseID: id);
-    printUnits();
+    //printUnits();
   }
 
   Future<void> getRevisions() async {
     final firebaseCrud = instanceManager.firebaseCrudService;
     revisions = await firebaseCrud.getRevisionsForCourse(courseID: id);
-    printRevisions();
+    //printRevisions();
 
   }
 

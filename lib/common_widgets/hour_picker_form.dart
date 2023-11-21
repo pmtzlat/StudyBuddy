@@ -236,7 +236,9 @@ class _DayFormState extends State<DayForm> {
                                       instanceManager.sessionStorage
                                           .weeklyGaps[daysStrToNum[widget.day]]
                                           .removeAt(index);
-                                      setState(() {});
+                                      setState(() {
+                                        
+                                      });
                                       final res =
                                           await _controller.deleteGap(timeSlot);
                                       if (res != 1) {
@@ -244,7 +246,7 @@ class _DayFormState extends State<DayForm> {
                                             _localizations.errorDeletingGap);
                                       }
                                       await _controller.getGaps();
-                                      setState(() {});
+                                      setState(() {instanceManager.sessionStorage.needsRecalculation = true;});
                                     },
                                     icon: Icon(Icons.delete))
                               ],
