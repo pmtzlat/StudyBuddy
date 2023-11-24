@@ -18,13 +18,35 @@ class TimerWidget extends StatefulWidget {
   State<TimerWidget> createState() => _TimerWidgetState();
 }
 
-class _TimerWidgetState extends State<TimerWidget> {
+class _TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver{
   bool play = true;
+  bool timerWasRunning = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
   }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      
+      stopTimer();
+    } else if (state == AppLifecycleState.resumed) {
+      
+      if (timerWasRunning) {
+        startTimer();
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -50,16 +72,12 @@ class _TimerWidgetState extends State<TimerWidget> {
                         ? () {
                           logger.i('Pressed play!');
                             startTimer();
-                            setState(() {
-                              play = false;
-                            });
+                            
                           }
                         : () {
                             logger.i('Pressed pause!');
-                            endTimer();
-                            setState(() {
-                              play = true;
-                            });
+                            stopTimer();
+                            
                           },
                     icon: play
                         ? const Icon(Icons.play_arrow_rounded)
@@ -91,7 +109,10 @@ class _TimerWidgetState extends State<TimerWidget> {
   }
 
   void startTimer() async {
-    
+    timerWasRunning = true;
+    setState(() {
+      play = false;
+    });
     stopwatch.start();
     while (stopwatch.isRunning) {
       
@@ -100,7 +121,11 @@ class _TimerWidgetState extends State<TimerWidget> {
     }
   }
 
-  void endTimer() {
+  void stopTimer() {
+    setState(() {
+      play = true;
+    });
+    timerWasRunning = false;
     stopwatch.stop();
   }
 
