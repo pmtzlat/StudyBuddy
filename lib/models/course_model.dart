@@ -7,7 +7,7 @@ class CourseModel {
   final String name;
   final double weight;
   DateTime examDate;
-  Duration secondsStudied;
+  Duration timeStudied;
   String color;
   Duration sessionTime;
   final String id;
@@ -29,7 +29,7 @@ class CourseModel {
     required this.name,
     this.weight = 1.0,
     required this.examDate,
-    this.secondsStudied = const Duration(seconds:0),
+    this.timeStudied = const Duration(seconds:0),
     this.color = '#000000',
     this.sessionTime = const Duration(hours: 2), //one hour
     this.id = '',

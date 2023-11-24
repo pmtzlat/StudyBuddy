@@ -44,7 +44,7 @@ class FirebaseCrudService {
           'weight': newCourse.weight * 10,
           'examDate': newCourse.examDate.toString(),
           'sessionTime': newCourse.sessionTime.toString(),
-          'secondsStudied': newCourse.secondsStudied.toString(),
+          'timeStudied': newCourse.timeStudied.toString(),
           'color': newCourse.color,
           'id': '',
           'orderMatters': newCourse.orderMatters,
@@ -89,7 +89,9 @@ class FirebaseCrudService {
             order: unitData['order'] ?? 0,
             completed: unitData['completed'] ?? false,
             completionTime: parseTime(
-                unitData['completionTime'] ?? Duration.zero.toString()));
+                unitData['completionTime'] ?? Duration.zero.toString()),
+            realStudyTime: parseTime(
+                unitData['realStudyTime'] ?? Duration.zero.toString()));
         units.add(unit);
       }
       return units;
@@ -148,7 +150,9 @@ class FirebaseCrudService {
             order: unitData['order'] ?? 0,
             completed: unitData['completed'] ?? false,
             completionTime: parseTime(
-                unitData['completionTime'] ?? Duration.zero.toString()));
+                unitData['completionTime'] ?? Duration.zero.toString()),
+            realStudyTime: parseTime(
+                unitData['realStudyTime'] ?? Duration.zero.toString()));
       } else {
         return null;
       }
@@ -179,14 +183,15 @@ class FirebaseCrudService {
       for (final revisionDoc in revisionQuerySnapshot.docs) {
         final unitData = revisionDoc.data() as Map<String, dynamic>;
         final unit = UnitModel(
-          name: unitData['name'] ?? '',
-          sessionTime: parseTime(unitData['sessionTime']),
-          id: revisionDoc.id,
-          order: unitData['order'] ?? 0,
-          completed: unitData['completed'] ?? false,
-          completionTime:
-              parseTime(unitData['completionTime'] ?? Duration.zero.toString()),
-        );
+            name: unitData['name'] ?? '',
+            sessionTime: parseTime(unitData['sessionTime']),
+            id: revisionDoc.id,
+            order: unitData['order'] ?? 0,
+            completed: unitData['completed'] ?? false,
+            completionTime: parseTime(
+                unitData['completionTime'] ?? Duration.zero.toString()),
+            realStudyTime: parseTime(
+                unitData['realStudyTime'] ?? Duration.zero.toString()));
         revisions.add(unit);
       }
       return revisions;
@@ -404,7 +409,8 @@ class FirebaseCrudService {
         'order': newUnit.order,
         'id': '',
         'completed': newUnit.completed,
-        'completionTime': newUnit.completionTime.toString()
+        'completionTime': newUnit.completionTime.toString(),
+        'realStudyTime': newUnit.realStudyTime.toString()
       };
 
       final unitRef = await courseRef.collection('units').add(unitData);
@@ -436,7 +442,8 @@ class FirebaseCrudService {
         'order': newUnit.order,
         'id': '',
         'completed': newUnit.completed,
-        'completionTime': newUnit.completionTime.toString()
+        'completionTime': newUnit.completionTime.toString(),
+        'realStudyTime': newUnit.realStudyTime.toString()
       };
 
       final revisionRef =
@@ -524,7 +531,7 @@ class FirebaseCrudService {
           name: data['name'] as String,
           weight: weight,
           examDate: DateTime.parse((data['examDate'] as String)),
-          secondsStudied: parseTime(data['secondsStudied']),
+          timeStudied: parseTime(data['timeStudied']),
           color: data['color'] as String,
           sessionTime: parseTime(data['sessionTime']),
           id: data['id'] as String,
@@ -613,7 +620,8 @@ class FirebaseCrudService {
         'name': updatedUnit.name,
         'sessionTime': updatedUnit.sessionTime.toString(),
         'completed': updatedUnit.completed,
-        'completionTime': updatedUnit.completionTime.toString()
+        'completionTime': updatedUnit.completionTime.toString(),
+        'realStudyTime': updatedUnit.realStudyTime.toString()
       });
       return 1;
     } catch (e) {
@@ -931,7 +939,7 @@ class FirebaseCrudService {
           name: data['name'] as String,
           weight: weight,
           examDate: DateTime.parse(data['examDate'] as String),
-          secondsStudied: parseTime(data['secondsStudied']),
+          timeStudied: parseTime(data['timeStudied']),
           color: data['color'] as String,
           sessionTime: parseTime(data['sessionTime']),
           id: data['id'] as String,
@@ -992,7 +1000,7 @@ class FirebaseCrudService {
         'completed': timeSlot.completed,
         'id': '',
         'dayID': dayID,
-        'date': timeSlot.date.toString()
+        'date': timeSlot.date.toString(),
       };
 
       final timeSlotRef =
@@ -1030,6 +1038,7 @@ class FirebaseCrudService {
         'id': '',
         'dayID': dayID,
         'date': timeSlot.date.toString(),
+        'timeStudied': timeSlot.timeStudied.toString()
       };
 
       final timeSlotRef =
@@ -1207,18 +1216,19 @@ class FirebaseCrudService {
           List<TimeSlot>.from(timeSlotsQuery.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         return TimeSlot(
-          id: doc.id,
-          weekday: data['weekday'],
-          startTime: stringToTimeOfDay24Hr(data['startTime']),
-          endTime: stringToTimeOfDay24Hr(data['endTime']),
-          courseID: data['courseID'],
-          unitID: data['unitID'],
-          courseName: data['courseName'],
-          unitName: data['unitName'],
-          completed: data['completed'] ?? false,
-          dayID: data['dayID'] ?? '',
-          date: DateTime.parse(data['date']),
-        );
+            id: doc.id,
+            weekday: data['weekday'],
+            startTime: stringToTimeOfDay24Hr(data['startTime']),
+            endTime: stringToTimeOfDay24Hr(data['endTime']),
+            courseID: data['courseID'],
+            unitID: data['unitID'],
+            courseName: data['courseName'],
+            unitName: data['unitName'],
+            completed: data['completed'] ?? false,
+            dayID: data['dayID'] ?? '',
+            date: DateTime.parse(data['date']),
+            timeStudied:
+                parseTime(data['timeStudied'] ?? Duration.zero.toString()));
       }));
 
       timeSlotsList = sortTimeSlots(timeSlotsList);
@@ -1373,6 +1383,26 @@ class FirebaseCrudService {
       await dayRef.update({'notifiedIncompleteness': true});
     } catch (e) {
       logger.e('FirebaseCrud Error in marking day as notified: $e');
+    }
+  }
+
+  Future<void> updateTimeStudiedForTimeSlot(
+      String slotID, String dayID, Duration timeStudied) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final timeSlotRef = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays')
+          .doc(dayID)
+          .collection('timeSlots')
+          .doc(slotID);
+
+      await timeSlotRef.update({'timeStudied': timeStudied.toString()});
+    } catch (e) {
+      logger.e('Error in Firebase CRUD - saveTimeStudiedForTimeSlot: $e');
     }
   }
 }

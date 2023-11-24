@@ -4,7 +4,8 @@ class UnitModel {
   final String id;
   final int order;
   bool completed;
-  Duration completionTime  ;
+  Duration completionTime;
+  Duration realStudyTime;
 
   UnitModel(
       {required this.name,
@@ -12,7 +13,8 @@ class UnitModel {
       this.id = '',
       required this.order,
       this.completed = false,
-      this.completionTime = Duration.zero});
+      this.completionTime = Duration.zero,
+      this.realStudyTime = Duration.zero});
   UnitModel copyWith({
     String? name,
     Duration? sessionTime,

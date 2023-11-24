@@ -336,7 +336,7 @@ class CalendarController {
           timeSlot.courseID, timeSlot.unitID);
 
       //logger.i('Success marking timeSlot as not complete!');
-      if(DateTime.now().isAfter(day.date)) instanceManager.sessionStorage.needsRecalculation = true;
+      if(stripTime(DateTime.now()).isAfter(day.date)) instanceManager.sessionStorage.needsRecalculation = true;
       return 1;
     } catch (e) {
       logger.e('Error marking timeSlot as not complete: $e');
@@ -380,5 +380,29 @@ class CalendarController {
     }catch(e){
       logger.e('Error marking Day as notified: $e');
     }
+  }
+
+  Future<void> saveTimeStudied(TimeSlot timeSlot)async{
+    try{
+      await _firebaseCrud.updateTimeStudiedForTimeSlot(timeSlot.id, timeSlot.dayID, timeSlot.timeStudied);
+      //await _firebaseCrud.updateUnitStudyTime();
+
+    }catch(e){
+      logger.e('Error saving time Studied for timeslot: $e');
+    }
+  }
+
+  Future<int> resetTimeStudied(TimeSlot timeSlot)async {
+    try{
+      await _firebaseCrud.resetTimeSlotTimeStudied(timeSlot.id, timeSlot.dayID, timeSlot.timeStudied);
+      await _firebaseCrud.subtractTimeFromUnitRealStudyTime(timeSlot.courseID, timeSlot.unitID, timeSlot.timeStudied);
+      await _firebaseCrud.subtractTimeFromCourseTimeStudied(timeSlot.courseID, timeSlot.timeStudied);
+      return 1;
+    }catch(e){
+      logger.e('Error resetting time studied for timeSlot: $e');
+      return -1;
+
+    }
+
   }
 }

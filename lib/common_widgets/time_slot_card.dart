@@ -28,7 +28,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
     Widget checkBox(bool checked) {
       return GestureDetector(
         onTap: () async {
-          if (DateTime.now().isAfter(widget.timeSlot.date!)) {
+          if (stripTime(DateTime.now()).isAfter(widget.timeSlot.date!)) {
             showRedSnackbar(
                 context, _localizations.editUnitCompletionInCoursesPage);
             return;

@@ -55,6 +55,10 @@ dependencies:
   uuid: ^4.1.0
   duration: ^3.0.13
   ntp: ^2.0.0
+  circular_countdown_timer: 
+    git:
+        url: https://github.com/ceranco/circular_countdown_timer
+        ref: on_change_fix
   
 
 dev_dependencies:

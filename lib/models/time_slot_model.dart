@@ -7,6 +7,7 @@ class TimeSlot {
   TimeOfDay startTime;
   TimeOfDay endTime;
   Duration duration;
+  Duration timeStudied;
 
   final String courseID;
   final String unitID;
@@ -21,6 +22,7 @@ class TimeSlot {
       required this.weekday,
       required this.startTime,
       required this.endTime,
+      this.timeStudied = Duration.zero,
       required this.courseID,
       this.unitID= '',
       this.courseName = '',

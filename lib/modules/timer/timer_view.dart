@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:study_buddy/utils/timer.dart';
+import 'package:study_buddy/common_widgets/timer_widget.dart';
 import 'package:study_buddy/main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

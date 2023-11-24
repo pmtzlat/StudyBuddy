@@ -79,6 +79,7 @@
     "keep":"Leave incomplete",
     "recalc":"Recalculate",
     "editUnitCompletionInCoursesPage":"If you want to change as past session's completeness, you can edit that course's units in the 'Courses' page",
+    "cantStartSessionForFuture": "You can't start studying for a day that is not today",
 
 
 

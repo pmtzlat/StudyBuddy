@@ -1,6 +1,8 @@
+import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:intl/intl.dart';
+import 'package:study_buddy/common_widgets/pause_play_button.dart';
 import 'package:study_buddy/common_widgets/time_slot_card.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/day_model.dart';
@@ -8,6 +10,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/modules/loader/loader.dart';
 import 'package:study_buddy/services/logging_service.dart';
+import 'package:study_buddy/utils/datatype_utils.dart';
+import 'package:study_buddy/utils/error_&_success_messages.dart';
+import 'package:study_buddy/common_widgets/timer_widget.dart';
 
 class CalendarDayTimes extends StatefulWidget {
   Function updateParent;
@@ -37,7 +42,6 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
       day = instanceManager.sessionStorage.loadedCalendarDay;
     });
     widget.updateParent();
-
   }
 
   @override
@@ -45,7 +49,6 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -72,7 +75,6 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
               onTap: () {
                 logger.i(day.date);
                 _showDatePicker(context, day);
-                
               },
             ),
             IconButton(
@@ -91,10 +93,11 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
           ],
         ),
         TimeShower(
-            screenHeight: screenHeight,
-            localizations: _localizations,
-            times: day.times,
-            updateAllParents: updateParent,)
+          screenHeight: screenHeight,
+          localizations: _localizations,
+          times: day.times,
+          updateAllParents: updateParent,
+        )
       ],
     );
   }
@@ -120,7 +123,6 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
           .getCalendarDay(instanceManager.sessionStorage.currentDay);
       day = instanceManager.sessionStorage.loadedCalendarDay;
       updateParent();
-      
     }
   }
 }
@@ -144,11 +146,13 @@ class TimeShower extends StatefulWidget {
 }
 
 class _TimeShowerState extends State<TimeShower> {
+  final _controller = instanceManager.calendarController;
 
-  void updateParents(){
+  void updateParents() {
     logger.i('TimeShower: updateParents');
     widget.updateAllParents();
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -163,9 +167,82 @@ class _TimeShowerState extends State<TimeShower> {
                   itemCount: widget.times.length,
                   itemBuilder: (context, index) {
                     var timeSlot = widget.times[index];
-                    return TimeSlotCard(timeSlot: timeSlot, updateAllParents: updateParents,);
+                    return GestureDetector(
+                        onTap: () {
+                          _showTimerDialog(context, timeSlot);
+                        },
+                        child: TimeSlotCard(
+                          timeSlot: timeSlot,
+                          updateAllParents: updateParents,
+                        ));
                   }),
             ),
     );
+  }
+
+  void _showTimerDialog(BuildContext context, TimeSlot timeSlot) {
+    var screenHeight = MediaQuery.of(context).size.height;
+    var screenWidth = MediaQuery.of(context).size.width;
+    final _localizations = AppLocalizations.of(context)!;
+    TimerWidget timer = TimerWidget(hours: timeSlot.timeStudied.inHours, minutes: timeSlot.timeStudied.inMinutes, seconds: timeSlot.timeStudied.inSeconds);
+    if (timeSlot.date != stripTime(DateTime.now()))
+      return showRedSnackbar(context, _localizations.cantStartSessionForFuture);
+
+    showGeneralDialog(
+        context: context,
+        barrierDismissible: false,
+        barrierLabel:
+            MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        barrierColor: const Color.fromARGB(97, 0, 0, 0),
+        transitionDuration: Duration(milliseconds: 200),
+
+        // Create the dialog's content
+        pageBuilder: (context, animation, secondaryAnimation) {
+          final int duration = timeSlot.duration.inSeconds;
+          int initialValue = timeSlot.timeStudied.inSeconds;
+          
+          logger.i('Initial Value: $initialValue');
+          return Center(
+            child: Card(
+                child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    IconButton(
+                        onPressed: () async {
+                          timeSlot.timeStudied = timer.timerTime;
+                          logger.i('TimeSlot time studied: ${timeSlot.timeStudied}');
+                          Navigator.pop(context);
+                          await _controller.saveTimeStudied(timeSlot);
+                          await _controller.getCalendarDay(
+                              instanceManager.sessionStorage.currentDay);
+                          updateParents();
+                        },
+                        icon: const Icon(Icons.close))
+                  ],
+                ),
+                Container(
+                  width: screenWidth * 0.8,
+                  padding: EdgeInsets.all(screenWidth * 0.05),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          timer,
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            )),
+          );
+        });
   }
 }

@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:study_buddy/common_widgets/pause_play_button.dart';
+import 'package:study_buddy/services/logging_service.dart';
 
 class TimerWidget extends StatefulWidget {
   final int hours;
@@ -17,6 +19,13 @@ class TimerWidget extends StatefulWidget {
 }
 
 class _TimerWidgetState extends State<TimerWidget> {
+  bool play = true;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     int hoursShown = widget.timerTime.inHours % 23;
@@ -32,10 +41,39 @@ class _TimerWidgetState extends State<TimerWidget> {
             '${minutesShown < 10 ? '0${minutesShown}' : minutesShown} : '
             '${secondsShown < 10 ? '0${secondsShown}' : secondsShown}'),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(onPressed: () => startTimer(), child: Text(AppLocalizations.of(context)!.start)),
-            ElevatedButton(onPressed: () => pauseTimer(), child: Text(AppLocalizations.of(context)!.stop)),
-            ElevatedButton(onPressed: () => resetTimer(), child: Text(AppLocalizations.of(context)!.reset))
+            Column(
+              children: [
+                IconButton(
+                    onPressed: play
+                        ? () {
+                          logger.i('Pressed play!');
+                            startTimer();
+                            setState(() {
+                              play = false;
+                            });
+                          }
+                        : () {
+                            logger.i('Pressed pause!');
+                            endTimer();
+                            setState(() {
+                              play = true;
+                            });
+                          },
+                    icon: play
+                        ? const Icon(Icons.play_arrow_rounded)
+                        : const Icon(Icons.pause_rounded)),
+                IconButton(
+                  icon: Icon(Icons.restart_alt_rounded),
+                  onPressed: () {
+                    //restart counter
+                    logger.i('Pressed restart!');
+                    resetTimer();
+                  },
+                )
+              ],
+            ),
           ],
         )
       ],
@@ -45,10 +83,9 @@ class _TimerWidgetState extends State<TimerWidget> {
   final stopwatch = Stopwatch();
 
   void updatetimer() {
-    
     setState(() {
       if (stopwatch.isRunning) {
-        widget.timerTime = widget.timerTime - Duration(seconds: 1);
+        widget.timerTime = widget.timerTime + Duration(seconds: 1);
       }
     });
   }
@@ -57,7 +94,7 @@ class _TimerWidgetState extends State<TimerWidget> {
     
     stopwatch.start();
     while (stopwatch.isRunning) {
-      if (widget.timerTime == Duration(seconds: 0)) break;
+      
       await Future.delayed(Duration(seconds: 1));
       updatetimer();
     }
@@ -71,7 +108,10 @@ class _TimerWidgetState extends State<TimerWidget> {
     stopwatch.stop();
     stopwatch.reset();
     widget.timerTime = Duration(
-        hours: widget.hours, minutes: widget.minutes, seconds: widget.seconds);
+        hours: 0, minutes: 0, seconds: 0);
+    setState(() {
+      play = true;
+    });
     updatetimer();
   }
 
