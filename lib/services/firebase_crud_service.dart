@@ -262,6 +262,37 @@ class FirebaseCrudService {
     }
   }
 
+  Future<Day?> getCalendarDayByID(String id) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final day = await firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays')
+          .doc(id)
+          .get();
+
+      if (day.exists) {
+        final doc = day.data() as Map<String, dynamic>;
+        return Day(
+          weekday: doc['weekday'],
+          id: doc['id'],
+          date: DateTime.parse(doc['date'] as String),
+          times: <TimeSlot>[],
+          notifiedIncompleteness: doc['notifiedIncompleteness'],
+        );
+      } else {
+        // Document does not exist
+        return null;
+      }
+    } catch (e) {
+      logger.e('Error getting calendar day by id: $e');
+      return null;
+    }
+  }
+
   Future<Day> getCalendarDay(DateTime date) async {
     try {
       final Day? matchingDay = await getCalendarDayByDate(date);

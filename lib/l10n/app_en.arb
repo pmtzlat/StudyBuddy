@@ -83,6 +83,8 @@
 
 
 
+
+
     "progressTitle" : "Progress",
 
 
@@ -90,6 +92,10 @@
     "start": "Start",
     "stop": "Stop",
     "reset": "Reset",
+    "sessionCompleted": "Session Completed",
+    "sessionCompletedBody":"You have completed your goal for this session! Do you want to continue, or mark the session as complete?",
+    "continueTimer":"Continue",
+    "completeSession": "Complete",
 
 
 

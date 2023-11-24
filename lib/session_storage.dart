@@ -1,6 +1,7 @@
 import 'package:study_buddy/models/course_model.dart';
 import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
+import 'package:study_buddy/utils/datatype_utils.dart';
 
 class SessionStorage {
   List<CourseModel> savedCourses =[];
@@ -16,7 +17,7 @@ class SessionStorage {
   Day loadedCalendarDay = Day(
       date: DateTime.now(), weekday: DateTime.now().weekday, id: 'Placeholder');
 
-  DateTime currentDay = DateTime.now();
+  DateTime currentDay = stripTime(DateTime.now());
   bool dayLoaded = false;
 
   var savedWeekday = 0;

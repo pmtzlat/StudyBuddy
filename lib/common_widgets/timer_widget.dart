@@ -10,15 +10,23 @@ class TimerWidget extends StatefulWidget {
   final int minutes;
   final int seconds;
   Duration timerTime;
+  Duration sessionTime;
+  Function completeAndClose;
 
-  TimerWidget({super.key, this.hours = 0, this.minutes = 0, this.seconds = 0})
+  TimerWidget(
+      {super.key,
+      this.hours = 0,
+      this.minutes = 0,
+      this.seconds = 0,
+      required this.sessionTime,
+      required this.completeAndClose})
       : timerTime = Duration(hours: hours, minutes: minutes, seconds: seconds);
 
   @override
   State<TimerWidget> createState() => _TimerWidgetState();
 }
 
-class _TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver{
+class _TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   bool play = true;
   bool timerWasRunning = false;
 
@@ -37,16 +45,13 @@ class _TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver{
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      
       stopTimer();
     } else if (state == AppLifecycleState.resumed) {
-      
       if (timerWasRunning) {
         startTimer();
       }
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -70,14 +75,12 @@ class _TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver{
                 IconButton(
                     onPressed: play
                         ? () {
-                          logger.i('Pressed play!');
+                            logger.i('Pressed play!');
                             startTimer();
-                            
                           }
                         : () {
                             logger.i('Pressed pause!');
                             stopTimer();
-                            
                           },
                     icon: play
                         ? const Icon(Icons.play_arrow_rounded)
@@ -98,9 +101,37 @@ class _TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver{
     );
   }
 
+  Future<bool> showContinueDialog() async {
+    bool result = false;
+    final _localizations = AppLocalizations.of(context)!;
+    await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(_localizations.sessionCompleted),
+            content: Text(_localizations.sessionCompletedBody),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    result = true;
+                    Navigator.pop(context);
+                  },
+                  child: Text(_localizations.continueTimer)),
+              TextButton(
+                  onPressed: () {
+                    result = false;
+                    Navigator.pop(context);
+                  },
+                  child: Text(_localizations.completeSession))
+            ],
+          );
+        });
+    return result;
+  }
+
   final stopwatch = Stopwatch();
 
-  void updatetimer() {
+  void updatetimer() async {
     setState(() {
       if (stopwatch.isRunning) {
         widget.timerTime = widget.timerTime + Duration(seconds: 1);
@@ -116,8 +147,16 @@ class _TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver{
     stopwatch.start();
     while (stopwatch.isRunning) {
       
+
       await Future.delayed(Duration(seconds: 1));
       updatetimer();
+      if (widget.timerTime == widget.sessionTime) {
+        bool continueTimer = await showContinueDialog();
+        if (!continueTimer) {
+          widget.completeAndClose(widget.timerTime, context);
+          return;
+        }
+      }
     }
   }
 
@@ -132,8 +171,7 @@ class _TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver{
   void resetTimer() {
     stopwatch.stop();
     stopwatch.reset();
-    widget.timerTime = Duration(
-        hours: 0, minutes: 0, seconds: 0);
+    widget.timerTime = Duration(hours: 0, minutes: 0, seconds: 0);
     setState(() {
       play = true;
     });

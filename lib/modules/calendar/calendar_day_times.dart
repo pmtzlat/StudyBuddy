@@ -180,11 +180,42 @@ class _TimeShowerState extends State<TimeShower> {
     );
   }
 
-  void _showTimerDialog(BuildContext context, TimeSlot timeSlot) {
+  void _showTimerDialog(BuildContext context, TimeSlot timeSlot) { //NEEDS TESTING!!
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    TimerWidget timer = TimerWidget(hours: timeSlot.timeStudied.inHours, minutes: timeSlot.timeStudied.inMinutes, seconds: timeSlot.timeStudied.inSeconds);
+
+    Future<void> closeTimer( Duration time, BuildContext context) async {
+            
+            timeSlot.timeStudied = time;
+            if (timeSlot.timeStudied >= Duration(seconds: 5)) {
+              timeSlot.completed = true;
+              
+               _controller.markTimeSlotAsComplete(
+                  timeSlot.dayID, timeSlot);
+            } else {
+              timeSlot.completed = false;
+              
+               _controller.markTimeSlotAsIncomplete(
+                  await instanceManager.firebaseCrudService
+                      .getCalendarDayByID(timeSlot.dayID),
+                  timeSlot);
+            }
+            updateParents();
+            Navigator.pop(context);
+            await _controller.saveTimeStudied(timeSlot);
+            await _controller
+                .getCalendarDay(instanceManager.sessionStorage.currentDay);
+            updateParents();
+          }
+
+    TimerWidget timer = TimerWidget(
+      hours: timeSlot.timeStudied.inHours,
+      minutes: timeSlot.timeStudied.inMinutes,
+      seconds: timeSlot.timeStudied.inSeconds,
+      sessionTime: Duration(seconds: 5), //timeSlot.duration,
+      completeAndClose: closeTimer,
+    );
     if (timeSlot.date != stripTime(DateTime.now()))
       return showRedSnackbar(context, _localizations.cantStartSessionForFuture);
 
@@ -200,8 +231,9 @@ class _TimeShowerState extends State<TimeShower> {
         pageBuilder: (context, animation, secondaryAnimation) {
           final int duration = timeSlot.duration.inSeconds;
           int initialValue = timeSlot.timeStudied.inSeconds;
+
           
-          logger.i('Initial Value: $initialValue');
+
           return Center(
             child: Card(
                 child: Column(
@@ -214,13 +246,7 @@ class _TimeShowerState extends State<TimeShower> {
                   children: [
                     IconButton(
                         onPressed: () async {
-                          timeSlot.timeStudied = timer.timerTime;
-                          logger.i('TimeSlot time studied: ${timeSlot.timeStudied}');
-                          Navigator.pop(context);
-                          await _controller.saveTimeStudied(timeSlot);
-                          await _controller.getCalendarDay(
-                              instanceManager.sessionStorage.currentDay);
-                          updateParents();
+                          await closeTimer(timer.timerTime, context);
                         },
                         icon: const Icon(Icons.close))
                   ],
