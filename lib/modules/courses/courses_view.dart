@@ -6,6 +6,7 @@ import 'package:study_buddy/main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/models/course_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 import '../../common_widgets/course_card.dart';
 
 class CoursesView extends StatefulWidget {
@@ -18,13 +19,13 @@ class CoursesView extends StatefulWidget {
 class _CoursesViewState extends State<CoursesView> {
   final _controller = instanceManager.courseController;
 
-  
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    
+    final PageController _pageController = PageController(initialPage: 0);
+
     return instanceManager.scaffold.getScaffold(
         context: context,
         activeIndex: 0,
@@ -39,15 +40,39 @@ class _CoursesViewState extends State<CoursesView> {
                 style: Theme.of(context).textTheme.displayMedium,
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                showAddCourseSheet(context);
-              },
-              child: Text(_localizations.addCourse),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    showAddCourseSheet(context);
+                  },
+                  child: Text(_localizations.addCourse),
+                ),
+                ToggleSwitch(
+                  initialLabelIndex: instanceManager.sessionStorage.activeOrAllCourses,
+                  totalSwitches: 2,
+                  labels: [
+                    _localizations.activeCourses,
+                    _localizations.allCourses
+                  ],
+                  onToggle: (index) {
+                    print('switched to: $index');
+                    instanceManager.sessionStorage.activeOrAllCourses = index;
+                    _pageController.animateToPage(index!, duration: Duration(milliseconds: 500), curve: Curves.decelerate);
+                  },
+                ),
+              ],
             ),
             instanceManager.sessionStorage.activeCourses == null
                 ? loadingScreen()
-                : getCourseList()
+                : Flexible(
+                  child: PageView(
+                    physics: NeverScrollableScrollPhysics(),
+                      scrollDirection: Axis.horizontal,
+                      controller: _pageController,
+                      children: [getCourseList(instanceManager.sessionStorage.activeCourses), getCourseList(instanceManager.sessionStorage.savedCourses)]),
+                )
           ],
         ));
     ;
@@ -58,15 +83,14 @@ class _CoursesViewState extends State<CoursesView> {
     setState(() {});
   }
 
-  Expanded getCourseList() {
-    return Expanded(
-      child: Container(
+  Container getCourseList(List<CourseModel> courseList) {
+    return Container(
         child: ListView.builder(
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
-          itemCount: instanceManager.sessionStorage.activeCourses!.length,
+          itemCount: courseList!.length,
           itemBuilder: (context, index) {
-            final course = instanceManager.sessionStorage.activeCourses![index];
+            final course = courseList![index];
             return Dismissible(
               key: Key(course.id),
               background: Container(
@@ -80,22 +104,22 @@ class _CoursesViewState extends State<CoursesView> {
               ),
               onDismissed: (direction) async {
                 setState(() {
-                  instanceManager.sessionStorage.activeCourses.removeAt(index);
+                  instanceManager.sessionStorage.activeCourses.remove(course);
+                  instanceManager.sessionStorage.savedCourses.remove(course);
                 });
 
                 await _controller.deleteCourse(
                     id: course.id, index: index, context: context);
 
-                await _controller.getAllCourses();
+                //await _controller.getAllCourses();
               },
               child: CourseCard(
-                  course: instanceManager.sessionStorage.activeCourses![index],
+                  course: courseList![index],
                   parentRefresh: loadCourses),
             );
           },
         ),
-      ),
-    );
+      );
   }
 
   void showAddCourseSheet(BuildContext context) {

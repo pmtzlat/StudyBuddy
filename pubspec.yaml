@@ -59,6 +59,7 @@ dependencies:
     git:
         url: https://github.com/ceranco/circular_countdown_timer
         ref: on_change_fix
+  toggle_switch: ^2.1.0
   
 
 dev_dependencies:

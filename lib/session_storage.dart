@@ -14,6 +14,8 @@ class SessionStorage {
   List<Day> customDays = [];
   List<Day> activeCustomDays = [];
 
+  int activeOrAllCourses = 0;
+
   Day loadedCalendarDay = Day(
       date: DateTime.now(), weekday: DateTime.now().weekday, id: 'Placeholder');
 

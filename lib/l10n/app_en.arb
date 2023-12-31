@@ -31,6 +31,8 @@
     "isUnitCompleted": "Has this unit been studied already?",
     "unitCompleted": "This unit has been already studied.",
     "unitNotCompleted": "This unit has not been studied yet.",
+    "activeCourses": "Active",
+    "allCourses": "All",
 
     
 
