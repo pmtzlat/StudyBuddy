@@ -24,7 +24,7 @@ class _CoursesViewState extends State<CoursesView> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    final PageController _pageController = PageController(initialPage: 0);
+    final PageController _pageController = PageController(initialPage: instanceManager.sessionStorage.activeOrAllCourses);
 
     return instanceManager.scaffold.getScaffold(
         context: context,
