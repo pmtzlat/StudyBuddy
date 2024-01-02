@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:screen_lock_check/screen_lock_check.dart';
+
 import 'package:study_buddy/common_widgets/pause_play_button.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
@@ -23,10 +25,10 @@ class TimerWidget extends StatefulWidget {
       : timerTime = Duration(hours: hours, minutes: minutes, seconds: seconds);
 
   @override
-  State<TimerWidget> createState() => _TimerWidgetState();
+  State<TimerWidget> createState() => TimerWidgetState();
 }
 
-class _TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
+class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   bool play = true;
   bool timerWasRunning = false;
 
@@ -39,15 +41,18 @@ class _TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    stopTimer();
     super.dispose();
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
-      stopTimer();
+      bool locked = await ScreenLockCheck().isScreenLockEnabled;
+      logger.i(state);
+      if (locked) stopTimer();
     } else if (state == AppLifecycleState.resumed) {
-      if (timerWasRunning) {
+      if (!timerWasRunning) {
         startTimer();
       }
     }
@@ -146,8 +151,6 @@ class _TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
     });
     stopwatch.start();
     while (stopwatch.isRunning) {
-      
-
       await Future.delayed(Duration(seconds: 1));
       updatetimer();
       if (widget.timerTime == widget.sessionTime) {

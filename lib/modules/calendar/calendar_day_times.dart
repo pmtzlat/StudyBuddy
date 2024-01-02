@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -21,6 +23,7 @@ class CalendarDayTimes extends StatefulWidget {
     required this.updateParent,
   }) : super(key: key);
 
+  
   @override
   State<CalendarDayTimes> createState() => CalendarDayTimesState();
 }
@@ -128,7 +131,7 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
 }
 
 class TimeShower extends StatefulWidget {
-  const TimeShower(
+  TimeShower(
       {super.key,
       required this.screenHeight,
       required AppLocalizations localizations,
@@ -140,6 +143,8 @@ class TimeShower extends StatefulWidget {
   final AppLocalizations _localizations;
   final List<TimeSlot> times;
   final Function updateAllParents;
+  final GlobalKey<TimerWidgetState> timerKey = GlobalKey<TimerWidgetState>();
+
 
   @override
   State<TimeShower> createState() => _TimeShowerState();
@@ -180,43 +185,60 @@ class _TimeShowerState extends State<TimeShower> {
     );
   }
 
-  void _showTimerDialog(BuildContext context, TimeSlot timeSlot) { //NEEDS TESTING!!
+  void _showTimerDialog(BuildContext context, TimeSlot timeSlot) {
+    //NEEDS TESTING!!
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
 
-    Future<void> closeTimer( Duration time, BuildContext context) async {
-            
-            timeSlot.timeStudied = time;
-            if (timeSlot.timeStudied >= Duration(seconds: 5)) {
-              timeSlot.completed = true;
-              
-               _controller.markTimeSlotAsComplete(
-                  timeSlot.dayID, timeSlot);
-            } else {
-              timeSlot.completed = false;
-              
-               _controller.markTimeSlotAsIncomplete(
-                  await instanceManager.firebaseCrudService
-                      .getCalendarDayByID(timeSlot.dayID),
-                  timeSlot);
-            }
-            updateParents();
-            Navigator.pop(context);
-            await _controller.saveTimeStudied(timeSlot);
-            await _controller
-                .getCalendarDay(instanceManager.sessionStorage.currentDay);
-            updateParents();
-          }
+    List<int> formatDuration(Duration duration) {
+      int hours = duration.inHours;
+      int minutes =
+          (duration.inMinutes - Duration(hours: hours).inMinutes) % 60;
+      int seconds = (duration.inSeconds -
+              Duration(hours: hours, minutes: minutes).inSeconds) %
+          60;
+
+      return [hours, minutes, seconds];
+    }
+
+    Future<void> closeTimer(Duration time, BuildContext context) async {
+
+      timeSlot.timeStudied = time;
+      if (timeSlot.timeStudied >= Duration(seconds: 5) && timeSlot.completed == false) { // change line here to timeslot.duration
+        timeSlot.completed = true;
+
+        _controller.markTimeSlotAsComplete(timeSlot.dayID, timeSlot);
+      } else if (timeSlot.timeStudied < Duration(seconds: 5) && timeSlot.completed == true){
+
+        timeSlot.completed = false;
+
+        _controller.markTimeSlotAsIncomplete(
+            await instanceManager.firebaseCrudService
+                .getCalendarDayByID(timeSlot.dayID),
+            timeSlot);
+      }
+      updateParents();
+      Navigator.pop(context);
+      await _controller.saveTimeStudied(timeSlot);
+      await _controller
+          .getCalendarDay(instanceManager.sessionStorage.currentDay);
+     
+      updateParents();
+    }
+    List<int> formattedDuration = formatDuration(timeSlot.timeStudied);
 
     TimerWidget timer = TimerWidget(
-      hours: timeSlot.timeStudied.inHours,
-      minutes: timeSlot.timeStudied.inMinutes,
-      seconds: timeSlot.timeStudied.inSeconds,
+      key: widget.timerKey,
+      hours: formattedDuration[0],
+      minutes: formattedDuration[1],
+      seconds: formattedDuration[2],
       sessionTime: Duration(seconds: 5), //timeSlot.duration,
       completeAndClose: closeTimer,
     );
-    if (timeSlot.date != stripTime(DateTime.now()))
+
+
+    if (instanceManager.sessionStorage.currentDay != stripTime(DateTime.now()))
       return showRedSnackbar(context, _localizations.cantStartSessionForFuture);
 
     showGeneralDialog(
@@ -232,8 +254,6 @@ class _TimeShowerState extends State<TimeShower> {
           final int duration = timeSlot.duration.inSeconds;
           int initialValue = timeSlot.timeStudied.inSeconds;
 
-          
-
           return Center(
             child: Card(
                 child: Column(
@@ -246,6 +266,9 @@ class _TimeShowerState extends State<TimeShower> {
                   children: [
                     IconButton(
                         onPressed: () async {
+                          
+                          //here
+                          widget.timerKey.currentState?.stopTimer();
                           await closeTimer(timer.timerTime, context);
                         },
                         icon: const Icon(Icons.close))

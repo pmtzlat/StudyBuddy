@@ -125,8 +125,8 @@ class FirebaseCrudService {
 
   Future<UnitModel?> getSpecificUnit(
       String courseID, String unitID, String revisionOrUnit) async {
-    //logger.i(
-    // 'Getting specific unit: courseID: $courseID, $unitID, $revisionOrUnit');
+    logger.i(
+    'Getting specific unit: courseID: $courseID, unitID: $unitID, $revisionOrUnit');
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     try {
@@ -1246,6 +1246,8 @@ class FirebaseCrudService {
       List<TimeSlot> timeSlotsList =
           List<TimeSlot>.from(timeSlotsQuery.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
+        // logger.i(data['timeStudied']);
+        // logger.i(parseTime(data['timeStudied'] ?? Duration.zero.toString()));
         return TimeSlot(
             id: doc.id,
             weekday: data['weekday'],
