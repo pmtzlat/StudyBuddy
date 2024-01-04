@@ -33,7 +33,6 @@ class TimerWidget extends StatefulWidget {
 class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   bool play = true;
   bool timerWasRunning = false;
-  bool paused = false;
   late Screen _screen;
   late StreamSubscription<ScreenStateEvent>? _subscription;
   bool screenOn = true;
@@ -41,21 +40,14 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   DateTime? postLockTimeStamp;
 
   void onData(ScreenStateEvent event) {
-    //logger.i('$paused , $event, $timerWasRunning');
-    if ( //paused &&
-        event == ScreenStateEvent.SCREEN_OFF //&&timerWasRunning == true
-        ) {
+    if (event == ScreenStateEvent.SCREEN_OFF) {
       screenOn = false;
-      // logger.i('starting from onData');
-      // startTimer();
-      // paused = false;
     } else {
       screenOn = true;
     }
   }
 
   void startListening() {
-    //logger.i('Listening to screen state...)');
     _screen = new Screen();
     try {
       _subscription = _screen.screenStateStream?.listen(onData);
@@ -65,7 +57,6 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   }
 
   void stopListening() {
-    //logger.i('cancelling screen listener...');
     _subscription?.cancel();
   }
 
@@ -85,31 +76,21 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    //logger.i('$paused , $state, $timerWasRunning');
     if (state == AppLifecycleState.paused) {
-      //await isDeviceLocked();
-      //if (timerWasRunning) {
-      await Future.delayed(Duration(seconds: 1)); //tighten this up a lil bit
-      //logger.i('screenOn: $screenOn');
+      await Future.delayed(Duration(seconds: 1));
       if (!screenOn) {
-        //logger.i('screen is off');
         preLockTimeStamp = DateTime.now();
       }
 
-      //logger.i('pausing...');
       stopTimer();
-      paused = true; // is 'paused' redundant?
-      
 
       //}
     } else if (state == AppLifecycleState.resumed) {
-      if (timerWasRunning && paused == true) {
-        //logger.i('starting from didChangeAppLifecycleState. preLockTImeStamp: $preLockTimeStamp');
+      if (timerWasRunning) {
         if (preLockTimeStamp != null) {
           postLockTimeStamp = DateTime.now();
           Duration timePassed =
               postLockTimeStamp!.difference(preLockTimeStamp!);
-          //logger.i('preLock: $preLockTimeStamp, postLock: $postLockTimeStamp, timePassed: $timePassed\n widget.timerTime: ${widget.timerTime}, result: ${widget.timerTime + timePassed}');
           widget.timerTime += timePassed;
           preLockTimeStamp = null;
           postLockTimeStamp = null;
@@ -118,29 +99,6 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
       }
     }
   }
-
-  // Future<bool> isDeviceLocked() async {
-  //   try {
-  //     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  //     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-
-  //     if (androidInfo != null) {
-  //       LocalAuthentication localAuth = LocalAuthentication();
-  //       bool canCheckBiometrics = await localAuth.canCheckBiometrics;
-
-  //       if (canCheckBiometrics) {
-  //         return !(await localAuth.authenticate(
-  //           localizedReason: 'Authenticate to check device lock status',
-  //         ));
-  //       }
-  //     }
-  //   } on PlatformException catch (e) {
-  //     print('Error checking device lock status: $e');
-  //   }
-
-  //   // Default to true if an error occurs (considering the device as locked)
-  //   return true;
-  //}
 
   @override
   Widget build(BuildContext context) {
@@ -164,14 +122,10 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
                 IconButton(
                     onPressed: play
                         ? () {
-                            //logger.i('Pressed play!');
-
-                            //logger.i('starting from onPressed play');
                             startTimer();
                             timerWasRunning = true;
                           }
                         : () {
-                            //logger.i('Pressed pause!');
                             stopTimer();
                             timerWasRunning = false;
                           },
@@ -181,8 +135,6 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
                 IconButton(
                   icon: Icon(Icons.restart_alt_rounded),
                   onPressed: () {
-                    //restart counter
-                    //logger.i('Pressed restart!');
                     resetTimer();
                   },
                 )
@@ -237,7 +189,6 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
       play = false;
     });
     stopwatch.start();
-    //logger.i('Started timer!');
     while (stopwatch.isRunning) {
       await Future.delayed(Duration(seconds: 1));
       updatetimer();
@@ -257,7 +208,6 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
     });
 
     stopwatch.stop();
-    //logger.i('Paused timer!');
   }
 
   void resetTimer() {
