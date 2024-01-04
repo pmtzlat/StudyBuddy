@@ -4,6 +4,7 @@ import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:intl/intl.dart';
+import 'package:screen_state/screen_state.dart';
 import 'package:study_buddy/common_widgets/pause_play_button.dart';
 import 'package:study_buddy/common_widgets/time_slot_card.dart';
 import 'package:study_buddy/main.dart';
@@ -23,7 +24,6 @@ class CalendarDayTimes extends StatefulWidget {
     required this.updateParent,
   }) : super(key: key);
 
-  
   @override
   State<CalendarDayTimes> createState() => CalendarDayTimesState();
 }
@@ -145,7 +145,6 @@ class TimeShower extends StatefulWidget {
   final Function updateAllParents;
   final GlobalKey<TimerWidgetState> timerKey = GlobalKey<TimerWidgetState>();
 
-
   @override
   State<TimeShower> createState() => _TimeShowerState();
 }
@@ -191,6 +190,7 @@ class _TimeShowerState extends State<TimeShower> {
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
 
+    
     List<int> formatDuration(Duration duration) {
       int hours = duration.inHours;
       int minutes =
@@ -203,14 +203,16 @@ class _TimeShowerState extends State<TimeShower> {
     }
 
     Future<void> closeTimer(Duration time, BuildContext context) async {
-
+      //stopListening();
       timeSlot.timeStudied = time;
-      if (timeSlot.timeStudied >= Duration(seconds: 5) && timeSlot.completed == false) { // change line here to timeslot.duration
+      if (timeSlot.timeStudied >= Duration(seconds: 5) &&
+          timeSlot.completed == false) {
+        // change line here to timeslot.duration
         timeSlot.completed = true;
 
         _controller.markTimeSlotAsComplete(timeSlot.dayID, timeSlot);
-      } else if (timeSlot.timeStudied < Duration(seconds: 5) && timeSlot.completed == true){
-
+      } else if (timeSlot.timeStudied < Duration(seconds: 5) &&
+          timeSlot.completed == true) {
         timeSlot.completed = false;
 
         _controller.markTimeSlotAsIncomplete(
@@ -223,9 +225,10 @@ class _TimeShowerState extends State<TimeShower> {
       await _controller.saveTimeStudied(timeSlot);
       await _controller
           .getCalendarDay(instanceManager.sessionStorage.currentDay);
-     
+
       updateParents();
     }
+
     List<int> formattedDuration = formatDuration(timeSlot.timeStudied);
 
     TimerWidget timer = TimerWidget(
@@ -237,9 +240,9 @@ class _TimeShowerState extends State<TimeShower> {
       completeAndClose: closeTimer,
     );
 
-
     if (instanceManager.sessionStorage.currentDay != stripTime(DateTime.now()))
       return showRedSnackbar(context, _localizations.cantStartSessionForFuture);
+  
 
     showGeneralDialog(
         context: context,
@@ -266,8 +269,8 @@ class _TimeShowerState extends State<TimeShower> {
                   children: [
                     IconButton(
                         onPressed: () async {
-                          
                           //here
+                          widget.timerKey.currentState?.stopListening();
                           widget.timerKey.currentState?.stopTimer();
                           await closeTimer(timer.timerTime, context);
                         },

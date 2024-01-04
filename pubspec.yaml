@@ -60,7 +60,8 @@ dependencies:
         url: https://github.com/ceranco/circular_countdown_timer
         ref: on_change_fix
   toggle_switch: ^2.1.0
-  screen_lock_check: ^2.0.1
+  screen_state: ^3.0.1
+  
   
   
   
