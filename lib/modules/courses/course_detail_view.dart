@@ -28,6 +28,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
   final _controller = instanceManager.courseController;
   bool editMode = false;
   final courseFormKey = GlobalKey<FormBuilderState>();
+  bool loading = false;
 
   @override
   void initState() {
@@ -79,14 +80,23 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                               });
                             },
                             icon: Icon(Icons.edit)),
-                        ElevatedButton(
-                            onPressed: () async {
-                              await widget.course.addUnit();
-                              setState(() {
-                                instanceManager.sessionStorage.needsRecalculation = true;
-                              });
-                            },
-                            child: Text(_localizations.addUnit)),
+                        Container(
+                          height: screenHeight *0.05,
+                          padding: EdgeInsets.all(3),
+                          child: loading == false ? ElevatedButton(
+                              onPressed: () async {
+                                setState(() {
+                                  loading = true;
+                                });
+                                await widget.course.addUnit();
+                                setState(() {
+                                  instanceManager.sessionStorage.needsRecalculation = true;
+                                  loading = false;
+                                });
+                              },
+                              child: Text(_localizations.addUnit))
+                              : CircularProgressIndicator(),
+                        ),
                         widget.course.units == null
                             ? loadingScreen()
                             : getUnitList()
@@ -181,8 +191,11 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                   ),
                                 ],
                               )),
-                          IconButton(
+                          loading == false ? IconButton(
                               onPressed: () async {
+                                setState(() {
+                                  loading = true;
+                                });
                                 int? res = await _controller.handleEditCourse(
                                     courseFormKey, widget.course);
 
@@ -203,10 +216,12 @@ class _CourseDetailViewState extends State<CourseDetailView> {
 
                                   setState(() {
                                     editMode = false;
+                                    loading = false;
                                   });
                                 }
                               },
-                              icon: Icon(Icons.check)),
+                              icon: Icon(Icons.check))
+                              : CircularProgressIndicator(),
                         ],
                       )),
                     ),
