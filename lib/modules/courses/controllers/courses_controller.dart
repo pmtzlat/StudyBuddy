@@ -101,91 +101,91 @@ class CoursesController {
     }
   }
 
-  Future<int?> handleAddCourse(
-      GlobalKey<FormBuilderState> courseCreationFormKey,
+  Future<int> handleAddCourse(GlobalKey<FormBuilderState> courseCreationFormKey,
       BuildContext context) async {
     int? res;
     try {
-      if (courseCreationFormKey.currentState!.validate()) {
-        courseCreationFormKey.currentState!.save();
-        dynamic snackbar;
-        final examDate = DateTime.parse(courseCreationFormKey
-            .currentState!.fields['examDate']!.value
-            .toString());
+      dynamic snackbar;
+      final examDate = DateTime.parse(courseCreationFormKey
+          .currentState!.fields['examDate']!.value
+          .toString());
 
-        if (examDate.isAfter(DateTime.now())) {
-          final name = courseCreationFormKey
-              .currentState!.fields['courseName']!.value
-              .toString();
+      if (examDate.isAfter(DateTime.now())) {
+        final name = courseCreationFormKey
+            .currentState!.fields['courseName']!.value
+            .toString();
 
-          final weight =
-              courseCreationFormKey.currentState!.fields['weightSlider']!.value;
-          final session = doubleToDuration(double.parse(courseCreationFormKey
-              .currentState!.fields['sessionTime']!.value));
+        final weight =
+            courseCreationFormKey.currentState!.fields['weightSlider']!.value;
+        final session = doubleToDuration(double.parse(
+            courseCreationFormKey.currentState!.fields['sessionTime']!.value));
 
-          final int units = int.parse(
-              courseCreationFormKey.currentState!.fields['units']!.value);
+        final int units = int.parse(
+            courseCreationFormKey.currentState!.fields['units']!.value);
 
-          final int revisions = int.parse(
-              courseCreationFormKey.currentState!.fields['revisions']!.value);
+        final int revisions = int.parse(
+            courseCreationFormKey.currentState!.fields['revisions']!.value);
 
-          final bool orderMatters =
-              courseCreationFormKey.currentState!.fields['orderMatters']!.value;
+        final bool orderMatters =
+            courseCreationFormKey.currentState!.fields['orderMatters']!.value;
 
-          dynamic res = await addCourse(
-            name: name,
-            examDate: examDate,
-            weight: weight,
-            sessionTime: session,
-            orderMatters: orderMatters,
-          );
+        dynamic res = await addCourse(
+          name: name,
+          examDate: examDate,
+          weight: weight,
+          sessionTime: session,
+          orderMatters: orderMatters,
+        );
 
-          int? unitsAdded = 0;
-          if (res != null) {
-            unitsAdded = await addUnitsToCourse(
-                id: res, units: units, sessionTime: session);
-          }
-
-          int? revisionsAdded = 0;
-
-          if (unitsAdded != null) {
-            revisionsAdded = await addRevisionsToCourse(
-                id: res, revisions: revisions, sessionTime: session);
-          }
-
-          // Close the bottom sheet
-          Navigator.of(context).pop();
-
-          // Show a snackbar based on the value of 'res'
-          snackbar = SnackBar(
-            content: Text(
-              revisionsAdded != null
-                  ? AppLocalizations.of(context)!.courseAddedCorrectly
-                  : AppLocalizations.of(context)!.errorAddingCourse,
-            ),
-            backgroundColor: revisionsAdded != null
-                ? Color.fromARGB(255, 0, 172, 6)
-                : Color.fromARGB(255, 221, 15, 0),
-          );
-          if (revisionsAdded != null)
-            instanceManager.sessionStorage.needsRecalculation = true;
-        } else {
-          // Close the bottom sheet
-          Navigator.of(context).pop();
-
-          snackbar = SnackBar(
-            content: Text(AppLocalizations.of(context)!.wrongDates),
-            backgroundColor: Color.fromARGB(255, 221, 15, 0),
-          );
+        int? unitsAdded = 0;
+        if (res != null) {
+          unitsAdded = await addUnitsToCourse(
+              id: res, units: units, sessionTime: session);
         }
 
-        ScaffoldMessenger.of(context).showSnackBar(snackbar);
-        return res;
+        int? revisionsAdded = 0;
+
+        if (unitsAdded != null) {
+          revisionsAdded = await addRevisionsToCourse(
+              id: res, revisions: revisions, sessionTime: session);
+        }
+
+        //success = 1
+        //wrong dates = 0
+        // error = -1
+
+        // Show a snackbar based on the value of 'res'
+        // snackbar = SnackBar(
+        //   content: Text(
+        //     revisionsAdded != null
+        //         ? AppLocalizations.of(context)!.courseAddedCorrectly
+        //         : AppLocalizations.of(context)!.errorAddingCourse,
+        //   ),
+        //   backgroundColor: revisionsAdded != null
+        //       ? Color.fromARGB(255, 0, 172, 6)
+        //       : Color.fromARGB(255, 221, 15, 0),
+        // );
+        if (revisionsAdded != null) {
+          instanceManager.sessionStorage.needsRecalculation = true;
+          return 1;
+        } else {
+          return -1;
+        }
       } else {
-        logger.e("Error validating fields!");
+        // Close the bottom sheet
+        // Navigator.of(context).pop();
+
+        // snackbar = SnackBar(
+        //   content: Text(AppLocalizations.of(context)!.wrongDates),
+        //   backgroundColor: Color.fromARGB(255, 221, 15, 0),
+        // );
+        return 0;
       }
+
+      //ScaffoldMessenger.of(context).showSnackBar(snackbar);
     } catch (e) {
       logger.e('Error handling add course: $e');
+      return -1;
     }
   }
 
@@ -306,11 +306,8 @@ class CoursesController {
           res = await firebaseCrud.addRevisionToCourse(
               newUnit: newUnit, courseID: course.id);
           if (res == null) return -1;
-          
         }
-      }
-
-      else if (revisions < currentRevisions) {
+      } else if (revisions < currentRevisions) {
         logger.i('new revisions is < current revisions');
         while (revisions < currentRevisions) {
           logger.i('Removing new revision: ${currentRevisions}');

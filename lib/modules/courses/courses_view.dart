@@ -5,6 +5,8 @@ import 'package:study_buddy/common_widgets/loading_screen.dart';
 import 'package:study_buddy/main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/models/course_model.dart';
+import 'package:study_buddy/modules/courses/controllers/courses_controller.dart';
+import 'package:study_buddy/modules/loader/loader.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import '../../common_widgets/course_card.dart';
@@ -24,7 +26,8 @@ class _CoursesViewState extends State<CoursesView> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    final PageController _pageController = PageController(initialPage: instanceManager.sessionStorage.activeOrAllCourses);
+    final PageController _pageController = PageController(
+        initialPage: instanceManager.sessionStorage.activeOrAllCourses);
 
     return instanceManager.scaffold.getScaffold(
         context: context,
@@ -50,7 +53,8 @@ class _CoursesViewState extends State<CoursesView> {
                   child: Text(_localizations.addCourse),
                 ),
                 ToggleSwitch(
-                  initialLabelIndex: instanceManager.sessionStorage.activeOrAllCourses,
+                  initialLabelIndex:
+                      instanceManager.sessionStorage.activeOrAllCourses,
                   totalSwitches: 2,
                   labels: [
                     _localizations.activeCourses,
@@ -59,7 +63,9 @@ class _CoursesViewState extends State<CoursesView> {
                   onToggle: (index) {
                     print('switched to: $index');
                     instanceManager.sessionStorage.activeOrAllCourses = index;
-                    _pageController.animateToPage(index!, duration: Duration(milliseconds: 500), curve: Curves.decelerate);
+                    _pageController.animateToPage(index!,
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.decelerate);
                   },
                 ),
               ],
@@ -67,12 +73,17 @@ class _CoursesViewState extends State<CoursesView> {
             instanceManager.sessionStorage.activeCourses == null
                 ? loadingScreen()
                 : Flexible(
-                  child: PageView(
-                    physics: NeverScrollableScrollPhysics(),
-                      scrollDirection: Axis.horizontal,
-                      controller: _pageController,
-                      children: [getCourseList(instanceManager.sessionStorage.activeCourses), getCourseList(instanceManager.sessionStorage.savedCourses)]),
-                )
+                    child: PageView(
+                        physics: NeverScrollableScrollPhysics(),
+                        scrollDirection: Axis.horizontal,
+                        controller: _pageController,
+                        children: [
+                          getCourseList(
+                              instanceManager.sessionStorage.activeCourses),
+                          getCourseList(
+                              instanceManager.sessionStorage.savedCourses)
+                        ]),
+                  )
           ],
         ));
     ;
@@ -85,41 +96,40 @@ class _CoursesViewState extends State<CoursesView> {
 
   Container getCourseList(List<CourseModel> courseList) {
     return Container(
-        child: ListView.builder(
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          itemCount: courseList!.length,
-          itemBuilder: (context, index) {
-            final course = courseList![index];
-            return Dismissible(
-              key: Key(course.id),
-              background: Container(
-                color: const Color.fromARGB(255, 255, 77, 65),
-                child: Icon(
-                  Icons.delete,
-                  color: Colors.white,
-                ),
-                alignment: Alignment.centerRight,
-                padding: EdgeInsets.only(right: 20.0),
+      child: ListView.builder(
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        itemCount: courseList!.length,
+        itemBuilder: (context, index) {
+          final course = courseList![index];
+          return Dismissible(
+            key: Key(course.id),
+            background: Container(
+              color: const Color.fromARGB(255, 255, 77, 65),
+              child: Icon(
+                Icons.delete,
+                color: Colors.white,
               ),
-              onDismissed: (direction) async {
-                setState(() {
-                  instanceManager.sessionStorage.activeCourses.remove(course);
-                  instanceManager.sessionStorage.savedCourses.remove(course);
-                });
+              alignment: Alignment.centerRight,
+              padding: EdgeInsets.only(right: 20.0),
+            ),
+            onDismissed: (direction) async {
+              setState(() {
+                instanceManager.sessionStorage.activeCourses.remove(course);
+                instanceManager.sessionStorage.savedCourses.remove(course);
+              });
 
-                await _controller.deleteCourse(
-                    id: course.id, index: index, context: context);
+              await _controller.deleteCourse(
+                  id: course.id, index: index, context: context);
 
-                //await _controller.getAllCourses();
-              },
-              child: CourseCard(
-                  course: courseList![index],
-                  parentRefresh: loadCourses),
-            );
-          },
-        ),
-      );
+              //await _controller.getAllCourses();
+            },
+            child: CourseCard(
+                course: courseList![index], parentRefresh: loadCourses),
+          );
+        },
+      ),
+    );
   }
 
   void showAddCourseSheet(BuildContext context) {
@@ -133,6 +143,7 @@ class _CoursesViewState extends State<CoursesView> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(25.0))),
       isScrollControlled: true,
       builder: (BuildContext context) {
+        bool loading = false;
         return SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.only(
@@ -252,20 +263,11 @@ class _CoursesViewState extends State<CoursesView> {
                             title: Text(_localizations.orderMatters))
                       ],
                     )),
-                Center(
-                  child: Container(
-                    margin: EdgeInsets.all(20),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final res = await _controller.handleAddCourse(
-                            courseCreationFormKey, context);
-                        await _controller.getAllCourses();
-
-                        setState(() {});
-                      },
-                      child: Text(_localizations.add),
-                    ),
-                  ),
+                AddButton(
+                  controller: _controller,
+                  courseCreationFormKey: courseCreationFormKey,
+                  refresh: refresh,
+                  localizations: _localizations,
                 )
               ],
             ),
@@ -277,5 +279,79 @@ class _CoursesViewState extends State<CoursesView> {
 
   void refresh() {
     setState(() {});
+  }
+}
+
+class AddButton extends StatefulWidget {
+  CoursesController controller;
+  GlobalKey<FormBuilderState> courseCreationFormKey;
+  Function refresh;
+  AppLocalizations localizations;
+
+  AddButton(
+      {super.key,
+      required this.controller,
+      required this.courseCreationFormKey,
+      required this.refresh,
+      required this.localizations});
+
+  @override
+  State<AddButton> createState() => _AddButtonState();
+}
+
+class _AddButtonState extends State<AddButton> {
+  bool loading = false;
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        margin: EdgeInsets.all(20),
+        child: loading == false
+            ? ElevatedButton(
+                onPressed: () async {
+                  if (widget.courseCreationFormKey.currentState!.validate()) {
+                    widget.courseCreationFormKey.currentState!.save();
+                    setState(() {
+                      loading = true;
+                    });
+                    int res = await widget.controller
+                        .handleAddCourse(widget.courseCreationFormKey, context);
+
+                    late SnackBar snackbar;
+                    switch (res) {
+                      case (1):
+                        snackbar = SnackBar(
+                            content: Text(AppLocalizations.of(context)!
+                                .courseAddedCorrectly),
+                            backgroundColor: Color.fromARGB(255, 0, 172, 6));
+
+                      case (0):
+                        snackbar = SnackBar(
+                            content:
+                                Text(AppLocalizations.of(context)!.wrongDates),
+                            backgroundColor: Color.fromARGB(255, 221, 15, 0));
+
+                      default:
+                        snackbar = SnackBar(
+                          content: Text(
+                              AppLocalizations.of(context)!.errorAddingCourse),
+                          backgroundColor: Color.fromARGB(255, 221, 15, 0),
+                        );
+                    }
+
+                    await widget.controller.getAllCourses();
+
+                    widget.refresh();
+                    //await Future.delayed(Duration(seconds: 5));
+                    Navigator.pop(context);
+
+                    ScaffoldMessenger.of(context).showSnackBar(snackbar);
+                  }
+                },
+                child: Text(widget.localizations.add),
+              )
+            : CircularProgressIndicator(),
+      ),
+    );
   }
 }
