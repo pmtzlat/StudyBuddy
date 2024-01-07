@@ -20,6 +20,7 @@ class CoursesView extends StatefulWidget {
 
 class _CoursesViewState extends State<CoursesView> {
   final _controller = instanceManager.courseController;
+  bool loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -135,142 +136,248 @@ class _CoursesViewState extends State<CoursesView> {
   void showAddCourseSheet(BuildContext context) {
     final courseCreationFormKey = GlobalKey<FormBuilderState>();
     final _localizations = AppLocalizations.of(context)!;
+    var screenHeight = MediaQuery.of(context).size.height;
+    var screenWidth = MediaQuery.of(context).size.width;
 
     showModalBottomSheet(
       context: context,
+      isDismissible: false,
+      enableDrag: false,
       backgroundColor: Colors.black,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(25.0))),
       isScrollControlled: true,
       builder: (BuildContext context) {
-        bool loading = false;
-        return SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-                left: 20,
-                right: 20,
-                top: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  _localizations.addCourse,
-                  style: TextStyle(
-                    color: Colors.white, // Text color
-                    fontSize: 18.0, // Text size
+        
+        return WillPopScope(
+          onWillPop: () async {return false;},
+          child: Container(
+            height: screenHeight * 0.9,
+            child: ListView(
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.only(
+                            top: screenWidth * 0.01, left: screenWidth * 0.01),
+                        child: IconButton(
+                            iconSize: screenWidth * 0.1,
+                            onPressed: () {
+                              logger.i('Closing... - Loading state: $loading');
+                              if(loading != true) {
+                                Navigator.pop(context);
+                                }
+                                else{
+                                  logger.i('Can\'t close while its loading!');
+                                }
+                              
+                            },
+                            icon: Icon(Icons.close_rounded)),
+                      ),
+                    ],
                   ),
-                ),
-                FormBuilder(
-                    key: courseCreationFormKey,
+                  Container(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom,
+                        left: screenWidth * 0.05,
+                        top: screenWidth * 0.03),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          height: 20,
-                        ),
-                        FormBuilderTextField(
-                          // Name
-                          name: 'courseName',
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          decoration: InputDecoration(
-                            labelText: _localizations.courseName,
-                          ),
-                          style: TextStyle(color: Colors.white),
-
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(),
-                          ]),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        FormBuilderDateTimePicker(
-                          name: 'examDate',
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          inputType: InputType.date,
-                          enabled: true,
-                          decoration: InputDecoration(
-                              labelText: _localizations.examDate),
+                        Text(
+                          _localizations.addCourse,
                           style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.normal),
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(),
-                          ]),
-                        ),
-                        FormBuilderSlider(
-                          name: 'weightSlider',
-                          initialValue: 1.0,
-                          min: 0.0,
-                          max: 2.0,
-                          divisions: 20,
-                          decoration: InputDecoration(
-                              labelText: _localizations.courseWeight),
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(),
-                          ]),
-                        ),
-                        FormBuilderTextField(
-                          name: 'sessionTime',
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          keyboardType: TextInputType.number,
-                          initialValue: '2.0',
-                          decoration: InputDecoration(
-                              labelText: _localizations.sessionTime,
-                              suffix: Text(_localizations.hours)),
-                          style: TextStyle(color: Colors.white),
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(),
-                            FormBuilderValidators.numeric()
-                          ]),
-                        ),
-                        FormBuilderTextField(
-                          name: 'units',
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          keyboardType: TextInputType.number,
-                          maxLength: 2,
-                          initialValue: '1',
-                          decoration: InputDecoration(
-                            labelText: _localizations.numberOfUnits,
+                            color: Colors.white, // Text color
+                            fontSize: 34.0, // Text size
                           ),
-                          style: TextStyle(color: Colors.white),
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(),
-                            FormBuilderValidators.numeric()
-                          ]),
                         ),
-                        FormBuilderTextField(
-                          name: 'revisions',
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          keyboardType: TextInputType.number,
-                          maxLength: 1,
-                          initialValue: '2',
-                          decoration: InputDecoration(
-                            labelText: _localizations.numberOfRevisions,
+                        Container(
+                          height: screenHeight * 0.65,
+                          child: Scrollbar(
+                            isAlwaysShown: true,
+                            child: SingleChildScrollView(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                    right: screenWidth * 0.06,
+                                    bottom:
+                                        MediaQuery.of(context).viewInsets.bottom),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    FormBuilder(
+                                        key: courseCreationFormKey,
+                                        child: Column(
+                                          children: [
+                                            SizedBox(
+                                              height: 20,
+                                            ),
+                                            FormBuilderTextField(
+                                              // Name
+                                              name: 'courseName',
+                                              autovalidateMode: AutovalidateMode
+                                                  .onUserInteraction,
+                                              decoration: InputDecoration(
+                                                labelText:
+                                                    _localizations.courseName,
+                                              ),
+                                              style:
+                                                  TextStyle(color: Colors.white),
+        
+                                              validator:
+                                                  FormBuilderValidators.compose([
+                                                FormBuilderValidators.required(),
+                                              ]),
+                                              scrollPadding: EdgeInsets.only(
+                                                  bottom: MediaQuery.of(context)
+                                                      .viewInsets
+                                                      .bottom),
+                                            ),
+                                            SizedBox(
+                                              height: 20,
+                                            ),
+                                            FormBuilderDateTimePicker(
+                                                name: 'examDate',
+                                                autovalidateMode: AutovalidateMode
+                                                    .onUserInteraction,
+                                                inputType: InputType.date,
+                                                enabled: true,
+                                                decoration: InputDecoration(
+                                                    labelText:
+                                                        _localizations.examDate),
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16.0,
+                                                    fontWeight:
+                                                        FontWeight.normal),
+                                                validator: FormBuilderValidators
+                                                    .compose([
+                                                  FormBuilderValidators
+                                                      .required(),
+                                                ]),
+                                                scrollPadding: EdgeInsets.only(
+                                                    bottom: MediaQuery.of(context)
+                                                        .viewInsets
+                                                        .bottom)),
+                                            FormBuilderSlider(
+                                              name: 'weightSlider',
+                                              initialValue: 1.0,
+                                              min: 0.0,
+                                              max: 2.0,
+                                              divisions: 20,
+                                              decoration: InputDecoration(
+                                                  labelText: _localizations
+                                                      .courseWeight),
+                                              autovalidateMode: AutovalidateMode
+                                                  .onUserInteraction,
+                                              validator:
+                                                  FormBuilderValidators.compose([
+                                                FormBuilderValidators.required(),
+                                              ]),
+                                            ),
+                                            FormBuilderTextField(
+                                                name: 'sessionTime',
+                                                autovalidateMode: AutovalidateMode
+                                                    .onUserInteraction,
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                initialValue: '2.0',
+                                                decoration: InputDecoration(
+                                                    labelText: _localizations
+                                                        .sessionTime,
+                                                    suffix: Text(
+                                                        _localizations.hours)),
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                                validator: FormBuilderValidators
+                                                    .compose([
+                                                  FormBuilderValidators
+                                                      .required(),
+                                                  FormBuilderValidators.numeric()
+                                                ]),
+                                                scrollPadding: EdgeInsets.only(
+                                                    bottom: MediaQuery.of(context)
+                                                        .viewInsets
+                                                        .bottom)),
+                                            FormBuilderTextField(
+                                                name: 'units',
+                                                autovalidateMode: AutovalidateMode
+                                                    .onUserInteraction,
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                maxLength: 2,
+                                                initialValue: '1',
+                                                decoration: InputDecoration(
+                                                  labelText: _localizations
+                                                      .numberOfUnits,
+                                                ),
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                                validator: FormBuilderValidators
+                                                    .compose([
+                                                  FormBuilderValidators
+                                                      .required(),
+                                                  FormBuilderValidators.numeric()
+                                                ]),
+                                                scrollPadding: EdgeInsets.only(
+                                                    bottom: MediaQuery.of(context)
+                                                        .viewInsets
+                                                        .bottom)),
+                                            FormBuilderTextField(
+                                                name: 'revisions',
+                                                autovalidateMode: AutovalidateMode
+                                                    .onUserInteraction,
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                maxLength: 1,
+                                                initialValue: '2',
+                                                decoration: InputDecoration(
+                                                  labelText: _localizations
+                                                      .numberOfRevisions,
+                                                ),
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                                validator: FormBuilderValidators
+                                                    .compose([
+                                                  FormBuilderValidators
+                                                      .required(),
+                                                  FormBuilderValidators.numeric()
+                                                ]),
+                                                scrollPadding: EdgeInsets.only(
+                                                    bottom: MediaQuery.of(context)
+                                                        .viewInsets
+                                                        .bottom)),
+                                            FormBuilderCheckbox(
+                                                name: 'orderMatters',
+                                                initialValue: false,
+                                                title: Text(
+                                                  _localizations.orderMatters,
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ))
+                                          ],
+                                        )),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
-                          style: TextStyle(color: Colors.white),
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(),
-                            FormBuilderValidators.numeric()
-                          ]),
                         ),
-                        FormBuilderCheckbox(
-                            name: 'orderMatters',
-                            initialValue: false,
-                            title: Text(_localizations.orderMatters))
+                        
                       ],
-                    )),
-                AddButton(
-                  controller: _controller,
-                  courseCreationFormKey: courseCreationFormKey,
-                  refresh: refresh,
-                  localizations: _localizations,
-                )
-              ],
-            ),
+                    ),
+                  ),
+                  Center(
+                          child: AddButton(
+                            controller: _controller,
+                            courseCreationFormKey: courseCreationFormKey,
+                            refresh: refresh,
+                            lockClose: setLoading,
+                            localizations: _localizations,
+                          ),
+                        )
+                ]),
           ),
         );
       },
@@ -280,12 +387,21 @@ class _CoursesViewState extends State<CoursesView> {
   void refresh() {
     setState(() {});
   }
+  void setLoading(bool state){
+    logger.i('Changing state of laoding to $state');
+    setState(() {
+      loading = state;
+    });
+  }
+
+
 }
 
 class AddButton extends StatefulWidget {
   CoursesController controller;
   GlobalKey<FormBuilderState> courseCreationFormKey;
   Function refresh;
+  Function lockClose;
   AppLocalizations localizations;
 
   AddButton(
@@ -293,6 +409,7 @@ class AddButton extends StatefulWidget {
       required this.controller,
       required this.courseCreationFormKey,
       required this.refresh,
+      required this.lockClose,
       required this.localizations});
 
   @override
@@ -314,6 +431,7 @@ class _AddButtonState extends State<AddButton> {
                     setState(() {
                       loading = true;
                     });
+                    widget.lockClose(true);
                     int res = await widget.controller
                         .handleAddCourse(widget.courseCreationFormKey, context);
 
@@ -343,6 +461,7 @@ class _AddButtonState extends State<AddButton> {
 
                     widget.refresh();
                     //await Future.delayed(Duration(seconds: 5));
+                    widget.lockClose(false);
                     Navigator.pop(context);
 
                     ScaffoldMessenger.of(context).showSnackBar(snackbar);
