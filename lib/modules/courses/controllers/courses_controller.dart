@@ -117,8 +117,12 @@ class CoursesController {
 
         final weight =
             courseCreationFormKey.currentState!.fields['weightSlider']!.value;
-        final session = doubleToDuration(double.parse(
-            courseCreationFormKey.currentState!.fields['sessionTime']!.value));
+        final int sessionHours = int.parse(
+            courseCreationFormKey.currentState!.fields['sessionHours']!.value);
+        final int sessionMinutes = int.parse(
+            courseCreationFormKey.currentState!.fields['sessionMinutes']!.value);
+        
+        final Duration session = Duration(hours: sessionHours, minutes: sessionMinutes);
 
         final int units = int.parse(
             courseCreationFormKey.currentState!.fields['units']!.value);

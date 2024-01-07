@@ -9,6 +9,7 @@
     "courseWeight" : "Course Weight",
     "sessionTime": "Minimum Study Session Time",
     "hours": "hours",
+    "minutes":"minutes",
     "weightValidation" : "Enter a valid weight (0.0 - 2.0)",
     "addUnit" : "Add Unit",
     "units":"Units",
@@ -33,6 +34,8 @@
     "unitNotCompleted": "This unit has not been studied yet.",
     "activeCourses": "Active",
     "allCourses": "All",
+    "intValidator": "Integers only",
+    
 
     
 
