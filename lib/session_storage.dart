@@ -1,6 +1,7 @@
 import 'package:study_buddy/models/course_model.dart';
 import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
+import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 
 class SessionStorage {
@@ -24,7 +25,10 @@ class SessionStorage {
 
   var savedWeekday = 0;
   int? schedulePresent;
-  List<String> leftoverCourses = [];
+  List<String> leftoverCourses = <String>[];
+
+  CourseModel courseToAdd = CourseModel(examDate: DateTime.now(), name: '');
+  List<double> courseWeightArray = [];
 
   bool needsRecalculation = false;
   Map<String,List<TimeSlot>> incompletePreviousDays = {};

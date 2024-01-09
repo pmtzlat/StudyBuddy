@@ -24,7 +24,7 @@ class FirebaseCrudService {
     'Sunday'
   ];
   Future<String?> addCourseToUser({required CourseModel newCourse}) async {
-    try {
+    
       // Check if the user document exists
       final uid = instanceManager.localStorage.getString('uid');
       final connectivityResult =
@@ -57,10 +57,7 @@ class FirebaseCrudService {
         logger.e('User document with UID $uid does not exist.');
         return null;
       }
-    } catch (e) {
-      logger.e('Error adding course to firebase: $e');
-      return null;
-    }
+    
   }
 
   Future<List<UnitModel>?> getUnitsForCourse({required String courseID}) async {
@@ -457,7 +454,7 @@ class FirebaseCrudService {
 
   Future<String?> addRevisionToCourse(
       {required UnitModel newUnit, required String courseID}) async {
-    try {
+    
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
@@ -482,11 +479,7 @@ class FirebaseCrudService {
       await revisionRef.update({'id': revisionRef.id});
 
       return revisionRef.id;
-    } catch (e) {
-      logger
-          .e('Error in Firebase CRUD when adding unit to course $courseID: $e');
-      return null;
-    }
+    
   }
 
   Future<int> clearRevisionsForCourse(String courseID) async {
@@ -911,7 +904,6 @@ class FirebaseCrudService {
   }
 
   Future<int?> editCourse(CourseModel course) async {
-    try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
       final courseReference = firebaseInstance
@@ -929,6 +921,8 @@ class FirebaseCrudService {
         'revisions': course.revisions
       });
 
+      logger.i('editCourse: updated course');
+
       final courseUnits = await getUnitsForCourse(courseID: course.id);
 
       if (courseUnits != null) {
@@ -945,10 +939,7 @@ class FirebaseCrudService {
       }
 
       return 1;
-    } catch (e) {
-      logger.e('Error updating course: $e');
-      return -1;
-    }
+    
   }
 
   Future<CourseModel?> getCourse(String courseID) async {

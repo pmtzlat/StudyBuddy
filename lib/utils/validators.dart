@@ -30,7 +30,7 @@ String? futureDateValidator(DateTime? value) {
 
   final currentDate = DateTime.now();
 
-  logger.i(getCurrentLocale());
+  //logger.i(getCurrentLocale());
 
   if (value.isBefore(currentDate)) {
     // If the selected date is not in the future, return an error message

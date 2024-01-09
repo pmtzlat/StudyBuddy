@@ -5,13 +5,13 @@ import 'package:study_buddy/services/logging_service.dart';
 
 class CourseModel {
   final String name;
-  final double weight;
+  double weight;
   DateTime examDate;
   Duration timeStudied;
   String color;
   Duration sessionTime;
   final String id;
-  List<UnitModel>? units;
+  List<UnitModel> units;
   bool orderMatters;
   List<UnitModel> revisions;
 
@@ -27,13 +27,13 @@ class CourseModel {
 
   CourseModel({
     required this.name,
-    this.weight = 1.0,
+    this.weight = 2.0,
     required this.examDate,
     this.timeStudied = const Duration(seconds:0),
     this.color = '#000000',
     this.sessionTime = const Duration(hours: 2), //one hour
-    this.id = '',
-    this.units = null,
+    this.id = '0',
+    this.units = const <UnitModel>[],
     this.orderMatters = false,
     this.revisions = const [],
   });

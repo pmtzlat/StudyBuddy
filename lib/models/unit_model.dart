@@ -1,5 +1,5 @@
 class UnitModel {
-  final String name;
+  String name;
   Duration sessionTime;
   final String id;
   final int order;

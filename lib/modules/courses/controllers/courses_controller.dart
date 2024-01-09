@@ -10,47 +10,48 @@ import 'package:study_buddy/models/course_model.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/models/unit_model.dart';
-import '../../../services/logging_service.dart';
+import 'package:study_buddy/services/logging_service.dart';
 
 class CoursesController {
   final firebaseCrud = instanceManager.firebaseCrudService;
   final uid = instanceManager.localStorage.getString('uid') ?? '';
 
-  addCourse({
-    required name,
-    weight,
-    required examDate,
-    color = '#0000000',
-    sessionTime = const Duration(hours: 2),
-    orderMatters = false,
-  }) {
-    try {
-      final newCourse = CourseModel(
-        name: name,
-        examDate: examDate,
-        weight: weight,
-        color: color,
-        sessionTime: sessionTime,
-        orderMatters: orderMatters,
-      );
-      instanceManager.sessionStorage.needsRecalculation = true;
+  // addCourse({
+  //   required name,
+  //   weight,
+  //   required examDate,
+  //   color = '#0000000',
+  //   sessionTime = const Duration(hours: 2),
+  //   orderMatters = false,
+  // }) {
+  //   try {
+  //     final newCourse = CourseModel(
+  //       name: name,
+  //       examDate: examDate,
+  //       weight: weight,
+  //       color: color,
+  //       sessionTime: sessionTime,
+  //       orderMatters: orderMatters,
+  //     );
+  //     instanceManager.sessionStorage.needsRecalculation = true;
 
-      return firebaseCrud.addCourseToUser(newCourse: newCourse);
-    } catch (e) {
-      logger.e('Error in CoursesController.addCourse: $e');
-    }
-  }
+  //     return firebaseCrud.addCourseToUser(newCourse: newCourse);
+  //   } catch (e) {
+  //     logger.e('Error in CoursesController.addCourse: $e');
+  //   }
+  // }
 
   Future<void> deleteCourse(
-      {required String id,
+      {required String name,
+      required String id,
       required int index,
       required BuildContext context}) async {
     final res = await firebaseCrud.deleteCourse(courseId: id);
     final snackbar = SnackBar(
       content: Text(
         res == 1
-            ? AppLocalizations.of(context)!.courseDeletedCorrectly
-            : AppLocalizations.of(context)!.errorDeletingCourse,
+            ? name + AppLocalizations.of(context)!.courseDeletedCorrectly
+            : AppLocalizations.of(context)!.errorDeletingCourse +name,
       ),
       backgroundColor: res == 1
           ? Color.fromARGB(255, 0, 172, 6)
@@ -62,131 +63,217 @@ class CoursesController {
     ScaffoldMessenger.of(context).showSnackBar(snackbar);
   }
 
-  Future<int?> addUnitsToCourse(
-      {required String id,
-      required int units,
-      required Duration sessionTime}) async {
+  // Future<int?> addUnitsToCourse(
+  //     {required String id,
+  //     required int units,
+  //     required Duration sessionTime}) async {
+  //   try {
+  //     for (int i = 0; i < units; i++) {
+  //       final unitNum = i + 1;
+  //       final newUnit = UnitModel(
+  //           name: 'Unit $unitNum', order: unitNum, sessionTime: sessionTime);
+  //       await firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
+  //     }
+  //     return 1;
+  //   } catch (e) {
+  //     logger.e('Error adding units: $e');
+  //     return null;
+  //   }
+  // }
+
+  // Future<int?> addRevisionsToCourse(
+  //     {required String id,
+  //     required int revisions,
+  //     required Duration sessionTime}) async {
+  //   try {
+  //     for (int i = 0; i < revisions; i++) {
+  //       final revisionNum = i + 1;
+  //       final newUnit = UnitModel(
+  //           name: 'Revision $revisionNum',
+  //           order: revisionNum,
+  //           sessionTime:
+  //               doubleToDuration((durationToDouble(sessionTime) * 1.5)));
+  //       await firebaseCrud.addRevisionToCourse(newUnit: newUnit, courseID: id);
+  //     }
+  //     return 1;
+  //   } catch (e) {
+  //     logger.e('Error adding units: $e');
+  //     return null;
+  //   }
+  // }
+
+  int addCourseScreen3() {
     try {
-      for (int i = 0; i < units; i++) {
-        final unitNum = i + 1;
-        final newUnit = UnitModel(
-            name: 'Unit $unitNum', order: unitNum, sessionTime: sessionTime);
-        await firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
+      final courses = instanceManager.sessionStorage.activeCourses;
+      final weights = instanceManager.sessionStorage.courseWeightArray;
+      logger.i(weights);
+      for (int i = 0; i < courses.length; i++) {
+        courses[i].weight = weights[i];
+        logger.i('New weight for course: ${courses[i].name}: ${weights[i]}');
       }
-      return 1;
+      return 3;
     } catch (e) {
-      logger.e('Error adding units: $e');
-      return null;
+      logger.e('Error in addCourseScreen3: $e');
+      return -1;
     }
   }
 
-  Future<int?> addRevisionsToCourse(
-      {required String id,
-      required int revisions,
-      required Duration sessionTime}) async {
+  int addCourseScreen2(GlobalKey<FormBuilderState> unitsFormKey) {
+    //returns index of page the addCourse flow goes through
+    // -1 = error
+    // 2 = course priority page
+    // 3 = finish successfully
     try {
-      for (int i = 0; i < revisions; i++) {
-        final revisionNum = i + 1;
-        final newUnit = UnitModel(
-            name: 'Revision $revisionNum',
-            order: revisionNum,
-            sessionTime:
-                doubleToDuration((durationToDouble(sessionTime) * 1.5)));
-        await firebaseCrud.addRevisionToCourse(newUnit: newUnit, courseID: id);
+      List<UnitModel> units = instanceManager.sessionStorage.courseToAdd.units;
+      logger.i(unitsFormKey.currentState!.fields);
+      for (UnitModel unit in units) {
+        unit.name = unitsFormKey
+            .currentState!.fields['Unit ${unit.order} name']!.value
+            .toString();
+        logger.i(
+            'Name and time for unit ${unit.order}: ${unit.name}, ${formatDuration(unit.sessionTime)}');
       }
-      return 1;
+      if (instanceManager.sessionStorage.activeCourses.isNotEmpty) {
+        return 2;
+      } else {
+        //save course to DB
+        
+        return 3;
+      }
     } catch (e) {
-      logger.e('Error adding units: $e');
-      return null;
+      logger.e('Error addCourseScreen2: $e');
+      return -1;
     }
   }
 
-  Future<int> handleAddCourse(GlobalKey<FormBuilderState> courseCreationFormKey,
-      BuildContext context) async {
-    int? res;
+  int addCourseScreen1(GlobalKey<FormBuilderState> courseCreationFormKey, Duration sessionTime) {
+    //returns index of page the addCourse flow goes through
+    // -1 = error
+    // 1 = unit session page
+    // 2 = course priority page
+    // 3 = finish successfully
     try {
-      dynamic snackbar;
       final examDate = DateTime.parse(courseCreationFormKey
           .currentState!.fields['examDate']!.value
           .toString());
 
-      if (examDate.isAfter(DateTime.now())) {
-        final name = courseCreationFormKey
-            .currentState!.fields['courseName']!.value
-            .toString();
+      final name = courseCreationFormKey
+          .currentState!.fields['courseName']!.value
+          .toString();
 
-        final weight =
-            courseCreationFormKey.currentState!.fields['weightSlider']!.value;
-        final int sessionHours = int.parse(
-            courseCreationFormKey.currentState!.fields['sessionHours']!.value);
-        final int sessionMinutes = int.parse(
-            courseCreationFormKey.currentState!.fields['sessionMinutes']!.value);
-        
-        final Duration session = Duration(hours: sessionHours, minutes: sessionMinutes);
+      // final weight =
+      //     courseCreationFormKey.currentState!.fields['weightSlider']!.value ??
+      //         1.0;
+      
 
-        final int units = int.parse(
-            courseCreationFormKey.currentState!.fields['units']!.value);
+      final Duration session =
+          sessionTime;
 
-        final int revisions = int.parse(
-            courseCreationFormKey.currentState!.fields['revisions']!.value);
+      final int units = int.parse(
+              courseCreationFormKey.currentState!.fields['units']!.value) ??
+          1;
 
-        final bool orderMatters =
-            courseCreationFormKey.currentState!.fields['orderMatters']!.value;
+      final int revisions = int.parse(
+              courseCreationFormKey.currentState!.fields['revisions']!.value) ??
+          1;
 
-        dynamic res = await addCourse(
+      final bool orderMatters =
+          courseCreationFormKey.currentState!.fields['orderMatters']!.value ??
+              false;
+
+      final bool applySessionTime = courseCreationFormKey
+              .currentState!.fields['applySessionTime']!.value ??
+          false;
+
+      logger.i('Validation done');
+
+      instanceManager.sessionStorage.courseToAdd = CourseModel(
           name: name,
           examDate: examDate,
-          weight: weight,
           sessionTime: session,
-          orderMatters: orderMatters,
-        );
+          orderMatters: orderMatters);
 
-        int? unitsAdded = 0;
-        if (res != null) {
-          unitsAdded = await addUnitsToCourse(
-              id: res, units: units, sessionTime: session);
-        }
-
-        int? revisionsAdded = 0;
-
-        if (unitsAdded != null) {
-          revisionsAdded = await addRevisionsToCourse(
-              id: res, revisions: revisions, sessionTime: session);
-        }
-
-        //success = 1
-        //wrong dates = 0
-        // error = -1
-
-        // Show a snackbar based on the value of 'res'
-        // snackbar = SnackBar(
-        //   content: Text(
-        //     revisionsAdded != null
-        //         ? AppLocalizations.of(context)!.courseAddedCorrectly
-        //         : AppLocalizations.of(context)!.errorAddingCourse,
-        //   ),
-        //   backgroundColor: revisionsAdded != null
-        //       ? Color.fromARGB(255, 0, 172, 6)
-        //       : Color.fromARGB(255, 221, 15, 0),
-        // );
-        if (revisionsAdded != null) {
-          instanceManager.sessionStorage.needsRecalculation = true;
-          return 1;
-        } else {
-          return -1;
-        }
-      } else {
-        // Close the bottom sheet
-        // Navigator.of(context).pop();
-
-        // snackbar = SnackBar(
-        //   content: Text(AppLocalizations.of(context)!.wrongDates),
-        //   backgroundColor: Color.fromARGB(255, 221, 15, 0),
-        // );
-        return 0;
+      instanceManager.sessionStorage.courseToAdd!.units = <UnitModel>[];
+      List<UnitModel> unitsList =
+          instanceManager.sessionStorage.courseToAdd!.units;
+      for (int i = 0; i < units; i++) {
+        final unitNum = i + 1;
+        final newUnit = UnitModel(
+            name: 'Unit $unitNum', order: unitNum, sessionTime: session);
+        unitsList!.add(newUnit);
       }
 
-      //ScaffoldMessenger.of(context).showSnackBar(snackbar);
+      instanceManager.sessionStorage.courseToAdd!.revisions = <UnitModel>[];
+      List<UnitModel> revisionsList =
+          instanceManager.sessionStorage.courseToAdd!.revisions;
+      for (int i = 0; i < revisions; i++) {
+        final revisionNum = i + 1;
+        final newRevision = UnitModel(
+            name: 'Revision $revisionNum',
+            order: revisionNum,
+            sessionTime: session);
+        revisionsList!.add(newRevision);
+      }
+
+      if (units > 0 && !applySessionTime) {
+        //logger.i(unitsList!.length);
+        return 1;
+      } else {
+        if (instanceManager.sessionStorage.activeCourses.isNotEmpty) {
+          return 2;
+        }
+
+        //save course to db
+
+        return 3;
+      }
+    } catch (e) {
+      logger.e('Error in addCourseScreen1: $e');
+      return -1;
+    }
+  }
+
+  Future<int> handleAddCourse() async {
+    try {
+      final courses = instanceManager.sessionStorage.activeCourses;
+      final unitsForNewCourse =
+          instanceManager.sessionStorage.courseToAdd.units;
+
+      for (CourseModel course in courses) {
+        CourseModel? alreadyInDB = await firebaseCrud.getCourse(course.id);
+        if (alreadyInDB != null) {
+          //update weight
+          logger.i('Course ${course.name} found in DB! Updating...');
+
+          await firebaseCrud.editCourse(course);
+          logger.i('Done!');
+
+        } else {
+          //add course
+          logger.i('Course ${course.name} not found in DB! Adding...');
+
+          String courseID =
+              await firebaseCrud.addCourseToUser(newCourse: course);
+
+          logger.i('Course added!');
+          for (UnitModel unit in unitsForNewCourse) {
+            await firebaseCrud.addUnitToCourse(
+                newUnit: unit, courseID: courseID);
+          }
+          logger.i('Units added!');
+
+          for (UnitModel revision in course.revisions) {
+            await firebaseCrud.addRevisionToCourse(
+                newUnit: revision, courseID: courseID);
+          }
+          logger.i('Revisions added!');
+          logger.i('Done!');
+        }
+      }
+
+      
+
+      return 1;
     } catch (e) {
       logger.e('Error handling add course: $e');
       return -1;
@@ -200,6 +287,10 @@ class CoursesController {
       instanceManager.sessionStorage.savedCourses = courses;
       instanceManager.sessionStorage.activeCourses =
           filterActiveCourses(courses);
+      instanceManager.sessionStorage.activeCourses
+          .sort((CourseModel a, CourseModel b) => b.weight.compareTo(a.weight));
+      instanceManager.sessionStorage.savedCourses
+          .sort((CourseModel a, CourseModel b) => b.examDate.compareTo(a.examDate));
     } catch (e) {
       logger.e('Error getting courses: $e');
     }

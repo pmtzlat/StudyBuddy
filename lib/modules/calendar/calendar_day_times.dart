@@ -205,7 +205,7 @@ class _TimeShowerState extends State<TimeShower> {
     Future<void> closeTimer(Duration time, BuildContext context) async {
       //stopListening();
       timeSlot.timeStudied = time;
-      if (timeSlot.timeStudied >= Duration(seconds: 5) &&
+      if (timeSlot.timeStudied >= timeSlot.duration &&
           timeSlot.completed == false) {
         // change line here to timeslot.duration
         timeSlot.completed = true;
@@ -236,7 +236,7 @@ class _TimeShowerState extends State<TimeShower> {
       hours: formattedDuration[0],
       minutes: formattedDuration[1],
       seconds: formattedDuration[2],
-      sessionTime: Duration(seconds: 5), //timeSlot.duration,
+      sessionTime: timeSlot.duration, //timeSlot.duration,
       completeAndClose: closeTimer,
     );
 
@@ -269,7 +269,6 @@ class _TimeShowerState extends State<TimeShower> {
                   children: [
                     IconButton(
                         onPressed: () async {
-                          //here
                           widget.timerKey.currentState?.stopListening();
                           widget.timerKey.currentState?.stopTimer();
                           await closeTimer(timer.timerTime, context);
