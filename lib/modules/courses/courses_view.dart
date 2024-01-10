@@ -36,6 +36,7 @@ class _CoursesViewState extends State<CoursesView> {
 
   @override
   Widget build(BuildContext context) {
+    final buttonColor = Color.fromARGB(255, 158, 158, 158);
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
@@ -60,11 +61,27 @@ class _CoursesViewState extends State<CoursesView> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton.icon(
+                  
                     onPressed: () {
                       showAddCourseSheet(context);
                     },
-                    label: Text(_localizations.addCourse),
-                    icon: Icon(Icons.add_rounded)),
+                    label: Text(_localizations.addCourse, style: TextStyle(color: buttonColor)),
+                    icon: Icon(Icons.add_rounded, color: buttonColor)),
+                
+                AnimatedOpacity(
+                  opacity: instanceManager.sessionStorage.activeOrAllCourses == 0 ? 1.0 : 0.0,
+                  duration: Duration(milliseconds: 500),
+                  child: TextButton.icon(
+                    
+                      onPressed: () {
+                       logger.i('Prioritize clicked!');
+                       if(instanceManager.sessionStorage.activeOrAllCourses == 0){
+                        //TODO after gym
+                       }
+                      },
+                      label: Text(_localizations.prioritizeButton, style: TextStyle(color: buttonColor)),
+                      icon: Icon(Icons.format_list_numbered, color: buttonColor)),
+                ) ,
               ],
             ),
             instanceManager.sessionStorage.activeCourses == null
@@ -105,7 +122,10 @@ class _CoursesViewState extends State<CoursesView> {
                         index = 1;
                       }
                       print('switched to: $index');
-                      instanceManager.sessionStorage.activeOrAllCourses = index;
+                      setState(() {
+                        instanceManager.sessionStorage.activeOrAllCourses = index;
+                      });
+                      
                       _pageController.animateToPage(index!,
                           duration: Duration(milliseconds: 500),
                           curve: Curves.decelerate);
