@@ -17,6 +17,8 @@ class AddButton extends StatefulWidget {
   int screen;
   PageController? pageController;
   Duration? sessionTime;
+  Function? removePage;
+  Duration? revisionTime;
 
   AddButton(
       {super.key,
@@ -28,7 +30,9 @@ class AddButton extends StatefulWidget {
       this.updatePage3,
       required this.screen,
       this.sessionTime,
-      this.pageController});
+      this.pageController,
+      this.removePage,
+      this.revisionTime});
 
   @override
   State<AddButton> createState() => _AddButtonState();
@@ -59,12 +63,13 @@ class _AddButtonState extends State<AddButton> {
                         // int res = await widget.controller
                         //     .handleAddCourse(widget.courseCreationFormKey);
                         switch (await widget.controller
-                            .addCourseScreen1(widget.formKey!, widget.sessionTime!)) {
+                            .addCourseScreen1(widget.formKey!, widget.sessionTime!, widget.revisionTime!)) {
                           case (1):
                             await moveToPage2();
 
                           case (2):
-                            moveToPage3();
+                          
+                            moveToPage3(skipPage2: true);
 
                           case (3):
                             saveCourses(context);
@@ -200,7 +205,7 @@ class _AddButtonState extends State<AddButton> {
         duration: Duration(milliseconds: 500), curve: Curves.decelerate);
   }
 
-  Future<void> moveToPage3() async {
+  Future<void> moveToPage3({bool skipPage2 = false} ) async {
     List<double> generateDescendingList(int n) {
       List<double> resultList = [];
 
@@ -228,8 +233,15 @@ class _AddButtonState extends State<AddButton> {
     await widget.refresh!();
     widget.lockClose!(false);
     widget.updatePage3!();
+    if(skipPage2){
+      widget.removePage!(1);
+      widget.pageController!.animateToPage(1,
+        duration: Duration(milliseconds: 500), curve: Curves.decelerate);
+
+    }else{
     widget.pageController!.animateToPage(2,
         duration: Duration(milliseconds: 500), curve: Curves.decelerate);
+    }
   }
 
   Future<void> closeModal(BuildContext context, SnackBar snackbar) async {

@@ -20,13 +20,15 @@ class Page1 extends StatefulWidget {
   Function updatePage2;
   Function updatePage3;
   PageController pageController;
+  Function removePage;
   Page1(
       {super.key,
       required this.refresh,
       required this.lockClose,
       required this.updatePage2,
       required this.pageController,
-      required this.updatePage3});
+      required this.updatePage3,
+      required this.removePage});
 
   @override
   State<Page1> createState() => _Page1State();
@@ -35,6 +37,7 @@ class Page1 extends StatefulWidget {
 class _Page1State extends State<Page1> {
   final courseCreationFormKey = GlobalKey<FormBuilderState>();
   Duration sessionTime = Duration(hours: 1);
+  Duration revisionTime = Duration(hours: 1);
   final _controller = instanceManager.courseController;
 
   @override
@@ -136,34 +139,7 @@ class _Page1State extends State<Page1> {
                     //     ]),
                     //   ),
                     // ),
-                    Container(
-                      margin: EdgeInsets.only(top: screenHeight * 0.07),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text(_localizations.sessionTime,
-                              style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: screenHeight * 0.02)),
-                          TextButton.icon(
-                            label: Text(
-                              '${formatDuration(sessionTime)}',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            icon: Icon(Icons.av_timer_rounded,
-                                color: Colors.white),
-                            onPressed: () async {
-                              sessionTime = await showDurationPicker(
-                                    context: context,
-                                    initialTime: sessionTime,
-                                  ) ??
-                                  sessionTime;
-                              setState(() {});
-                            },
-                          )
-                        ],
-                      ),
-                    ),
+                    
 
                     // Row(
                     //   crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,6 +254,69 @@ class _Page1State extends State<Page1> {
                       ),
                     ),
                     Container(
+                      width: screenWidth*0.9,
+                      child: Column(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(top: screenHeight * 0.07),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(_localizations.sessionTime,
+                                    style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: screenHeight * 0.02)),
+                                TextButton.icon(
+                                  label: Text(
+                                    '${formatDuration(sessionTime)}',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  icon: Icon(Icons.av_timer_rounded,
+                                      color: Colors.white),
+                                  onPressed: () async {
+                                    sessionTime = await showDurationPicker(
+                                          context: context,
+                                          initialTime: sessionTime,
+                                        ) ??
+                                        sessionTime;
+                                    setState(() {});
+                                  },
+                                )
+                              ],
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top: screenHeight * 0.07),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(_localizations.revisionTime,
+                                    style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: screenHeight * 0.02)),
+                                TextButton.icon(
+                                  label: Text(
+                                    '${formatDuration(revisionTime)}',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  icon: Icon(Icons.av_timer_rounded,
+                                      color: Colors.white),
+                                  onPressed: () async {
+                                    revisionTime = await showDurationPicker(
+                                          context: context,
+                                          initialTime: revisionTime,
+                                        ) ??
+                                        revisionTime;
+                                    setState(() {});
+                                  },
+                                )
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
                       margin: EdgeInsets.only(top: screenHeight * 0.05),
                       width: screenWidth * 0.7,
                       child: FormBuilderCheckbox(
@@ -309,6 +348,7 @@ class _Page1State extends State<Page1> {
                 margin: EdgeInsets.only(top: 10),
                 child: AddButton(
                   sessionTime: sessionTime,
+                  revisionTime: revisionTime,
                   controller: _controller,
                   formKey: courseCreationFormKey,
                   refresh: widget.refresh,
@@ -317,6 +357,7 @@ class _Page1State extends State<Page1> {
                   updatePage3: widget.updatePage3,
                   screen: 0,
                   pageController: widget.pageController,
+                  removePage: widget.removePage,
                 ),
               ),
             )

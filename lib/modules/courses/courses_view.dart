@@ -190,20 +190,32 @@ class _CoursesViewState extends State<CoursesView> {
       //calls setstate in page2 to ensure it gets update correctly
       page2.updateChild();
     }
+    late List<Widget> pages;
 
+    void removePage(int page){
+      pages.removeAt(page);
+    }
 
     Page1 page1 = Page1(
       refresh: refresh,
       lockClose: setLoading,
       updatePage2: updatePage2,
       updatePage3: updatePage3,
+      removePage: removePage,
       pageController: _pageController
     );
 
-    
-    
-    List<Widget> pages = [page1, page2, page3];
 
+     pages = [page1, page2, page3];
+
+    
+
+
+
+    
+    
+    
+    
     showModalBottomSheet(
       context: context,
       isDismissible: false,

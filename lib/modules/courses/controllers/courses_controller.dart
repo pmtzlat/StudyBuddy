@@ -146,7 +146,7 @@ class CoursesController {
     }
   }
 
-  int addCourseScreen1(GlobalKey<FormBuilderState> courseCreationFormKey, Duration sessionTime) {
+  int addCourseScreen1(GlobalKey<FormBuilderState> courseCreationFormKey, Duration sessionTime, Duration revisionTime) {
     //returns index of page the addCourse flow goes through
     // -1 = error
     // 1 = unit session page
@@ -211,7 +211,7 @@ class CoursesController {
         final newRevision = UnitModel(
             name: 'Revision $revisionNum',
             order: revisionNum,
-            sessionTime: session);
+            sessionTime: revisionTime);
         revisionsList!.add(newRevision);
       }
 
