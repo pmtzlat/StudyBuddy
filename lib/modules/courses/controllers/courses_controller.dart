@@ -245,7 +245,7 @@ class CoursesController {
           //update weight
           logger.i('Course ${course.name} found in DB! Updating...');
 
-          await firebaseCrud.editCourse(course);
+          await firebaseCrud.editCourseWeight(course);
           logger.i('Done!');
 
         } else {

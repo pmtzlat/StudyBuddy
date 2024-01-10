@@ -150,13 +150,13 @@ class _CoursesViewState extends State<CoursesView> {
   }
 
   void showAddCourseSheet(BuildContext context) {
-    final courseCreationFormKey = GlobalKey<FormBuilderState>();
+    //final courseCreationFormKey = GlobalKey<FormBuilderState>();
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
 
     final PageController _pageController = PageController(); // Add a controller
-    Duration sessionTime = Duration(hours:1);
+    //Duration sessionTime = Duration(hours:1);
 
     Page3 page3 = Page3(
       key: GlobalKey<Page3State>(),
@@ -191,292 +191,17 @@ class _CoursesViewState extends State<CoursesView> {
       page2.updateChild();
     }
 
-    Widget page1 = SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.only(
-            bottom: screenHeight * 0.1,
-            left: screenWidth * 0.05,
-            right: screenWidth * 0.05,
-            top: screenWidth * 0.03),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            FormBuilder(
-                key: courseCreationFormKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(top: screenHeight * 0.00),
-                      child: FormBuilderTextField(
-                        // Name
-                        name: 'courseName',
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        decoration: InputDecoration(
-                          labelText: _localizations.courseName,
-                        ),
-                        style: TextStyle(color: Colors.white),
 
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(),
-                        ]),
-                        scrollPadding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).viewInsets.bottom),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: screenHeight * 0.04),
-                      child: FormBuilderDateTimePicker(
-                          name: 'examDate',
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                          inputType: InputType.date,
-                          enabled: true,
-                          decoration: InputDecoration(
-                              labelText: _localizations.examDate),
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.normal),
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(),
-                            futureDateValidator,
-                          ]),
-                          scrollPadding: EdgeInsets.only(
-                              bottom:
-                                  MediaQuery.of(context).viewInsets.bottom)),
-                    ),
-                    // Container(
-                    //   margin: EdgeInsets.only(
-                    //       top: screenHeight * 0.05),
-                    //   child: FormBuilderSlider(
-                    //     name: 'weightSlider',
-                    //     initialValue: 1.0,
-                    //     min: 0.0,
-                    //     max: 2.0,
-                    //     divisions: 20,
-                    //     valueWidget: (value) {
-                    //       return Text('$value',
-                    //           style: TextStyle(
-                    //               color: Colors.white,
-                    //               fontSize: 23));
-                    //     },
-                    //     inactiveColor:
-                    //         const Color.fromARGB(
-                    //             255, 52, 52, 52),
-                    //     decoration: InputDecoration(
-                    //         helperStyle: TextStyle(
-                    //             color: Colors.white,
-                    //             fontSize: screenHeight *
-                    //                 0.03),
-                    //         labelText: _localizations
-                    //             .courseWeight,
-                    //         labelStyle: TextStyle(
-                    //             color: Colors.white,
-                    //             fontSize: screenHeight *
-                    //                 0.03)),
-                    //     autovalidateMode:
-                    //         AutovalidateMode
-                    //             .onUserInteraction,
-                    //     validator: FormBuilderValidators
-                    //         .compose([
-                    //       FormBuilderValidators
-                    //           .required(),
-                    //     ]),
-                    //   ),
-                    // ),
-                    Container(
-                      margin: EdgeInsets.only(top: screenHeight * 0.07),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text(_localizations.sessionTime,
-                              style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: screenHeight * 0.02)),
-                          TextButton.icon(
-                                            label: Text(
-                                              '${formatDuration(sessionTime)}',
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                            icon: Icon(Icons.av_timer_rounded,
-                                                color: Colors.white),
-                                            onPressed: () async {
-                                              sessionTime =
-                                                  await showDurationPicker(
-                                                        context: context,
-                                                        initialTime:
-                                                            sessionTime,
-                                                      ) ??
-                                                      sessionTime;
-                                              setState(() {});
-                                            },
-                                          )
-                        ],
-                      ),
-                    ),
-                    // Row(
-                    //   crossAxisAlignment: CrossAxisAlignment.start,
-                    //   mainAxisAlignment: MainAxisAlignment.start,
-                    //   children: [
-                    //     Container(
-                    //       width: screenWidth * 0.15,
-                    //       child: FormBuilderTextField(
-                    //           name: 'sessionHours',
-                    //           autovalidateMode:
-                    //               AutovalidateMode.onUserInteraction,
-                    //           keyboardType: TextInputType.number,
-                    //           initialValue: '2',
-                    //           decoration: InputDecoration(
-                    //             labelText: _localizations.hours,
-                    //           ),
-                    //           style: TextStyle(color: Colors.white),
-                    //           validator: FormBuilderValidators.compose([
-                    //             FormBuilderValidators.required(),
-                    //             FormBuilderValidators.numeric(),
-                    //             integerValidator(context)
-                    //           ]),
-                    //           scrollPadding: EdgeInsets.only(
-                    //               bottom: MediaQuery.of(context)
-                    //                   .viewInsets
-                    //                   .bottom)),
-                    //     ),
-                    //     SizedBox(
-                    //       width: 10,
-                    //     ),
-                    //     Container(
-                    //       width: screenWidth * 0.15,
-                    //       child: FormBuilderTextField(
-                    //           name: 'sessionMinutes',
-                    //           autovalidateMode:
-                    //               AutovalidateMode.onUserInteraction,
-                    //           keyboardType: TextInputType.number,
-                    //           initialValue: '30',
-                    //           decoration: InputDecoration(
-                    //             labelText: _localizations.minutes,
-                    //           ),
-                    //           style: TextStyle(color: Colors.white),
-                    //           validator: FormBuilderValidators.compose([
-                    //             FormBuilderValidators.required(),
-                    //             FormBuilderValidators.numeric(),
-                    //             integerValidator(context)
-                    //           ]),
-                    //           scrollPadding: EdgeInsets.only(
-                    //               bottom: MediaQuery.of(context)
-                    //                   .viewInsets
-                    //                   .bottom)),
-                    //     ),
-                    //   ],
-                    // ),
-
-                    
-                    Container(
-                      margin: EdgeInsets.only(top: screenHeight * 0.05),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: screenWidth * 0.3,
-                            child: FormBuilderTextField(
-                                name: 'units',
-                                autovalidateMode:
-                                    AutovalidateMode.onUserInteraction,
-                                keyboardType: TextInputType.number,
-                                initialValue: '1',
-                                decoration: InputDecoration(
-                                    labelText: _localizations.numberOfUnits,
-                                    labelStyle: TextStyle(
-                                        fontSize: screenWidth * 0.05)),
-                                style: TextStyle(color: Colors.white),
-                                validator: FormBuilderValidators.compose([
-                                  integerValidator(context),
-                                  FormBuilderValidators.required(),
-                                  FormBuilderValidators.numeric()
-                                ]),
-                                scrollPadding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(context)
-                                        .viewInsets
-                                        .bottom)),
-                          ),
-                          SizedBox(
-                            width: 30,
-                          ),
-                          Container(
-                            width: screenWidth * 0.45,
-                            child: FormBuilderTextField(
-                                name: 'revisions',
-                                autovalidateMode:
-                                    AutovalidateMode.onUserInteraction,
-                                keyboardType: TextInputType.number,
-                                initialValue: '2',
-                                decoration: InputDecoration(
-                                    labelText: _localizations.numberOfRevisions,
-                                    labelStyle: TextStyle(
-                                        fontSize: screenWidth * 0.05)),
-                                style: TextStyle(color: Colors.white),
-                                validator: FormBuilderValidators.compose([
-                                  integerValidator(context),
-                                  FormBuilderValidators.required(),
-                                  FormBuilderValidators.numeric()
-                                ]),
-                                scrollPadding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(context)
-                                        .viewInsets
-                                        .bottom)),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: screenHeight * 0.05),
-                      width: screenWidth * 0.7,
-                      child: FormBuilderCheckbox(
-                          name: 'orderMatters',
-                          initialValue: false,
-                          title: Text(
-                            _localizations.orderMatters,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: screenHeight * 0.022),
-                          )),
-                    ),
-                    Container(
-                      width: screenWidth * 0.7,
-                      child: FormBuilderCheckbox(
-                          name: 'applySessionTime',
-                          initialValue: false,
-                          title: Text(
-                            _localizations.applySessionTime,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: screenHeight * 0.022),
-                          )),
-                    ),
-                  ],
-                )),
-            Center(
-              child: Container(
-                margin: EdgeInsets.only(top: 10),
-                child: AddButton(
-                  sessionTime: sessionTime,
-                  controller: _controller,
-                  formKey: courseCreationFormKey,
-                  refresh: refresh,
-                  lockClose: setLoading,
-                  updatePage2: updatePage2,
-                  updatePage3: updatePage3,
-                  screen: 0,
-                  pageController: _pageController,
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
+    Page1 page1 = Page1(
+      refresh: refresh,
+      lockClose: setLoading,
+      updatePage2: updatePage2,
+      updatePage3: updatePage3,
+      pageController: _pageController
     );
 
+    
+    
     List<Widget> pages = [page1, page2, page3];
 
     showModalBottomSheet(
