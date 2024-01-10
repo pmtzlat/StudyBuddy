@@ -88,6 +88,7 @@ class BottomNavBar extends StatelessWidget {
       currentIndex: activeIndex,
       showSelectedLabels: false,
       showUnselectedLabels: false,
+      elevation: 0,
       onTap: (index) {
         if (index != activeIndex) {
           switch (index) {

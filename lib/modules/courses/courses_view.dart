@@ -2,6 +2,7 @@ import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:sliding_switch/sliding_switch.dart';
 import 'package:study_buddy/common_widgets/loading_screen.dart';
 import 'package:study_buddy/instance_manager.dart';
 import 'package:study_buddy/main.dart';
@@ -15,7 +16,6 @@ import 'package:study_buddy/modules/loader/loader.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/utils/validators.dart';
-import 'package:toggle_switch/toggle_switch.dart';
 import '../../common_widgets/course_card.dart';
 
 class CoursesView extends StatefulWidget {
@@ -30,10 +30,8 @@ class _CoursesViewState extends State<CoursesView> {
   bool loading = false;
   //List<UnitModel> unitsToAdd = instanceManager.sessionStorage.courseToAdd.units;
 
-  void updateCoursePage(){
-    setState(() {
-      
-    });
+  void updateCoursePage() {
+    setState(() {});
   }
 
   @override
@@ -59,31 +57,14 @@ class _CoursesViewState extends State<CoursesView> {
               ),
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    showAddCourseSheet(context);
-                    
-                  },
-                  child: Text(_localizations.addCourse),
-                ),
-                ToggleSwitch(
-                  initialLabelIndex:
-                      instanceManager.sessionStorage.activeOrAllCourses,
-                  totalSwitches: 2,
-                  labels: [
-                    _localizations.activeCourses,
-                    _localizations.allCourses
-                  ],
-                  onToggle: (index) {
-                    print('switched to: $index');
-                    instanceManager.sessionStorage.activeOrAllCourses = index;
-                    _pageController.animateToPage(index!,
-                        duration: Duration(milliseconds: 500),
-                        curve: Curves.decelerate);
-                  },
-                ),
+                TextButton.icon(
+                    onPressed: () {
+                      showAddCourseSheet(context);
+                    },
+                    label: Text(_localizations.addCourse),
+                    icon: Icon(Icons.add_rounded)),
               ],
             ),
             instanceManager.sessionStorage.activeCourses == null
@@ -99,10 +80,40 @@ class _CoursesViewState extends State<CoursesView> {
                           getCourseList(
                               instanceManager.sessionStorage.savedCourses)
                         ]),
-                  )
+                  ),
+            Center(
+              child: Container(
+                  margin: EdgeInsets.only(
+                      top: screenHeight * 0.02, bottom: screenHeight * 0.03),
+                  child: SlidingSwitch(
+                    onTap: () {},
+                    onDoubleTap: () {},
+                    onSwipe: () {},
+                    value: false,
+                    width: screenWidth * 0.6,
+                    height: screenHeight * 0.04,
+                    textOff: _localizations.activeCourses,
+                    textOn: _localizations.allCourses,
+                    colorOn: Color.fromARGB(255, 59, 59, 59),
+                    colorOff: Color.fromARGB(255, 59, 59, 59),
+                    contentSize: screenWidth * 0.035,
+                    onChanged: (bool value) {
+                      int index;
+                      if (value == false) {
+                        index = 0;
+                      } else {
+                        index = 1;
+                      }
+                      print('switched to: $index');
+                      instanceManager.sessionStorage.activeOrAllCourses = index;
+                      _pageController.animateToPage(index!,
+                          duration: Duration(milliseconds: 500),
+                          curve: Curves.decelerate);
+                    },
+                  )),
+            ),
           ],
         ));
-    ;
   }
 
   void loadCourses() async {
@@ -110,42 +121,87 @@ class _CoursesViewState extends State<CoursesView> {
     setState(() {});
   }
 
-  Container getCourseList(List<CourseModel> courseList) {
-    return Container(
-      child: ListView.builder(
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        itemCount: courseList!.length,
-        itemBuilder: (context, index) {
-          final course = courseList![index];
-          return Dismissible(
-            key: Key(course.id),
-            background: Container(
-              color: const Color.fromARGB(255, 255, 77, 65),
-              child: Icon(
-                Icons.delete,
-                color: Colors.white,
-              ),
-              alignment: Alignment.centerRight,
-              padding: EdgeInsets.only(right: 20.0),
+  Widget getCourseList(List<CourseModel> courseList) {
+    var screenHeight = MediaQuery.of(context).size.height;
+    var screenWidth = MediaQuery.of(context).size.width;
+    final _localizations = AppLocalizations.of(context)!;
+    return Stack(
+      children: [
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.02),
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: ListView.builder(
+              //padding: EdgeInsets.only(bottom: screenHeight * 0.03),
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: courseList!.length,
+              itemBuilder: (context, index) {
+                final course = courseList![index];
+                return Dismissible(
+                  key: Key(course.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(
+                          Icons.delete,
+                          color: Colors.red,
+                        ),
+                        Container(
+                            margin: EdgeInsets.only(left: 5),
+                            child: Text(_localizations.delete,
+                                style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: screenWidth * 0.04)))
+                      ],
+                    ),
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.only(right: 20.0),
+                  ),
+                  onDismissed: (direction) async {
+                    setState(() {
+                      instanceManager.sessionStorage.activeCourses
+                          .remove(course);
+                      instanceManager.sessionStorage.savedCourses
+                          .remove(course);
+                    });
+
+                    await _controller.deleteCourse(
+                      name: course.name,
+                      id: course.id,
+                      index: index,
+                      context: context,
+                    );
+                  },
+                  child: CourseCard(
+                    course: courseList![index],
+                    parentRefresh: loadCourses,
+                  ),
+                );
+              },
             ),
-            onDismissed: (direction) async {
-              setState(() {
-                instanceManager.sessionStorage.activeCourses.remove(course);
-                instanceManager.sessionStorage.savedCourses.remove(course);
-              });
-
-              await _controller.deleteCourse(
-                name: course.name,
-                  id: course.id, index: index, context: context);
-
-              //await _controller.getAllCourses();
-            },
-            child: CourseCard(
-                course: courseList![index], parentRefresh: loadCourses),
-          );
-        },
-      ),
+          ),
+        ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            height: screenHeight * 0.01,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  colors: [Colors.white.withOpacity(0.0), Colors.white],
+                  begin: FractionalOffset(0, 0),
+                  end: FractionalOffset(0, 1),
+                  stops: [0.0, 1.0],
+                  tileMode: TileMode.clamp),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -190,32 +246,23 @@ class _CoursesViewState extends State<CoursesView> {
       //calls setstate in page2 to ensure it gets update correctly
       page2.updateChild();
     }
+
     late List<Widget> pages;
 
-    void removePage(int page){
+    void removePage(int page) {
       pages.removeAt(page);
     }
 
     Page1 page1 = Page1(
-      refresh: refresh,
-      lockClose: setLoading,
-      updatePage2: updatePage2,
-      updatePage3: updatePage3,
-      removePage: removePage,
-      pageController: _pageController
-    );
+        refresh: refresh,
+        lockClose: setLoading,
+        updatePage2: updatePage2,
+        updatePage3: updatePage3,
+        removePage: removePage,
+        pageController: _pageController);
 
+    pages = [page1, page2, page3];
 
-     pages = [page1, page2, page3];
-
-    
-
-
-
-    
-    
-    
-    
     showModalBottomSheet(
       context: context,
       isDismissible: false,
@@ -278,8 +325,8 @@ class _CoursesViewState extends State<CoursesView> {
                           child: PageView.builder(
                               controller:
                                   _pageController, // Assign the controller
-                              // physics:
-                              //     NeverScrollableScrollPhysics(), // Make it non-scrollable
+                              physics:
+                                  NeverScrollableScrollPhysics(), // Make it non-scrollable
                               itemCount: pages.length,
                               itemBuilder: (BuildContext context, int index) {
                                 return pages[index];
@@ -305,10 +352,9 @@ class _CoursesViewState extends State<CoursesView> {
             .remove(instanceManager.sessionStorage.courseToAdd);
       }
 
-      instanceManager.sessionStorage.courseToAdd.units =
-          <UnitModel>[]; 
-      instanceManager.sessionStorage.courseToAdd = 
-           CourseModel(examDate: DateTime.now(), name: '');
+      instanceManager.sessionStorage.courseToAdd.units = <UnitModel>[];
+      instanceManager.sessionStorage.courseToAdd =
+          CourseModel(examDate: DateTime.now(), name: '');
       updateCoursePage();
       Navigator.pop(context);
     } else {

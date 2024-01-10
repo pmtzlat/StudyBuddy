@@ -100,100 +100,7 @@ class _Page1State extends State<Page1> {
                               bottom:
                                   MediaQuery.of(context).viewInsets.bottom)),
                     ),
-                    // Container(
-                    //   margin: EdgeInsets.only(
-                    //       top: screenHeight * 0.05),
-                    //   child: FormBuilderSlider(
-                    //     name: 'weightSlider',
-                    //     initialValue: 1.0,
-                    //     min: 0.0,
-                    //     max: 2.0,
-                    //     divisions: 20,
-                    //     valueWidget: (value) {
-                    //       return Text('$value',
-                    //           style: TextStyle(
-                    //               color: Colors.white,
-                    //               fontSize: 23));
-                    //     },
-                    //     inactiveColor:
-                    //         const Color.fromARGB(
-                    //             255, 52, 52, 52),
-                    //     decoration: InputDecoration(
-                    //         helperStyle: TextStyle(
-                    //             color: Colors.white,
-                    //             fontSize: screenHeight *
-                    //                 0.03),
-                    //         labelText: _localizations
-                    //             .courseWeight,
-                    //         labelStyle: TextStyle(
-                    //             color: Colors.white,
-                    //             fontSize: screenHeight *
-                    //                 0.03)),
-                    //     autovalidateMode:
-                    //         AutovalidateMode
-                    //             .onUserInteraction,
-                    //     validator: FormBuilderValidators
-                    //         .compose([
-                    //       FormBuilderValidators
-                    //           .required(),
-                    //     ]),
-                    //   ),
-                    // ),
                     
-
-                    // Row(
-                    //   crossAxisAlignment: CrossAxisAlignment.start,
-                    //   mainAxisAlignment: MainAxisAlignment.start,
-                    //   children: [
-                    //     Container(
-                    //       width: screenWidth * 0.15,
-                    //       child: FormBuilderTextField(
-                    //           name: 'sessionHours',
-                    //           autovalidateMode:
-                    //               AutovalidateMode.onUserInteraction,
-                    //           keyboardType: TextInputType.number,
-                    //           initialValue: '2',
-                    //           decoration: InputDecoration(
-                    //             labelText: _localizations.hours,
-                    //           ),
-                    //           style: TextStyle(color: Colors.white),
-                    //           validator: FormBuilderValidators.compose([
-                    //             FormBuilderValidators.required(),
-                    //             FormBuilderValidators.numeric(),
-                    //             integerValidator(context)
-                    //           ]),
-                    //           scrollPadding: EdgeInsets.only(
-                    //               bottom: MediaQuery.of(context)
-                    //                   .viewInsets
-                    //                   .bottom)),
-                    //     ),
-                    //     SizedBox(
-                    //       width: 10,
-                    //     ),
-                    //     Container(
-                    //       width: screenWidth * 0.15,
-                    //       child: FormBuilderTextField(
-                    //           name: 'sessionMinutes',
-                    //           autovalidateMode:
-                    //               AutovalidateMode.onUserInteraction,
-                    //           keyboardType: TextInputType.number,
-                    //           initialValue: '30',
-                    //           decoration: InputDecoration(
-                    //             labelText: _localizations.minutes,
-                    //           ),
-                    //           style: TextStyle(color: Colors.white),
-                    //           validator: FormBuilderValidators.compose([
-                    //             FormBuilderValidators.required(),
-                    //             FormBuilderValidators.numeric(),
-                    //             integerValidator(context)
-                    //           ]),
-                    //           scrollPadding: EdgeInsets.only(
-                    //               bottom: MediaQuery.of(context)
-                    //                   .viewInsets
-                    //                   .bottom)),
-                    //     ),
-                    //   ],
-                    // ),
 
                     Container(
                       margin: EdgeInsets.only(top: screenHeight * 0.05),
@@ -254,7 +161,7 @@ class _Page1State extends State<Page1> {
                       ),
                     ),
                     Container(
-                      width: screenWidth*0.9,
+                      width: screenWidth * 0.9,
                       child: Column(
                         children: [
                           Container(
@@ -651,7 +558,7 @@ class Page3State extends State<Page3> {
             ),
             Stack(children: [
               Container(
-                  height: screenHeight * 0.57,
+                  height: screenHeight * 0.58,
                   child: //Placeholder()
                       ReorderableListView.builder(
                           padding:
@@ -715,40 +622,33 @@ class Page3State extends State<Page3> {
                               courses.insert(newIndex, item);
                             });
                           })),
-              Container(
-                height: screenHeight * 0.65,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Container(
-                        //color: Colors.yellow,
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
 
-                        width: screenHeight * 0.9,
-                        height: screenHeight * 0.08,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.center,
-                            end: Alignment.bottomCenter,
-                            //stops: [0.1, 0.8], 
-                            colors: [
-                              Colors
-                                  .transparent, // Transparent color at the top
-                              
-                              Color.fromARGB(255, 0, 5, 5),
-                            ],
-                          ),
-                        ),
-                        child: SizedBox()),
-                    AddButton(
-                      controller: _controller,
-                      refresh: widget.refreshParent ?? () {},
-                      lockClose: widget.lockClose ?? (bool value) {},
-                      screen: 2,
+                    height: screenHeight * 0.04,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                          colors: [
+                            Color.fromARGB(0, 0, 5, 5),
+                            Color.fromARGB(255, 0, 5, 5),
+                          ],
+                          begin: FractionalOffset(0, 0),
+                          end: FractionalOffset(0, 1),
+                          stops: [0.0, 1.0],
+                          tileMode: TileMode.clamp),
                     ),
-                  ],
-                ),
-              )
+                    child: SizedBox()),
+              ),
             ]),
+            AddButton(
+              controller: _controller,
+              refresh: widget.refreshParent ?? () {},
+              lockClose: widget.lockClose ?? (bool value) {},
+              screen: 2,
+            ),
           ],
         ),
       ),

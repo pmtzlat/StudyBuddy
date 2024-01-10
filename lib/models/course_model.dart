@@ -15,6 +15,7 @@ class CourseModel {
   bool orderMatters;
   List<UnitModel> revisions;
 
+
   /*
   var iconData = IconData(58717, fontFamily: 'MaterialIcons')
 
@@ -30,7 +31,7 @@ class CourseModel {
     this.weight = 2.0,
     required this.examDate,
     this.timeStudied = const Duration(seconds:0),
-    this.color = '#000000',
+    this.color = '#FDC62A',
     this.sessionTime = const Duration(hours: 2), //one hour
     this.id = '0',
     this.units = const <UnitModel>[],
