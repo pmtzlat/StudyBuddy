@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:study_buddy/modules/calendar/calendar_view.dart';
-import 'package:study_buddy/modules/courses/courses_view.dart';
+import 'package:study_buddy/modules/exams/exams_view.dart';
 import 'package:study_buddy/modules/profile/profile_view.dart';
 
 PageRouteBuilder<dynamic> fadePageRouteBuilder(
@@ -94,7 +94,7 @@ class BottomNavBar extends StatelessWidget {
           switch (index) {
             case 0:
               Navigator.of(context)
-                  .pushReplacement(fadePageRouteBuilder(CoursesView()));
+                  .pushReplacement(fadePageRouteBuilder(ExamsView()));
 
               break;
             case 1:

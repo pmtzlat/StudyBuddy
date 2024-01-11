@@ -9,7 +9,7 @@ class UnitModel {
 
   UnitModel(
       {required this.name,
-      required this.sessionTime,
+      this.sessionTime = const Duration(hours:2),
       this.id = '',
       required this.order,
       this.completed = false,

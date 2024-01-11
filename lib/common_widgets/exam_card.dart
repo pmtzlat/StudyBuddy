@@ -1,28 +1,28 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:study_buddy/common_widgets/scaffold.dart';
-import 'package:study_buddy/modules/courses/course_detail_view.dart';
+import 'package:study_buddy/modules/exams/exam_detail_view.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../models/course_model.dart';
+import '../models/exam_model.dart';
 
-class CourseCard extends StatefulWidget {
-  final course;
+class ExamCard extends StatefulWidget {
+  final exam;
   final Function parentRefresh;
-  const CourseCard(
+  const ExamCard(
       {super.key,
-      required CourseModel this.course,
+      required ExamModel this.exam,
       required this.parentRefresh});
 
   @override
-  State<CourseCard> createState() => _CourseCardState();
+  State<ExamCard> createState() => _ExamCardState();
 }
 
-class _CourseCardState extends State<CourseCard> {
+class _ExamCardState extends State<ExamCard> {
   double cardRadius = 20.0;
   @override
   Widget build(BuildContext context) {
-    final cardColor = stringToColor(widget.course.color);
+    final cardColor = stringToColor(widget.exam.color);
     final lighterColor = lighten(cardColor, .03);
     final darkerColor = darken(cardColor, .1);
 
@@ -43,8 +43,8 @@ class _CourseCardState extends State<CourseCard> {
 
           // Create the dialog's content
           pageBuilder: (context, animation, secondaryAnimation) {
-            return CourseDetailView(
-                course: widget.course, refreshParent: widget.parentRefresh);
+            return ExamDetailView(
+                exam: widget.exam, refreshParent: widget.parentRefresh);
           },
         );
       },
@@ -77,7 +77,7 @@ class _CourseCardState extends State<CourseCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(widget.course.name,
+                  Text(widget.exam.name,
                       style: TextStyle(
                           color: Colors.white, fontSize: screenWidth * 0.06)),
                 ],

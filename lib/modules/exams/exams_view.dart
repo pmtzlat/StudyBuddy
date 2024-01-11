@@ -7,30 +7,30 @@ import 'package:study_buddy/common_widgets/loading_screen.dart';
 import 'package:study_buddy/instance_manager.dart';
 import 'package:study_buddy/main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:study_buddy/models/course_model.dart';
+import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
-import 'package:study_buddy/modules/courses/add_course_button.dart';
-import 'package:study_buddy/modules/courses/add_course_pages.dart';
-import 'package:study_buddy/modules/courses/controllers/courses_controller.dart';
+import 'package:study_buddy/modules/exams/add_exam_button.dart';
+import 'package:study_buddy/modules/exams/add_exam_pages.dart';
+import 'package:study_buddy/modules/exams/controllers/exams_controller.dart';
 import 'package:study_buddy/modules/loader/loader.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/utils/validators.dart';
-import '../../common_widgets/course_card.dart';
+import '../../common_widgets/exam_card.dart';
 
-class CoursesView extends StatefulWidget {
-  const CoursesView({super.key});
+class ExamsView extends StatefulWidget {
+  const ExamsView({super.key});
 
   @override
-  State<CoursesView> createState() => _CoursesViewState();
+  State<ExamsView> createState() => _ExamsViewState();
 }
 
-class _CoursesViewState extends State<CoursesView> {
-  final _controller = instanceManager.courseController;
+class _ExamsViewState extends State<ExamsView> {
+  final _controller = instanceManager.examController;
   bool loading = false;
-  //List<UnitModel> unitsToAdd = instanceManager.sessionStorage.courseToAdd.units;
+  //List<UnitModel> unitsToAdd = instanceManager.sessionStorage.examToAdd.units;
 
-  void updateCoursePage() {
+  void updateExamPage() {
     setState(() {});
   }
 
@@ -41,7 +41,7 @@ class _CoursesViewState extends State<CoursesView> {
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
     final PageController _pageController = PageController(
-        initialPage: instanceManager.sessionStorage.activeOrAllCourses);
+        initialPage: instanceManager.sessionStorage.activeOrAllExams);
 
     return instanceManager.scaffold.getScaffold(
         context: context,
@@ -53,7 +53,7 @@ class _CoursesViewState extends State<CoursesView> {
             Container(
               margin: EdgeInsets.all(screenWidth * 0.05),
               child: Text(
-                _localizations.coursesTitle,
+                _localizations.examsTitle,
                 style: Theme.of(context).textTheme.displayMedium,
               ),
             ),
@@ -63,19 +63,19 @@ class _CoursesViewState extends State<CoursesView> {
                 TextButton.icon(
                   
                     onPressed: () {
-                      showAddCourseSheet(context);
+                      showAddExamSheet(context);
                     },
-                    label: Text(_localizations.addCourse, style: TextStyle(color: buttonColor)),
+                    label: Text(_localizations.addExam, style: TextStyle(color: buttonColor)),
                     icon: Icon(Icons.add_rounded, color: buttonColor)),
                 
                 AnimatedOpacity(
-                  opacity: instanceManager.sessionStorage.activeOrAllCourses == 0 ? 1.0 : 0.0,
+                  opacity: instanceManager.sessionStorage.activeOrAllExams == 0 ? 1.0 : 0.0,
                   duration: Duration(milliseconds: 500),
                   child: TextButton.icon(
                     
                       onPressed: () {
                        logger.i('Prioritize clicked!');
-                       if(instanceManager.sessionStorage.activeOrAllCourses == 0){
+                       if(instanceManager.sessionStorage.activeOrAllExams == 0){
                         //TODO after gym
                        }
                       },
@@ -84,7 +84,7 @@ class _CoursesViewState extends State<CoursesView> {
                 ) ,
               ],
             ),
-            instanceManager.sessionStorage.activeCourses == null
+            instanceManager.sessionStorage.activeExams == null
                 ? loadingScreen()
                 : Flexible(
                     child: PageView(
@@ -92,10 +92,10 @@ class _CoursesViewState extends State<CoursesView> {
                         scrollDirection: Axis.horizontal,
                         controller: _pageController,
                         children: [
-                          getCourseList(
-                              instanceManager.sessionStorage.activeCourses),
-                          getCourseList(
-                              instanceManager.sessionStorage.savedCourses)
+                          getExamList(
+                              instanceManager.sessionStorage.activeExams),
+                          getExamList(
+                              instanceManager.sessionStorage.pastExams)
                         ]),
                   ),
             Center(
@@ -109,8 +109,8 @@ class _CoursesViewState extends State<CoursesView> {
                     value: false,
                     width: screenWidth * 0.6,
                     height: screenHeight * 0.04,
-                    textOff: _localizations.activeCourses,
-                    textOn: _localizations.allCourses,
+                    textOff: _localizations.activeExams,
+                    textOn: _localizations.allExams,
                     colorOn: Color.fromARGB(255, 59, 59, 59),
                     colorOff: Color.fromARGB(255, 59, 59, 59),
                     contentSize: screenWidth * 0.035,
@@ -123,7 +123,7 @@ class _CoursesViewState extends State<CoursesView> {
                       }
                       print('switched to: $index');
                       setState(() {
-                        instanceManager.sessionStorage.activeOrAllCourses = index;
+                        instanceManager.sessionStorage.activeOrAllExams = index;
                       });
                       
                       _pageController.animateToPage(index!,
@@ -136,12 +136,12 @@ class _CoursesViewState extends State<CoursesView> {
         ));
   }
 
-  void loadCourses() async {
-    await _controller.getAllCourses();
+  void loadExams() async {
+    await _controller.getAllExams();
     setState(() {});
   }
 
-  Widget getCourseList(List<CourseModel> courseList) {
+  Widget getExamList(List<ExamModel> examList) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
@@ -156,11 +156,11 @@ class _CoursesViewState extends State<CoursesView> {
               //padding: EdgeInsets.only(bottom: screenHeight * 0.03),
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
-              itemCount: courseList!.length,
+              itemCount: examList!.length,
               itemBuilder: (context, index) {
-                final course = courseList![index];
+                final exam = examList![index];
                 return Dismissible(
-                  key: Key(course.id),
+                  key: Key(exam.id),
                   direction: DismissDirection.endToStart,
                   background: Container(
                     child: Row(
@@ -183,22 +183,22 @@ class _CoursesViewState extends State<CoursesView> {
                   ),
                   onDismissed: (direction) async {
                     setState(() {
-                      instanceManager.sessionStorage.activeCourses
-                          .remove(course);
-                      instanceManager.sessionStorage.savedCourses
-                          .remove(course);
+                      instanceManager.sessionStorage.activeExams
+                          .remove(exam);
+                      instanceManager.sessionStorage.savedExams
+                          .remove(exam);
                     });
 
-                    await _controller.deleteCourse(
-                      name: course.name,
-                      id: course.id,
+                    await _controller.deleteExam(
+                      name: exam.name,
+                      id: exam.id,
                       index: index,
                       context: context,
                     );
                   },
-                  child: CourseCard(
-                    course: courseList![index],
-                    parentRefresh: loadCourses,
+                  child: ExamCard(
+                    exam: examList![index],
+                    parentRefresh: loadExams,
                   ),
                 );
               },
@@ -225,8 +225,8 @@ class _CoursesViewState extends State<CoursesView> {
     );
   }
 
-  void showAddCourseSheet(BuildContext context) {
-    //final courseCreationFormKey = GlobalKey<FormBuilderState>();
+  void showAddExamSheet(BuildContext context) {
+    //final examCreationFormKey = GlobalKey<FormBuilderState>();
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
@@ -292,7 +292,7 @@ class _CoursesViewState extends State<CoursesView> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(25.0))),
       isScrollControlled: true,
       builder: (BuildContext context) {
-        //logger.i(instanceManager.sessionStorage.courseToAdd.units);
+        //logger.i(instanceManager.sessionStorage.examToAdd.units);
         return WillPopScope(
           onWillPop: () async {
             return false;
@@ -329,7 +329,7 @@ class _CoursesViewState extends State<CoursesView> {
                             right: screenWidth * 0.05,
                           ),
                           child: Text(
-                            _localizations.addCourse,
+                            _localizations.addExam,
                             style: TextStyle(
                               color: Colors.white, // Text color
                               fontSize: 34.0, // Text size
@@ -365,17 +365,17 @@ class _CoursesViewState extends State<CoursesView> {
   void closeModal(BuildContext context) {
     logger.i('Closing... - Loading state: $loading');
     if (loading != true) {
-      if (instanceManager.sessionStorage.courseToAdd != null &&
-          instanceManager.sessionStorage.activeCourses
-              .contains(instanceManager.sessionStorage.courseToAdd)) {
-        instanceManager.sessionStorage.activeCourses
-            .remove(instanceManager.sessionStorage.courseToAdd);
+      if (instanceManager.sessionStorage.examToAdd != null &&
+          instanceManager.sessionStorage.activeExams
+              .contains(instanceManager.sessionStorage.examToAdd)) {
+        instanceManager.sessionStorage.activeExams
+            .remove(instanceManager.sessionStorage.examToAdd);
       }
 
-      instanceManager.sessionStorage.courseToAdd.units = <UnitModel>[];
-      instanceManager.sessionStorage.courseToAdd =
-          CourseModel(examDate: DateTime.now(), name: '');
-      updateCoursePage();
+      instanceManager.sessionStorage.examToAdd.units = <UnitModel>[];
+      instanceManager.sessionStorage.examToAdd =
+          ExamModel(examDate: DateTime.now(), name: '');
+      updateExamPage();
       Navigator.pop(context);
     } else {
       logger.i('Can\'t close while its loading!');

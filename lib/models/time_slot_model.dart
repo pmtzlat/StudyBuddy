@@ -9,9 +9,9 @@ class TimeSlot {
   Duration duration;
   Duration timeStudied;
 
-  final String courseID;
+  final String examID;
   final String unitID;
-  final String courseName;
+  final String examName;
   final String unitName;
   bool completed;
   final String dayID;
@@ -23,9 +23,9 @@ class TimeSlot {
       required this.startTime,
       required this.endTime,
       this.timeStudied = Duration.zero,
-      required this.courseID,
+      required this.examID,
       this.unitID= '',
-      this.courseName = '',
+      this.examName = '',
       this.unitName= '',
       this.completed = false,
       this.dayID = '',
@@ -63,7 +63,7 @@ class TimeSlot {
       'Sunday'
     ];
     final result =
-        'TimeSlot: \n${weekdays[weekday-1]} ${startTime.toString()} - ${endTime.toString()} : $courseName';
+        'TimeSlot: \n${weekdays[weekday-1]} ${startTime.toString()} - ${endTime.toString()} : $examName';
     return result;
   }
 
@@ -86,7 +86,7 @@ class TimeSlot {
           weekday == other.weekday &&
           startTime == other.startTime &&
           endTime == other.endTime &&
-          courseID == other.courseID &&
+          examID == other.examID &&
           unitID == other.unitID;
 
   @override
@@ -95,6 +95,6 @@ class TimeSlot {
       weekday.hashCode ^
       startTime.hashCode ^
       endTime.hashCode ^
-      courseID.hashCode ^
+      examID.hashCode ^
       unitID.hashCode;
 }

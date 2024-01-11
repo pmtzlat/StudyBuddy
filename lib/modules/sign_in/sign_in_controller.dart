@@ -11,7 +11,7 @@ class SignInController {
 
       await instanceManager.startDependantInstances();
 
-      await instanceManager.courseController.getAllCourses();
+      await instanceManager.examController.getAllExams();
       await instanceManager.calendarController.getGaps();
       await instanceManager.calendarController.getCustomDays();
       await instanceManager.calendarController.getCalendarDay(now);

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:study_buddy/main.dart';
-import 'package:study_buddy/models/course_model.dart';
+import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
-import 'package:study_buddy/modules/courses/controllers/courses_controller.dart';
+import 'package:study_buddy/modules/exams/controllers/exams_controller.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 class AddButton extends StatefulWidget {
-  CoursesController controller;
+  ExamsController controller;
   GlobalKey<FormBuilderState>? formKey;
   Function? refresh;
   Function? lockClose;
@@ -61,9 +61,9 @@ class _AddButtonState extends State<AddButton> {
                         widget.lockClose!(true);
 
                         // int res = await widget.controller
-                        //     .handleAddCourse(widget.courseCreationFormKey);
+                        //     .handleAddExam(widget.examCreationFormKey);
                         switch (await widget.controller
-                            .addCourseScreen1(widget.formKey!, widget.sessionTime!, widget.revisionTime!)) {
+                            .addExamScreen1(widget.formKey!, widget.sessionTime!, widget.revisionTime!)) {
                           case (1):
                             await moveToPage2();
 
@@ -72,7 +72,7 @@ class _AddButtonState extends State<AddButton> {
                             moveToPage3(skipPage2: true);
 
                           case (3):
-                            saveCourses(context);
+                            saveExams(context);
 
                           case (-1):
                             await closeError(context);
@@ -103,13 +103,13 @@ class _AddButtonState extends State<AddButton> {
 
                         
                         switch (await widget.controller
-                            .addCourseScreen2(widget.formKey!)) {
+                            .addExamScreen2(widget.formKey!)) {
                           case (2):
                             await moveToPage3();
 
                           case (3):
                            
-                            saveCourses(context);
+                            saveExams(context);
 
                           case (-1):
                             closeError(context);
@@ -134,11 +134,11 @@ class _AddButtonState extends State<AddButton> {
                       widget.lockClose!(true);
 
                       // int res = await widget.controller
-                      //     .handleAddCourse(widget.courseCreationFormKey);
-                      switch (await widget.controller.addCourseScreen3()) {
+                      //     .handleAddExam(widget.examCreationFormKey);
+                      switch (await widget.controller.addExamScreen3()) {
                         // change to screen3
                         case (3):
-                          saveCourses(context);
+                          saveExams(context);
 
                         case (-1):
                           closeError(context);
@@ -155,14 +155,14 @@ class _AddButtonState extends State<AddButton> {
     }
   }
 
-  void saveCourses(BuildContext context) async {
-    if(!instanceManager.sessionStorage.activeCourses.contains(instanceManager.sessionStorage.courseToAdd)){
-      instanceManager.sessionStorage.activeCourses.add(instanceManager.sessionStorage.courseToAdd);
+  void saveExams(BuildContext context) async {
+    if(!instanceManager.sessionStorage.activeExams.contains(instanceManager.sessionStorage.examToAdd)){
+      instanceManager.sessionStorage.activeExams.add(instanceManager.sessionStorage.examToAdd);
 
     }
      
 
-    if(await widget.controller.handleAddCourse() == 1){
+    if(await widget.controller.handleAddExam() == 1){
       
       await closeSuccess(context);
     }
@@ -177,7 +177,7 @@ class _AddButtonState extends State<AddButton> {
 
   Future<void> closeError(BuildContext context) async {
     snackbar = SnackBar(
-      content: Text(AppLocalizations.of(context)!.errorAddingCourse),
+      content: Text(AppLocalizations.of(context)!.errorAddingExam),
       backgroundColor: Color.fromARGB(255, 221, 15, 0),
     );
     setState(() {
@@ -188,7 +188,7 @@ class _AddButtonState extends State<AddButton> {
 
   Future<void> closeSuccess(BuildContext context) async {
     snackbar = SnackBar(
-        content: Text(AppLocalizations.of(context)!.courseAddedCorrectly),
+        content: Text(AppLocalizations.of(context)!.examAddedCorrectly),
         backgroundColor: Color.fromARGB(255, 0, 172, 6));
     await closeModal(context, snackbar);
   }
@@ -220,15 +220,15 @@ class _AddButtonState extends State<AddButton> {
     setState(() {
       loading = false;
     });
-    var courses = instanceManager.sessionStorage.activeCourses;
-    courses.insert(0, instanceManager.sessionStorage.courseToAdd);
-    courses
-        .sort((CourseModel a, CourseModel b) => b.weight.compareTo(a.weight));
-    for(CourseModel course in courses){
-      logger.i(course.name + ',  ${course.weight}');
+    var exams = instanceManager.sessionStorage.activeExams;
+    exams.insert(0, instanceManager.sessionStorage.examToAdd);
+    exams
+        .sort((ExamModel a, ExamModel b) => b.weight.compareTo(a.weight));
+    for(ExamModel exam in exams){
+      logger.i(exam.name + ',  ${exam.weight}');
     }
-    instanceManager.sessionStorage.courseWeightArray =
-        generateDescendingList(courses.length);
+    instanceManager.sessionStorage.examWeightArray =
+        generateDescendingList(exams.length);
     
     await widget.refresh!();
     widget.lockClose!(false);
@@ -245,9 +245,9 @@ class _AddButtonState extends State<AddButton> {
   }
 
   Future<void> closeModal(BuildContext context, SnackBar snackbar) async {
-    instanceManager.sessionStorage.courseToAdd =  CourseModel(examDate: DateTime.now(), name: '');
+    instanceManager.sessionStorage.examToAdd =  ExamModel(examDate: DateTime.now(), name: '');
 
-    await widget.controller.getAllCourses();
+    await widget.controller.getAllExams();
 
     widget.refresh!();
     //await Future.delayed(Duration(seconds: 5));

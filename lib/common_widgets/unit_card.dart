@@ -5,20 +5,20 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
-import 'package:study_buddy/models/course_model.dart';
+import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
-import 'package:study_buddy/modules/courses/course_detail_view.dart';
+import 'package:study_buddy/modules/exams/exam_detail_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 class UnitCard extends StatefulWidget {
   final UnitModel unit;
-  final CourseModel course;
+  final ExamModel exam;
   final Function notifyParent;
   final Function showError;
 
   UnitCard(
       {required this.unit,
-      required this.course,
+      required this.exam,
       required Function this.notifyParent,
       required Function this.showError});
 
@@ -27,7 +27,7 @@ class UnitCard extends StatefulWidget {
 }
 
 class _UnitCardState extends State<UnitCard> {
-  final _controller = instanceManager.courseController;
+  final _controller = instanceManager.examController;
   var editMode = false;
   final unitFormKey = GlobalKey<FormBuilderState>();
 
@@ -102,7 +102,7 @@ class _UnitCardState extends State<UnitCard> {
                       IconButton(
                           onPressed: () async {
                             int? res = await _controller.handleEditUnit(
-                                unitFormKey, widget.course, widget.unit);
+                                unitFormKey, widget.exam, widget.unit);
                             if (res == -1) {
                               widget.showError(_localizations.errorEditingUnit);
                             }

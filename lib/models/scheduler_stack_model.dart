@@ -1,6 +1,6 @@
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
-import 'package:study_buddy/models/course_model.dart';
+import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
@@ -9,16 +9,16 @@ class SchedulerStack {
   late List<UnitModel> revisions;
   int? daysUntilExam;
   double? weight;
-  CourseModel course;
+  ExamModel exam;
   int unitsInDay = 0;
 
-  SchedulerStack({required this.course});
+  SchedulerStack({required this.exam});
 
-  Future<void> initializeUnitsAndRevision(CourseModel course) async {
+  Future<void> initializeUnitsAndRevision(ExamModel exam) async {
     try {
-      units = course.units!.where((unit) => unit.completed == false).toList();
-      revisions = course.revisions.where((result) => result.completed == false).toList();
-      daysUntilExam = getDaysUntilExam(course.examDate);
+      units = exam.units!.where((unit) => unit.completed == false).toList();
+      revisions = exam.revisions.where((result) => result.completed == false).toList();
+      daysUntilExam = getDaysUntilExam(exam.examDate);
 
     } catch (e) {
       logger.d('Error initializing unitsWithRevision: $e');
@@ -28,13 +28,13 @@ class SchedulerStack {
 
   
 
-  Future<List<UnitModel>> extractUnitsWithRevision(CourseModel course) async {
+  Future<List<UnitModel>> extractUnitsWithRevision(ExamModel exam) async {
     try {
       List<UnitModel> units = [];
-      final courseUnits = await instanceManager.firebaseCrudService
-          .getUnitsForCourse(courseID: course.id);
-      units += courseUnits;
-      logger.i('Revisons for course ${course.name}: ${course.revisions}');
+      final examUnits = await instanceManager.firebaseCrudService
+          .getUnitsForExam(examID: exam.id);
+      units += examUnits;
+      logger.i('Revisons for exam ${exam.name}: ${exam.revisions}');
 
       return units;
     } catch (e) {
@@ -53,12 +53,12 @@ class SchedulerStack {
       unitString += '\n ${revision.name}, hours: ${formatDuration(revision.sessionTime)}';
     }
     logger.f(
-        'Stack ${course.name} \n Session Time: ${formatDuration(course.sessionTime)} \n Exam date: ${course.examDate} \n Order matters: ${course.orderMatters} \n Weight: ${course.weight}\n $unitString');
+        'Stack ${exam.name} \n Session Time: ${formatDuration(exam.sessionTime)} \n Exam date: ${exam.examDate} \n Order matters: ${exam.orderMatters} \n Weight: ${exam.weight}\n $unitString');
   }
 
   int getDaysUntilExam(DateTime date) {
     DateTime currentDate = date;
-    DateTime date2 = course.examDate;
+    DateTime date2 = exam.examDate;
 
     DateTime date1 =
         DateTime(currentDate.year, currentDate.month, currentDate.day);
@@ -71,7 +71,7 @@ class SchedulerStack {
   }
 
   void calculateWeight(DateTime date) {
-    weight = course.weight + (1 / getDaysUntilExam(date));
+    weight = exam.weight + (1 / getDaysUntilExam(date));
   }
 
   UnitModel? getUnitForTimeSlot(Duration timeAvailable) {
@@ -79,7 +79,7 @@ class SchedulerStack {
       if ((unit.sessionTime) <= timeAvailable) {
         return unit;
       }
-      if (course.orderMatters) {
+      if (exam.orderMatters) {
         return null;
       }
     }

@@ -24,7 +24,7 @@ class Day {
     String timesString = '';
     for (TimeSlot slot in times!) {
       timesString +=
-          '\n ${slot.startTime} - ${slot.endTime} : ${slot.courseName ?? slot.courseID} ${slot.unitName}';
+          '\n ${slot.startTime} - ${slot.endTime} : ${slot.examName ?? slot.examID} ${slot.unitName}';
     }
 
     return '$id -> $date: $weekday\n Times: $timesString';
@@ -54,9 +54,9 @@ class Day {
             weekday: timeSlot.weekday,
             startTime: timeSlot.startTime,
             endTime: timeSlot.endTime,
-            courseID: timeSlot.courseID,
+            examID: timeSlot.examID,
             unitID: timeSlot.unitID,
-            courseName: timeSlot.courseName,
+            examName: timeSlot.examName,
             unitName: timeSlot.unitName,
           );
         }).toList();
@@ -72,7 +72,7 @@ class Day {
     for (var timeSlot in timeSlots) {
       timeSlot.calculateDuration(timeSlot.startTime, timeSlot.endTime);
 
-      if (timeSlot.courseID == 'free') {
+      if (timeSlot.examID == 'free') {
         //logger.d('timeSlot ${timeSlot.startTime} - ${timeSlot.endTime} is free, timeSlot.');
         totalDuration += timeSlot.duration;
       }

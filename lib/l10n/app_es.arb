@@ -1,10 +1,10 @@
 {
-    "coursesTitle": "Asignaturas",
-    "addCourse": "Añadir Asignatura",
+    "examsTitle": "Asignaturas",
+    "addExam": "Añadir Asignatura",
     "add" : "Añadir",
-    "courseAddedCorrectly" : "Asignatura añadida con éxito!",
-    "errorAddingCourse": "Error al añadir asignatura. Inténtalo otra vez.",
-    "courseName": "Nombre de Asignatura",
+    "examAddedCorrectly" : "Asignatura añadida con éxito!",
+    "errorAddingExam": "Error al añadir asignatura. Inténtalo otra vez.",
+    "examName": "Nombre de Asignatura",
 
     "calendarTitle": "Calendario",
 

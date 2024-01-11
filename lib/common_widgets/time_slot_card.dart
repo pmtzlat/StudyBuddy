@@ -30,7 +30,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
         onTap: () async {
           if (stripTime(DateTime.now()).isAfter(widget.timeSlot.date!)) {
             showRedSnackbar(
-                context, _localizations.editUnitCompletionInCoursesPage);
+                context, _localizations.editUnitCompletionInExamsPage);
             return;
           }
           if (widget.timeSlot.completed == false) {
@@ -67,7 +67,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
           height: screenHeight * 0.1,
           child:
               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            Text(widget.timeSlot.courseName),
+            Text(widget.timeSlot.examName),
             Text(widget.timeSlot.unitName),
             Text(
                 '${timeOfDayToStr(widget.timeSlot.startTime)} - ${timeOfDayToStr(widget.timeSlot.endTime)}'),

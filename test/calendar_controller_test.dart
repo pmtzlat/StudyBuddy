@@ -16,7 +16,7 @@ void main() {
         final provisionalList = <TimeSlot>[];
         final expectedResult = [
           TimeSlot(
-              courseID: 'free',
+              examID: 'free',
               startTime: start,
               endTime: end,
               weekday: weekday)
@@ -54,7 +54,7 @@ void main() {
         final provisionalList = <TimeSlot>[];
         final expectedResult = [
           TimeSlot(
-              courseID: 'free',
+              examID: 'free',
               startTime: start,
               endTime: end,
               weekday: weekday)
@@ -76,7 +76,7 @@ void main() {
         final provisionalList = <TimeSlot>[];
         final expectedResult = [
           TimeSlot(
-              courseID: 'free',
+              examID: 'free',
               startTime: start,
               endTime: end,
               weekday: weekday)
@@ -98,7 +98,7 @@ void main() {
         final provisionalList = <TimeSlot>[];
         final expectedResult = [
           TimeSlot(
-              courseID: 'free',
+              examID: 'free',
               startTime: start,
               endTime: end,
               weekday: weekday)
@@ -121,7 +121,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -133,9 +133,9 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
-                courseID: 'free',
+                examID: 'free',
                 startTime: start,
                 endTime: end,
                 weekday: weekday)
@@ -155,7 +155,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -167,9 +167,9 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
-                courseID: 'free',
+                examID: 'free',
                 startTime: start,
                 endTime: end,
                 weekday: weekday)
@@ -192,7 +192,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -204,7 +204,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -221,7 +221,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -233,7 +233,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -253,7 +253,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -265,7 +265,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -283,7 +283,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -292,7 +292,7 @@ void main() {
 
           final expectedResult = [
             TimeSlot(
-                courseID: 'free',
+                examID: 'free',
                 startTime: start,
                 endTime: end,
                 weekday: weekday)
@@ -313,7 +313,7 @@ void main() {
               weekday: weekday,
               startTime: TimeOfDay(hour: 10, minute: 0),
               endTime: TimeOfDay(hour: 11, minute: 0),
-              courseID: 'free');
+              examID: 'free');
 
           final provisionalList = <TimeSlot>[
             old,
@@ -325,7 +325,7 @@ void main() {
 
           final expectedResult = [
             TimeSlot(
-                courseID: 'free',
+                examID: 'free',
                 startTime: start,
                 endTime: end,
                 weekday: weekday)
@@ -343,7 +343,7 @@ void main() {
               weekday: weekday,
               startTime: TimeOfDay(hour: 10, minute: 0),
               endTime: TimeOfDay(hour: 11, minute: 0),
-              courseID: 'free');
+              examID: 'free');
 
           final provisionalList = <TimeSlot>[
             old,
@@ -355,7 +355,7 @@ void main() {
 
           final expectedResult = [
             TimeSlot(
-                courseID: 'free',
+                examID: 'free',
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: end,
                 weekday: weekday)
@@ -373,7 +373,7 @@ void main() {
               weekday: weekday,
               startTime: TimeOfDay(hour: 10, minute: 0),
               endTime: TimeOfDay(hour: 11, minute: 0),
-              courseID: 'free');
+              examID: 'free');
 
           final provisionalList = <TimeSlot>[
             old,
@@ -385,7 +385,7 @@ void main() {
 
           final expectedResult = [
             TimeSlot(
-                courseID: 'free',
+                examID: 'free',
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: end,
                 weekday: weekday)
@@ -405,7 +405,7 @@ void main() {
               weekday: weekday,
               startTime: TimeOfDay(hour: 10, minute: 0),
               endTime: TimeOfDay(hour: 11, minute: 2),
-              courseID: 'free');
+              examID: 'free');
 
           final provisionalList = <TimeSlot>[
             old,
@@ -417,7 +417,7 @@ void main() {
 
           final expectedResult = [
             TimeSlot(
-                courseID: 'free',
+                examID: 'free',
                 startTime: start,
                 endTime: TimeOfDay(hour: 11, minute: 2),
                 weekday: weekday)
@@ -434,7 +434,7 @@ void main() {
               weekday: weekday,
               startTime: TimeOfDay(hour: 10, minute: 2),
               endTime: TimeOfDay(hour: 11, minute: 2),
-              courseID: 'free');
+              examID: 'free');
 
           final provisionalList = <TimeSlot>[
             old,
@@ -446,7 +446,7 @@ void main() {
 
           final expectedResult = [
             TimeSlot(
-                courseID: 'free',
+                examID: 'free',
                 startTime: start,
                 endTime: TimeOfDay(hour: 11, minute: 2),
                 weekday: weekday)
@@ -463,7 +463,7 @@ void main() {
               weekday: weekday,
               startTime: TimeOfDay(hour: 10, minute: 1),
               endTime: TimeOfDay(hour: 11, minute: 2),
-              courseID: 'free');
+              examID: 'free');
 
           final provisionalList = <TimeSlot>[
             old,
@@ -475,7 +475,7 @@ void main() {
 
           final expectedResult = [
             TimeSlot(
-                courseID: 'free',
+                examID: 'free',
                 startTime: start,
                 endTime: TimeOfDay(hour: 11, minute: 2),
                 weekday: weekday)
@@ -501,12 +501,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -518,14 +518,14 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
-                  courseID: 'free',
+                  examID: 'free',
                   startTime: start,
                   endTime: end,
                   weekday: weekday)
@@ -545,12 +545,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -562,14 +562,14 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
-                  courseID: 'free',
+                  examID: 'free',
                   startTime: start,
                   endTime: end,
                   weekday: weekday)
@@ -592,12 +592,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -609,12 +609,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -632,12 +632,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -649,12 +649,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -674,12 +674,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -691,12 +691,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -714,12 +714,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -731,9 +731,9 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
-                  courseID: 'free',
+                  examID: 'free',
                   startTime: start,
                   endTime: end,
                   weekday: weekday)
@@ -754,7 +754,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free');
+                examID: 'free');
 
             final provisionalList = <TimeSlot>[
               old,
@@ -762,7 +762,7 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -774,9 +774,9 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
-                  courseID: 'free',
+                  examID: 'free',
                   startTime: start,
                   endTime: end,
                   weekday: weekday)
@@ -795,7 +795,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free');
+                examID: 'free');
 
             final provisionalList = <TimeSlot>[
               old,
@@ -803,7 +803,7 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -815,9 +815,9 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
-                  courseID: 'free',
+                  examID: 'free',
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: end,
                   weekday: weekday)
@@ -835,7 +835,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free');
+                examID: 'free');
 
             final provisionalList = <TimeSlot>[
               old,
@@ -843,7 +843,7 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -855,9 +855,9 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
-                  courseID: 'free',
+                  examID: 'free',
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: end,
                   weekday: weekday)
@@ -877,7 +877,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 2),
-                courseID: 'free');
+                examID: 'free');
 
             final provisionalList = <TimeSlot>[
               old,
@@ -885,7 +885,7 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -897,9 +897,9 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
-                  courseID: 'free',
+                  examID: 'free',
                   startTime: start,
                   endTime: TimeOfDay(hour: 11, minute: 2),
                   weekday: weekday)
@@ -917,7 +917,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 2),
                 endTime: TimeOfDay(hour: 11, minute: 2),
-                courseID: 'free');
+                examID: 'free');
 
             final provisionalList = <TimeSlot>[
               old,
@@ -925,7 +925,7 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -937,9 +937,9 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
-                  courseID: 'free',
+                  examID: 'free',
                   startTime: start,
                   endTime: TimeOfDay(hour: 11, minute: 2),
                   weekday: weekday)
@@ -957,7 +957,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 1),
                 endTime: TimeOfDay(hour: 11, minute: 2),
-                courseID: 'free');
+                examID: 'free');
 
             final provisionalList = <TimeSlot>[
               old,
@@ -965,7 +965,7 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -977,9 +977,9 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
-                  courseID: 'free',
+                  examID: 'free',
                   startTime: start,
                   endTime: TimeOfDay(hour: 11, minute: 2),
                   weekday: weekday)
@@ -1002,12 +1002,12 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -1019,7 +1019,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -1037,12 +1037,12 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -1054,7 +1054,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -1072,12 +1072,12 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -1089,7 +1089,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -1108,12 +1108,12 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -1125,7 +1125,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -1142,12 +1142,12 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -1159,7 +1159,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -1181,12 +1181,12 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -1198,17 +1198,17 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 6, minute: 0),
                 endTime: TimeOfDay(hour: 9, minute: 55),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -1228,12 +1228,12 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -1245,17 +1245,17 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 11, minute: 05),
                 endTime: TimeOfDay(hour: 11, minute: 55),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -1275,12 +1275,12 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -1292,17 +1292,17 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 13, minute: 05),
                 endTime: TimeOfDay(hour: 19, minute: 55),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -1324,12 +1324,12 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -1341,7 +1341,7 @@ void main() {
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -1360,12 +1360,12 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -1377,7 +1377,7 @@ void main() {
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -1395,12 +1395,12 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -1412,7 +1412,7 @@ void main() {
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -1439,17 +1439,17 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -1461,12 +1461,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -1484,17 +1484,17 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -1506,12 +1506,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -1529,17 +1529,17 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -1551,12 +1551,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -1575,17 +1575,17 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -1597,12 +1597,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -1619,17 +1619,17 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -1641,12 +1641,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -1668,12 +1668,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -1685,17 +1685,17 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 6, minute: 0),
                   endTime: TimeOfDay(hour: 9, minute: 55),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -1715,12 +1715,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -1732,17 +1732,17 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 11, minute: 05),
                   endTime: TimeOfDay(hour: 11, minute: 55),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -1762,12 +1762,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -1779,17 +1779,17 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 13, minute: 05),
                   endTime: TimeOfDay(hour: 19, minute: 55),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -1811,17 +1811,17 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -1833,12 +1833,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: start,
                   endTime: end,
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -1857,17 +1857,17 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -1879,12 +1879,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: start,
                   endTime: end,
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -1903,17 +1903,17 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final controller = CalendarController();
@@ -1925,12 +1925,12 @@ void main() {
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
-                  courseID: 'free'),
+                  examID: 'free'),
               TimeSlot(
                   weekday: weekday,
                   startTime: start,
                   endTime: end,
-                  courseID: 'free'),
+                  examID: 'free'),
             ];
 
             final result = await controller.checkGapClash(
@@ -1952,17 +1952,17 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 22, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -1974,7 +1974,7 @@ void main() {
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -1994,17 +1994,17 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 22, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -2016,7 +2016,7 @@ void main() {
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -2034,17 +2034,17 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 22, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -2056,7 +2056,7 @@ void main() {
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -2075,17 +2075,17 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 22, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -2097,7 +2097,7 @@ void main() {
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(
@@ -2115,17 +2115,17 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
             TimeSlot(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 22, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final controller = CalendarController();
@@ -2137,7 +2137,7 @@ void main() {
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),
-                courseID: 'free'),
+                examID: 'free'),
           ];
 
           final result = await controller.checkGapClash(

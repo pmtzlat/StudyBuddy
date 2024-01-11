@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:study_buddy/main.dart';
-import 'package:study_buddy/models/course_model.dart';
+import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
-import 'package:study_buddy/modules/courses/add_course_button.dart';
+import 'package:study_buddy/modules/exams/add_exam_button.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 
@@ -35,10 +35,10 @@ class Page1 extends StatefulWidget {
 }
 
 class _Page1State extends State<Page1> {
-  final courseCreationFormKey = GlobalKey<FormBuilderState>();
+  final examCreationFormKey = GlobalKey<FormBuilderState>();
   Duration sessionTime = Duration(hours: 1);
   Duration revisionTime = Duration(hours: 1);
-  final _controller = instanceManager.courseController;
+  final _controller = instanceManager.examController;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,7 @@ class _Page1State extends State<Page1> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             FormBuilder(
-                key: courseCreationFormKey,
+                key: examCreationFormKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -65,10 +65,10 @@ class _Page1State extends State<Page1> {
                       margin: EdgeInsets.only(top: screenHeight * 0.00),
                       child: FormBuilderTextField(
                         // Name
-                        name: 'courseName',
+                        name: 'examName',
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         decoration: InputDecoration(
-                          labelText: _localizations.courseName,
+                          labelText: _localizations.examName,
                         ),
                         style: TextStyle(color: Colors.white),
 
@@ -164,34 +164,7 @@ class _Page1State extends State<Page1> {
                       width: screenWidth * 0.9,
                       child: Column(
                         children: [
-                          Container(
-                            margin: EdgeInsets.only(top: screenHeight * 0.07),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(_localizations.sessionTime,
-                                    style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: screenHeight * 0.02)),
-                                TextButton.icon(
-                                  label: Text(
-                                    '${formatDuration(sessionTime)}',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  icon: Icon(Icons.av_timer_rounded,
-                                      color: Colors.white),
-                                  onPressed: () async {
-                                    sessionTime = await showDurationPicker(
-                                          context: context,
-                                          initialTime: sessionTime,
-                                        ) ??
-                                        sessionTime;
-                                    setState(() {});
-                                  },
-                                )
-                              ],
-                            ),
-                          ),
+                          
                           Container(
                             margin: EdgeInsets.only(top: screenHeight * 0.07),
                             child: Row(
@@ -236,18 +209,6 @@ class _Page1State extends State<Page1> {
                                 fontSize: screenHeight * 0.022),
                           )),
                     ),
-                    Container(
-                      width: screenWidth * 0.7,
-                      child: FormBuilderCheckbox(
-                          name: 'applySessionTime',
-                          initialValue: false,
-                          title: Text(
-                            _localizations.applySessionTime,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: screenHeight * 0.022),
-                          )),
-                    ),
                   ],
                 )),
             Center(
@@ -257,7 +218,7 @@ class _Page1State extends State<Page1> {
                   sessionTime: sessionTime,
                   revisionTime: revisionTime,
                   controller: _controller,
-                  formKey: courseCreationFormKey,
+                  formKey: examCreationFormKey,
                   refresh: widget.refresh,
                   lockClose: widget.lockClose,
                   updatePage2: widget.updatePage2,
@@ -301,13 +262,13 @@ class Page2 extends StatefulWidget {
 }
 
 class Page2State extends State<Page2> {
-  List<UnitModel> unitsToAdd = instanceManager.sessionStorage.courseToAdd.units;
+  List<UnitModel> unitsToAdd = instanceManager.sessionStorage.examToAdd.units;
   final unitTimesFormKey = GlobalKey<FormBuilderState>();
-  final _controller = instanceManager.courseController;
+  final _controller = instanceManager.examController;
 
   void updateState() {
     setState(() {
-      unitsToAdd = instanceManager.sessionStorage.courseToAdd.units;
+      unitsToAdd = instanceManager.sessionStorage.examToAdd.units;
     });
   }
 
@@ -353,7 +314,7 @@ class Page2State extends State<Page2> {
                       padding: EdgeInsets.only(bottom: screenHeight * 0.1),
                       child: Column(children: [
                         for (UnitModel unit
-                            in instanceManager.sessionStorage.courseToAdd.units)
+                            in instanceManager.sessionStorage.examToAdd.units)
                           Container(
                             margin: EdgeInsets.symmetric(vertical: 8),
                             child: Card(
@@ -493,9 +454,9 @@ class Page3 extends StatefulWidget {
 }
 
 class Page3State extends State<Page3> {
-  List<CourseModel> courses = instanceManager.sessionStorage.activeCourses;
+  List<ExamModel> exams = instanceManager.sessionStorage.activeExams;
 
-  final _controller = instanceManager.courseController;
+  final _controller = instanceManager.examController;
 
   @override
   void initState() {
@@ -543,7 +504,7 @@ class Page3State extends State<Page3> {
                 Container(
                   width: screenWidth * 0.9,
                   child: Text(
-                    _localizations.prioritizeCourses,
+                    _localizations.prioritizeExams,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: screenWidth * 0.04,
@@ -565,7 +526,7 @@ class Page3State extends State<Page3> {
                               EdgeInsets.only(bottom: screenHeight * 0.065),
                           proxyDecorator: proxyDecorator,
                           itemBuilder: (context, index) {
-                            CourseModel course = courses[index];
+                            ExamModel exam = exams[index];
                             return Container(
                                 key: Key('$index'),
                                 margin: EdgeInsets.symmetric(vertical: 8),
@@ -580,7 +541,7 @@ class Page3State extends State<Page3> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(course.name,
+                                            Text(exam.name,
                                                 style: TextStyle(
                                                     color: Colors.white,
                                                     fontSize:
@@ -588,7 +549,7 @@ class Page3State extends State<Page3> {
                                             Row(
                                               children: [
                                                 Text(
-                                                    '${formatDateTime(course.examDate)}',
+                                                    '${formatDateTime(exam.examDate)}',
                                                     style: TextStyle(
                                                         color: Colors.white,
                                                         fontSize: screenWidth *
@@ -611,15 +572,15 @@ class Page3State extends State<Page3> {
                                           ],
                                         ))));
                           },
-                          itemCount: courses.length,
+                          itemCount: exams.length,
                           onReorder: (int oldIndex, int newIndex) {
                             setState(() {
                               if (newIndex > oldIndex) {
                                 newIndex -= 1;
                               }
-                              final CourseModel item =
-                                  courses.removeAt(oldIndex);
-                              courses.insert(newIndex, item);
+                              final ExamModel item =
+                                  exams.removeAt(oldIndex);
+                              exams.insert(newIndex, item);
                             });
                           })),
               Positioned(

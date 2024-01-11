@@ -3,7 +3,7 @@ import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
-class CourseModel {
+class ExamModel {
   final String name;
   double weight;
   DateTime examDate;
@@ -26,7 +26,7 @@ class CourseModel {
   var iconData = IconData(iconCodePointFromDataBase, fontFamily: 'MaterialIcons');
   */
 
-  CourseModel({
+  ExamModel({
     required this.name,
     this.weight = 2.0,
     required this.examDate,
@@ -45,16 +45,22 @@ class CourseModel {
     }
     return false;
   }
+  bool inPastOrPresent(DateTime date) {
+    if (!examDate.isAfter(date)) {
+      return true;
+    }
+    return false;
+  }
 
   Future<void> getUnits() async {
     final firebaseCrud = instanceManager.firebaseCrudService;
-    units = await firebaseCrud.getUnitsForCourse(courseID: id);
+    units = await firebaseCrud.getUnitsForExam(examID: id);
     //printUnits();
   }
 
   Future<void> getRevisions() async {
     final firebaseCrud = instanceManager.firebaseCrudService;
-    revisions = await firebaseCrud.getRevisionsForCourse(courseID: id);
+    revisions = await firebaseCrud.getRevisionsForExam(examID: id);
     //printRevisions();
 
   }
@@ -63,11 +69,11 @@ class CourseModel {
     final firebaseCrud = instanceManager.firebaseCrudService;
     if (units == null) {
       final newUnit = UnitModel(name: 'Unit 1', order: 1, sessionTime: sessionTime, completed: false);
-      await firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
+      await firebaseCrud.addUnitToExam(newUnit: newUnit, examID: id);
     } else {
       final newUnit = UnitModel(
           name: 'Unit ${units!.length + 1}', order: units!.length + 1, sessionTime: sessionTime, completed: false);
-      await firebaseCrud.addUnitToCourse(newUnit: newUnit, courseID: id);
+      await firebaseCrud.addUnitToExam(newUnit: newUnit, examID: id);
     }
     await getUnits();
   }
@@ -75,7 +81,7 @@ class CourseModel {
   Future<void> deleteUnit({required UnitModel unit}) async {
     final firebaseCrud = instanceManager.firebaseCrudService;
     final unitNum = unit.order;
-    await firebaseCrud.deleteUnit(unit: unit, courseID: id);
+    await firebaseCrud.deleteUnit(unit: unit, examID: id);
     await getUnits();
   }
 

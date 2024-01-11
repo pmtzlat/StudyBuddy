@@ -26,15 +26,15 @@ class CalendarController {
   }
 
   Future<int> calculateSchedule() async {
-    if ((instanceManager.sessionStorage.activeCourses.isEmpty) ||
+    if ((instanceManager.sessionStorage.activeExams.isEmpty) ||
         (instanceManager.sessionStorage.weeklyGaps.isEmpty)) {
-      logger.i('No courses or no availability. ');
+      logger.i('No exams or no availability. ');
       return 1;
     }
     ;
     var result = await instanceManager.studyPlanner.calculateSchedule();
     logger.i('Result of calculating new schedule: ${result}');
-    logger.i(instanceManager.sessionStorage.leftoverCourses.length);
+    logger.i(instanceManager.sessionStorage.leftoverExams.length);
     if (result == 1) {
       instanceManager.sessionStorage.needsRecalculation = false;
     }
@@ -152,7 +152,7 @@ class CalendarController {
       }
 
       provisionalList.add(TimeSlot(
-          courseID: 'free',
+          examID: 'free',
           startTime: newStart,
           endTime: newEnd,
           weekday: weekday));
@@ -256,11 +256,11 @@ class CalendarController {
       final String unitOrRevision = getUnitOrRevision(timeSlot.unitName) + 's';
 
       final UnitModel unit = await _firebaseCrud.getSpecificUnit(
-          timeSlot.courseID, timeSlot.unitID, unitOrRevision.toLowerCase());
+          timeSlot.examID, timeSlot.unitID, unitOrRevision.toLowerCase());
       unit.completionTime = unit.completionTime + timeSlot.duration;
 
       if (await _firebaseCrud.updateUnitCompletionTime(
-              timeSlot.courseID,
+              timeSlot.examID,
               timeSlot.unitID,
               unitOrRevision.toLowerCase(),
               unit.completionTime) !=
@@ -272,7 +272,7 @@ class CalendarController {
       if (unit.completionTime >= unit.sessionTime) {
         //logger.i('Changing unit to complete...');
         await _firebaseCrud.markUnitAsComplete(
-            timeSlot.courseID, timeSlot.unitID);
+            timeSlot.examID, timeSlot.unitID);
       }
       //logger.i('Success marking timeSlot as complete!');
       return 1;
@@ -318,11 +318,11 @@ class CalendarController {
       await getCalendarDay(instanceManager.sessionStorage.currentDay);
       final unitOrRevision = getUnitOrRevision(timeSlot.unitName) + 's';
       final UnitModel unit = await _firebaseCrud.getSpecificUnit(
-          timeSlot.courseID, timeSlot.unitID, unitOrRevision.toLowerCase());
+          timeSlot.examID, timeSlot.unitID, unitOrRevision.toLowerCase());
       unit.completionTime = unit.completionTime - timeSlot.duration;
 
       if (await _firebaseCrud.updateUnitCompletionTime(
-              timeSlot.courseID,
+              timeSlot.examID,
               timeSlot.unitID,
               unitOrRevision.toLowerCase(),
               unit.completionTime) !=
@@ -333,7 +333,7 @@ class CalendarController {
       ;
 
       await _firebaseCrud.markUnitAsIncomplete(
-          timeSlot.courseID, timeSlot.unitID);
+          timeSlot.examID, timeSlot.unitID);
 
       //logger.i('Success marking timeSlot as not complete!');
       if(stripTime(DateTime.now()).isAfter(day.date)) instanceManager.sessionStorage.needsRecalculation = true;
@@ -395,8 +395,8 @@ class CalendarController {
   Future<int> resetTimeStudied(TimeSlot timeSlot)async {
     try{
       await _firebaseCrud.resetTimeSlotTimeStudied(timeSlot.id, timeSlot.dayID, timeSlot.timeStudied);
-      await _firebaseCrud.subtractTimeFromUnitRealStudyTime(timeSlot.courseID, timeSlot.unitID, timeSlot.timeStudied);
-      await _firebaseCrud.subtractTimeFromCourseTimeStudied(timeSlot.courseID, timeSlot.timeStudied);
+      await _firebaseCrud.subtractTimeFromUnitRealStudyTime(timeSlot.examID, timeSlot.unitID, timeSlot.timeStudied);
+      await _firebaseCrud.subtractTimeFromExamTimeStudied(timeSlot.examID, timeSlot.timeStudied);
       return 1;
     }catch(e){
       logger.e('Error resetting time studied for timeSlot: $e');

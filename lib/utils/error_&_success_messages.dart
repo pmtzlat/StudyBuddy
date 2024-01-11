@@ -74,11 +74,11 @@ void showErrorDialogForRecalc(
                                   thumbVisibility: true,
                                   child: ListView.builder(
                                       itemCount: instanceManager
-                                          .sessionStorage.leftoverCourses.length,
+                                          .sessionStorage.leftoverExams.length,
                                       itemBuilder: (context, index) {
                                         final currentItem = instanceManager
                                             .sessionStorage
-                                            .leftoverCourses[index];
+                                            .leftoverExams[index];
                               
                                         return Text('$currentItem \n');
                                       }),

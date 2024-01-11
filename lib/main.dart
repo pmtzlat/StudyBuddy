@@ -36,7 +36,7 @@ void main() async {
     
   }
 
-  await instanceManager.courseController.getAllCourses();
+  await instanceManager.examController.getAllExams();
   await instanceManager.calendarController.getGaps();
   await instanceManager.calendarController.getCustomDays();
   await instanceManager.calendarController.getCalendarDay(now);
@@ -66,7 +66,7 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
   Widget build(BuildContext context) {
     logger.i('uid found on boot: $uid');
     logger
-        .i('Got all courses! ${instanceManager.sessionStorage.activeCourses}');
+        .i('Got all exams! ${instanceManager.sessionStorage.savedExams}');
 
     if (synced != 1) {
       return MaterialApp(

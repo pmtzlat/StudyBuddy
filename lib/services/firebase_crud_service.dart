@@ -9,7 +9,7 @@ import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 
-import '../models/course_model.dart';
+import '../models/exam_model.dart';
 import '../models/user_model.dart';
 import 'logging_service.dart';
 
@@ -23,7 +23,7 @@ class FirebaseCrudService {
     'Saturday',
     'Sunday'
   ];
-  Future<String?> addCourseToUser({required CourseModel newCourse}) async {
+  Future<String?> addExamToUser({required ExamModel newExam}) async {
     // Check if the user document exists
     final uid = instanceManager.localStorage.getString('uid');
     final connectivityResult =
@@ -36,39 +36,39 @@ class FirebaseCrudService {
     final userDoc = await userDocRef.get();
 
     if (userDoc.exists) {
-      final coursesCollectionRef = userDocRef.collection('courses');
+      final examsCollectionRef = userDocRef.collection('exams');
 
-      final newCourseDocRef = await coursesCollectionRef.add({
-        'name': newCourse.name,
-        'weight': newCourse.weight * 10,
-        'examDate': newCourse.examDate.toString(),
-        'sessionTime': newCourse.sessionTime.toString(),
-        'timeStudied': newCourse.timeStudied.toString(),
-        'color': newCourse.color,
+      final newExamDocRef = await examsCollectionRef.add({
+        'name': newExam.name,
+        'weight': newExam.weight * 10,
+        'examDate': newExam.examDate.toString(),
+        'sessionTime': newExam.sessionTime.toString(),
+        'timeStudied': newExam.timeStudied.toString(),
+        'color': newExam.color,
         'id': '',
-        'orderMatters': newCourse.orderMatters,
+        'orderMatters': newExam.orderMatters,
       });
 
-      await newCourseDocRef.update({'id': newCourseDocRef.id});
+      await newExamDocRef.update({'id': newExamDocRef.id});
 
-      return newCourseDocRef.id as String;
+      return newExamDocRef.id as String;
     } else {
       logger.e('User document with UID $uid does not exist.');
       return null;
     }
   }
 
-  Future<List<UnitModel>?> getUnitsForCourse({required String courseID}) async {
+  Future<List<UnitModel>?> getUnitsForExam({required String examID}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     try {
-      final courseDocRef = firebaseInstance
+      final examDocRef = firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('courses')
-          .doc(courseID);
+          .collection('exams')
+          .doc(examID);
 
-      final unitCollectionRef = courseDocRef.collection('units');
+      final unitCollectionRef = examDocRef.collection('units');
 
       final unitQuerySnapshot =
           await unitCollectionRef.orderBy('order', descending: false).get();
@@ -91,12 +91,12 @@ class FirebaseCrudService {
       }
       return units;
     } catch (e) {
-      logger.e('Error getting units for course $courseID: $e');
+      logger.e('Error getting units for exam $examID: $e');
       return null;
     }
   }
 
-  Future<int> updateUnitCompletionTime(String courseID, String unitID,
+  Future<int> updateUnitCompletionTime(String examID, String unitID,
       String revisionOrUnit, Duration newCompletionTime) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
@@ -104,8 +104,8 @@ class FirebaseCrudService {
       final unitRef = await firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('courses')
-          .doc(courseID)
+          .collection('exams')
+          .doc(examID)
           .collection(revisionOrUnit)
           .doc(unitID);
 
@@ -119,17 +119,17 @@ class FirebaseCrudService {
   }
 
   Future<UnitModel?> getSpecificUnit(
-      String courseID, String unitID, String revisionOrUnit) async {
+      String examID, String unitID, String revisionOrUnit) async {
     logger.i(
-        'Getting specific unit: courseID: $courseID, unitID: $unitID, $revisionOrUnit');
+        'Getting specific unit: examID: $examID, unitID: $unitID, $revisionOrUnit');
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     try {
       final unitDoc = await firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('courses')
-          .doc(courseID)
+          .collection('exams')
+          .doc(examID)
           .collection(revisionOrUnit)
           .doc(unitID)
           .get();
@@ -157,18 +157,18 @@ class FirebaseCrudService {
     }
   }
 
-  Future<List<UnitModel>?> getRevisionsForCourse(
-      {required String courseID}) async {
+  Future<List<UnitModel>?> getRevisionsForExam(
+      {required String examID}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     try {
-      final courseDocRef = firebaseInstance
+      final examDocRef = firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('courses')
-          .doc(courseID);
+          .collection('exams')
+          .doc(examID);
 
-      final revisionCollectionRef = courseDocRef.collection('revisions');
+      final revisionCollectionRef = examDocRef.collection('revisions');
 
       final revisionQuerySnapshot =
           await revisionCollectionRef.orderBy('order', descending: false).get();
@@ -191,7 +191,7 @@ class FirebaseCrudService {
       }
       return revisions;
     } catch (e) {
-      logger.e('Error getting units for course $courseID: $e');
+      logger.e('Error getting units for exam $examID: $e');
       return null;
     }
   }
@@ -377,7 +377,7 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int> deleteCourse({required String courseId}) async {
+  Future<int> deleteExam({required String examId}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     try {
@@ -387,47 +387,47 @@ class FirebaseCrudService {
 
       final userDocRef = firebaseInstance.collection('users').doc(uid);
 
-      final courseDocRef = userDocRef.collection('courses').doc(courseId);
-      final courseDoc = await courseDocRef.get();
+      final examDocRef = userDocRef.collection('exams').doc(examId);
+      final examDoc = await examDocRef.get();
 
-      if (!courseDoc.exists) {
+      if (!examDoc.exists) {
         return 0;
       }
 
-      final unitCollectionRef = courseDocRef.collection('units');
+      final unitCollectionRef = examDocRef.collection('units');
       final unitQuerySnapshot = await unitCollectionRef.get();
 
       for (final unitDoc in unitQuerySnapshot.docs) {
         await unitDoc.reference.delete();
       }
 
-      final revisionCollectionRef = courseDocRef.collection('revisions');
+      final revisionCollectionRef = examDocRef.collection('revisions');
       final revisionQuerySnapshot = await revisionCollectionRef.get();
 
       for (final revisionDoc in revisionQuerySnapshot.docs) {
         await revisionDoc.reference.delete();
       }
 
-      await courseDocRef.delete();
+      await examDocRef.delete();
 
       return 1;
     } catch (e) {
-      logger.e('Error deleting course in FirebaseCrud: $e');
+      logger.e('Error deleting exam in FirebaseCrud: $e');
       return -1;
     }
   }
 
-  Future<String?> addUnitToCourse(
-      {required UnitModel newUnit, required String courseID}) async {
+  Future<String?> addUnitToExam(
+      {required UnitModel newUnit, required String examID}) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
-      final courseRef = firebaseInstance
+      final examRef = firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('courses')
-          .doc(courseID);
+          .collection('exams')
+          .doc(examID);
 
       final unitData = {
         'name': newUnit.name,
@@ -439,27 +439,27 @@ class FirebaseCrudService {
         'realStudyTime': newUnit.realStudyTime.toString()
       };
 
-      final unitRef = await courseRef.collection('units').add(unitData);
+      final unitRef = await examRef.collection('units').add(unitData);
       await unitRef.update({'id': unitRef.id});
 
       return unitRef.id;
     } catch (e) {
       logger
-          .e('Error in Firebase CRUD when adding unit to course $courseID: $e');
+          .e('Error in Firebase CRUD when adding unit to exam $examID: $e');
       return null;
     }
   }
 
-  Future<String?> addRevisionToCourse(
-      {required UnitModel newUnit, required String courseID}) async {
+  Future<String?> addRevisionToExam(
+      {required UnitModel newUnit, required String examID}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
-    final courseRef = firebaseInstance
+    final examRef = firebaseInstance
         .collection('users')
         .doc(uid)
-        .collection('courses')
-        .doc(courseID);
+        .collection('exams')
+        .doc(examID);
 
     final revisionData = {
       'name': newUnit.name,
@@ -472,25 +472,25 @@ class FirebaseCrudService {
     };
 
     final revisionRef =
-        await courseRef.collection('revisions').add(revisionData);
+        await examRef.collection('revisions').add(revisionData);
     await revisionRef.update({'id': revisionRef.id});
 
     return revisionRef.id;
   }
 
-  Future<int> clearRevisionsForCourse(String courseID) async {
+  Future<int> clearRevisionsForExam(String examID) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
     try {
       if (uid != null) {
-        final courseDocRef = firebaseInstance
+        final examDocRef = firebaseInstance
             .collection('users')
             .doc(uid)
-            .collection('courses')
-            .doc(courseID);
+            .collection('exams')
+            .doc(examID);
 
-        final revisionsCollectionRef = courseDocRef.collection('revisions');
+        final revisionsCollectionRef = examDocRef.collection('revisions');
 
         await revisionsCollectionRef.get().then((querySnapshot) {
           querySnapshot.docs.forEach((doc) {
@@ -509,7 +509,7 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int> removeRevisionFromCourse(int order, String courseID) async {
+  Future<int> removeRevisionFromExam(int order, String examID) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
@@ -517,8 +517,8 @@ class FirebaseCrudService {
       final revisionsCollection = firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('courses')
-          .doc(courseID)
+          .collection('exams')
+          .doc(examID)
           .collection('revisions');
       final querySnapshot =
           await revisionsCollection.where('order', isEqualTo: order).get();
@@ -528,26 +528,26 @@ class FirebaseCrudService {
       });
       return 1;
     } catch (e) {
-      logger.e('Error deleting revision $order from course $courseID: $e');
+      logger.e('Error deleting revision $order from exam $examID: $e');
       return -1;
     }
   }
 
-  Future<List<CourseModel>?> getAllCourses() async {
+  Future<List<ExamModel>?> getAllExams() async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final QuerySnapshot querySnapshot = await instanceManager.db
           .collection('users')
           .doc(uid)
-          .collection('courses')
+          .collection('exams')
           .get();
 
-      final List<CourseModel> courses = querySnapshot.docs.map((doc) {
+      final List<ExamModel> exams = querySnapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
 
         final double weight = ((data['weight'] as double) / 10.0);
 
-        return CourseModel(
+        return ExamModel(
           name: data['name'] as String,
           weight: weight,
           examDate: DateTime.parse((data['examDate'] as String)),
@@ -558,14 +558,14 @@ class FirebaseCrudService {
           orderMatters: data['orderMatters'] as bool,
         );
       }).toList();
-      return courses;
+      return exams;
     } catch (e) {
-      logger.e('Error getting courses: $e');
+      logger.e('Error getting exams: $e');
       return null;
     }
   }
 
-  Future<bool> deleteUnit({required UnitModel unit, required courseID}) async {
+  Future<bool> deleteUnit({required UnitModel unit, required examID}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -577,8 +577,8 @@ class FirebaseCrudService {
       final unitDocRef = firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('courses')
-          .doc(courseID)
+          .collection('exams')
+          .doc(examID)
           .collection('units')
           .doc(unit.id);
 
@@ -587,8 +587,8 @@ class FirebaseCrudService {
       final querySnapshot = await firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('courses')
-          .doc(courseID)
+          .collection('exams')
+          .doc(examID)
           .collection('units')
           .where('order', isGreaterThan: unit.order)
           .get();
@@ -620,19 +620,19 @@ class FirebaseCrudService {
   }
 
   Future<int> editUnit(
-      {required CourseModel course,
+      {required ExamModel exam,
       required String unitID,
       required UnitModel updatedUnit}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
-    final courseID = course.id;
+    final examID = exam.id;
 
     try {
       final unitReference = firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('courses')
-          .doc(courseID)
+          .collection('exams')
+          .doc(examID)
           .collection('units')
           .doc(unitID);
 
@@ -692,7 +692,7 @@ class FirebaseCrudService {
           final newGapRef = await timeSlotsCollectionRef.add({
             'startTime': timeSlot.timeOfDayToString(timeSlot.startTime),
             'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
-            'courseID': timeSlot.courseID,
+            'examID': timeSlot.examID,
             'duration': timeSlot.duration.toString(),
           });
 
@@ -818,9 +818,9 @@ class FirebaseCrudService {
               weekday: i + 1,
               startTime: stringToTimeOfDay24Hr(data['startTime']),
               endTime: stringToTimeOfDay24Hr(data['endTime']),
-              courseID: data['courseID'] ?? '',
+              examID: data['examID'] ?? '',
               unitID: data['unitID'] ?? '',
-              courseName: data['courseName'] ?? '',
+              examName: data['examName'] ?? '',
               unitName: data['unitName'] ?? '',
               completed: data['completed'] ?? false,
             );
@@ -899,49 +899,49 @@ class FirebaseCrudService {
     }
   }
 
-  Future<void> editCourseWeight(CourseModel course) async {
+  Future<void> editExamWeight(ExamModel exam) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
-    final courseReference = firebaseInstance
+    final examReference = firebaseInstance
         .collection('users')
         .doc(uid)
-        .collection('courses')
-        .doc(course.id);
+        .collection('exams')
+        .doc(exam.id);
 
-    await courseReference.update({
-      'weight': course.weight * 10,
+    await examReference.update({
+      'weight': exam.weight * 10,
     });
     return;
   }
 
-  Future<int?> editCourse(CourseModel course) async {
+  Future<int?> editExam(ExamModel exam) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
-    final courseReference = firebaseInstance
+    final examReference = firebaseInstance
         .collection('users')
         .doc(uid)
-        .collection('courses')
-        .doc(course.id);
+        .collection('exams')
+        .doc(exam.id);
 
-    await courseReference.update({
-      'name': course.name,
-      'examDate': course.examDate.toString(),
-      'weight': course.weight * 10,
-      'sessionTime': course.sessionTime.toString(),
-      'orderMatters': course.orderMatters,
-      'revisions': course.revisions
+    await examReference.update({
+      'name': exam.name,
+      'examDate': exam.examDate.toString(),
+      'weight': exam.weight * 10,
+      'sessionTime': exam.sessionTime.toString(),
+      'orderMatters': exam.orderMatters,
+      'revisions': exam.revisions
     });
 
-    logger.i('editCourse: updated course');
+    logger.i('editExam: updated exam');
 
-    final courseUnits = await getUnitsForCourse(courseID: course.id);
+    final examUnits = await getUnitsForExam(examID: exam.id);
 
-    if (courseUnits != null) {
-      for (var unit in courseUnits!) {
+    if (examUnits != null) {
+      for (var unit in examUnits!) {
         final res = await editUnit(
-            course: course,
+            exam: exam,
             unitID: unit.id,
-            updatedUnit: unit.copyWith(sessionTime: course.sessionTime));
+            updatedUnit: unit.copyWith(sessionTime: exam.sessionTime));
 
         if (res != 1) {
           return -1;
@@ -952,22 +952,22 @@ class FirebaseCrudService {
     return 1;
   }
 
-  Future<CourseModel?> getCourse(String courseID) async {
+  Future<ExamModel?> getExam(String examID) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
       final docSnapshot = await firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('courses')
-          .doc(courseID)
+          .collection('exams')
+          .doc(examID)
           .get();
 
       if (docSnapshot.exists) {
         final data = docSnapshot.data() as Map<String, dynamic>;
         final double weight = ((data['weight'] as double) / 10.0);
 
-        return CourseModel(
+        return ExamModel(
           name: data['name'] as String,
           weight: weight,
           examDate: DateTime.parse(data['examDate'] as String),
@@ -981,7 +981,7 @@ class FirebaseCrudService {
         return null;
       }
     } catch (e) {
-      logger.e('Error getting course: $e');
+      logger.e('Error getting exam: $e');
       return null;
     }
   }
@@ -1025,9 +1025,9 @@ class FirebaseCrudService {
         'startTime': timeSlot.timeOfDayToString(timeSlot.startTime),
         'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
         'duration': timeSlot.duration.toString(),
-        'courseID': timeSlot.courseID,
+        'examID': timeSlot.examID,
         'unitID': timeSlot.unitID,
-        'courseName': timeSlot.courseName,
+        'examName': timeSlot.examName,
         'unitName': timeSlot.unitName,
         'completed': timeSlot.completed,
         'id': '',
@@ -1062,9 +1062,9 @@ class FirebaseCrudService {
         'startTime': timeSlot.timeOfDayToString(timeSlot.startTime),
         'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
         'duration': timeSlot.duration.toString(),
-        'courseID': timeSlot.courseID,
+        'examID': timeSlot.examID,
         'unitID': timeSlot.unitID,
-        'courseName': timeSlot.courseName,
+        'examName': timeSlot.examName,
         'unitName': timeSlot.unitName,
         'completed': timeSlot.completed,
         'id': '',
@@ -1171,9 +1171,9 @@ class FirebaseCrudService {
           weekday: data['weekday'],
           startTime: stringToTimeOfDay24Hr(data['startTime']),
           endTime: stringToTimeOfDay24Hr(data['endTime']),
-          courseID: data['courseID'],
+          examID: data['examID'],
           unitID: data['unitID'],
-          courseName: data['courseName'],
+          examName: data['examName'],
           unitName: data['unitName'],
           completed: data['completed'] ?? false,
           dayID: data['dayID'] ?? '',
@@ -1254,9 +1254,9 @@ class FirebaseCrudService {
             weekday: data['weekday'],
             startTime: stringToTimeOfDay24Hr(data['startTime']),
             endTime: stringToTimeOfDay24Hr(data['endTime']),
-            courseID: data['courseID'],
+            examID: data['examID'],
             unitID: data['unitID'],
-            courseName: data['courseName'],
+            examName: data['examName'],
             unitName: data['unitName'],
             completed: data['completed'] ?? false,
             dayID: data['dayID'] ?? '',
@@ -1274,7 +1274,7 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int> markUnitAsComplete(String courseID, String unitID) async {
+  Future<int> markUnitAsComplete(String examID, String unitID) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
@@ -1282,8 +1282,8 @@ class FirebaseCrudService {
       final unitReference = firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('courses')
-          .doc(courseID)
+          .collection('exams')
+          .doc(examID)
           .collection('units')
           .doc(unitID);
 
@@ -1295,8 +1295,8 @@ class FirebaseCrudService {
         final revisionReference = firebaseInstance
             .collection('users')
             .doc(uid)
-            .collection('courses')
-            .doc(courseID)
+            .collection('exams')
+            .doc(examID)
             .collection('revisions')
             .doc(unitID);
 
@@ -1339,7 +1339,7 @@ class FirebaseCrudService {
     }
   }
 
-  Future<int> markUnitAsIncomplete(String courseID, String unitID) async {
+  Future<int> markUnitAsIncomplete(String examID, String unitID) async {
     try {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
@@ -1347,8 +1347,8 @@ class FirebaseCrudService {
       final unitReference = firebaseInstance
           .collection('users')
           .doc(uid)
-          .collection('courses')
-          .doc(courseID)
+          .collection('exams')
+          .doc(examID)
           .collection('units')
           .doc(unitID);
 
@@ -1360,8 +1360,8 @@ class FirebaseCrudService {
         final revisionReference = firebaseInstance
             .collection('users')
             .doc(uid)
-            .collection('courses')
-            .doc(courseID)
+            .collection('exams')
+            .doc(examID)
             .collection('revisions')
             .doc(unitID);
 

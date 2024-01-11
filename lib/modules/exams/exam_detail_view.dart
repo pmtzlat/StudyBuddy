@@ -10,24 +10,24 @@ import 'package:study_buddy/services/logging_service.dart';
 import '../../main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../models/course_model.dart';
+import '../../models/exam_model.dart';
 
-class CourseDetailView extends StatefulWidget {
-  CourseModel course;
+class ExamDetailView extends StatefulWidget {
+  ExamModel exam;
   Function refreshParent;
-  CourseDetailView(
+  ExamDetailView(
       {super.key,
-      required CourseModel this.course,
+      required ExamModel this.exam,
       required this.refreshParent});
 
   @override
-  State<CourseDetailView> createState() => _CourseDetailViewState();
+  State<ExamDetailView> createState() => _ExamDetailViewState();
 }
 
-class _CourseDetailViewState extends State<CourseDetailView> {
-  final _controller = instanceManager.courseController;
+class _ExamDetailViewState extends State<ExamDetailView> {
+  final _controller = instanceManager.examController;
   bool editMode = false;
-  final courseFormKey = GlobalKey<FormBuilderState>();
+  final examFormKey = GlobalKey<FormBuilderState>();
   bool loading = false;
 
   @override
@@ -60,18 +60,18 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.course.name,
+                          widget.exam.name,
                           style: TextStyle(fontSize: 24),
                         ),
                         SizedBox(
                           height: 20,
                         ),
-                        Text('Weight: ${widget.course.weight}'),
+                        Text('Weight: ${widget.exam.weight}'),
                         Text(
-                            'Session time: ${formatDuration(widget.course.sessionTime)}'),
-                        Text('Exam Date: ${widget.course.examDate}'),
-                        Text('Order Matters: ${widget.course.orderMatters}'),
-                        Text('Revisions: ${widget.course.revisions.length}'),
+                            'Session time: ${formatDuration(widget.exam.sessionTime)}'),
+                        Text('Exam Date: ${widget.exam.examDate}'),
+                        Text('Order Matters: ${widget.exam.orderMatters}'),
+                        Text('Revisions: ${widget.exam.revisions.length}'),
                         
                         IconButton(
                             onPressed: () {
@@ -88,7 +88,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                 setState(() {
                                   loading = true;
                                 });
-                                await widget.course.addUnit();
+                                await widget.exam.addUnit();
                                 setState(() {
                                   instanceManager.sessionStorage.needsRecalculation = true;
                                   loading = false;
@@ -97,7 +97,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                               child: Text(_localizations.addUnit))
                               : CircularProgressIndicator(),
                         ),
-                        widget.course.units == null
+                        widget.exam.units == null
                             ? loadingScreen()
                             : getUnitList()
                       ],
@@ -109,29 +109,29 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           FormBuilder(
-                              key: courseFormKey,
+                              key: examFormKey,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   FormBuilderTextField(
-                                    name: 'courseName',
+                                    name: 'examName',
                                     autovalidateMode:
                                         AutovalidateMode.onUserInteraction,
                                     decoration: InputDecoration(
                                         labelText: _localizations.unitName),
                                     style: TextStyle(color: Colors.black),
-                                    initialValue: widget.course.name,
+                                    initialValue: widget.exam.name,
                                     validator:
                                         FormBuilderValidators.compose([]),
                                   ),
                                   FormBuilderSlider(
                                     name: 'weightSlider',
-                                    initialValue: widget.course.weight,
+                                    initialValue: widget.exam.weight,
                                     min: 0.0,
                                     max: 2.0,
                                     divisions: 20,
                                     decoration: InputDecoration(
-                                        labelText: _localizations.courseWeight),
+                                        labelText: _localizations.examWeight),
                                     autovalidateMode:
                                         AutovalidateMode.onUserInteraction,
                                     validator:
@@ -143,7 +143,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                         AutovalidateMode.onUserInteraction,
                                     keyboardType: TextInputType.number,
                                     initialValue:
-                                        '${durationToDouble(widget.course.sessionTime)}',
+                                        '${durationToDouble(widget.exam.sessionTime)}',
                                     decoration: InputDecoration(
                                         labelText: _localizations.sessionTime,
                                         suffix: Text(_localizations.hours)),
@@ -157,7 +157,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                         AutovalidateMode.onUserInteraction,
                                     inputType: InputType.date,
                                     enabled: true,
-                                    initialValue: widget.course.examDate,
+                                    initialValue: widget.exam.examDate,
                                     decoration: InputDecoration(
                                         labelText: _localizations.examDate),
                                     style: TextStyle(
@@ -169,7 +169,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                   ),
                                   FormBuilderCheckbox(
                                       name: 'orderMatters',
-                                      initialValue: widget.course.orderMatters,
+                                      initialValue: widget.exam.orderMatters,
                                       title: Text(_localizations.orderMatters)),
                                   FormBuilderTextField(
                                     name: 'revisions',
@@ -178,7 +178,7 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                     keyboardType: TextInputType.number,
                                     maxLength: 1,
                                     initialValue:
-                                        widget.course.revisions.length.toString(),
+                                        widget.exam.revisions.length.toString(),
                                     decoration: InputDecoration(
                                       labelText:
                                           _localizations.numberOfRevisions,
@@ -196,22 +196,22 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                                 setState(() {
                                   loading = true;
                                 });
-                                int? res = await _controller.handleEditCourse(
-                                    courseFormKey, widget.course);
+                                int? res = await _controller.handleEditExam(
+                                    examFormKey, widget.exam);
 
                                 if (res == -1) {
-                                  showError(_localizations.errorEditingCourse);
+                                  showError(_localizations.errorEditingExam);
                                 }
                                 if (res == -2) {
                                   showError(_localizations.wrongDates);
                                 } else {
                                   
-                                  widget.course = await instanceManager
+                                  widget.exam = await instanceManager
                                       .firebaseCrudService
-                                      .getCourse(widget.course.id);
+                                      .getExam(widget.exam.id);
                                   
-                                  await widget.course.getUnits();
-                                  await widget.course.getRevisions();
+                                  await widget.exam.getUnits();
+                                  await widget.exam.getRevisions();
                                   widget.refreshParent();
 
                                   setState(() {
@@ -233,8 +233,8 @@ class _CourseDetailViewState extends State<CourseDetailView> {
   }
 
   void loadUnits() async {
-    await widget.course.getUnits();
-    await widget.course.getRevisions();
+    await widget.exam.getUnits();
+    await widget.exam.getRevisions();
     setState(() {});
   }
 
@@ -245,9 +245,9 @@ class _CourseDetailViewState extends State<CourseDetailView> {
         child: ListView.builder(
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
-          itemCount: widget.course.units!.length,
+          itemCount: widget.exam.units!.length,
           itemBuilder: (context, index) {
-            final unit = widget.course.units![index];
+            final unit = widget.exam.units![index];
             
               return Dismissible(
                 key: Key(unit.id),
@@ -261,15 +261,15 @@ class _CourseDetailViewState extends State<CourseDetailView> {
                   padding: EdgeInsets.only(right: 20.0),
                 ),
                 onDismissed: (direction) async {
-                  widget.course.units!.removeAt(index);
-                  await widget.course.deleteUnit(unit: unit);
+                  widget.exam.units!.removeAt(index);
+                  await widget.exam.deleteUnit(unit: unit);
                   setState(() {
                     instanceManager.sessionStorage.needsRecalculation = true;
                   });
                 },
                 child: UnitCard(
                   unit: unit,
-                  course: widget.course,
+                  exam: widget.exam,
                   notifyParent: loadUnits,
                   showError: showError,
                 ),

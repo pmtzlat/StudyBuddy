@@ -14,7 +14,7 @@ import 'package:study_buddy/services/local_storage_service.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/session_storage.dart';
 
-import 'modules/courses/controllers/courses_controller.dart';
+import 'modules/exams/controllers/exams_controller.dart';
 
 class InstanceManager {
 
@@ -27,7 +27,7 @@ class InstanceManager {
   final FirebaseCrudService firebaseCrudService = FirebaseCrudService();
   late SharedPreferences localStorage;
   final connectivity = Connectivity();
-  late CoursesController courseController;
+  late ExamsController examController;
   late CalendarController calendarController;
   late StudyPlanner studyPlanner;
   late LocalStorageService localStorageCustomOperations;
@@ -41,7 +41,7 @@ class InstanceManager {
 
   Future<void> startDependantInstances() async{
     localStorage =  await SharedPreferences.getInstance();
-    courseController = CoursesController();
+    examController = ExamsController();
     calendarController = CalendarController();
     studyPlanner = StudyPlanner(firebaseCrud: firebaseCrudService, uid: localStorage.getString('uid') ?? '');
     localStorageCustomOperations = LocalStorageService(localStorage: localStorage);
