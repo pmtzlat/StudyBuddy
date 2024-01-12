@@ -34,8 +34,8 @@ class _ExamsViewState extends State<ExamsView> {
   bool prioritizing = false;
   List<ExamModel> activeExams = instanceManager.sessionStorage.activeExams;
   List<ExamModel> pastExams = instanceManager.sessionStorage.pastExams;
-  List<ExamModel> reorderPreChange = [];
-  Duration prioritizeSwitchTime = Duration(milliseconds:300);
+  List<ExamModel> reorderExams = [];
+  Duration prioritizeSwitchTime = Duration(milliseconds: 300);
 
   void updateExamPage() {
     setState(() {});
@@ -131,12 +131,11 @@ class _ExamsViewState extends State<ExamsView> {
                                         TextButton.icon(
                                             key: ValueKey<int>(0),
                                             onPressed: () {
-                                              reorderPreChange = List.from(activeExams);
-                                              
+                                              reorderExams =
+                                                  List.from(activeExams);
 
                                               logger.i('Prioritize clicked!');
 
-                                              //TODO after gym
                                               setState(() {
                                                 prioritizing = !prioritizing;
                                               });
@@ -162,20 +161,18 @@ class _ExamsViewState extends State<ExamsView> {
                                             key: ValueKey<int>(1),
                                             onPressed: () async {
                                               logger.i('Confirm clicked!');
-                                              instanceManager.sessionStorage
-                                                      .examWeightArray =
-                                                  generateDescendingList(
-                                                      instanceManager
-                                                          .sessionStorage
-                                                          .activeExams
-                                                          .length);
+                                              _controller.applyWeights(reorderExams);
+                                              reorderExams.sort((ExamModel a, ExamModel b) => b.weight.compareTo(a.weight));
+                                              logger.i('reorderExams after confirm clicked: ${getActiveExamsString(reorderExams)}');
 
-                                              //TODO after gym
                                               setState(() {
+                                                
+                                                activeExams = reorderExams;
                                                 prioritizing = !prioritizing;
+                                                
                                               });
                                               switch (await _controller
-                                                  .updateExamWeights()) {
+                                                  .replaceExams(activeExams)) {
                                                 case (-1):
                                                   var snackbar = SnackBar(
                                                     content: Text(
@@ -190,7 +187,12 @@ class _ExamsViewState extends State<ExamsView> {
                                                       .showSnackBar(snackbar);
 
                                                 default:
+                                                
+                                                  
                                               }
+
+                                              activeExams = instanceManager.sessionStorage.activeExams;
+                                              reorderExams = <ExamModel>[];
 
                                               loadExams();
                                             },
@@ -216,7 +218,7 @@ class _ExamsViewState extends State<ExamsView> {
                         scrollDirection: Axis.horizontal,
                         controller: _pageController,
                         children: [
-                          getReorderableActiveExamsList(activeExams),
+                          getReorderableActiveExamsList(!prioritizing ? activeExams : reorderExams),
                           getPastExamsList()
                         ]),
                   ),
@@ -282,6 +284,7 @@ class _ExamsViewState extends State<ExamsView> {
       activeExams = instanceManager.sessionStorage.activeExams;
       pastExams = instanceManager.sessionStorage.pastExams;
     });
+    //logger.i('loadExams: ${getActiveExamsString(null)}');
   }
 
   Widget getReorderableActiveExamsList(List<ExamModel> examsList) {
@@ -336,20 +339,24 @@ class _ExamsViewState extends State<ExamsView> {
                 padding: EdgeInsets.only(right: 20.0),
               ),
               onDismissed: (direction) async {
-                setState(() {
-                  activeExams.remove(exam);
-                  instanceManager.sessionStorage.savedExams.remove(exam);
-                });
+                if (!prioritizing) {
+                  setState(() {
+                    activeExams.remove(exam);
+                    instanceManager.sessionStorage.savedExams.remove(exam);
+                  });
 
-                await _controller.deleteExam(
-                  name: exam.name,
-                  id: exam.id,
-                  index: index,
-                  context: context,
-                );
-                setState(() {
-                  
-                });
+                  await _controller.deleteExam(
+                    name: exam.name,
+                    id: exam.id,
+                    index: index,
+                    context: context,
+                  );
+                  setState(() {});
+                } else {
+                  setState(() {
+                    reorderExams.remove(exam);
+                  });
+                }
               },
               child: ExamCard(
                 exam: examsList![index],
@@ -664,7 +671,7 @@ class _ExamsViewState extends State<ExamsView> {
     }
   }
 
-  void refresh() async{
+  void refresh() async {
     //logger.i('updating...');
     loadExams();
     setState(() {});

@@ -135,7 +135,7 @@ class _AddButtonState extends State<AddButton> {
                       // int res = await widget.controller
                       //     .handleAddExam(widget.examCreationFormKey);
                       
-                      switch (await widget.controller.applyWeights()) {
+                      switch (await widget.controller.applyWeights(instanceManager.sessionStorage.activeExams)) {
                         // change to screen3
                         case (3):
                           saveExams(context);
@@ -203,7 +203,7 @@ class _AddButtonState extends State<AddButton> {
     var exams = instanceManager.sessionStorage.activeExams;
     exams.insert(0, instanceManager.sessionStorage.examToAdd);
     
-    widget.controller.applyWeights();
+    widget.controller.applyWeights(instanceManager.sessionStorage.activeExams);
 
     
     widget.lockClose!(false);

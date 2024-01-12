@@ -8,6 +8,7 @@ class SessionStorage {
   List<ExamModel> savedExams =[];
   List<ExamModel> pastExams = [];
   List<ExamModel> activeExams = [];
+  
 
   //NEEDS: a varibale that saves wether the calendar needs recalculating
   // after a new exam is added!!

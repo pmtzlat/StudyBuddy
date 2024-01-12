@@ -30,9 +30,8 @@ class ExamsController {
           backgroundColor: Color.fromARGB(255, 0, 172, 6));
 
       instanceManager.sessionStorage.needsRecalculation = true;
-      applyWeights();
+      applyWeights(instanceManager.sessionStorage.activeExams);
       await updateExamWeights();
-      
 
       ScaffoldMessenger.of(context).showSnackBar(snackbar);
     } catch (e) {
@@ -49,8 +48,7 @@ class ExamsController {
   Future<int> updateExamWeights() async {
     try {
       final exams = instanceManager.sessionStorage.activeExams;
-      applyWeights();
-      logger.w('');
+      applyWeights(exams);
 
       for (ExamModel exam in exams) {
         logger.i(exam.name);
@@ -63,9 +61,27 @@ class ExamsController {
     }
   }
 
-  int applyWeights() {
+  Future<int> replaceExams(List<ExamModel> newExams) async {
     try {
-      final exams = instanceManager.sessionStorage.activeExams;
+      final oldExams = filterActiveExams(await firebaseCrud.getAllExams());
+      
+
+      for (ExamModel exam in oldExams) {
+        await firebaseCrud.deleteExam(examId: exam.id);
+      }
+
+      for (ExamModel exam in newExams) {
+        await addExam(exam);
+      }
+      return 1;
+    } catch (e) {
+      logger.e('Error updating Exam Weights: $e');
+      return -1;
+    }
+  }
+
+  int applyWeights(List<ExamModel> exams) {
+    try {
       var weights = instanceManager.sessionStorage.examWeightArray;
       weights = generateDescendingList(exams.length);
       for (int i = 0; i < exams.length; i++) {
@@ -74,7 +90,7 @@ class ExamsController {
       }
       instanceManager.sessionStorage.activeExams
           .sort((ExamModel a, ExamModel b) => b.weight.compareTo(a.weight));
-      logger.i(getActiveExamsString());
+      logger.i(getActiveExamsString(null));
       return 3;
     } catch (e) {
       logger.e('Error in addExamScreen3: $e');
@@ -188,7 +204,6 @@ class ExamsController {
   Future<int> handleAddExam() async {
     try {
       final exams = instanceManager.sessionStorage.activeExams;
-      final unitsForNewExam = instanceManager.sessionStorage.examToAdd.units;
 
       for (ExamModel exam in exams) {
         ExamModel? alreadyInDB = await firebaseCrud.getExam(exam.id);
@@ -202,18 +217,7 @@ class ExamsController {
           //add exam
           logger.i('Exam ${exam.name} not found in DB! Adding...');
 
-          String examID = await firebaseCrud.addExamToUser(newExam: exam);
-
-          //logger.i('Exam added!');
-          for (UnitModel unit in unitsForNewExam) {
-            await firebaseCrud.addUnitToExam(newUnit: unit, examID: examID);
-          }
-          //logger.i('Units added!');
-
-          for (UnitModel revision in exam.revisions) {
-            await firebaseCrud.addRevisionToExam(
-                newUnit: revision, examID: examID);
-          }
+          await addExam(exam);
           // logger.i('Revisions added!');
           // logger.i('Done!');
         }
@@ -226,9 +230,24 @@ class ExamsController {
     }
   }
 
+  Future<void> addExam(ExamModel exam) async {
+    String examID = await firebaseCrud.addExamToUser(newExam: exam);
+
+    //logger.i('Exam added!');
+    for (UnitModel unit in exam.units) {
+      await firebaseCrud.addUnitToExam(newUnit: unit, examID: examID);
+    }
+    //logger.i('Units added!');
+
+    for (UnitModel revision in exam.revisions) {
+      await firebaseCrud.addRevisionToExam(newUnit: revision, examID: examID);
+    }
+  }
+
   Future<void> getAllExams() async {
     try {
       final exams = await firebaseCrud.getAllExams();
+      logger.i('getAllexams: ${getActiveExamsString(exams)}');
 
       instanceManager.sessionStorage.savedExams = exams;
       instanceManager.sessionStorage.activeExams = filterActiveExams(exams);

@@ -12,9 +12,10 @@ List<double> generateDescendingList(int n) {
       return resultList;
     }
 
-String getActiveExamsString(){
+String getActiveExamsString(List<ExamModel>? list){
   String res = '';
-  for (ExamModel exam in instanceManager.sessionStorage.activeExams){
+  if(list == null) list = instanceManager.sessionStorage.activeExams;
+  for (ExamModel exam in list!){
     res += '${exam.name} - ${exam.weight}\n';
 
   }
