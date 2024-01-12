@@ -12,6 +12,7 @@ import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:study_buddy/utils/general_utils.dart';
 import 'package:study_buddy/utils/validators.dart';
 
 class Page1 extends StatefulWidget {
@@ -100,8 +101,6 @@ class _Page1State extends State<Page1> {
                               bottom:
                                   MediaQuery.of(context).viewInsets.bottom)),
                     ),
-                    
-
                     Container(
                       margin: EdgeInsets.only(top: screenHeight * 0.05),
                       child: Row(
@@ -164,7 +163,6 @@ class _Page1State extends State<Page1> {
                       width: screenWidth * 0.9,
                       child: Column(
                         children: [
-                          
                           Container(
                             margin: EdgeInsets.only(top: screenHeight * 0.07),
                             child: Row(
@@ -465,24 +463,11 @@ class Page3State extends State<Page3> {
   }
 
   void updateState() {
-    setState(() {});
-  }
+    setState(() {
+      exams = instanceManager.sessionStorage.activeExams;
+    });
 
-  Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (BuildContext context, Widget? child) {
-        final double animValue = Curves.easeInOut.transform(animation.value);
-        final double elevation = lerpDouble(0, 6, animValue)!;
-        return Material(
-          elevation: elevation,
-          color: Colors.transparent,
-          shadowColor: Colors.black.withOpacity(0.5),
-          child: child,
-        );
-      },
-      child: child,
-    );
+    //logger.d('${getActiveExamsString()}\n$exams');
   }
 
   @override
@@ -490,6 +475,26 @@ class Page3State extends State<Page3> {
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
+
+    Widget proxyDecorator(
+        Widget child, int index, Animation<double> animation) {
+      return AnimatedBuilder(
+        animation: animation,
+        builder: (BuildContext context, Widget? child) {
+          final double animValue = Curves.easeInOut.transform(animation.value);
+          final double elevation = lerpDouble(0, 6, animValue)!;
+          return Material(
+            elevation: elevation,
+            color: Colors.transparent,
+            shadowColor: Colors.black.withOpacity(0.5),
+            child: child,
+          );
+        },
+        child: child,
+      );
+    }
+
+    //logger.w('${getActiveExamsString()}\n$exams');
 
     return Container(
       width: screenWidth * 0.9,
@@ -574,21 +579,22 @@ class Page3State extends State<Page3> {
                           },
                           itemCount: exams.length,
                           onReorder: (int oldIndex, int newIndex) {
+                            // logger.i(exams);
+                            // logger.t(getActiveExamsString());
                             setState(() {
                               if (newIndex > oldIndex) {
                                 newIndex -= 1;
                               }
-                              final ExamModel item =
-                                  exams.removeAt(oldIndex);
+                              final ExamModel item = exams.removeAt(oldIndex);
                               exams.insert(newIndex, item);
                             });
+                            //logger.t(getActiveExamsString());
                           })),
               Positioned(
                 bottom: 0,
                 left: 0,
                 right: 0,
                 child: Container(
-
                     height: screenHeight * 0.04,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -606,8 +612,8 @@ class Page3State extends State<Page3> {
             ]),
             AddButton(
               controller: _controller,
-              refresh: widget.refreshParent ?? () {},
-              lockClose: widget.lockClose ?? (bool value) {},
+              refresh: widget.refreshParent,
+              lockClose: widget.lockClose,
               screen: 2,
             ),
           ],

@@ -11,44 +11,70 @@ import 'package:study_buddy/models/exam_model.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
+import 'package:study_buddy/utils/general_utils.dart';
 
 class ExamsController {
   final firebaseCrud = instanceManager.firebaseCrudService;
   final uid = instanceManager.localStorage.getString('uid') ?? '';
 
-  
   Future<void> deleteExam(
       {required String name,
       required String id,
       required int index,
       required BuildContext context}) async {
-    final res = await firebaseCrud.deleteExam(examId: id);
-    final snackbar = SnackBar(
-      content: Text(
-        res == 1
-            ? name + AppLocalizations.of(context)!.examDeletedCorrectly
-            : AppLocalizations.of(context)!.errorDeletingExam +name,
-      ),
-      backgroundColor: res == 1
-          ? Color.fromARGB(255, 0, 172, 6)
-          : Color.fromARGB(255, 221, 15, 0),
-    );
-    if (res == 1) {
+    try {
+      await firebaseCrud.deleteExam(examId: id);
+      final snackbar = SnackBar(
+          content:
+              Text(name + AppLocalizations.of(context)!.examDeletedCorrectly),
+          backgroundColor: Color.fromARGB(255, 0, 172, 6));
+
       instanceManager.sessionStorage.needsRecalculation = true;
+      applyWeights();
+      await updateExamWeights();
+      
+
+      ScaffoldMessenger.of(context).showSnackBar(snackbar);
+    } catch (e) {
+      logger.e('Error deleting exam: $e');
+      final snackbar = SnackBar(
+        content: Text(AppLocalizations.of(context)!.errorDeletingExam + name),
+        backgroundColor: Color.fromARGB(255, 221, 15, 0),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(snackbar);
     }
-    ScaffoldMessenger.of(context).showSnackBar(snackbar);
   }
 
-  
-  int addExamScreen3() {
+  Future<int> updateExamWeights() async {
     try {
       final exams = instanceManager.sessionStorage.activeExams;
-      final weights = instanceManager.sessionStorage.examWeightArray;
-      logger.i(weights);
+      applyWeights();
+      logger.w('');
+
+      for (ExamModel exam in exams) {
+        logger.i(exam.name);
+        await firebaseCrud.editExamWeight(exam);
+      }
+      return 1;
+    } catch (e) {
+      logger.e('Error updating Exam Weights: $e');
+      return -1;
+    }
+  }
+
+  int applyWeights() {
+    try {
+      final exams = instanceManager.sessionStorage.activeExams;
+      var weights = instanceManager.sessionStorage.examWeightArray;
+      weights = generateDescendingList(exams.length);
       for (int i = 0; i < exams.length; i++) {
         exams[i].weight = weights[i];
         logger.i('New weight for exam: ${exams[i].name}: ${weights[i]}');
       }
+      instanceManager.sessionStorage.activeExams
+          .sort((ExamModel a, ExamModel b) => b.weight.compareTo(a.weight));
+      logger.i(getActiveExamsString());
       return 3;
     } catch (e) {
       logger.e('Error in addExamScreen3: $e');
@@ -63,19 +89,19 @@ class ExamsController {
     // 3 = finish successfully
     try {
       List<UnitModel> units = instanceManager.sessionStorage.examToAdd.units;
-      logger.i(unitsFormKey.currentState!.fields);
+      //logger.i(unitsFormKey.currentState!.fields);
       for (UnitModel unit in units) {
         unit.name = unitsFormKey
             .currentState!.fields['Unit ${unit.order} name']!.value
             .toString();
-        logger.i(
-            'Name and time for unit ${unit.order}: ${unit.name}, ${formatDuration(unit.sessionTime)}');
+        // logger.i(
+        //     'Name and time for unit ${unit.order}: ${unit.name}, ${formatDuration(unit.sessionTime)}');
       }
       if (instanceManager.sessionStorage.activeExams.isNotEmpty) {
         return 2;
       } else {
         //save exam to DB
-        
+
         return 3;
       }
     } catch (e) {
@@ -84,7 +110,8 @@ class ExamsController {
     }
   }
 
-  int addExamScreen1(GlobalKey<FormBuilderState> examCreationFormKey, Duration sessionTime, Duration revisionTime) {
+  int addExamScreen1(GlobalKey<FormBuilderState> examCreationFormKey,
+      Duration sessionTime, Duration revisionTime) {
     //returns index of page the addExam flow goes through
     // -1 = error
     // 1 = unit session page
@@ -95,18 +122,16 @@ class ExamsController {
           .currentState!.fields['examDate']!.value
           .toString());
 
-      final name = examCreationFormKey
-          .currentState!.fields['examName']!.value
+      final name = examCreationFormKey.currentState!.fields['examName']!.value
           .toString();
 
       // final weight =
       //     examCreationFormKey.currentState!.fields['weightSlider']!.value ??
       //         1.0;
-      
 
-      final int units = int.parse(
-              examCreationFormKey.currentState!.fields['units']!.value) ??
-          1;
+      final int units =
+          int.parse(examCreationFormKey.currentState!.fields['units']!.value) ??
+              1;
 
       final int revisions = int.parse(
               examCreationFormKey.currentState!.fields['revisions']!.value) ??
@@ -116,22 +141,17 @@ class ExamsController {
           examCreationFormKey.currentState!.fields['orderMatters']!.value ??
               false;
 
-      
+      //logger.i('Validation done');
 
-      logger.i('Validation done');
-
-      instanceManager.sessionStorage.examToAdd = ExamModel(
-          name: name,
-          examDate: examDate,
-          orderMatters: orderMatters);
+      instanceManager.sessionStorage.examToAdd =
+          ExamModel(name: name, examDate: examDate, orderMatters: orderMatters);
 
       instanceManager.sessionStorage.examToAdd!.units = <UnitModel>[];
       List<UnitModel> unitsList =
           instanceManager.sessionStorage.examToAdd!.units;
       for (int i = 0; i < units; i++) {
         final unitNum = i + 1;
-        final newUnit = UnitModel(
-            name: 'Unit $unitNum', order: unitNum);
+        final newUnit = UnitModel(name: 'Unit $unitNum', order: unitNum);
         unitsList!.add(newUnit);
       }
 
@@ -168,8 +188,7 @@ class ExamsController {
   Future<int> handleAddExam() async {
     try {
       final exams = instanceManager.sessionStorage.activeExams;
-      final unitsForNewExam =
-          instanceManager.sessionStorage.examToAdd.units;
+      final unitsForNewExam = instanceManager.sessionStorage.examToAdd.units;
 
       for (ExamModel exam in exams) {
         ExamModel? alreadyInDB = await firebaseCrud.getExam(exam.id);
@@ -178,32 +197,27 @@ class ExamsController {
           logger.i('Exam ${exam.name} found in DB! Updating...');
 
           await firebaseCrud.editExamWeight(exam);
-          logger.i('Done!');
-
+          //logger.i('Done!');
         } else {
           //add exam
           logger.i('Exam ${exam.name} not found in DB! Adding...');
 
-          String examID =
-              await firebaseCrud.addExamToUser(newExam: exam);
+          String examID = await firebaseCrud.addExamToUser(newExam: exam);
 
-          logger.i('Exam added!');
+          //logger.i('Exam added!');
           for (UnitModel unit in unitsForNewExam) {
-            await firebaseCrud.addUnitToExam(
-                newUnit: unit, examID: examID);
+            await firebaseCrud.addUnitToExam(newUnit: unit, examID: examID);
           }
-          logger.i('Units added!');
+          //logger.i('Units added!');
 
           for (UnitModel revision in exam.revisions) {
             await firebaseCrud.addRevisionToExam(
                 newUnit: revision, examID: examID);
           }
-          logger.i('Revisions added!');
-          logger.i('Done!');
+          // logger.i('Revisions added!');
+          // logger.i('Done!');
         }
       }
-
-      
 
       return 1;
     } catch (e) {
@@ -217,10 +231,8 @@ class ExamsController {
       final exams = await firebaseCrud.getAllExams();
 
       instanceManager.sessionStorage.savedExams = exams;
-      instanceManager.sessionStorage.activeExams =
-          filterActiveExams(exams);
-      instanceManager.sessionStorage.pastExams =
-          filterInactiveExams(exams);
+      instanceManager.sessionStorage.activeExams = filterActiveExams(exams);
+      instanceManager.sessionStorage.pastExams = filterInactiveExams(exams);
       instanceManager.sessionStorage.activeExams
           .sort((ExamModel a, ExamModel b) => b.weight.compareTo(a.weight));
       instanceManager.sessionStorage.pastExams
@@ -287,10 +299,10 @@ class ExamsController {
       final name =
           examFormKey.currentState!.fields['examName']!.value.toString();
       final weight = examFormKey.currentState!.fields['weightSlider']!.value;
-      final sessionTime = doubleToDuration(double.parse(
-          examFormKey.currentState!.fields['sessionTime']!.value));
-      final examDate = examFormKey.currentState!.fields['examDate']!.value ??
-          exam.examDate;
+      final sessionTime = doubleToDuration(
+          double.parse(examFormKey.currentState!.fields['sessionTime']!.value));
+      final examDate =
+          examFormKey.currentState!.fields['examDate']!.value ?? exam.examDate;
       final orderMatters =
           examFormKey.currentState!.fields['orderMatters']!.value;
       final revisions =
@@ -333,8 +345,8 @@ class ExamsController {
           final newUnit = UnitModel(
               name: 'Revision $currentRevisions',
               order: currentRevisions,
-              sessionTime: doubleToDuration(
-                  (durationToDouble(exam.sessionTime) * 1.5)));
+              sessionTime:
+                  doubleToDuration((durationToDouble(exam.sessionTime) * 1.5)));
           logger.i('Adding new revision: ${newUnit.name}');
           res = await firebaseCrud.addRevisionToExam(
               newUnit: newUnit, examID: exam.id);

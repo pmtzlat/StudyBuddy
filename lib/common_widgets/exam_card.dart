@@ -9,10 +9,14 @@ import '../models/exam_model.dart';
 class ExamCard extends StatefulWidget {
   final exam;
   final Function parentRefresh;
-  const ExamCard(
+  int index;
+  bool prioritizing;
+  ExamCard(
       {super.key,
       required ExamModel this.exam,
-      required this.parentRefresh});
+      required this.parentRefresh,
+      required this.index,
+      required this.prioritizing});
 
   @override
   State<ExamCard> createState() => _ExamCardState();
@@ -77,9 +81,53 @@ class _ExamCardState extends State<ExamCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(widget.exam.name,
+                  Text('${widget.exam.name} - ${widget.exam.weight}',
                       style: TextStyle(
                           color: Colors.white, fontSize: screenWidth * 0.06)),
+                 
+                  AnimatedContainer(
+                    curve: Curves.decelerate,
+                    duration: Duration(milliseconds: 300),
+                    width: !widget.prioritizing
+                        ? screenWidth * 0.23
+                        : screenWidth * 0.35,
+
+                   // color: Colors.yellow,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: NeverScrollableScrollPhysics(),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: screenWidth*0.23,
+                            child: Row(
+                              // widget 1
+                              children: [
+                                Text('${formatDateTime(widget.exam.examDate)}',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: screenWidth * 0.035)),
+                                SizedBox(
+                                  width: screenWidth * 0.02,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            width: screenWidth*0.12,
+                            child: ReorderableDragStartListener(
+                                // widget 2
+                                child: Padding(
+                                  padding: EdgeInsets.all(screenWidth * 0.02),
+                                  child: Icon(Icons.drag_handle_rounded,
+                                      color: Colors.black),
+                                ),
+                                index: widget.index),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ))),
     );

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -15,6 +17,7 @@ import 'package:study_buddy/modules/exams/controllers/exams_controller.dart';
 import 'package:study_buddy/modules/loader/loader.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
+import 'package:study_buddy/utils/general_utils.dart';
 import 'package:study_buddy/utils/validators.dart';
 import '../../common_widgets/exam_card.dart';
 
@@ -28,7 +31,11 @@ class ExamsView extends StatefulWidget {
 class _ExamsViewState extends State<ExamsView> {
   final _controller = instanceManager.examController;
   bool loading = false;
-  //List<UnitModel> unitsToAdd = instanceManager.sessionStorage.examToAdd.units;
+  bool prioritizing = false;
+  List<ExamModel> activeExams = instanceManager.sessionStorage.activeExams;
+  List<ExamModel> pastExams = instanceManager.sessionStorage.pastExams;
+  List<ExamModel> reorderPreChange = [];
+  Duration prioritizeSwitchTime = Duration(milliseconds:300);
 
   void updateExamPage() {
     setState(() {});
@@ -60,31 +67,148 @@ class _ExamsViewState extends State<ExamsView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton.icon(
-                  
-                    onPressed: () {
-                      showAddExamSheet(context);
-                    },
-                    label: Text(_localizations.addExam, style: TextStyle(color: buttonColor)),
-                    icon: Icon(Icons.add_rounded, color: buttonColor)),
-                
-                AnimatedOpacity(
-                  opacity: instanceManager.sessionStorage.activeOrAllExams == 0 ? 1.0 : 0.0,
-                  duration: Duration(milliseconds: 500),
-                  child: TextButton.icon(
-                    
-                      onPressed: () {
-                       logger.i('Prioritize clicked!');
-                       if(instanceManager.sessionStorage.activeOrAllExams == 0){
-                        //TODO after gym
-                       }
-                      },
-                      label: Text(_localizations.prioritizeButton, style: TextStyle(color: buttonColor)),
-                      icon: Icon(Icons.format_list_numbered, color: buttonColor)),
-                ) ,
+                AnimatedSwitcher(
+                  duration: prioritizeSwitchTime,
+                  child: !prioritizing
+                      ? Container(
+                          // add course
+                          key: ValueKey<int>(0),
+                          width: screenWidth * 0.4,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              TextButton.icon(
+                                  key: ValueKey<int>(0),
+                                  onPressed: () {
+                                    showAddExamSheet(context);
+                                  },
+                                  label: Text(_localizations.addExam,
+                                      style: TextStyle(color: buttonColor)),
+                                  icon: Icon(Icons.add_rounded,
+                                      color: buttonColor)),
+                            ],
+                          ),
+                        )
+                      : Container(
+                          // cancel prioritize
+                          key: ValueKey<int>(1),
+                          width: screenWidth * 0.4,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              TextButton.icon(
+                                  key: ValueKey<int>(1),
+                                  onPressed: () {
+                                    logger.i('Cancel clicked!');
+                                    setState(() {
+                                      prioritizing = !prioritizing;
+                                    });
+                                    loadExams();
+                                  },
+                                  label: Text(_localizations.cancel,
+                                      style:
+                                          TextStyle(color: Colors.redAccent)),
+                                  icon: Icon(Icons.close_rounded,
+                                      color: Colors.redAccent)),
+                            ],
+                          ),
+                        ),
+                ),
+                AnimatedSwitcher(
+                    duration: Duration(milliseconds: 500),
+                    child: instanceManager.sessionStorage.activeOrAllExams == 0
+                        ? AnimatedSwitcher(
+                            key: ValueKey<int>(0),
+                            duration: prioritizeSwitchTime,
+                            child: !prioritizing
+                                ? Container(
+                                    //Prioritize
+                                    key: ValueKey<int>(0),
+                                    width: screenWidth * 0.4,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        TextButton.icon(
+                                            key: ValueKey<int>(0),
+                                            onPressed: () {
+                                              reorderPreChange = List.from(activeExams);
+                                              
+
+                                              logger.i('Prioritize clicked!');
+
+                                              //TODO after gym
+                                              setState(() {
+                                                prioritizing = !prioritizing;
+                                              });
+                                            },
+                                            label: Text(
+                                                _localizations.prioritizeButton,
+                                                style: TextStyle(
+                                                    color: buttonColor)),
+                                            icon: Icon(
+                                                Icons.format_list_numbered,
+                                                color: buttonColor))
+                                      ],
+                                    ),
+                                  )
+                                : Container(
+                                    //finishPrioritize
+                                    key: ValueKey<int>(1),
+                                    width: screenWidth * 0.4,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        TextButton.icon(
+                                            key: ValueKey<int>(1),
+                                            onPressed: () async {
+                                              logger.i('Confirm clicked!');
+                                              instanceManager.sessionStorage
+                                                      .examWeightArray =
+                                                  generateDescendingList(
+                                                      instanceManager
+                                                          .sessionStorage
+                                                          .activeExams
+                                                          .length);
+
+                                              //TODO after gym
+                                              setState(() {
+                                                prioritizing = !prioritizing;
+                                              });
+                                              switch (await _controller
+                                                  .updateExamWeights()) {
+                                                case (-1):
+                                                  var snackbar = SnackBar(
+                                                    content: Text(
+                                                        AppLocalizations.of(
+                                                                context)!
+                                                            .errorPrioritizing),
+                                                    backgroundColor:
+                                                        Colors.redAccent,
+                                                  );
+
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(snackbar);
+
+                                                default:
+                                              }
+
+                                              loadExams();
+                                            },
+                                            label: Text(_localizations.confirm,
+                                                style: TextStyle(
+                                                    color: Colors.greenAccent)),
+                                            icon: Icon(Icons.done_rounded,
+                                                color: Colors.greenAccent)),
+                                      ],
+                                    ),
+                                  ),
+                          )
+                        : Text('fasdf',
+                            style:
+                                TextStyle(color: Colors.transparent))), //hotfix
               ],
             ),
-            instanceManager.sessionStorage.activeExams == null
+            activeExams == null
                 ? loadingScreen()
                 : Flexible(
                     child: PageView(
@@ -92,44 +216,60 @@ class _ExamsViewState extends State<ExamsView> {
                         scrollDirection: Axis.horizontal,
                         controller: _pageController,
                         children: [
-                          getExamList(
-                              instanceManager.sessionStorage.activeExams),
-                          getExamList(
-                              instanceManager.sessionStorage.pastExams)
+                          getReorderableActiveExamsList(activeExams),
+                          getPastExamsList()
                         ]),
                   ),
             Center(
               child: Container(
                   margin: EdgeInsets.only(
                       top: screenHeight * 0.02, bottom: screenHeight * 0.03),
-                  child: SlidingSwitch(
-                    onTap: () {},
-                    onDoubleTap: () {},
-                    onSwipe: () {},
-                    value: false,
-                    width: screenWidth * 0.6,
-                    height: screenHeight * 0.04,
-                    textOff: _localizations.activeExams,
-                    textOn: _localizations.allExams,
-                    colorOn: Color.fromARGB(255, 59, 59, 59),
-                    colorOff: Color.fromARGB(255, 59, 59, 59),
-                    contentSize: screenWidth * 0.035,
-                    onChanged: (bool value) {
-                      int index;
-                      if (value == false) {
-                        index = 0;
-                      } else {
-                        index = 1;
-                      }
-                      print('switched to: $index');
-                      setState(() {
-                        instanceManager.sessionStorage.activeOrAllExams = index;
-                      });
-                      
-                      _pageController.animateToPage(index!,
-                          duration: Duration(milliseconds: 500),
-                          curve: Curves.decelerate);
-                    },
+                  child: AnimatedSwitcher(
+                    duration: prioritizeSwitchTime,
+                    child: !prioritizing
+                        ? SlidingSwitch(
+                            onTap: () {},
+                            onDoubleTap: () {},
+                            onSwipe: () {},
+                            value: false,
+                            width: screenWidth * 0.6,
+                            height: screenHeight * 0.04,
+                            textOff: _localizations.futureExams,
+                            textOn: _localizations.pastExams,
+                            colorOn: Color.fromARGB(255, 59, 59, 59),
+                            colorOff: Color.fromARGB(255, 59, 59, 59),
+                            contentSize: screenWidth * 0.035,
+                            onChanged: (bool value) {
+                              int index;
+                              if (value == false) {
+                                index = 0;
+                              } else {
+                                index = 1;
+                              }
+                              print('switched to: $index');
+                              setState(() {
+                                instanceManager
+                                    .sessionStorage.activeOrAllExams = index;
+                              });
+
+                              _pageController.animateToPage(index!,
+                                  duration: Duration(milliseconds: 500),
+                                  curve: Curves.decelerate);
+                            },
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                // or Expanded
+                                child: Text(
+                                  _localizations.reorderText,
+                                  textAlign: TextAlign
+                                      .center, // Optional: Center the text within the available space
+                                ),
+                              ),
+                            ],
+                          ),
                   )),
             ),
           ],
@@ -138,10 +278,154 @@ class _ExamsViewState extends State<ExamsView> {
 
   void loadExams() async {
     await _controller.getAllExams();
-    setState(() {});
+    setState(() {
+      activeExams = instanceManager.sessionStorage.activeExams;
+      pastExams = instanceManager.sessionStorage.pastExams;
+    });
   }
 
-  Widget getExamList(List<ExamModel> examList) {
+  Widget getReorderableActiveExamsList(List<ExamModel> examsList) {
+    var screenHeight = MediaQuery.of(context).size.height;
+    var screenWidth = MediaQuery.of(context).size.width;
+    final _localizations = AppLocalizations.of(context)!;
+    ReorderableListView reorderableList() {
+      Widget proxyDecorator(
+          Widget child, int index, Animation<double> animation) {
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (BuildContext context, Widget? child) {
+            final double animValue =
+                Curves.easeInOut.transform(animation.value);
+            final double elevation = lerpDouble(0, 6, animValue)!;
+            return Material(
+              elevation: elevation,
+              color: Colors.transparent,
+              shadowColor: Colors.black.withOpacity(0.5),
+              child: child,
+            );
+          },
+          child: child,
+        );
+      }
+
+      return ReorderableListView.builder(
+          padding: EdgeInsets.only(bottom: screenHeight * 0.065),
+          proxyDecorator: proxyDecorator,
+          itemBuilder: (context, index) {
+            ExamModel exam = examsList[index];
+            return Dismissible(
+              key: Key(exam.id),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
+                    Container(
+                        margin: EdgeInsets.only(left: 5),
+                        child: Text(_localizations.delete,
+                            style: TextStyle(
+                                color: Colors.red,
+                                fontSize: screenWidth * 0.04)))
+                  ],
+                ),
+                alignment: Alignment.centerRight,
+                padding: EdgeInsets.only(right: 20.0),
+              ),
+              onDismissed: (direction) async {
+                setState(() {
+                  activeExams.remove(exam);
+                  instanceManager.sessionStorage.savedExams.remove(exam);
+                });
+
+                await _controller.deleteExam(
+                  name: exam.name,
+                  id: exam.id,
+                  index: index,
+                  context: context,
+                );
+                setState(() {
+                  
+                });
+              },
+              child: ExamCard(
+                exam: examsList![index],
+                parentRefresh: loadExams,
+                index: index,
+                prioritizing: prioritizing,
+              ),
+            );
+
+            // Container(
+            //     key: Key('$index'),
+            //     margin: EdgeInsets.symmetric(vertical: 8),
+            //     child: Card(
+            //         color: Color.fromARGB(255, 39, 39, 39),
+            //         child: Container(
+            //             padding: EdgeInsets.only(
+            //                 left: screenWidth * 0.05,
+            //                 top: screenWidth * 0.03,
+            //                 bottom: screenWidth * 0.03),
+            //             child: Row(
+            //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //               children: [
+            //                 Text(exam.name,
+            //                     style: TextStyle(
+            //                         color: Colors.white,
+            //                         fontSize: screenWidth * 0.06)),
+            //                 SingleChildScrollView(
+            //                   scrollDirection: Axis.horizontal,
+            //                   physics: NeverScrollableScrollPhysics(),
+            //                   child: Row(
+            //                     children: [
+            //                       AnimatedContainer(
+            //                         curve: Curves.decelerate,
+            //                         duration: prioritizeSwitchTime,
+            //                         width:
+            //                             prioritizing ? screenWidth * 0.05 : 0,
+            //                         child: SizedBox(),
+            //                       ),
+            //                       Text('${formatDateTime(exam.examDate)}',
+            //                           style: TextStyle(
+            //                               color: Colors.white,
+            //                               fontSize: screenWidth * 0.035)),
+            //                       SizedBox(
+            //                         width: screenWidth * 0.02,
+            //                       ),
+            //                       ReorderableDragStartListener(
+            //                           child: Padding(
+            //                             padding:
+            //                                 EdgeInsets.all(screenWidth * 0.02),
+            //                             child: Icon(Icons.drag_handle_rounded,
+            //                                 color: Colors.black),
+            //                           ),
+            //                           index: index),
+            //                     ],
+            //                   ),
+            //                 )
+            //               ],
+            //             ))));
+          },
+          itemCount: examsList.length,
+          onReorder: (int oldIndex, int newIndex) {
+            setState(() {
+              if (newIndex > oldIndex) {
+                newIndex -= 1;
+              }
+              final ExamModel item = examsList.removeAt(oldIndex);
+              examsList.insert(newIndex, item);
+            });
+          });
+    }
+
+    return reorderableList();
+  }
+
+  Widget getPastExamsList() {
+    List<ExamModel> examList = pastExams;
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
@@ -183,10 +467,8 @@ class _ExamsViewState extends State<ExamsView> {
                   ),
                   onDismissed: (direction) async {
                     setState(() {
-                      instanceManager.sessionStorage.activeExams
-                          .remove(exam);
-                      instanceManager.sessionStorage.savedExams
-                          .remove(exam);
+                      activeExams.remove(exam);
+                      instanceManager.sessionStorage.savedExams.remove(exam);
                     });
 
                     await _controller.deleteExam(
@@ -199,6 +481,8 @@ class _ExamsViewState extends State<ExamsView> {
                   child: ExamCard(
                     exam: examList![index],
                     parentRefresh: loadExams,
+                    prioritizing: false,
+                    index: index,
                   ),
                 );
               },
@@ -366,10 +650,8 @@ class _ExamsViewState extends State<ExamsView> {
     logger.i('Closing... - Loading state: $loading');
     if (loading != true) {
       if (instanceManager.sessionStorage.examToAdd != null &&
-          instanceManager.sessionStorage.activeExams
-              .contains(instanceManager.sessionStorage.examToAdd)) {
-        instanceManager.sessionStorage.activeExams
-            .remove(instanceManager.sessionStorage.examToAdd);
+          activeExams.contains(instanceManager.sessionStorage.examToAdd)) {
+        activeExams.remove(instanceManager.sessionStorage.examToAdd);
       }
 
       instanceManager.sessionStorage.examToAdd.units = <UnitModel>[];
@@ -382,13 +664,14 @@ class _ExamsViewState extends State<ExamsView> {
     }
   }
 
-  void refresh() {
-    logger.i('updating...');
+  void refresh() async{
+    //logger.i('updating...');
+    loadExams();
     setState(() {});
   }
 
   void setLoading(bool state) {
-    logger.i('Changing state of laoding to $state');
+    //logger.i('Changing state of laoding to $state');
     setState(() {
       loading = state;
     });

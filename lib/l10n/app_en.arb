@@ -33,8 +33,8 @@
     "isUnitCompleted": "Has this unit been studied already?",
     "unitCompleted": "This unit has been already studied.",
     "unitNotCompleted": "This unit has not been studied yet.",
-    "activeExams": "Active",
-    "allExams": "All",
+    "futureExams": "Future",
+    "pastExams": "Past",
     "intValidator": "Integers only",
     "applySessionTime": "Apply session time to all units",
     "continueOn":"Continue",
@@ -43,6 +43,10 @@
     "prioritizeExams": "Please move the following exams in order of priority (highest priority on top).",
     "delete": "Delete",
     "prioritizeButton": "Prioritize",
+    "cancel":"Cancel",
+    "confirm": "Confirm",
+    "reorderText":"Drag and drop to move your exams in order of importance (highest first)",
+    "errorPrioritizing": "Error reordering exams",
 
     
 
