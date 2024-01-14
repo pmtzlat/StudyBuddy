@@ -8,6 +8,7 @@ import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
+import 'package:study_buddy/utils/general_utils.dart';
 
 import '../models/exam_model.dart';
 import '../models/user_model.dart';
@@ -44,7 +45,7 @@ class FirebaseCrudService {
         'examDate': newExam.examDate.toString(),
         'sessionTime': newExam.sessionTime.toString(),
         'timeStudied': newExam.timeStudied.toString(),
-        'color': newExam.color,
+        'color': newExam.color.toHex(),
         'id': '',
         'orderMatters': newExam.orderMatters,
       });
@@ -552,7 +553,7 @@ class FirebaseCrudService {
           weight: weight,
           examDate: DateTime.parse((data['examDate'] as String)),
           timeStudied: parseTime(data['timeStudied']),
-          color: data['color'] as String,
+          color: HexColor.fromHex(data['color']),
           sessionTime: parseTime(data['sessionTime']),
           id: data['id'] as String,
           orderMatters: data['orderMatters'] as bool,
@@ -972,7 +973,7 @@ class FirebaseCrudService {
           weight: weight,
           examDate: DateTime.parse(data['examDate'] as String),
           timeStudied: parseTime(data['timeStudied']),
-          color: data['color'] as String,
+          color: HexColor.fromHex(data['color']),
           sessionTime: parseTime(data['sessionTime']),
           id: data['id'] as String,
           orderMatters: data['orderMatters'] as bool,

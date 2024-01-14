@@ -8,7 +8,7 @@ class ExamModel {
   double weight;
   DateTime examDate;
   Duration timeStudied;
-  String color;
+  Color color;
   Duration sessionTime;
   final String id;
   List<UnitModel> units;
@@ -31,7 +31,7 @@ class ExamModel {
     this.weight = 2.0,
     required this.examDate,
     this.timeStudied = const Duration(seconds:0),
-    this.color = '#FDC62A',
+    this.color = Colors.redAccent,
     this.sessionTime = const Duration(hours: 2), //one hour
     this.id = '0',
     this.units = const <UnitModel>[],

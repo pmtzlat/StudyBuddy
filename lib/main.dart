@@ -32,8 +32,7 @@ void main() async {
       await instanceManager.localStorageCustomOperations.updateDateHandling();
   if (synced == 1) {
     await instanceManager.calendarController.getIncompletePreviousDays(
-            DateTime.parse(instanceManager.localStorage.getString('oldDate')));
-    
+        DateTime.parse(instanceManager.localStorage.getString('oldDate')));
   }
 
   await instanceManager.examController.getAllExams();
@@ -65,8 +64,7 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
   @override
   Widget build(BuildContext context) {
     logger.i('uid found on boot: $uid');
-    logger
-        .i('Got all exams! ${instanceManager.sessionStorage.savedExams}');
+    logger.i('Got all exams! ${instanceManager.sessionStorage.savedExams}');
 
     if (synced != 1) {
       return MaterialApp(
@@ -88,22 +86,22 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
       );
     }
 
-    return MaterialApp(
-      title: 'StudyBuddy',
-      home: (user != null) ? CalendarView() : SignInView(),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 46, 46, 46)),
-        useMaterial3: true,
-      ),
-      supportedLocales: [Locale('es'), Locale('en')],
-      localizationsDelegates: [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        FormBuilderLocalizations.delegate,
-      ],
-    );
+    return  MaterialApp(
+        title: 'StudyBuddy',
+        home: (user != null) ? CalendarView() : SignInView(),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color.fromARGB(255, 46, 46, 46)),
+          useMaterial3: true,
+        ),
+        supportedLocales: [Locale('es'), Locale('en')],
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          FormBuilderLocalizations.delegate,
+        ],
+      );
   }
 }

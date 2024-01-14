@@ -47,6 +47,16 @@
     "confirm": "Confirm",
     "reorderText":"Drag and drop to move your exams in order of importance (highest first)",
     "errorPrioritizing": "Error reordering exams",
+    "color":"Exam Color:",
+    "select":"Select",
+    "chooseColor": "Choose Color",
+    "edit":"Edit",
+    "priority":"Priority",
+    "timeStudied": "Time Studied:",
+    "orderMatter": "Order Matters:", 
+    "complete": "Complete",
+    "yes":"Yes",
+    "no":"No",
 
     
 
@@ -96,6 +106,7 @@
     "recalc":"Recalculate",
     "editUnitCompletionInExamsPage":"If you want to change as past session's completeness, you can edit that exam's units in the 'Exams' page",
     "cantStartSessionForFuture": "You can't start studying for a day that is not today",
+    
 
 
 

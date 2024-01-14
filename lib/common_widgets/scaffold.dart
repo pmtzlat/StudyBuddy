@@ -66,14 +66,20 @@ class MyScaffold {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-        bottomNavigationBar: BottomNavBar(activeIndex: activeIndex),
-        body: Container(
-            padding: EdgeInsets.only(
-                top: screenHeight * 0.08,
-                left: screenWidth * 0.03,
-                right: screenWidth * 0.03),
-            child: body));
+    return WillPopScope(
+      onWillPop: () async {
+        // Disable back button
+        return false;
+      },
+      child: Scaffold(
+          bottomNavigationBar: BottomNavBar(activeIndex: activeIndex),
+          body: Container(
+              padding: EdgeInsets.only(
+                  top: screenHeight * 0.08,
+                  left: screenWidth * 0.03,
+                  right: screenWidth * 0.03),
+              child: body)),
+    );
   }
 }
 
@@ -89,6 +95,8 @@ class BottomNavBar extends StatelessWidget {
       showSelectedLabels: false,
       showUnselectedLabels: false,
       elevation: 0,
+      selectedItemColor: Color.fromARGB(255, 73, 73, 73),
+      unselectedItemColor: Color.fromARGB(255, 179, 179, 179),
       onTap: (index) {
         if (index != activeIndex) {
           switch (index) {

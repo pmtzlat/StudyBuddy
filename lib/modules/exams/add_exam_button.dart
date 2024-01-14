@@ -20,6 +20,7 @@ class AddButton extends StatefulWidget {
   Duration? sessionTime;
   Function? removePage;
   Duration? revisionTime;
+  Color? examColor;
 
   AddButton(
       {super.key,
@@ -33,7 +34,8 @@ class AddButton extends StatefulWidget {
       this.sessionTime,
       this.pageController,
       this.removePage,
-      this.revisionTime});
+      this.revisionTime,
+      this.examColor});
 
   @override
   State<AddButton> createState() => _AddButtonState();
@@ -66,7 +68,8 @@ class _AddButtonState extends State<AddButton> {
                         switch (await widget.controller.addExamScreen1(
                             widget.formKey!,
                             widget.sessionTime!,
-                            widget.revisionTime!)) {
+                            widget.revisionTime!, 
+                            widget.examColor!)) {
                           case (1):
                             await moveToPage2();
 

@@ -14,6 +14,7 @@ import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/modules/exams/add_exam_button.dart';
 import 'package:study_buddy/modules/exams/add_exam_pages.dart';
 import 'package:study_buddy/modules/exams/controllers/exams_controller.dart';
+import 'package:study_buddy/modules/exams/exam_detail_view.dart';
 import 'package:study_buddy/modules/loader/loader.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
@@ -36,6 +37,9 @@ class _ExamsViewState extends State<ExamsView> {
   List<ExamModel> pastExams = instanceManager.sessionStorage.pastExams;
   List<ExamModel> reorderExams = [];
   Duration prioritizeSwitchTime = Duration(milliseconds: 300);
+  ExamModel selectedExam =
+      ExamModel(name: 'placeholder', examDate: DateTime.now());
+  final PageController examPageController = PageController();
 
   void updateExamPage() {
     setState(() {});
@@ -47,235 +51,250 @@ class _ExamsViewState extends State<ExamsView> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    final PageController _pageController = PageController(
+    final PageController timePageController = PageController(
         initialPage: instanceManager.sessionStorage.activeOrAllExams);
+
+    Widget page1 = Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: EdgeInsets.all(screenWidth * 0.05),
+          child: Text(
+            _localizations.examsTitle,
+            style: Theme.of(context).textTheme.displayMedium,
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            AnimatedSwitcher(
+              duration: prioritizeSwitchTime,
+              child: !prioritizing
+                  ? Container(
+                      // add course
+                      key: ValueKey<int>(0),
+                      width: screenWidth * 0.4,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          TextButton.icon(
+                              key: ValueKey<int>(0),
+                              onPressed: () {
+                                showAddExamSheet(context);
+                              },
+                              label: Text(_localizations.addExam,
+                                  style: TextStyle(color: buttonColor)),
+                              icon:
+                                  Icon(Icons.add_rounded, color: buttonColor)),
+                        ],
+                      ),
+                    )
+                  : Container(
+                      // cancel prioritize
+                      key: ValueKey<int>(1),
+                      width: screenWidth * 0.4,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          TextButton.icon(
+                              key: ValueKey<int>(1),
+                              onPressed: () {
+                                logger.i('Cancel clicked!');
+                                setState(() {
+                                  prioritizing = !prioritizing;
+                                });
+                                loadExams();
+                              },
+                              label: Text(_localizations.cancel,
+                                  style: TextStyle(color: Colors.redAccent)),
+                              icon: Icon(Icons.close_rounded,
+                                  color: Colors.redAccent)),
+                        ],
+                      ),
+                    ),
+            ),
+            AnimatedSwitcher(
+                duration: Duration(milliseconds: 500),
+                child: instanceManager.sessionStorage.activeOrAllExams == 0
+                    ? AnimatedSwitcher(
+                        key: ValueKey<int>(0),
+                        duration: prioritizeSwitchTime,
+                        child: !prioritizing
+                            ? Container(
+                                //Prioritize
+                                key: ValueKey<int>(0),
+                                width: screenWidth * 0.4,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    TextButton.icon(
+                                        key: ValueKey<int>(0),
+                                        onPressed: () {
+                                          reorderExams = List.from(activeExams);
+
+                                          logger.i('Prioritize clicked!');
+
+                                          setState(() {
+                                            prioritizing = !prioritizing;
+                                          });
+                                        },
+                                        label: Text(
+                                            _localizations.prioritizeButton,
+                                            style:
+                                                TextStyle(color: buttonColor)),
+                                        icon: Icon(Icons.format_list_numbered,
+                                            color: buttonColor))
+                                  ],
+                                ),
+                              )
+                            : Container(
+                                //finishPrioritize
+                                key: ValueKey<int>(1),
+                                width: screenWidth * 0.4,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    TextButton.icon(
+                                        key: ValueKey<int>(1),
+                                        onPressed: () async {
+                                          logger.i('Confirm clicked!');
+                                          _controller
+                                              .applyWeights(reorderExams);
+                                          reorderExams.sort(
+                                              (ExamModel a, ExamModel b) =>
+                                                  b.weight.compareTo(a.weight));
+                                          logger.i(
+                                              'reorderExams after confirm clicked: ${getActiveExamsString(reorderExams)}');
+
+                                          setState(() {
+                                            activeExams = reorderExams;
+                                            prioritizing = !prioritizing;
+                                          });
+                                          switch (await _controller
+                                              .replaceExams(activeExams)) {
+                                            case (-1):
+                                              var snackbar = SnackBar(
+                                                content: Text(
+                                                    AppLocalizations.of(
+                                                            context)!
+                                                        .errorPrioritizing),
+                                                backgroundColor:
+                                                    Colors.redAccent,
+                                              );
+
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(snackbar);
+
+                                            default:
+                                          }
+
+                                          activeExams = instanceManager
+                                              .sessionStorage.activeExams;
+                                          reorderExams = <ExamModel>[];
+
+                                          loadExams();
+                                        },
+                                        label: Text(_localizations.confirm,
+                                            style: TextStyle(
+                                                color: Colors.greenAccent)),
+                                        icon: Icon(Icons.done_rounded,
+                                            color: Colors.greenAccent)),
+                                  ],
+                                ),
+                              ),
+                      )
+                    : Text('fasdf',
+                        style: TextStyle(color: Colors.transparent))), //hotfix
+          ],
+        ),
+        activeExams == null
+            ? loadingScreen()
+            : Flexible(
+                child: PageView(
+                    physics: NeverScrollableScrollPhysics(),
+                    scrollDirection: Axis.horizontal,
+                    controller: timePageController,
+                    children: [
+                      getReorderableActiveExamsList(
+                          !prioritizing ? activeExams : reorderExams),
+                      getPastExamsList()
+                    ]),
+              ),
+        Center(
+          child: Container(
+              margin: EdgeInsets.only(
+                  top: screenHeight * 0.02, bottom: screenHeight * 0.03),
+              child: AnimatedSwitcher(
+                duration: prioritizeSwitchTime,
+                child: !prioritizing
+                    ? SlidingSwitch(
+                        onTap: () {},
+                        onDoubleTap: () {},
+                        onSwipe: () {},
+                        value: false,
+                        width: screenWidth * 0.6,
+                        height: screenHeight * 0.04,
+                        textOff: _localizations.futureExams,
+                        textOn: _localizations.pastExams,
+                        colorOn: Color.fromARGB(255, 59, 59, 59),
+                        colorOff: Color.fromARGB(255, 59, 59, 59),
+                        contentSize: screenWidth * 0.035,
+                        onChanged: (bool value) {
+                          int index;
+                          if (value == false) {
+                            index = 0;
+                          } else {
+                            index = 1;
+                          }
+                          print('switched to: $index');
+                          setState(() {
+                            instanceManager.sessionStorage.activeOrAllExams =
+                                index;
+                          });
+
+                          timePageController.animateToPage(index!,
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.decelerate);
+                        },
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            // or Expanded
+                            child: Text(
+                              _localizations.reorderText,
+                              textAlign: TextAlign
+                                  .center, // Optional: Center the text within the available space
+                            ),
+                          ),
+                        ],
+                      ),
+              )),
+        ),
+      ],
+    );
+
+    Widget page2 =
+        ExamDetailView(exam: selectedExam, refreshParent: refresh, pageController: examPageController,); //TODO:
+
+    List<Widget> pages = [page1, page2];
 
     return instanceManager.scaffold.getScaffold(
         context: context,
         activeIndex: 0,
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              margin: EdgeInsets.all(screenWidth * 0.05),
-              child: Text(
-                _localizations.examsTitle,
-                style: Theme.of(context).textTheme.displayMedium,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                AnimatedSwitcher(
-                  duration: prioritizeSwitchTime,
-                  child: !prioritizing
-                      ? Container(
-                          // add course
-                          key: ValueKey<int>(0),
-                          width: screenWidth * 0.4,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              TextButton.icon(
-                                  key: ValueKey<int>(0),
-                                  onPressed: () {
-                                    showAddExamSheet(context);
-                                  },
-                                  label: Text(_localizations.addExam,
-                                      style: TextStyle(color: buttonColor)),
-                                  icon: Icon(Icons.add_rounded,
-                                      color: buttonColor)),
-                            ],
-                          ),
-                        )
-                      : Container(
-                          // cancel prioritize
-                          key: ValueKey<int>(1),
-                          width: screenWidth * 0.4,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              TextButton.icon(
-                                  key: ValueKey<int>(1),
-                                  onPressed: () {
-                                    logger.i('Cancel clicked!');
-                                    setState(() {
-                                      prioritizing = !prioritizing;
-                                    });
-                                    loadExams();
-                                  },
-                                  label: Text(_localizations.cancel,
-                                      style:
-                                          TextStyle(color: Colors.redAccent)),
-                                  icon: Icon(Icons.close_rounded,
-                                      color: Colors.redAccent)),
-                            ],
-                          ),
-                        ),
-                ),
-                AnimatedSwitcher(
-                    duration: Duration(milliseconds: 500),
-                    child: instanceManager.sessionStorage.activeOrAllExams == 0
-                        ? AnimatedSwitcher(
-                            key: ValueKey<int>(0),
-                            duration: prioritizeSwitchTime,
-                            child: !prioritizing
-                                ? Container(
-                                    //Prioritize
-                                    key: ValueKey<int>(0),
-                                    width: screenWidth * 0.4,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        TextButton.icon(
-                                            key: ValueKey<int>(0),
-                                            onPressed: () {
-                                              reorderExams =
-                                                  List.from(activeExams);
-
-                                              logger.i('Prioritize clicked!');
-
-                                              setState(() {
-                                                prioritizing = !prioritizing;
-                                              });
-                                            },
-                                            label: Text(
-                                                _localizations.prioritizeButton,
-                                                style: TextStyle(
-                                                    color: buttonColor)),
-                                            icon: Icon(
-                                                Icons.format_list_numbered,
-                                                color: buttonColor))
-                                      ],
-                                    ),
-                                  )
-                                : Container(
-                                    //finishPrioritize
-                                    key: ValueKey<int>(1),
-                                    width: screenWidth * 0.4,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        TextButton.icon(
-                                            key: ValueKey<int>(1),
-                                            onPressed: () async {
-                                              logger.i('Confirm clicked!');
-                                              _controller.applyWeights(reorderExams);
-                                              reorderExams.sort((ExamModel a, ExamModel b) => b.weight.compareTo(a.weight));
-                                              logger.i('reorderExams after confirm clicked: ${getActiveExamsString(reorderExams)}');
-
-                                              setState(() {
-                                                
-                                                activeExams = reorderExams;
-                                                prioritizing = !prioritizing;
-                                                
-                                              });
-                                              switch (await _controller
-                                                  .replaceExams(activeExams)) {
-                                                case (-1):
-                                                  var snackbar = SnackBar(
-                                                    content: Text(
-                                                        AppLocalizations.of(
-                                                                context)!
-                                                            .errorPrioritizing),
-                                                    backgroundColor:
-                                                        Colors.redAccent,
-                                                  );
-
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(snackbar);
-
-                                                default:
-                                                
-                                                  
-                                              }
-
-                                              activeExams = instanceManager.sessionStorage.activeExams;
-                                              reorderExams = <ExamModel>[];
-
-                                              loadExams();
-                                            },
-                                            label: Text(_localizations.confirm,
-                                                style: TextStyle(
-                                                    color: Colors.greenAccent)),
-                                            icon: Icon(Icons.done_rounded,
-                                                color: Colors.greenAccent)),
-                                      ],
-                                    ),
-                                  ),
-                          )
-                        : Text('fasdf',
-                            style:
-                                TextStyle(color: Colors.transparent))), //hotfix
-              ],
-            ),
-            activeExams == null
-                ? loadingScreen()
-                : Flexible(
-                    child: PageView(
-                        physics: NeverScrollableScrollPhysics(),
-                        scrollDirection: Axis.horizontal,
-                        controller: _pageController,
-                        children: [
-                          getReorderableActiveExamsList(!prioritizing ? activeExams : reorderExams),
-                          getPastExamsList()
-                        ]),
-                  ),
-            Center(
-              child: Container(
-                  margin: EdgeInsets.only(
-                      top: screenHeight * 0.02, bottom: screenHeight * 0.03),
-                  child: AnimatedSwitcher(
-                    duration: prioritizeSwitchTime,
-                    child: !prioritizing
-                        ? SlidingSwitch(
-                            onTap: () {},
-                            onDoubleTap: () {},
-                            onSwipe: () {},
-                            value: false,
-                            width: screenWidth * 0.6,
-                            height: screenHeight * 0.04,
-                            textOff: _localizations.futureExams,
-                            textOn: _localizations.pastExams,
-                            colorOn: Color.fromARGB(255, 59, 59, 59),
-                            colorOff: Color.fromARGB(255, 59, 59, 59),
-                            contentSize: screenWidth * 0.035,
-                            onChanged: (bool value) {
-                              int index;
-                              if (value == false) {
-                                index = 0;
-                              } else {
-                                index = 1;
-                              }
-                              print('switched to: $index');
-                              setState(() {
-                                instanceManager
-                                    .sessionStorage.activeOrAllExams = index;
-                              });
-
-                              _pageController.animateToPage(index!,
-                                  duration: Duration(milliseconds: 500),
-                                  curve: Curves.decelerate);
-                            },
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                // or Expanded
-                                child: Text(
-                                  _localizations.reorderText,
-                                  textAlign: TextAlign
-                                      .center, // Optional: Center the text within the available space
-                                ),
-                              ),
-                            ],
-                          ),
-                  )),
-            ),
-          ],
+        body: PageView(
+          physics: NeverScrollableScrollPhysics(),
+          controller: examPageController,
+          children: pages,
         ));
+  }
+
+  void giveDetails(ExamModel exam) {
+    setState(() {
+      selectedExam = exam;
+    });
   }
 
   void loadExams() async {
@@ -363,6 +382,8 @@ class _ExamsViewState extends State<ExamsView> {
                 parentRefresh: loadExams,
                 index: index,
                 prioritizing: prioritizing,
+                pageController: examPageController,
+                giveDetails: giveDetails,
               ),
             );
 
@@ -490,6 +511,8 @@ class _ExamsViewState extends State<ExamsView> {
                     parentRefresh: loadExams,
                     prioritizing: false,
                     index: index,
+                    pageController: examPageController,
+                    giveDetails: giveDetails,
                   ),
                 );
               },

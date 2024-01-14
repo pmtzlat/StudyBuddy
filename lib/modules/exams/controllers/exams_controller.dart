@@ -17,6 +17,8 @@ class ExamsController {
   final firebaseCrud = instanceManager.firebaseCrudService;
   final uid = instanceManager.localStorage.getString('uid') ?? '';
 
+  
+
   Future<void> deleteExam(
       {required String name,
       required String id,
@@ -127,7 +129,7 @@ class ExamsController {
   }
 
   int addExamScreen1(GlobalKey<FormBuilderState> examCreationFormKey,
-      Duration sessionTime, Duration revisionTime) {
+      Duration sessionTime, Duration revisionTime, Color examColor) {
     //returns index of page the addExam flow goes through
     // -1 = error
     // 1 = unit session page
@@ -160,7 +162,7 @@ class ExamsController {
       //logger.i('Validation done');
 
       instanceManager.sessionStorage.examToAdd =
-          ExamModel(name: name, examDate: examDate, orderMatters: orderMatters);
+          ExamModel(name: name, examDate: examDate, orderMatters: orderMatters, color: examColor);
 
       instanceManager.sessionStorage.examToAdd!.units = <UnitModel>[];
       List<UnitModel> unitsList =

@@ -2,21 +2,27 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:study_buddy/common_widgets/scaffold.dart';
 import 'package:study_buddy/modules/exams/exam_detail_view.dart';
+import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:study_buddy/utils/general_utils.dart';
 import '../models/exam_model.dart';
 
 class ExamCard extends StatefulWidget {
-  final exam;
+  ExamModel exam;
   final Function parentRefresh;
   int index;
   bool prioritizing;
+  PageController pageController;
+  Function giveDetails;
   ExamCard(
       {super.key,
       required ExamModel this.exam,
       required this.parentRefresh,
       required this.index,
-      required this.prioritizing});
+      required this.prioritizing,
+      required this.pageController,
+      required this.giveDetails});
 
   @override
   State<ExamCard> createState() => _ExamCardState();
@@ -26,9 +32,9 @@ class _ExamCardState extends State<ExamCard> {
   double cardRadius = 20.0;
   @override
   Widget build(BuildContext context) {
-    final cardColor = stringToColor(widget.exam.color);
-    final lighterColor = lighten(cardColor, .03);
-    final darkerColor = darken(cardColor, .1);
+    final cardColor = widget.exam.color;
+    final lighterColor = lighten(cardColor, .05);
+    final darkerColor = darken(cardColor, .15);
 
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
@@ -36,21 +42,13 @@ class _ExamCardState extends State<ExamCard> {
 
     return GestureDetector(
       onTap: () {
-        showGeneralDialog(
-          context: context,
-          barrierDismissible: true,
-          barrierLabel:
-              MaterialLocalizations.of(context).modalBarrierDismissLabel,
-          barrierColor: Colors.transparent,
-
-          transitionDuration: Duration(milliseconds: 200),
-
-          // Create the dialog's content
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return ExamDetailView(
-                exam: widget.exam, refreshParent: widget.parentRefresh);
-          },
-        );
+        logger.i(widget.prioritizing);
+        if (!widget.prioritizing) {
+          widget.giveDetails(widget.exam);
+          widget.pageController.animateToPage(1,
+              duration: Duration(milliseconds: 300), curve: Curves.decelerate);
+          
+        }
       },
       child: Card(
           elevation: 0,
@@ -63,14 +61,10 @@ class _ExamCardState extends State<ExamCard> {
                 gradient: LinearGradient(
                     end: Alignment.bottomLeft,
                     begin: Alignment.topRight,
-                    stops: [
-                      0.2,
-                      0.3,
-                      0.9,
-                    ],
+                    
                     colors: [
                       lighterColor,
-                      cardColor,
+                      
                       darkerColor
                     ]),
               ),
@@ -81,10 +75,12 @@ class _ExamCardState extends State<ExamCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('${widget.exam.name} - ${widget.exam.weight}',
-                      style: TextStyle(
-                          color: Colors.white, fontSize: screenWidth * 0.06)),
-                 
+                  Flexible(
+                    child: Text('${widget.exam.name}', // - ${widget.exam.weight}',
+                          overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            color: Colors.white, fontSize: screenWidth * 0.06)),
+                  ),
                   AnimatedContainer(
                     curve: Curves.decelerate,
                     duration: Duration(milliseconds: 300),
@@ -92,14 +88,14 @@ class _ExamCardState extends State<ExamCard> {
                         ? screenWidth * 0.23
                         : screenWidth * 0.35,
 
-                   // color: Colors.yellow,
+                    // color: Colors.yellow,
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       physics: NeverScrollableScrollPhysics(),
                       child: Row(
                         children: [
                           Container(
-                            width: screenWidth*0.23,
+                            width: screenWidth * 0.23,
                             child: Row(
                               // widget 1
                               children: [
@@ -114,15 +110,15 @@ class _ExamCardState extends State<ExamCard> {
                             ),
                           ),
                           Container(
-                            width: screenWidth*0.12,
+                            width: screenWidth * 0.12,
                             child: ReorderableDragStartListener(
                                 // widget 2
+                                index: widget.index,
                                 child: Padding(
                                   padding: EdgeInsets.all(screenWidth * 0.02),
                                   child: Icon(Icons.drag_handle_rounded,
                                       color: Colors.black),
-                                ),
-                                index: widget.index),
+                                )),
                           ),
                         ],
                       ),

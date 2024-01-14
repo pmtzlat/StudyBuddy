@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/exam_model.dart';
@@ -40,12 +41,71 @@ class _Page1State extends State<Page1> {
   Duration sessionTime = Duration(hours: 1);
   Duration revisionTime = Duration(hours: 1);
   final _controller = instanceManager.examController;
+  Color examColor = Colors.redAccent;
 
   @override
   Widget build(BuildContext context) {
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
+
+    void _openDialog(String title, Widget content) {
+      showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            contentPadding: const EdgeInsets.all(18.0),
+            title: Text(title, style: TextStyle(color: Colors.white)),
+            content: content,
+            backgroundColor: Color.fromARGB(255, 16, 16, 16),
+            actions: [
+              TextButton(
+                onPressed: Navigator.of(context).pop,
+                child: Text(_localizations.cancel,
+                    style: TextStyle(color: Colors.white)),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(_localizations.select,
+                    style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    void _openMainColorPicker() async {
+      _openDialog(
+        _localizations.chooseColor,
+        MaterialColorPicker(
+          colors: const [
+            Colors.amberAccent,
+            Colors.amber,
+            Colors.blueAccent,
+            Colors.cyan,
+            Colors.deepOrangeAccent,
+            Colors.deepPurpleAccent,
+            Colors.greenAccent,
+            Colors.indigo,
+            Colors.lightBlueAccent,
+            Colors.lightGreen,
+            Colors.lime,
+            Colors.orangeAccent,
+            Colors.pinkAccent,
+            Colors.purpleAccent,
+            Colors.redAccent,
+            Colors.teal,
+          ],
+          selectedColor: examColor,
+          allowShades: false,
+          onMainColorChange: (color) => setState(() => examColor = color!),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.only(
@@ -67,6 +127,7 @@ class _Page1State extends State<Page1> {
                       child: FormBuilderTextField(
                         // Name
                         name: 'examName',
+                        textCapitalization: TextCapitalization.words,
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         decoration: InputDecoration(
                           labelText: _localizations.examName,
@@ -161,37 +222,68 @@ class _Page1State extends State<Page1> {
                     ),
                     Container(
                       width: screenWidth * 0.9,
-                      child: Column(
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(top: screenHeight * 0.07),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(_localizations.revisionTime,
-                                    style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: screenHeight * 0.02)),
-                                TextButton.icon(
-                                  label: Text(
-                                    '${formatDuration(revisionTime)}',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  icon: Icon(Icons.av_timer_rounded,
-                                      color: Colors.white),
-                                  onPressed: () async {
-                                    revisionTime = await showDurationPicker(
-                                          context: context,
-                                          initialTime: revisionTime,
-                                        ) ??
-                                        revisionTime;
-                                    setState(() {});
-                                  },
-                                )
-                              ],
+                      child: Container(
+                        margin: EdgeInsets.only(top: screenHeight * 0.07),
+                        child: Row(
+                          children: [
+                            Text(_localizations.color,
+                                style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: screenWidth * 0.045)),
+                            SizedBox(
+                              width: screenWidth * 0.06,
                             ),
-                          ),
-                        ],
+                            GestureDetector(
+                              onTap: () {
+                                _openMainColorPicker();
+                              },
+                              child: Container(
+                                width: screenWidth * 0.1,
+                                height: screenWidth * 0.1,
+                                decoration: BoxDecoration(
+                                  color: examColor,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 3.0,
+                                  ),
+                                ),
+                                // You can add other child widgets here if needed
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: screenWidth * 0.9,
+                      child: Container(
+                        margin: EdgeInsets.only(top: screenHeight * 0.07),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(_localizations.revisionTime,
+                                style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: screenHeight * 0.02)),
+                            TextButton.icon(
+                              label: Text(
+                                '${formatDuration(revisionTime)}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              icon: Icon(Icons.av_timer_rounded,
+                                  color: Colors.white),
+                              onPressed: () async {
+                                revisionTime = await showDurationPicker(
+                                      context: context,
+                                      initialTime: revisionTime,
+                                    ) ??
+                                    revisionTime;
+                                setState(() {});
+                              },
+                            )
+                          ],
+                        ),
                       ),
                     ),
                     Container(
@@ -213,6 +305,7 @@ class _Page1State extends State<Page1> {
               child: Container(
                 margin: EdgeInsets.only(top: 10),
                 child: AddButton(
+                  examColor: examColor,
                   sessionTime: sessionTime,
                   revisionTime: revisionTime,
                   controller: _controller,
@@ -340,6 +433,8 @@ class Page2State extends State<Page2> {
                                                 //     81, 255, 235, 59),
                                                 width: screenWidth * 0.37,
                                                 child: FormBuilderTextField(
+                                                  textCapitalization:
+                                                      TextCapitalization.words,
                                                   name:
                                                       'Unit ${unit.order} name',
                                                   initialValue: '${unit.name}',
@@ -396,12 +491,13 @@ class Page2State extends State<Page2> {
                       //color: Colors.yellow,
                       width: screenHeight * 0.9,
                       height: screenHeight * 0.1,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.center,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.transparent, // Transparent color at the top
+                            Color.fromARGB(255, 0, 5, 5).withOpacity(
+                                0.0), // Transparent color at the top
                             Color.fromARGB(255, 0, 5, 5),
                             Color.fromARGB(255, 0, 5, 5),
                           ],
@@ -532,12 +628,34 @@ class Page3State extends State<Page3> {
                           proxyDecorator: proxyDecorator,
                           itemBuilder: (context, index) {
                             ExamModel exam = exams[index];
+                            final cardColor = exam.color;
+                            final lighterColor = lighten(cardColor, .03);
+                            final darkerColor = darken(cardColor, .1);
                             return Container(
                                 key: Key('$index'),
                                 margin: EdgeInsets.symmetric(vertical: 8),
                                 child: Card(
-                                    color: Color.fromARGB(255, 39, 39, 39),
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    clipBehavior: Clip.antiAliasWithSaveLayer,
                                     child: Container(
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                              end: Alignment.bottomLeft,
+                                              begin: Alignment.topRight,
+                                              stops: const [
+                                                0.2,
+                                                0.3,
+                                                0.9,
+                                              ],
+                                              colors: [
+                                                lighterColor,
+                                                cardColor,
+                                                darkerColor
+                                              ]),
+                                        ),
                                         padding: EdgeInsets.only(
                                             left: screenWidth * 0.05,
                                             top: screenWidth * 0.03,
@@ -546,11 +664,14 @@ class Page3State extends State<Page3> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(exam.name,
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize:
-                                                        screenWidth * 0.06)),
+                                            Flexible(
+                                              child: Text(exam.name,
+                                              overflow: TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize:
+                                                          screenWidth * 0.06)),
+                                            ),
                                             Row(
                                               children: [
                                                 Text(
