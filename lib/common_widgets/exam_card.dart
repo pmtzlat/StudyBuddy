@@ -47,7 +47,6 @@ class _ExamCardState extends State<ExamCard> {
           widget.giveDetails(widget.exam);
           widget.pageController.animateToPage(1,
               duration: Duration(milliseconds: 300), curve: Curves.decelerate);
-          
         }
       },
       child: Card(
@@ -61,12 +60,8 @@ class _ExamCardState extends State<ExamCard> {
                 gradient: LinearGradient(
                     end: Alignment.bottomLeft,
                     begin: Alignment.topRight,
-                    
-                    colors: [
-                      lighterColor,
-                      
-                      darkerColor
-                    ]),
+                    //stops: [ 0.1, 0.9],
+                    colors: [cardColor, darkerColor]),
               ),
               padding: EdgeInsets.only(
                   left: screenWidth * 0.05,
@@ -76,8 +71,9 @@ class _ExamCardState extends State<ExamCard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
-                    child: Text('${widget.exam.name}', // - ${widget.exam.weight}',
-                          overflow: TextOverflow.ellipsis,
+                    child: Text(
+                        '${widget.exam.name}', // - ${widget.exam.weight}',
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                             color: Colors.white, fontSize: screenWidth * 0.06)),
                   ),

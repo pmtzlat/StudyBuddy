@@ -102,7 +102,7 @@ class _ExamsViewState extends State<ExamsView> {
                               onPressed: () {
                                 logger.i('Cancel clicked!');
                                 setState(() {
-                                  prioritizing = !prioritizing;
+                                  prioritizing = false;
                                 });
                                 loadExams();
                               },
@@ -136,7 +136,7 @@ class _ExamsViewState extends State<ExamsView> {
                                           logger.i('Prioritize clicked!');
 
                                           setState(() {
-                                            prioritizing = !prioritizing;
+                                            prioritizing = true;
                                           });
                                         },
                                         label: Text(
@@ -169,7 +169,7 @@ class _ExamsViewState extends State<ExamsView> {
 
                                           setState(() {
                                             activeExams = reorderExams;
-                                            prioritizing = !prioritizing;
+                                            prioritizing = false;
                                           });
                                           switch (await _controller
                                               .replaceExams(activeExams)) {

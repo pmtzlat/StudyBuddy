@@ -246,7 +246,7 @@ class StudyPlanner {
     //logger.d('calculateWeights');
     try {
       for (SchedulerStack stack in stacks) {
-        final daysToExam = getDaysToExam(day, stack);
+        final daysToExam = _getDaysToExam(day, stack);
         if (daysToExam > 0) {
           stack.weight = (stack.exam.weight + (1 / daysToExam));
         } else {
@@ -261,7 +261,7 @@ class StudyPlanner {
     }
   }
 
-  int getDaysToExam(Day day, SchedulerStack stack) {
+  int _getDaysToExam(Day day, SchedulerStack stack) {
     //logger.d('getDaysToExam');
     try {
       Duration difference = stack.exam.examDate.difference(day.date);

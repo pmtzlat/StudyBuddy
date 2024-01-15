@@ -3,34 +3,30 @@ import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/exam_model.dart';
 
 List<double> generateDescendingList(int n) {
-      List<double> resultList = [];
+  List<double> resultList = [];
 
-      for (int i = 0; i < n; i++) {
-        double value = 2.0 - (2.0/n)*i;
-        resultList.add(double.parse(value.toStringAsFixed(3)));
-      }
+  for (int i = 0; i < n; i++) {
+    double value = 2.0 - (2.0 / n) * i;
+    resultList.add(double.parse(value.toStringAsFixed(3)));
+  }
 
-      return resultList;
-    }
+  return resultList;
+}
 
-String getActiveExamsString(List<ExamModel>? list){
+String getActiveExamsString(List<ExamModel>? list) {
   String res = '';
-  if(list == null) list = instanceManager.sessionStorage.activeExams;
-  for (ExamModel exam in list!){
+  if (list == null) list = instanceManager.sessionStorage.activeExams;
+  for (ExamModel exam in list!) {
     res += '${exam.name} - ${exam.weight}\n';
-
   }
   return res;
 }
 
-String getPosition(ExamModel exam){
-
- int position = instanceManager.sessionStorage.activeExams.indexOf(exam) + 1;
- int total = instanceManager.sessionStorage.activeExams.length;
- return '$position of $total';
-
+String getPosition(ExamModel exam) {
+  int position = instanceManager.sessionStorage.activeExams.indexOf(exam) + 1;
+  int total = instanceManager.sessionStorage.activeExams.length;
+  return '$position of $total';
 }
-
 
 extension HexColor on Color {
   /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
@@ -47,4 +43,10 @@ extension HexColor on Color {
       '${red.toRadixString(16).padLeft(2, '0')}'
       '${green.toRadixString(16).padLeft(2, '0')}'
       '${blue.toRadixString(16).padLeft(2, '0')}';
+}
+
+int getDaysUntilExam(DateTime examDate) {
+  DateTime currentDate = DateTime.now();
+  Duration difference = currentDate.difference(examDate);
+  return difference.inDays.abs();
 }

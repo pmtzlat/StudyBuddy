@@ -83,14 +83,11 @@ class _Page1State extends State<Page1> {
         MaterialColorPicker(
           colors: const [
             Colors.amberAccent,
-            Colors.amber,
             Colors.blueAccent,
             Colors.cyan,
             Colors.deepOrangeAccent,
             Colors.deepPurpleAccent,
-            Colors.greenAccent,
             Colors.indigo,
-            Colors.lightBlueAccent,
             Colors.lightGreen,
             Colors.lime,
             Colors.orangeAccent,
@@ -465,7 +462,7 @@ class Page2State extends State<Page2> {
                                                         context: context,
                                                         initialTime:
                                                             const Duration(
-                                                                minutes: 30),
+                                                                hours: 1),
                                                       ) ??
                                                       unit.sessionTime;
                                               setState(() {});
