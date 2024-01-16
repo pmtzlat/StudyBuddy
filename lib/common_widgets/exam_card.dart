@@ -77,6 +77,7 @@ class _ExamCardState extends State<ExamCard> {
                         style: TextStyle(
                             color: Colors.white, fontSize: screenWidth * 0.06)),
                   ),
+                  SizedBox(width: screenWidth*0.1,),
                   AnimatedContainer(
                     curve: Curves.decelerate,
                     duration: Duration(milliseconds: 300),
