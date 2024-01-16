@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:intl/intl.dart';
+import 'package:study_buddy/common_widgets/plus_minus_field.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/modules/exams/add_exam_button.dart';
+import 'package:study_buddy/modules/exams/exam_detail_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 
@@ -42,6 +45,7 @@ class _Page1State extends State<Page1> {
   Duration revisionTime = Duration(hours: 1);
   final _controller = instanceManager.examController;
   Color examColor = Colors.redAccent;
+  int revisions = 2;
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +149,7 @@ class _Page1State extends State<Page1> {
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           inputType: InputType.date,
                           enabled: true,
+                          format: DateFormat('EEE, M/d/y') ,
                           decoration: InputDecoration(
                               labelText: _localizations.examDate),
                           style: TextStyle(
@@ -162,8 +167,8 @@ class _Page1State extends State<Page1> {
                     Container(
                       margin: EdgeInsets.only(top: screenHeight * 0.05),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
                             width: screenWidth * 0.3,
@@ -191,29 +196,28 @@ class _Page1State extends State<Page1> {
                           SizedBox(
                             width: 30,
                           ),
-                          Container(
-                            width: screenWidth * 0.45,
-                            child: FormBuilderTextField(
-                                name: 'revisions',
-                                autovalidateMode:
-                                    AutovalidateMode.onUserInteraction,
-                                keyboardType: TextInputType.number,
-                                initialValue: '2',
-                                decoration: InputDecoration(
-                                    labelText: _localizations.numberOfRevisions,
-                                    labelStyle: TextStyle(
-                                        fontSize: screenWidth * 0.05)),
-                                style: TextStyle(color: Colors.white),
-                                validator: FormBuilderValidators.compose([
-                                  integerValidator(context),
-                                  FormBuilderValidators.required(),
-                                  FormBuilderValidators.numeric()
-                                ]),
-                                scrollPadding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(context)
-                                        .viewInsets
-                                        .bottom)),
+
+                          Column(
+                            children: [
+                              Text(
+                                _localizations.numberOfRevisions,
+                                style: TextStyle(color: Color.fromRGBO(63, 72, 74, 1.0)),
+                              ),
+                              Container(
+                                margin: EdgeInsets.only(top: screenHeight*0.01),
+                                child: plusMinusField(
+                                    duration: Duration(seconds: 1),
+                                    toggle: true,
+                                    addNumberToParent: (int i) {
+                                      setState(() {
+                                        revisions += i;
+                                      });
+                                    },
+                                    number: revisions),
+                              ),
+                            ],
                           ),
+                          
                         ],
                       ),
                     ),
@@ -305,6 +309,7 @@ class _Page1State extends State<Page1> {
                   examColor: examColor,
                   sessionTime: sessionTime,
                   revisionTime: revisionTime,
+                  revisions: revisions,
                   controller: _controller,
                   formKey: examCreationFormKey,
                   refresh: widget.refresh,
@@ -663,7 +668,8 @@ class Page3State extends State<Page3> {
                                           children: [
                                             Flexible(
                                               child: Text(exam.name,
-                                              overflow: TextOverflow.ellipsis,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                   style: TextStyle(
                                                       color: Colors.white,
                                                       fontSize:

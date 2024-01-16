@@ -21,6 +21,7 @@ class AddButton extends StatefulWidget {
   Function? removePage;
   Duration? revisionTime;
   Color? examColor;
+  int? revisions;
 
   AddButton(
       {super.key,
@@ -35,6 +36,7 @@ class AddButton extends StatefulWidget {
       this.pageController,
       this.removePage,
       this.revisionTime,
+      this.revisions,
       this.examColor});
 
   @override
@@ -69,7 +71,8 @@ class _AddButtonState extends State<AddButton> {
                             widget.formKey!,
                             widget.sessionTime!,
                             widget.revisionTime!, 
-                            widget.examColor!)) {
+                            widget.examColor!,
+                            widget.revisions!)) {
                           case (1):
                             await moveToPage2();
 

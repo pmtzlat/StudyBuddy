@@ -53,7 +53,7 @@ class SchedulerStack {
       unitString += '\n ${revision.name}, hours: ${formatDuration(revision.sessionTime)}';
     }
     logger.f(
-        'Stack ${exam.name} \n Session Time: ${formatDuration(exam.sessionTime)} \n Exam date: ${exam.examDate} \n Order matters: ${exam.orderMatters} \n Weight: ${exam.weight}\n $unitString');
+        'Stack ${exam.name} \n Session Time: ${formatDuration(exam.revisionTime)} \n Exam date: ${exam.examDate} \n Order matters: ${exam.orderMatters} \n Weight: ${exam.weight}\n $unitString');
   }
 
   int getDaysUntilExam(DateTime date) {

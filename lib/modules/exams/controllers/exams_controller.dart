@@ -17,8 +17,6 @@ class ExamsController {
   final firebaseCrud = instanceManager.firebaseCrudService;
   final uid = instanceManager.localStorage.getString('uid') ?? '';
 
-  
-
   Future<void> deleteExam(
       {required String name,
       required String id,
@@ -66,7 +64,6 @@ class ExamsController {
   Future<int> replaceExams(List<ExamModel> newExams) async {
     try {
       final oldExams = filterActiveExams(await firebaseCrud.getAllExams());
-      
 
       for (ExamModel exam in oldExams) {
         await firebaseCrud.deleteExam(examId: exam.id);
@@ -92,7 +89,7 @@ class ExamsController {
       }
       instanceManager.sessionStorage.activeExams
           .sort((ExamModel a, ExamModel b) => b.weight.compareTo(a.weight));
-      logger.i(getActiveExamsString(null));
+      logger.i(getExamsListString(null));
       return 3;
     } catch (e) {
       logger.e('Error in addExamScreen3: $e');
@@ -128,8 +125,12 @@ class ExamsController {
     }
   }
 
-  int addExamScreen1(GlobalKey<FormBuilderState> examCreationFormKey,
-      Duration sessionTime, Duration revisionTime, Color examColor) {
+  int addExamScreen1(
+      GlobalKey<FormBuilderState> examCreationFormKey,
+      Duration sessionTime,
+      Duration revisionTime,
+      Color examColor,
+      int revisions) {
     //returns index of page the addExam flow goes through
     // -1 = error
     // 1 = unit session page
@@ -151,18 +152,17 @@ class ExamsController {
           int.parse(examCreationFormKey.currentState!.fields['units']!.value) ??
               1;
 
-      final int revisions = int.parse(
-              examCreationFormKey.currentState!.fields['revisions']!.value) ??
-          1;
-
       final bool orderMatters =
           examCreationFormKey.currentState!.fields['orderMatters']!.value ??
               false;
 
       //logger.i('Validation done');
 
-      instanceManager.sessionStorage.examToAdd =
-          ExamModel(name: name, examDate: examDate, orderMatters: orderMatters, color: examColor);
+      instanceManager.sessionStorage.examToAdd = ExamModel(
+          name: name,
+          examDate: examDate,
+          orderMatters: orderMatters,
+          color: examColor);
 
       instanceManager.sessionStorage.examToAdd!.units = <UnitModel>[];
       List<UnitModel> unitsList =
@@ -233,7 +233,7 @@ class ExamsController {
   }
 
   Future<void> addExam(ExamModel exam) async {
-    String examID = await firebaseCrud.addExamToUser(newExam: exam);
+    String examID = await firebaseCrud.addExam(newExam: exam);
 
     //logger.i('Exam added!');
     for (UnitModel unit in exam.units) {
@@ -249,7 +249,7 @@ class ExamsController {
   Future<void> getAllExams() async {
     try {
       final exams = await firebaseCrud.getAllExams();
-      logger.i('getAllexams: ${getActiveExamsString(exams)}');
+      logger.i('getAllexams: ${getExamsListString(exams)}');
 
       instanceManager.sessionStorage.savedExams = exams;
       instanceManager.sessionStorage.activeExams = filterActiveExams(exams);
@@ -314,43 +314,39 @@ class ExamsController {
   Future<int?> handleEditExam(
     GlobalKey<FormBuilderState> examFormKey,
     ExamModel exam,
+    int revisions,
+    Duration revisionTime,
+    Color examColor
   ) async {
-    if (examFormKey.currentState!.validate()) {
-      examFormKey.currentState!.save();
-      final name =
-          examFormKey.currentState!.fields['examName']!.value.toString();
-      final weight = examFormKey.currentState!.fields['weightSlider']!.value;
-      final sessionTime = doubleToDuration(
-          double.parse(examFormKey.currentState!.fields['sessionTime']!.value));
-      final examDate =
-          examFormKey.currentState!.fields['examDate']!.value ?? exam.examDate;
-      final orderMatters =
-          examFormKey.currentState!.fields['orderMatters']!.value;
-      final revisions =
-          int.parse(examFormKey.currentState!.fields['revisions']!.value);
+    
+      //await Future.delayed(Duration(seconds:5));
+    ExamModel newExam = ExamModel.copy(exam);
+    newExam.name = examFormKey.currentState!.fields['name']!.value.toString();
+    newExam.revisionTime = revisionTime;
+    newExam.examDate =
+        examFormKey.currentState!.fields['examDate']!.value ?? exam.examDate;
+    newExam.orderMatters = examFormKey.currentState!.fields['orderMatters']!.value;
+    newExam.color = examColor;
+  
+    logger.i('oldExam id: ${exam.id}, new exam id: ${newExam.id}');
 
-      if (examDate.isAfter(DateTime.now())) {
-        final updatedExam = ExamModel(
-            id: exam.id,
-            name: name,
-            examDate: examDate,
-            weight: weight,
-            sessionTime: sessionTime,
-            orderMatters: orderMatters);
 
-        var res = await firebaseCrud.editExam(updatedExam);
 
-        if (res == 1) {
-          res = await handleChangeInRevisions(revisions, exam);
-          if (res == 1)
-            instanceManager.sessionStorage.needsRecalculation = true;
-        }
-        return res;
-      }
-      return -2;
-    } else {
-      logger.e('Error validating edited exam!');
-    }
+    await firebaseCrud.editExam(exam.id, newExam);
+
+    await handleChangeInRevisions(revisions, newExam);
+    var examList = instanceManager.sessionStorage.activeExams;
+    int indexOfItem = examList.indexWhere((item) => item.id == newExam.id);
+
+    logger.w('${newExam.id} : ${await firebaseCrud.getExam(newExam.id)}');
+
+    examList[indexOfItem] = await firebaseCrud.getExam(newExam.id);
+
+    logger.i(getExamsListString(instanceManager.sessionStorage.activeExams));
+
+    instanceManager.sessionStorage.needsRecalculation = true;
+    return 1;
+    
   }
 
   Future<int> handleChangeInRevisions(int revisions, ExamModel exam) async {
@@ -366,8 +362,8 @@ class ExamsController {
           final newUnit = UnitModel(
               name: 'Revision $currentRevisions',
               order: currentRevisions,
-              sessionTime:
-                  doubleToDuration((durationToDouble(exam.sessionTime) * 1.5)));
+              sessionTime: doubleToDuration(
+                  (durationToDouble(exam.revisionTime) * 1.5)));
           logger.i('Adding new revision: ${newUnit.name}');
           res = await firebaseCrud.addRevisionToExam(
               newUnit: newUnit, examID: exam.id);

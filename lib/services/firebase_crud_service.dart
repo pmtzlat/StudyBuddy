@@ -24,7 +24,7 @@ class FirebaseCrudService {
     'Saturday',
     'Sunday'
   ];
-  Future<String?> addExamToUser({required ExamModel newExam}) async {
+  Future<String?> addExam({required ExamModel newExam}) async {
     // Check if the user document exists
     final uid = instanceManager.localStorage.getString('uid');
     final connectivityResult =
@@ -43,7 +43,7 @@ class FirebaseCrudService {
         'name': newExam.name,
         'weight': newExam.weight * 10,
         'examDate': newExam.examDate.toString(),
-        'sessionTime': newExam.sessionTime.toString(),
+        'revisionTime': newExam.revisionTime.toString(),
         'timeStudied': newExam.timeStudied.toString(),
         'color': newExam.color.toHex(),
         'id': '',
@@ -554,11 +554,17 @@ class FirebaseCrudService {
           examDate: DateTime.parse((data['examDate'] as String)),
           timeStudied: parseTime(data['timeStudied']),
           color: HexColor.fromHex(data['color']),
-          sessionTime: parseTime(data['sessionTime']),
+          revisionTime: parseTime(data['revisionTime']),
           id: data['id'] as String,
           orderMatters: data['orderMatters'] as bool,
         );
       }).toList();
+
+      for (ExamModel exam in exams){
+        exam.units = await getUnitsForExam(examID:exam.id) ?? <UnitModel> [];
+        exam.revisions = await getRevisionsForExam(examID: exam.id) ?? <UnitModel>[];
+
+      }
       return exams;
     } catch (e) {
       logger.e('Error getting exams: $e');
@@ -915,46 +921,33 @@ class FirebaseCrudService {
     return;
   }
 
-  Future<int?> editExam(ExamModel exam) async {
+  Future<int?> editExam(String examID, ExamModel newExam) async {
+    
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     final examReference = firebaseInstance
         .collection('users')
         .doc(uid)
         .collection('exams')
-        .doc(exam.id);
+        .doc(examID);
 
     await examReference.update({
-      'name': exam.name,
-      'examDate': exam.examDate.toString(),
-      'weight': exam.weight * 10,
-      'sessionTime': exam.sessionTime.toString(),
-      'orderMatters': exam.orderMatters,
-      'revisions': exam.revisions
+      'name': newExam.name,
+      'examDate': newExam.examDate.toString(),
+      'weight': newExam.weight * 10,
+      'revisionTime': newExam.revisionTime.toString(),
+      'orderMatters': newExam.orderMatters,
+      'color': newExam.color.toHex()
     });
 
     logger.i('editExam: updated exam');
 
-    final examUnits = await getUnitsForExam(examID: exam.id);
-
-    if (examUnits != null) {
-      for (var unit in examUnits!) {
-        final res = await editUnit(
-            exam: exam,
-            unitID: unit.id,
-            updatedUnit: unit.copyWith(sessionTime: exam.sessionTime));
-
-        if (res != 1) {
-          return -1;
-        }
-      }
-    }
-
     return 1;
+    
   }
 
   Future<ExamModel?> getExam(String examID) async {
-    try {
+    
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
       final docSnapshot = await firebaseInstance
@@ -963,28 +956,32 @@ class FirebaseCrudService {
           .collection('exams')
           .doc(examID)
           .get();
-
+      
       if (docSnapshot.exists) {
+        
         final data = docSnapshot.data() as Map<String, dynamic>;
         final double weight = ((data['weight'] as double) / 10.0);
 
-        return ExamModel(
+        var exam =  ExamModel(
           name: data['name'] as String,
           weight: weight,
           examDate: DateTime.parse(data['examDate'] as String),
           timeStudied: parseTime(data['timeStudied']),
           color: HexColor.fromHex(data['color']),
-          sessionTime: parseTime(data['sessionTime']),
+          revisionTime: parseTime(data['revisionTime']),
           id: data['id'] as String,
           orderMatters: data['orderMatters'] as bool,
         );
+        
+
+        exam.units = await getUnitsForExam(examID: exam.id) ?? <UnitModel>[];
+        exam.revisions = await getRevisionsForExam(examID: exam.id) ?? <UnitModel>[];
+        return exam;
       } else {
+        logger.w('Exam $examID not found!');
         return null;
       }
-    } catch (e) {
-      logger.e('Error getting exam: $e');
-      return null;
-    }
+    
   }
 
   Future<String?> addCustomDay(Day day) async {

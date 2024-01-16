@@ -4,12 +4,12 @@ import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 class ExamModel {
-  final String name;
+  String name;
   double weight;
   DateTime examDate;
   Duration timeStudied;
   Color color;
-  Duration sessionTime;
+  Duration revisionTime;
   final String id;
   List<UnitModel> units;
   bool orderMatters;
@@ -32,12 +32,24 @@ class ExamModel {
     required this.examDate,
     this.timeStudied = const Duration(seconds:0),
     this.color = Colors.redAccent,
-    this.sessionTime = const Duration(hours: 2), //one hour
+    this.revisionTime = const Duration(hours: 2), //one hour
     this.id = '0',
     this.units = const <UnitModel>[],
     this.orderMatters = false,
     this.revisions = const [],
   });
+
+   ExamModel.copy(ExamModel other)
+      : name = other.name,
+        weight = other.weight,
+        examDate = other.examDate,
+        timeStudied = other.timeStudied,
+        color = other.color,
+        revisionTime = other.revisionTime,
+        id = other.id,
+        units = List<UnitModel>.from(other.units),
+        orderMatters = other.orderMatters,
+        revisions = List<UnitModel>.from(other.revisions);
 
   bool inFuture(DateTime date) {
     if (examDate.isAfter(date)) {
@@ -68,11 +80,11 @@ class ExamModel {
   Future<void> addUnit() async {
     final firebaseCrud = instanceManager.firebaseCrudService;
     if (units == null) {
-      final newUnit = UnitModel(name: 'Unit 1', order: 1, sessionTime: sessionTime, completed: false);
+      final newUnit = UnitModel(name: 'Unit 1', order: 1, sessionTime: revisionTime, completed: false);
       await firebaseCrud.addUnitToExam(newUnit: newUnit, examID: id);
     } else {
       final newUnit = UnitModel(
-          name: 'Unit ${units!.length + 1}', order: units!.length + 1, sessionTime: sessionTime, completed: false);
+          name: 'Unit ${units!.length + 1}', order: units!.length + 1, sessionTime: revisionTime, completed: false);
       await firebaseCrud.addUnitToExam(newUnit: newUnit, examID: id);
     }
     await getUnits();

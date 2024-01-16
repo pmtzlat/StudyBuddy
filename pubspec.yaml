@@ -65,6 +65,7 @@ dependencies:
   flutter_material_color_picker: ^1.2.0
   sliding_switch: ^1.1.0
   flutter_slidable: ^3.0.1
+  flutter_shakemywidget: ^1.0.5+1
   
   
   

@@ -13,7 +13,7 @@ List<double> generateDescendingList(int n) {
   return resultList;
 }
 
-String getActiveExamsString(List<ExamModel>? list) {
+String getExamsListString(List<ExamModel>? list) {
   String res = '';
   if (list == null) list = instanceManager.sessionStorage.activeExams;
   for (ExamModel exam in list!) {
@@ -48,5 +48,9 @@ extension HexColor on Color {
 int getDaysUntilExam(DateTime examDate) {
   DateTime currentDate = DateTime.now();
   Duration difference = currentDate.difference(examDate);
-  return difference.inDays.abs();
+  return difference.inDays.abs()+1;
 }
+
+
+
+

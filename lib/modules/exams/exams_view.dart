@@ -165,7 +165,7 @@ class _ExamsViewState extends State<ExamsView> {
                                               (ExamModel a, ExamModel b) =>
                                                   b.weight.compareTo(a.weight));
                                           logger.i(
-                                              'reorderExams after confirm clicked: ${getActiveExamsString(reorderExams)}');
+                                              'reorderExams after confirm clicked: ${getExamsListString(reorderExams)}');
 
                                           setState(() {
                                             activeExams = reorderExams;

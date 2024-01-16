@@ -1,14 +1,21 @@
+import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
+import 'package:flutter_shakemywidget/flutter_shakemywidget.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:intl/intl.dart';
 import 'package:study_buddy/common_widgets/marquee.dart';
+import 'package:study_buddy/common_widgets/plus_minus_field.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/common_widgets/loading_screen.dart';
 import 'package:study_buddy/common_widgets/unit_card.dart';
 import 'package:study_buddy/services/logging_service.dart';
+import 'package:study_buddy/utils/error_&_success_messages.dart';
 import 'package:study_buddy/utils/general_utils.dart';
+import 'package:study_buddy/utils/validators.dart';
 import '../../main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -34,15 +41,22 @@ class _ExamDetailViewState extends State<ExamDetailView> {
   final editExamFormKey = GlobalKey<FormBuilderState>();
   bool loading = false;
   Duration editSwitchTime = Duration(milliseconds: 300);
+  bool orderMatters = false;
+  int revisions = 0;
+  Duration revisionTime = Duration(seconds: 0);
+  DateTime examDate = DateTime.now();
+  Color examColor = Colors.white;
+  String position = '';
 
   @override
   void initState() {
     super.initState();
-    init();
-  }
-
-  void init() {
-    //loadUnits();
+    orderMatters = widget.exam.orderMatters;
+    revisions = widget.exam.revisions.length;
+    revisionTime = widget.exam.revisionTime;
+    examDate = widget.exam.examDate;
+    examColor = widget.exam.color;
+    position = getPosition(widget.exam);
   }
 
   @override
@@ -50,10 +64,69 @@ class _ExamDetailViewState extends State<ExamDetailView> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    final cardColor = widget.exam.color;
+    final cardColor = examColor;
     final lighterColor = lighten(cardColor, .05);
     final darkerColor = darken(cardColor, .2);
     ExamModel exam = widget.exam;
+
+    final shakeKey1 = GlobalKey<ShakeWidgetState>();
+    final shakeKey2 = GlobalKey<ShakeWidgetState>();
+    final shakeKey3 = GlobalKey<ShakeWidgetState>();
+
+    void _openDialog(String title, Widget content) {
+      showDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            contentPadding: const EdgeInsets.all(18.0),
+            title: Text(title, style: TextStyle(color: Colors.white)),
+            content: content,
+            backgroundColor: Color.fromARGB(255, 16, 16, 16),
+            actions: [
+              TextButton(
+                onPressed: Navigator.of(context).pop,
+                child: Text(_localizations.cancel,
+                    style: TextStyle(color: Colors.white)),
+              ),
+              TextButton(
+                onPressed: () {
+                  
+                  Navigator.of(context).pop();
+                },
+                child: Text(_localizations.select,
+                    style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    void _openMainColorPicker() async {
+      _openDialog(
+        _localizations.chooseColor,
+        MaterialColorPicker(
+          colors: const [
+            Colors.amberAccent,
+            Colors.blueAccent,
+            Colors.cyan,
+            Colors.deepOrangeAccent,
+            Colors.deepPurpleAccent,
+            Colors.indigo,
+            Colors.lightGreen,
+            Colors.lime,
+            Colors.orangeAccent,
+            Colors.pinkAccent,
+            Colors.purpleAccent,
+            Colors.redAccent,
+            Colors.teal,
+          ],
+          selectedColor: examColor,
+          allowShades: false,
+          onMainColorChange: (color) => setState(() => examColor = color!),
+        ),
+      );
+    }
 
     var examData = Expanded(
       child: Container(
@@ -114,22 +187,36 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                 ),
                 AnimatedContainer(
                   duration: editSwitchTime,
-                  height:
-                      !editMode ? screenHeight * 0.015 : screenHeight * 0.04,
+                  height: !editMode ? 0 : screenHeight * 0.04,
                 ),
                 AnimatedSwitcher(
                     duration: editSwitchTime,
                     child: !editMode
-                        ? Text(formatDateTime(exam.examDate),
+                        ? Text(DateFormat('EEE, M/d/y').format(exam.examDate),
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: screenWidth * 0.06,
                                 fontWeight: FontWeight.w300))
                         : FormBuilderDateTimePicker(
-                            name: "date",
+                            name: "examDate",
                             inputType: InputType.date,
                             decoration: InputDecoration.collapsed(hintText: ''),
                             initialValue: exam.examDate,
+                            format: DateFormat('EEE, M/d/y'),
+                            validator: FormBuilderValidators.compose([
+                              FormBuilderValidators.required(),
+                              futureDateValidator,
+                            ]),
+                            autovalidateMode:
+                                AutovalidateMode.onUserInteraction,
+                            onChanged: (DateTime? value) {
+                              if (!value!.isBefore(stripTime(DateTime.now())
+                                  .add(Duration(days: 1)))) {
+                                setState(() {
+                                  examDate = value!;
+                                });
+                              }
+                            },
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: screenWidth * 0.06,
@@ -137,103 +224,138 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                           )),
                 AnimatedContainer(
                   duration: editSwitchTime,
-                  height: !editMode ? screenHeight * 0.08 : screenHeight * 0.05,
+                  height: !editMode ? screenHeight * 0.08 : screenHeight * 0.03,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
+                GestureDetector(
+                  onTap: () {
+                    if (editMode) {
+                      shakeKey1.currentState?.shake();
+                    }
+                  },
+                  child: ShakeMe(
+                    key: shakeKey1,
+                    shakeCount: 3,
+                    shakeOffset: 10,
+                    shakeDuration: Duration(milliseconds: 500),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(
-                          Icons.pin_rounded,
-                           color: Colors.white,
-                          size: screenWidth * 0.08,
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.pin_rounded,
+                              color: Colors.white,
+                              size: screenWidth * 0.08,
+                            ),
+                            SizedBox(width: 10),
+                            Text(_localizations.priority,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: screenWidth * 0.05))
+                          ],
                         ),
-                        SizedBox(width: 10),
-                        Text(_localizations.priority,
+                        Text(position,
                             style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                                color: !editMode
+                                    ? Colors.white
+                                    : const Color.fromARGB(255, 93, 93, 93),
+                                fontWeight: FontWeight.w400,
                                 fontSize: screenWidth * 0.05))
                       ],
                     ),
-                    Text(getPosition(exam),
-                        style: TextStyle(
-                            color: !editMode
-                                ? Colors.white
-                                : const Color.fromARGB(255, 93, 93, 93),
-                            fontWeight: FontWeight.w400,
-                            fontSize: screenWidth * 0.05))
-                  ],
+                  ),
                 ),
                 AnimatedContainer(
                   duration: editSwitchTime,
-                  height:
-                      !editMode ? screenHeight * 0.015 : screenHeight * 0.05,
+                  height: screenHeight * 0.015,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today_outlined,
-                          color: Colors.white,
-                          size: screenWidth * 0.08,
-                        ),
-                        SizedBox(width: 10),
-                        Text(_localizations.daysUntilExam,
-                            style: TextStyle(
+                GestureDetector(
+                    onTap: () {
+                      if (editMode) {
+                        shakeKey2.currentState?.shake();
+                      }
+                    },
+                    child: ShakeMe(
+                      key: shakeKey2,
+                      shakeCount: 3,
+                      shakeOffset: 10,
+                      shakeDuration: Duration(milliseconds: 500),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today_outlined,
                                 color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: screenWidth * 0.05))
-                      ],
-                    ),
-                    Text('${getDaysUntilExam(exam.examDate)}',
-                        style: TextStyle(
-                            color: !editMode
-                                ? Colors.white
-                                : const Color.fromARGB(255, 93, 93, 93),
-                            fontWeight: FontWeight.w400,
-                            fontSize: screenWidth * 0.05))
-                  ],
-                ),
+                                size: screenWidth * 0.08,
+                              ),
+                              SizedBox(width: 10),
+                              Text(_localizations.daysUntilExam,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: screenWidth * 0.05))
+                            ],
+                          ),
+                          Text('${getDaysUntilExam(examDate)}',
+                              style: TextStyle(
+                                  color: !editMode
+                                      ? Colors.white
+                                      : const Color.fromARGB(255, 93, 93, 93),
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: screenWidth * 0.05))
+                        ],
+                      ),
+                    )),
                 AnimatedContainer(
                   duration: editSwitchTime,
-                  height:
-                      !editMode ? screenHeight * 0.015 : screenHeight * 0.05,
+                  height: screenHeight * 0.015,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.timer,
-                          color: Colors.white,
-                          size: screenWidth * 0.08,
-                        ),
-                        SizedBox(width: 10),
-                        Text(_localizations.timeStudied,
-                            style: TextStyle(
+                GestureDetector(
+                    onTap: () {
+                      if (editMode) {
+                        shakeKey3.currentState?.shake();
+                      }
+                    },
+                    child: ShakeMe(
+                      key: shakeKey3,
+                      shakeCount: 3,
+                      shakeOffset: 10,
+                      shakeDuration: Duration(milliseconds: 500),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.timer,
                                 color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: screenWidth * 0.05))
-                      ],
-                    ),
-                    Text(formatDuration(exam.timeStudied),
-                        style: TextStyle(
-                            color: !editMode
-                                ? Colors.white
-                                : const Color.fromARGB(255, 93, 93, 93),
-                            fontWeight: FontWeight.w400,
-                            fontSize: screenWidth * 0.05))
-                  ],
-                ),
+                                size: screenWidth * 0.08,
+                              ),
+                              SizedBox(width: 10),
+                              Text(_localizations.timeStudied,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: screenWidth * 0.05))
+                            ],
+                          ),
+                          Text(formatDuration(exam.timeStudied),
+                              style: TextStyle(
+                                  color: !editMode
+                                      ? Colors.white
+                                      : const Color.fromARGB(255, 93, 93, 93),
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: screenWidth * 0.05))
+                        ],
+                      ),
+                    )),
                 AnimatedContainer(
                   duration: editSwitchTime,
                   height:
-                      !editMode ? screenHeight * 0.015 : screenHeight * 0.05,
+                      !editMode ? screenHeight * 0.015 : screenHeight * 0.04,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -253,20 +375,95 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                 fontSize: screenWidth * 0.05))
                       ],
                     ),
-                    Text(
-                        exam.orderMatters
-                            ? _localizations.yes
-                            : _localizations.no,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w400,
-                            fontSize: screenWidth * 0.05))
+                    FormBuilderField<bool>(
+                        name: 'orderMatters',
+                        enabled: editMode,
+                        initialValue: exam.orderMatters,
+                        builder: (FormFieldState<dynamic> field) {
+                          return Checkbox(
+                              visualDensity: VisualDensity(
+                                  horizontal: -4,
+                                  vertical: -4), // Adjust the values as needed
+                              activeColor: Colors
+                                  .white, // Color when checkbox is checked
+                              checkColor:
+                                  Colors.black, // Color of the checkmark
+                              fillColor:
+                                  MaterialStateProperty.all(Colors.white),
+                              value:
+                                  !editMode ? exam.orderMatters : orderMatters,
+                              onChanged: (bool? newValue) {
+                                if (editMode) {
+                                  setState(() {
+                                    logger.i(newValue);
+                                    orderMatters = newValue ?? false;
+                                    // Additional logic can be added here based on the new value
+                                  });
+                                  field.didChange(newValue);
+                                }
+                              });
+                        })
+
+                    // Container(
+                    //   width: screenWidth * 0.1,
+                    //   child: FormBuilderCheckbox(
+                    //     name: 'orderMatters',
+                    //     enabled: editMode,
+                    //   initialValue: exam.orderMatters,
+                    //   title: SizedBox(),
+                    //   ),
+                    // )
                   ],
                 ),
                 AnimatedContainer(
                   duration: editSwitchTime,
                   height:
-                      !editMode ? screenHeight * 0.015 : screenHeight * 0.05,
+                      !editMode ? screenHeight * 0.015 : screenHeight * 0.04,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.restore_page_outlined,
+                          color: Colors.white,
+                          size: screenWidth * 0.08,
+                        ),
+                        SizedBox(width: 10),
+                        Text(
+                          _localizations.revisionDays,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenWidth * 0.05),
+                        )
+                      ],
+                    ),
+                    AnimatedContainer(
+                      duration: editSwitchTime,
+                      width: !editMode ? screenWidth * 0.12 : screenWidth * 0.2,
+                      child: SingleChildScrollView(
+                        physics: NeverScrollableScrollPhysics(),
+                        scrollDirection: Axis.horizontal,
+                        child: plusMinusField(
+                          duration: editSwitchTime,
+                          toggle: editMode,
+                          number: revisions,
+                          addNumberToParent: (int value) {
+                            setState(() {
+                              revisions += value;
+                            });
+                          },
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                AnimatedContainer(
+                  duration: editSwitchTime,
+                  height:
+                      !editMode ? screenHeight * 0.015 : screenHeight * 0.04,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -283,16 +480,78 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                             style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: screenWidth * 0.042))
+                                fontSize: screenWidth * 0.04))
                       ],
                     ),
-                    Text(formatDuration(exam.sessionTime),
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w400,
-                            fontSize: screenWidth * 0.05))
+                    GestureDetector(
+                      onTap: () async {
+                        if (editMode) {
+                          revisionTime = await showDurationPicker(
+                                context: context,
+                                initialTime: revisionTime,
+                              ) ??
+                              revisionTime;
+                          setState(() {
+                            revisionTime = revisionTime;
+                          });
+                          logger.i(revisionTime);
+                        }
+                      },
+                      child: Text(formatDuration(revisionTime),
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w400,
+                              fontSize: screenWidth * 0.05)),
+                    )
                   ],
                 ),
+                AnimatedContainer(
+                  duration: editSwitchTime,
+                  height:
+                      !editMode ? screenHeight * 0.015 : screenHeight * 0.03,
+                ),
+                AnimatedSwitcher(
+                    duration: editSwitchTime,
+                    child: editMode
+                        ? Container(
+                            width: screenWidth * 0.9,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.brush,
+                                  color: Colors.white,
+                                  size: screenWidth * 0.08,
+                                ),
+                                SizedBox(width: 10),
+                                Text(_localizations.color,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: screenWidth * 0.05)),
+                                SizedBox(
+                                  width: screenWidth * 0.06,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    _openMainColorPicker();
+                                  },
+                                  child: Container(
+                                    width: screenWidth * 0.1,
+                                    height: screenWidth * 0.1,
+                                    decoration: BoxDecoration(
+                                      color: examColor,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 3.0,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                        : SizedBox()),
               ],
             ),
           )),
@@ -347,6 +606,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                     child: IconButton(
                                         iconSize: screenWidth * 0.1,
                                         onPressed: () {
+                                          //return
                                           widget.pageController.animateToPage(0,
                                               duration:
                                                   Duration(milliseconds: 300),
@@ -360,32 +620,50 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                               ),
                             )
                           : Container(
-                              // cancel prioritize
+                              // cancel edit
                               key: ValueKey<int>(1),
                               height: screenHeight * 0.06,
                               width: screenWidth * 0.4,
                               padding: EdgeInsets.all(2),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  TextButton.icon(
-                                      key: ValueKey<int>(1),
-                                      onPressed: () {
-                                        logger.i('Cancel clicked!');
-                                        setState(() {
-                                          editMode = false;
-                                        });
-                                      },
-                                      label: Text(_localizations.cancel,
-                                          style: TextStyle(
-                                              color: Colors.redAccent,
-                                              fontSize: screenWidth * 0.05)),
-                                      icon: Icon(
-                                        Icons.close_rounded,
-                                        color: Colors.redAccent,
-                                        size: screenWidth * 0.08,
-                                      )),
-                                ],
+                              child: AnimatedSwitcher(
+                                duration: editSwitchTime,
+                                child: !loading
+                                    ? Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          TextButton.icon(
+                                              key: ValueKey<int>(1),
+                                              onPressed: () {
+                                                logger.i('Cancel clicked!');
+                                                editExamFormKey.currentState!
+                                                    .reset();
+                                                setState(() {
+                                                  editMode = false;
+
+                                                  orderMatters =
+                                                      exam.orderMatters;
+                                                  revisions =
+                                                      exam.revisions.length;
+                                                  revisionTime =
+                                                      exam.revisionTime;
+                                                  examDate = exam.examDate;
+                                                  examColor = exam.color;
+                                                });
+                                              },
+                                              label: Text(_localizations.cancel,
+                                                  style: TextStyle(
+                                                      color: Colors.redAccent,
+                                                      fontSize:
+                                                          screenWidth * 0.05)),
+                                              icon: Icon(
+                                                Icons.close_rounded,
+                                                color: Colors.redAccent,
+                                                size: screenWidth * 0.08,
+                                              ))
+                                        ],
+                                      )
+                                    : SizedBox(),
                               ),
                             ),
                     ),
@@ -394,6 +672,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                       child: !editMode
                           ? TextButton.icon(
                               onPressed: () {
+                                //toggle edit
                                 setState(() {
                                   editMode = true;
                                 });
@@ -407,23 +686,89 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                TextButton.icon(
-                                    key: ValueKey<int>(1),
-                                    onPressed: () {
-                                      logger.i('Confirm clicked!');
-                                      setState(() {
-                                        editMode = false;
-                                      });
-                                    },
-                                    label: Text(_localizations.confirm,
-                                        style: TextStyle(
-                                            color: Colors.greenAccent,
-                                            fontSize: screenWidth * 0.05)),
-                                    icon: Icon(
-                                      Icons.done,
-                                      color: Colors.greenAccent,
-                                      size: screenWidth * 0.08,
-                                    )),
+                                AnimatedSwitcher(
+                                    duration: editSwitchTime,
+                                    child: !loading
+                                        ? TextButton.icon(
+                                            key: ValueKey<int>(0),
+                                            onPressed: () async {
+                                              //confirm edit
+                                              logger.i('Confirm clicked!');
+                                              setState(() {
+                                                loading = true;
+                                              });
+
+                                              if (editExamFormKey!.currentState!
+                                                  .validate()) {
+                                                editExamFormKey!.currentState!
+                                                    .save();
+                                                try {
+                                                  await _controller
+                                                      .handleEditExam(
+                                                          editExamFormKey,
+                                                          widget.exam,
+                                                          revisions,
+                                                          revisionTime,
+                                                          examColor);
+                                                } catch (e) {
+                                                  logger.e(
+                                                      'Error editing exam: $e');
+                                                  editExamFormKey.currentState!
+                                                      .reset();
+                                                  showRedSnackbar(
+                                                      context,
+                                                      _localizations
+                                                          .errorEditingExam);
+                                                }
+
+                                                final activeExams =
+                                                    instanceManager
+                                                        .sessionStorage
+                                                        .activeExams;
+
+                                                setState(() {
+                                                  loading = false;
+                                                  editMode = false;
+                                                  widget.exam =
+                                                      activeExams.firstWhere(
+                                                          (examToFind) =>
+                                                              examToFind.id ==
+                                                              exam.id);
+                                                  exam = widget.exam;
+                                                  orderMatters =
+                                                      exam.orderMatters;
+                                                  revisions =
+                                                      exam.revisions.length;
+                                                  revisionTime =
+                                                      exam.revisionTime;
+                                                  examDate = exam.examDate;
+                                                  examColor = exam.color;
+                                                });
+                                              }
+                                            },
+                                            label: Text(_localizations.confirm,
+                                                style: TextStyle(
+                                                    color: Colors.greenAccent,
+                                                    fontSize:
+                                                        screenWidth * 0.05)),
+                                            icon: Icon(
+                                              Icons.done,
+                                              color: Colors.greenAccent,
+                                              size: screenWidth * 0.08,
+                                            ))
+                                        : TextButton.icon(
+                                            key: ValueKey<int>(1),
+                                            onPressed: () {},
+                                            label: Text(_localizations.loading,
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize:
+                                                        screenWidth * 0.05)),
+                                            icon: Icon(
+                                              Icons.edit_outlined,
+                                              color: Colors.white,
+                                              size: screenWidth * 0.08,
+                                            ))),
                               ],
                             ),
                     )
@@ -493,6 +838,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
   //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
   // }
 }
+
 
 
 // Container(
