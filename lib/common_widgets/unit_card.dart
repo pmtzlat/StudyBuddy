@@ -32,17 +32,25 @@ class UnitCard extends StatefulWidget {
   State<UnitCard> createState() => _UnitCardState();
 }
 
-class _UnitCardState extends State<UnitCard> {
+class _UnitCardState extends State<UnitCard>
+    with SingleTickerProviderStateMixin {
   final _controller = instanceManager.examController;
   var editMode = false;
   final unitFormKey = GlobalKey<FormBuilderState>();
   UnitModel unit = UnitModel(name: 'init', order: 0);
+  bool open = false;
+  late AnimationController _animationController;
+  Duration openUnit = Duration(milliseconds: 200);
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     unit = widget.unit;
+    _animationController = AnimationController(
+      vsync: this,
+      duration: openUnit,
+    );
   }
 
   @override
@@ -54,16 +62,40 @@ class _UnitCardState extends State<UnitCard> {
       elevation: 0,
       margin: EdgeInsets.symmetric(vertical: 8.0),
       color: widget.darkMode ? widget.darkShade : widget.lightShade,
-      child: Container(
-        //height: screenHeight*0.08,
-        padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
-        child: Row(
-          children: [
-            Text(unit.name,
-                style: TextStyle(
-                    color: widget.darkMode ? Colors.black : Colors.white,
-                    fontSize: screenWidth*0.05))
-          ],
+      child: AnimatedContainer(
+        duration: openUnit,
+        height: !open ? screenHeight*0.07 : screenHeight*0.2,
+        child: SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              Theme(
+                data: ThemeData().copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  iconColor: Colors.white,
+                  collapsedIconColor: Colors.white,
+                  backgroundColor: Colors.transparent,
+                  trailing: RotationTransition(
+                      turns: Tween<double>(begin: 0.0, end: 0.5).animate(_animationController),
+                      child: Icon(Icons.expand_more, color: Colors.white)),
+                  onExpansionChanged: (bool expanded) {
+                    setState(() {
+                      open = expanded;
+                      if (open) {
+                        _animationController.forward();
+                      } else {
+                        _animationController.reverse();
+                      }
+                    });
+                  },
+                  title: Text(unit.name,
+                      style: TextStyle(
+                          color: widget.darkMode ? Colors.black : Colors.white,
+                          fontSize: screenWidth * 0.05)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

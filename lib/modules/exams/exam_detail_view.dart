@@ -545,8 +545,8 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                 exam: exam,
                 notifyParent: () {},
                 showError: () {},
-                lightShade: lighten(widget.exam.color, 0.1),
-                darkShade: widget.exam.color,
+                lightShade: lighten(examColor, 0.1),
+                darkShade: examColor,
                 darkMode: editMode)
         ]),
       ),
