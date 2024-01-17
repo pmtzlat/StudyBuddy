@@ -69,10 +69,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
     final darkerColor = darken(cardColor, .2);
     ExamModel exam = widget.exam;
 
-    final shakeKey1 = GlobalKey<ShakeWidgetState>();
-    final shakeKey2 = GlobalKey<ShakeWidgetState>();
-    final shakeKey3 = GlobalKey<ShakeWidgetState>();
-
     void _openDialog(String title, Widget content) {
       showDialog(
         context: context,
@@ -90,7 +86,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
               ),
               TextButton(
                 onPressed: () {
-                  
                   Navigator.of(context).pop();
                 },
                 child: Text(_localizations.select,
@@ -226,136 +221,108 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                   duration: editSwitchTime,
                   height: !editMode ? screenHeight * 0.08 : screenHeight * 0.03,
                 ),
-                GestureDetector(
-                  onTap: () {
-                    if (editMode) {
-                      shakeKey1.currentState?.shake();
-                    }
-                  },
-                  child: ShakeMe(
-                    key: shakeKey1,
-                    shakeCount: 3,
-                    shakeOffset: 10,
-                    shakeDuration: Duration(milliseconds: 500),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                AnimatedContainer(
+                  duration: editSwitchTime,
+                  height: !editMode ? screenHeight * 0.2 : screenHeight * 0.04,
+                  child: SingleChildScrollView(
+                    reverse: true,
+                    child: Column(
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(
-                              Icons.pin_rounded,
-                              color: Colors.white,
-                              size: screenWidth * 0.08,
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.pin_rounded,
+                                  color: Colors.white,
+                                  size: screenWidth * 0.08,
+                                ),
+                                SizedBox(width: 10),
+                                Text(_localizations.priority,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: screenWidth * 0.05))
+                              ],
                             ),
-                            SizedBox(width: 10),
-                            Text(_localizations.priority,
+                            Text(position,
                                 style: TextStyle(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w400,
                                     fontSize: screenWidth * 0.05))
                           ],
                         ),
-                        Text(position,
-                            style: TextStyle(
-                                color: !editMode
-                                    ? Colors.white
-                                    : const Color.fromARGB(255, 93, 93, 93),
-                                fontWeight: FontWeight.w400,
-                                fontSize: screenWidth * 0.05))
+                        Container(
+                          height: screenHeight * 0.015,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.calendar_today_outlined,
+                                  color: Colors.white,
+                                  size: screenWidth * 0.08,
+                                ),
+                                SizedBox(width: 10),
+                                Text(_localizations.daysUntilExam,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: screenWidth * 0.05))
+                              ],
+                            ),
+                            Text('${getDaysUntilExam(examDate)}',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: screenWidth * 0.05))
+                          ],
+                        ),
+                        Container(
+                          height: screenHeight * 0.015,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.timer,
+                                  color: Colors.white,
+                                  size: screenWidth * 0.08,
+                                ),
+                                SizedBox(width: 10),
+                                Text(_localizations.timeStudied,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: screenWidth * 0.05))
+                              ],
+                            ),
+                            Text(formatDuration(exam.timeStudied),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: screenWidth * 0.05))
+                          ],
+                        ),
+                        Container(
+                          margin: EdgeInsets.symmetric(
+                              vertical: screenHeight * 0.02),
+                          color: Colors.white,
+                          height: 2,
+                        )
                       ],
                     ),
                   ),
                 ),
                 AnimatedContainer(
                   duration: editSwitchTime,
-                  height: screenHeight * 0.015,
-                ),
-                GestureDetector(
-                    onTap: () {
-                      if (editMode) {
-                        shakeKey2.currentState?.shake();
-                      }
-                    },
-                    child: ShakeMe(
-                      key: shakeKey2,
-                      shakeCount: 3,
-                      shakeOffset: 10,
-                      shakeDuration: Duration(milliseconds: 500),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.calendar_today_outlined,
-                                color: Colors.white,
-                                size: screenWidth * 0.08,
-                              ),
-                              SizedBox(width: 10),
-                              Text(_localizations.daysUntilExam,
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: screenWidth * 0.05))
-                            ],
-                          ),
-                          Text('${getDaysUntilExam(examDate)}',
-                              style: TextStyle(
-                                  color: !editMode
-                                      ? Colors.white
-                                      : const Color.fromARGB(255, 93, 93, 93),
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: screenWidth * 0.05))
-                        ],
-                      ),
-                    )),
-                AnimatedContainer(
-                  duration: editSwitchTime,
-                  height: screenHeight * 0.015,
-                ),
-                GestureDetector(
-                    onTap: () {
-                      if (editMode) {
-                        shakeKey3.currentState?.shake();
-                      }
-                    },
-                    child: ShakeMe(
-                      key: shakeKey3,
-                      shakeCount: 3,
-                      shakeOffset: 10,
-                      shakeDuration: Duration(milliseconds: 500),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.timer,
-                                color: Colors.white,
-                                size: screenWidth * 0.08,
-                              ),
-                              SizedBox(width: 10),
-                              Text(_localizations.timeStudied,
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: screenWidth * 0.05))
-                            ],
-                          ),
-                          Text(formatDuration(exam.timeStudied),
-                              style: TextStyle(
-                                  color: !editMode
-                                      ? Colors.white
-                                      : const Color.fromARGB(255, 93, 93, 93),
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: screenWidth * 0.05))
-                        ],
-                      ),
-                    )),
-                AnimatedContainer(
-                  duration: editSwitchTime,
                   height:
-                      !editMode ? screenHeight * 0.015 : screenHeight * 0.04,
+                      !editMode ? screenHeight * 0.005 : screenHeight * 0.04,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -514,6 +481,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                     duration: editSwitchTime,
                     child: editMode
                         ? Container(
+                            key: ValueKey<int>(0),
                             width: screenWidth * 0.9,
                             child: Row(
                               children: [
@@ -551,7 +519,9 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                               ],
                             ),
                           )
-                        : SizedBox()),
+                        : Container(
+                            key: ValueKey<int>(1),
+                          )),
               ],
             ),
           )),
@@ -670,106 +640,124 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                     AnimatedSwitcher(
                       duration: editSwitchTime,
                       child: !editMode
-                          ? TextButton.icon(
-                              onPressed: () {
-                                //toggle edit
-                                setState(() {
-                                  editMode = true;
-                                });
-                              },
-                              icon: Icon(Icons.edit, color: Colors.white),
-                              label: Text(_localizations.edit,
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: screenWidth * 0.05,
-                                      fontWeight: FontWeight.w400)))
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                AnimatedSwitcher(
-                                    duration: editSwitchTime,
-                                    child: !loading
-                                        ? TextButton.icon(
-                                            key: ValueKey<int>(0),
-                                            onPressed: () async {
-                                              //confirm edit
-                                              logger.i('Confirm clicked!');
-                                              setState(() {
-                                                loading = true;
-                                              });
-
-                                              if (editExamFormKey!.currentState!
-                                                  .validate()) {
-                                                editExamFormKey!.currentState!
-                                                    .save();
-                                                try {
-                                                  await _controller
-                                                      .handleEditExam(
-                                                          editExamFormKey,
-                                                          widget.exam,
-                                                          revisions,
-                                                          revisionTime,
-                                                          examColor);
-                                                } catch (e) {
-                                                  logger.e(
-                                                      'Error editing exam: $e');
-                                                  editExamFormKey.currentState!
-                                                      .reset();
-                                                  showRedSnackbar(
-                                                      context,
-                                                      _localizations
-                                                          .errorEditingExam);
-                                                }
-
-                                                final activeExams =
-                                                    instanceManager
-                                                        .sessionStorage
-                                                        .activeExams;
-
-                                                setState(() {
-                                                  loading = false;
-                                                  editMode = false;
-                                                  widget.exam =
-                                                      activeExams.firstWhere(
-                                                          (examToFind) =>
-                                                              examToFind.id ==
-                                                              exam.id);
-                                                  exam = widget.exam;
-                                                  orderMatters =
-                                                      exam.orderMatters;
-                                                  revisions =
-                                                      exam.revisions.length;
-                                                  revisionTime =
-                                                      exam.revisionTime;
-                                                  examDate = exam.examDate;
-                                                  examColor = exam.color;
-                                                });
-                                              }
-                                            },
-                                            label: Text(_localizations.confirm,
-                                                style: TextStyle(
-                                                    color: Colors.greenAccent,
-                                                    fontSize:
-                                                        screenWidth * 0.05)),
-                                            icon: Icon(
-                                              Icons.done,
-                                              color: Colors.greenAccent,
-                                              size: screenWidth * 0.08,
-                                            ))
-                                        : TextButton.icon(
-                                            key: ValueKey<int>(1),
-                                            onPressed: () {},
-                                            label: Text(_localizations.loading,
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize:
-                                                        screenWidth * 0.05)),
-                                            icon: Icon(
-                                              Icons.edit_outlined,
+                          ? Container(
+                              width: screenWidth * 0.36,
+                              key: ValueKey<int>(0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton.icon(
+                                      onPressed: () {
+                                        //toggle edit
+                                        setState(() {
+                                          editMode = true;
+                                        });
+                                      },
+                                      icon:
+                                          Icon(Icons.edit, color: Colors.white),
+                                      label: Text(_localizations.edit,
+                                          style: TextStyle(
                                               color: Colors.white,
-                                              size: screenWidth * 0.08,
-                                            ))),
-                              ],
+                                              fontSize: screenWidth * 0.05,
+                                              fontWeight: FontWeight.w400))),
+                                ],
+                              ),
+                            )
+                          : Container(
+                              width: screenWidth * 0.36,
+                              key: ValueKey<int>(1),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  AnimatedSwitcher(
+                                      duration: editSwitchTime,
+                                      child: !loading
+                                          ? TextButton.icon(
+                                              key: ValueKey<int>(0),
+                                              onPressed: () async {
+                                                //confirm edit
+                                                logger.i('Confirm clicked!');
+                                                setState(() {
+                                                  loading = true;
+                                                });
+
+                                                if (editExamFormKey!
+                                                    .currentState!
+                                                    .validate()) {
+                                                  editExamFormKey!.currentState!
+                                                      .save();
+                                                  try {
+                                                    await _controller
+                                                        .handleEditExam(
+                                                            editExamFormKey,
+                                                            widget.exam,
+                                                            revisions,
+                                                            revisionTime,
+                                                            examColor);
+                                                  } catch (e) {
+                                                    logger.e(
+                                                        'Error editing exam: $e');
+                                                    editExamFormKey
+                                                        .currentState!
+                                                        .reset();
+                                                    showRedSnackbar(
+                                                        context,
+                                                        _localizations
+                                                            .errorEditingExam);
+                                                  }
+
+                                                  final activeExams =
+                                                      instanceManager
+                                                          .sessionStorage
+                                                          .activeExams;
+
+                                                  setState(() {
+                                                    loading = false;
+                                                    editMode = false;
+                                                    widget.exam =
+                                                        activeExams.firstWhere(
+                                                            (examToFind) =>
+                                                                examToFind.id ==
+                                                                exam.id);
+                                                    exam = widget.exam;
+                                                    orderMatters =
+                                                        exam.orderMatters;
+                                                    revisions =
+                                                        exam.revisions.length;
+                                                    revisionTime =
+                                                        exam.revisionTime;
+                                                    examDate = exam.examDate;
+                                                    examColor = exam.color;
+                                                  });
+                                                }
+                                              },
+                                              label: Text(
+                                                  _localizations.confirm,
+                                                  style: TextStyle(
+                                                      color: Colors.greenAccent,
+                                                      fontSize:
+                                                          screenWidth * 0.05)),
+                                              icon: Icon(
+                                                Icons.done,
+                                                color: Colors.greenAccent,
+                                                size: screenWidth * 0.08,
+                                              ))
+                                          : TextButton.icon(
+                                              key: ValueKey<int>(1),
+                                              onPressed: () {},
+                                              label: Text(
+                                                  _localizations.loading,
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize:
+                                                          screenWidth * 0.05)),
+                                              icon: Icon(
+                                                Icons.edit_outlined,
+                                                color: Colors.white,
+                                                size: screenWidth * 0.08,
+                                              ))),
+                                ],
+                              ),
                             ),
                     )
                   ],
