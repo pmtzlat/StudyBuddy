@@ -11,16 +11,22 @@ import 'package:study_buddy/modules/exams/exam_detail_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 class UnitCard extends StatefulWidget {
-  final UnitModel unit;
-  final ExamModel exam;
-  final Function notifyParent;
-  final Function showError;
+  UnitModel unit;
+  ExamModel exam;
+  Function notifyParent;
+  Function showError;
+  Color lightShade;
+  Color darkShade;
+  bool darkMode;
 
   UnitCard(
       {required this.unit,
       required this.exam,
       required Function this.notifyParent,
-      required Function this.showError});
+      required Function this.showError,
+      required this.lightShade,
+      required this.darkShade,
+      required this.darkMode});
 
   @override
   State<UnitCard> createState() => _UnitCardState();
@@ -30,91 +36,33 @@ class _UnitCardState extends State<UnitCard> {
   final _controller = instanceManager.examController;
   var editMode = false;
   final unitFormKey = GlobalKey<FormBuilderState>();
+  UnitModel unit = UnitModel(name: 'init', order: 0);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    unit = widget.unit;
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    var screenHeight = MediaQuery.of(context).size.height;
     final _localizations = AppLocalizations.of(context)!;
     return Card(
-      elevation: 2.0,
+      elevation: 0,
       margin: EdgeInsets.symmetric(vertical: 8.0),
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
+      color: widget.darkMode ? widget.darkShade : widget.lightShade,
+      child: Container(
+        //height: screenHeight*0.08,
+        padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
         child: Row(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: editMode == false
-                  ? [
-                      Text('Unit ${widget.unit.order}: ${widget.unit.name}'),
-                      Text('${widget.unit.id}'),
-                      Text('${formatDuration(widget.unit.sessionTime)}'),
-                      Row(children: widget.unit.completed ? [Text(_localizations.unitCompleted)] : [Text(_localizations.unitNotCompleted)]), 
-                      SizedBox(width: 8.0),
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              editMode = true;
-                            });
-                          },
-                          icon: Icon(Icons.edit))
-                    ]
-                  : [
-                      FormBuilder(
-                          key: unitFormKey,
-                          child: Container(
-                            width: screenWidth * 0.6,
-                            child: Column(
-                              children: [
-                                FormBuilderTextField(
-                                  name: 'unitName',
-                                  autovalidateMode:
-                                      AutovalidateMode.onUserInteraction,
-                                  decoration: InputDecoration(
-                                      labelText: _localizations.unitName),
-                                  style: TextStyle(color: Colors.black),
-                                  initialValue: widget.unit.name,
-                                  validator: FormBuilderValidators.compose([]),
-                                ),
-                                FormBuilderTextField(
-                                  name: 'sessionTime',
-                                  autovalidateMode:
-                                      AutovalidateMode.onUserInteraction,
-                                  keyboardType: TextInputType.number,
-                                  initialValue: '${durationToDouble(widget.unit.sessionTime)}',
-                                  decoration: InputDecoration(
-                                    labelText: _localizations.unitHours,
-                                  ),
-                                  style: TextStyle(color: Colors.black),
-                                  validator: FormBuilderValidators.compose([
-                                    FormBuilderValidators.required(),
-                                    FormBuilderValidators.numeric()
-                                  ]),
-                                ),
-                                FormBuilderCheckbox(
-                                  name: 'completed',
-                                  title: Text(_localizations.isUnitCompleted),
-                                  initialValue: widget.unit.completed,
-                                )
-                              ],
-                            ),
-                          )),
-                      IconButton(
-                          onPressed: () async {
-                            int? res = await _controller.handleEditUnit(
-                                unitFormKey, widget.exam, widget.unit);
-                            if (res == -1) {
-                              widget.showError(_localizations.errorEditingUnit);
-                            }
-                            widget.notifyParent();
-
-                            setState(() {
-                              editMode = false;
-                            });
-                          },
-                          icon: Icon(Icons.check))
-                    ],
-            ),
+            Text(unit.name,
+                style: TextStyle(
+                    color: widget.darkMode ? Colors.black : Colors.white,
+                    fontSize: screenWidth*0.05))
           ],
         ),
       ),

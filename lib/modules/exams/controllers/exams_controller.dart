@@ -108,7 +108,8 @@ class ExamsController {
       for (UnitModel unit in units) {
         unit.name = unitsFormKey
             .currentState!.fields['Unit ${unit.order} name']!.value
-            .toString();
+            .toString() ;
+        if(unit.name == '') unit.name = 'Unit ${unit.order}';
         // logger.i(
         //     'Name and time for unit ${unit.order}: ${unit.name}, ${formatDuration(unit.sessionTime)}');
       }
@@ -338,7 +339,7 @@ class ExamsController {
     var examList = instanceManager.sessionStorage.activeExams;
     int indexOfItem = examList.indexWhere((item) => item.id == newExam.id);
 
-    logger.w('${newExam.id} : ${await firebaseCrud.getExam(newExam.id)}');
+    //logger.w('${newExam.id} : ${await firebaseCrud.getExam(newExam.id)}');
 
     examList[indexOfItem] = await firebaseCrud.getExam(newExam.id);
 

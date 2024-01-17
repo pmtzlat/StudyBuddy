@@ -112,4 +112,8 @@ class ExamModel {
       }
     }
   }
+
+  void printMe(){
+    logger.i('Exam $name: \n Date: $examDate:\n Order Matters: $orderMatters\n Units: ${units.length}\n Revision days: ${revisions.length}\n Revision session: $revisionTime');
+  }
 }

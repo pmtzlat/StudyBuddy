@@ -425,11 +425,11 @@ class Page2State extends State<Page2> {
                                         children: [
                                           Row(
                                             children: [
-                                              Text('${unit.order}.  ',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize:
-                                                          screenWidth * 0.05)),
+                                              // Text('${unit.order}.  ',
+                                              //     style: TextStyle(
+                                              //         color: Colors.white,
+                                              //         fontSize:
+                                              //             screenWidth * 0.05)),
                                               Container(
                                                 // color: const Color.fromARGB(
                                                 //     81, 255, 235, 59),
