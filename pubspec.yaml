@@ -45,7 +45,7 @@ dependencies:
   flutter_signin_button: ^2.0.0
   shared_preferences: ^2.2.1
   cloud_firestore: ^4.9.1
-  connectivity_plus: ^4.0.2
+  connectivity_plus: ^5.0.2
   flutter_form_builder: ^9.1.1
   form_builder_validators: ^9.0.0
   flutter_localizations:
@@ -66,6 +66,7 @@ dependencies:
   sliding_switch: ^1.1.0
   flutter_slidable: ^3.0.1
   flutter_shakemywidget: ^1.0.5+1
+  firebase_database: ^10.4.0
   
   
   

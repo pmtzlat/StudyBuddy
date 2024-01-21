@@ -8,19 +8,19 @@ class LocalStorageService {
   final SharedPreferences localStorage;
   LocalStorageService({required SharedPreferences this.localStorage});
 
-  Future<int> updateDateHandling() async {
-    logger.i('Previous Old date: ${localStorage.getString('oldDate')?? 'Not found'}');
-    logger.i('Previus New date: ${localStorage.getString('newDate')?? 'Not found'}');
-    final now = await NTP.now();
-    if (stripTime(now) != stripTime(DateTime.now())) {
-      logger.e('Current Date doesn\'t match server!');
-      return -1;
-    }
+  int updateDateHandling(){
+    
+    logger.i(
+        'Previous Old date: ${localStorage.getString('oldDate') ?? 'Not found'}');
+    logger.i(
+        'Previus New date: ${localStorage.getString('newDate') ?? 'Not found'}');
+
+    
     final String oldNewDate = localStorage.getString('newDate') ??
         stripTime(now.subtract(const Duration(days: 1))).toString();
 
     //logger.i('Old newdate: ${oldNewDate}');
-    
+
     localStorage.setString('oldDate', oldNewDate);
     //localStorage.setString('oldDate', '2023-11-18 00:00:00.000');
     localStorage.setString('newDate', stripTime(now).toString());
@@ -28,5 +28,15 @@ class LocalStorageService {
     logger.i('Current Old date: ${localStorage.getString('oldDate')}');
     logger.i('Current New date: ${localStorage.getString('newDate')}');
     return 1;
+  }
+
+  Future<bool> isCorrectDate() async {
+    final timeStamp = await NTP.now();
+    logger.i('timeStamp : ${stripTime(timeStamp)} - dateTime.now: ${stripTime(DateTime.now())}');
+    if (stripTime(timeStamp) != stripTime(DateTime.now())) {
+      logger.e('Current Date doesn\'t match server!');
+      return false;
+    }
+    return true;
   }
 }

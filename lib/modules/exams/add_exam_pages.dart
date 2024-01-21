@@ -404,7 +404,7 @@ class Page2State extends State<Page2> {
                   key: unitTimesFormKey,
                   child: SingleChildScrollView(
                     child: Container(
-                      padding: EdgeInsets.only(bottom: screenHeight * 0.1),
+                      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom + screenHeight * 0.1),
                       child: Column(children: [
                         for (UnitModel unit
                             in instanceManager.sessionStorage.examToAdd.units)

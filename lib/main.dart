@@ -1,4 +1,6 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -15,30 +17,39 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 var instanceManager;
 var now;
-var synced;
+late bool synced;
+late ConnectivityResult connectivityResult;
+Duration timeoutDuration = Duration(seconds: 10);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  connectivityResult = await (Connectivity().checkConnectivity()); //this line
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FirebaseDatabase.instance.setPersistenceEnabled(true);
 
   instanceManager = InstanceManager();
-  now = await NTP.now();
+  synced = true;
+
   await instanceManager.startDependantInstances();
+  if (connectivityResult == ConnectivityResult.wifi ||
+      connectivityResult == ConnectivityResult.ethernet ||
+      connectivityResult == ConnectivityResult.mobile) {
+    now = await NTP.now();
+    synced = await instanceManager.localStorageCustomOperations.isCorrectDate();
 
-  synced =
-      await instanceManager.localStorageCustomOperations.updateDateHandling();
-  if (synced == 1) {
-    await instanceManager.calendarController.getIncompletePreviousDays(
-        DateTime.parse(instanceManager.localStorage.getString('oldDate')));
+    if (synced) {
+      instanceManager.localStorageCustomOperations.updateDateHandling();
+      await instanceManager.calendarController.getIncompletePreviousDays(
+          DateTime.parse(instanceManager.localStorage.getString('oldDate')));
+    }
+
+    await instanceManager.examController.getAllExams();
+    await instanceManager.calendarController.getGaps();
+    await instanceManager.calendarController.getCustomDays();
+    await instanceManager.calendarController.getCalendarDay(now);
   }
-
-  await instanceManager.examController.getAllExams();
-  await instanceManager.calendarController.getGaps();
-  await instanceManager.calendarController.getCustomDays();
-  await instanceManager.calendarController.getCalendarDay(now);
 
   runApp(StudyBuddyApp());
 }
@@ -66,7 +77,7 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
     logger.i('uid found on boot: $uid');
     logger.i('Got all exams! ${instanceManager.sessionStorage.savedExams}');
 
-    if (synced != 1) {
+    if (!synced) {
       return MaterialApp(
         title: 'StudyBuddy',
         home: DesyncView(),
@@ -86,22 +97,25 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
       );
     }
 
-    return  MaterialApp(
-        title: 'StudyBuddy',
-        home: (user != null) ? CalendarView() : SignInView(),
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color.fromARGB(255, 46, 46, 46)),
-          useMaterial3: true,
+    return MaterialApp(
+      title: 'StudyBuddy',
+      home: (user != null) ? CalendarView() : SignInView(),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(255, 46, 46, 46)),
+        useMaterial3: true,
+        textSelectionTheme: TextSelectionThemeData(
+          selectionHandleColor: Colors.transparent,
         ),
-        supportedLocales: [Locale('es'), Locale('en')],
-        localizationsDelegates: [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          FormBuilderLocalizations.delegate,
-        ],
-      );
+      ),
+      supportedLocales: [Locale('es'), Locale('en')],
+      localizationsDelegates: [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        FormBuilderLocalizations.delegate,
+      ],
+    );
   }
 }

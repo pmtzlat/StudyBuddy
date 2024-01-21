@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
+import 'package:study_buddy/utils/datatype_utils.dart';
 
 class ExamModel {
   String name;
@@ -14,7 +15,6 @@ class ExamModel {
   List<UnitModel> units;
   bool orderMatters;
   List<UnitModel> revisions;
-
 
   /*
   var iconData = IconData(58717, fontFamily: 'MaterialIcons')
@@ -30,7 +30,7 @@ class ExamModel {
     required this.name,
     this.weight = 2.0,
     required this.examDate,
-    this.timeStudied = const Duration(seconds:0),
+    this.timeStudied = const Duration(seconds: 0),
     this.color = Colors.redAccent,
     this.revisionTime = const Duration(hours: 2), //one hour
     this.id = '0',
@@ -39,7 +39,7 @@ class ExamModel {
     this.revisions = const [],
   });
 
-   ExamModel.copy(ExamModel other)
+  ExamModel.copy(ExamModel other)
       : name = other.name,
         weight = other.weight,
         examDate = other.examDate,
@@ -57,6 +57,7 @@ class ExamModel {
     }
     return false;
   }
+
   bool inPastOrPresent(DateTime date) {
     if (!examDate.isAfter(date)) {
       return true;
@@ -66,35 +67,68 @@ class ExamModel {
 
   Future<void> getUnits() async {
     final firebaseCrud = instanceManager.firebaseCrudService;
-    units = await firebaseCrud.getUnitsForExam(examID: id);
-    //printUnits();
+    try {
+      units = await firebaseCrud
+          .getUnitsForExam(examID: id)
+          .timeout(timeoutDuration);
+      //printUnits();
+    } catch (e) {
+      logger.e('Error getting units for exam: $name: $e');
+    }
   }
 
   Future<void> getRevisions() async {
     final firebaseCrud = instanceManager.firebaseCrudService;
-    revisions = await firebaseCrud.getRevisionsForExam(examID: id);
-    //printRevisions();
-
+    try {
+      revisions = await firebaseCrud
+          .getRevisionsForExam(examID: id)
+          .timeout(timeoutDuration)
+          .timeout(timeoutDuration);
+      //printRevisions();
+    } catch (e) {
+      logger.e('Error getting revisions for exam: $name: $e');
+    }
   }
 
   Future<void> addUnit() async {
     final firebaseCrud = instanceManager.firebaseCrudService;
-    if (units == null) {
-      final newUnit = UnitModel(name: 'Unit 1', order: 1, sessionTime: revisionTime, completed: false);
-      await firebaseCrud.addUnitToExam(newUnit: newUnit, examID: id);
-    } else {
-      final newUnit = UnitModel(
-          name: 'Unit ${units!.length + 1}', order: units!.length + 1, sessionTime: revisionTime, completed: false);
-      await firebaseCrud.addUnitToExam(newUnit: newUnit, examID: id);
+    try {
+      if (units == null) {
+        final newUnit = UnitModel(
+            name: 'Unit 1',
+            order: 1,
+            sessionTime: revisionTime,
+            completed: false);
+        await firebaseCrud
+            .addUnitToExam(newUnit: newUnit, examID: id)
+            .timeout(timeoutDuration);
+      } else {
+        final newUnit = UnitModel(
+            name: 'Unit ${units!.length + 1}',
+            order: units!.length + 1,
+            sessionTime: revisionTime,
+            completed: false);
+        await firebaseCrud
+            .addUnitToExam(newUnit: newUnit, examID: id)
+            .timeout(timeoutDuration);
+      }
+      await getUnits();
+    } catch (e) {
+      logger.e('Error adding unit: $e');
     }
-    await getUnits();
   }
 
   Future<void> deleteUnit({required UnitModel unit}) async {
-    final firebaseCrud = instanceManager.firebaseCrudService;
-    final unitNum = unit.order;
-    await firebaseCrud.deleteUnit(unit: unit, examID: id);
-    await getUnits();
+    try {
+      final firebaseCrud = instanceManager.firebaseCrudService;
+      final unitNum = unit.order;
+      await firebaseCrud
+          .deleteUnit(unit: unit, examID: id)
+          .timeout(timeoutDuration);
+      await getUnits();
+    } catch (e) {
+      logger.e('Error deleting unit $e');
+    }
   }
 
   void printUnits() {
@@ -113,7 +147,16 @@ class ExamModel {
     }
   }
 
-  void printMe(){
-    logger.i('Exam $name: \n Date: $examDate:\n Order Matters: $orderMatters\n Units: ${units.length}\n Revision days: ${revisions.length}\n Revision session: $revisionTime');
+  void printMe() {
+    String res =
+        'Exam $name: \n Date: $examDate:\n Order Matters: $orderMatters\n Units: ';
+    for (UnitModel unit in units) {
+      res +=
+          '\n       ${unit.name}: ${formatDuration(unit.sessionTime)}, completed: ${unit.completed}';
+    }
+    res +=
+        '\n Revision days: ${revisions.length}\n Revision session: $revisionTime';
+
+    logger.i(res);
   }
 }

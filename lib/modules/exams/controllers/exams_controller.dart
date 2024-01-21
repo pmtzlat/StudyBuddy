@@ -23,7 +23,7 @@ class ExamsController {
       required int index,
       required BuildContext context}) async {
     try {
-      await firebaseCrud.deleteExam(examId: id);
+      await firebaseCrud.deleteExam(examId: id).timeout(timeoutDuration);
       final snackbar = SnackBar(
           content:
               Text(name + AppLocalizations.of(context)!.examDeletedCorrectly),
@@ -52,7 +52,7 @@ class ExamsController {
 
       for (ExamModel exam in exams) {
         logger.i(exam.name);
-        await firebaseCrud.editExamWeight(exam);
+        await firebaseCrud.editExamWeight(exam).timeout(timeoutDuration);
       }
       return 1;
     } catch (e) {
@@ -63,10 +63,11 @@ class ExamsController {
 
   Future<int> replaceExams(List<ExamModel> newExams) async {
     try {
-      final oldExams = filterActiveExams(await firebaseCrud.getAllExams());
+      final oldExams = filterActiveExams(
+          await firebaseCrud.getAllExams().timeout(timeoutDuration));
 
       for (ExamModel exam in oldExams) {
-        await firebaseCrud.deleteExam(examId: exam.id);
+        await firebaseCrud.deleteExam(examId: exam.id).timeout(timeoutDuration);
       }
 
       for (ExamModel exam in newExams) {
@@ -108,8 +109,8 @@ class ExamsController {
       for (UnitModel unit in units) {
         unit.name = unitsFormKey
             .currentState!.fields['Unit ${unit.order} name']!.value
-            .toString() ;
-        if(unit.name == '') unit.name = 'Unit ${unit.order}';
+            .toString();
+        if (unit.name == '') unit.name = 'Unit ${unit.order}';
         // logger.i(
         //     'Name and time for unit ${unit.order}: ${unit.name}, ${formatDuration(unit.sessionTime)}');
       }
@@ -204,52 +205,59 @@ class ExamsController {
     }
   }
 
-  Future<int> handleAddExam() async {
+  Future<bool> handleAddExam() async {
     try {
       final exams = instanceManager.sessionStorage.activeExams;
 
+      // instanceManager.sessionStorage.activeExams.removeAt(instanceManager
+      //     .sessionStorage.activeExams
+      //     .indexOf(instanceManager.sessionStorage.examToAdd));
+
       for (ExamModel exam in exams) {
         ExamModel? alreadyInDB = await firebaseCrud.getExam(exam.id);
+
         if (alreadyInDB != null) {
-          //update weight
           logger.i('Exam ${exam.name} found in DB! Updating...');
-
           await firebaseCrud.editExamWeight(exam);
-          //logger.i('Done!');
         } else {
-          //add exam
           logger.i('Exam ${exam.name} not found in DB! Adding...');
-
           await addExam(exam);
-          // logger.i('Revisions added!');
-          // logger.i('Done!');
         }
       }
 
-      return 1;
+      //await addExam(instanceManager.sessionStorage.examToAdd);
+
+      return true;
     } catch (e) {
-      logger.e('Error handling add exam: $e');
-      return -1;
+      logger.e('Error in handleAddExam: $e');
+      rethrow; // Rethrow the exception after logging it
     }
   }
 
   Future<void> addExam(ExamModel exam) async {
-    String examID = await firebaseCrud.addExam(newExam: exam);
+    try {
+      String examID = await firebaseCrud.addExam(newExam: exam);
 
-    //logger.i('Exam added!');
-    for (UnitModel unit in exam.units) {
-      await firebaseCrud.addUnitToExam(newUnit: unit, examID: examID);
-    }
-    //logger.i('Units added!');
+      if (examID != null) {
+        for (UnitModel unit in exam.units) {
+          await firebaseCrud.addUnitToExam(newUnit: unit, examID: examID);
+        }
 
-    for (UnitModel revision in exam.revisions) {
-      await firebaseCrud.addRevisionToExam(newUnit: revision, examID: examID);
+        for (UnitModel revision in exam.revisions) {
+          await firebaseCrud.addRevisionToExam(
+              newUnit: revision, examID: examID);
+        }
+      }
+    } catch (e) {
+      logger.e('Error in addExam: $e');
+      rethrow; // Rethrow the exception after logging it
     }
   }
 
   Future<void> getAllExams() async {
     try {
       final exams = await firebaseCrud.getAllExams();
+      ;
       logger.i('getAllexams: ${getExamsListString(exams)}');
 
       instanceManager.sessionStorage.savedExams = exams;
@@ -280,74 +288,93 @@ class ExamsController {
 
   Future<int?> handleEditUnit(GlobalKey<FormBuilderState> unitFormKey,
       ExamModel exam, UnitModel oldUnit) async {
-    if (unitFormKey.currentState!.validate()) {
-      unitFormKey.currentState!.save();
+    try {
+      if (unitFormKey.currentState!.validate()) {
+        unitFormKey.currentState!.save();
 
-      final name =
-          unitFormKey.currentState!.fields['unitName']!.value.toString();
-      final sessionTime = doubleToDuration(double.parse(
-          unitFormKey.currentState!.fields['sessionTime']!.value.toString()));
-      final completed = unitFormKey.currentState!.fields['completed']!.value;
-      final completionTime;
-      if (completed == false) {
-        completionTime = Duration.zero;
+        final name =
+            unitFormKey.currentState!.fields['unitName']!.value.toString();
+        final sessionTime = doubleToDuration(double.parse(
+            unitFormKey.currentState!.fields['sessionTime']!.value.toString()));
+        final completed = unitFormKey.currentState!.fields['completed']!.value;
+        final completionTime;
+        if (completed == false) {
+          completionTime = Duration.zero;
+        } else {
+          completionTime = sessionTime;
+        }
+
+        final updatedUnit = UnitModel(
+            name: name,
+            order: oldUnit.order,
+            sessionTime: sessionTime,
+            completed: completed,
+            completionTime: completionTime);
+
+        dynamic res = await firebaseCrud
+            .editUnit(exam: exam, unitID: oldUnit.id, updatedUnit: updatedUnit)
+            .timeout(timeoutDuration);
+        ;
+        if (res == 1) instanceManager.sessionStorage.needsRecalculation = true;
+
+        return res;
       } else {
-        completionTime = sessionTime;
+        logger.e('Error validating unit keys!');
       }
-
-      final updatedUnit = UnitModel(
-          name: name,
-          order: oldUnit.order,
-          sessionTime: sessionTime,
-          completed: completed,
-          completionTime: completionTime);
-
-      dynamic res = await firebaseCrud.editUnit(
-          exam: exam, unitID: oldUnit.id, updatedUnit: updatedUnit);
-      if (res == 1) instanceManager.sessionStorage.needsRecalculation = true;
-
-      return res;
-    } else {
-      logger.e('Error validating unit keys!');
+    } on Exception catch (e) {
+      logger.e('Error handling edit Unit: $e');
+      return -1;
     }
   }
 
   Future<int?> handleEditExam(
-    GlobalKey<FormBuilderState> examFormKey,
-    ExamModel exam,
-    int revisions,
-    Duration revisionTime,
-    Color examColor
-  ) async {
-    
-      //await Future.delayed(Duration(seconds:5));
-    ExamModel newExam = ExamModel.copy(exam);
-    newExam.name = examFormKey.currentState!.fields['name']!.value.toString();
-    newExam.revisionTime = revisionTime;
-    newExam.examDate =
-        examFormKey.currentState!.fields['examDate']!.value ?? exam.examDate;
-    newExam.orderMatters = examFormKey.currentState!.fields['orderMatters']!.value;
-    newExam.color = examColor;
-  
-    logger.i('oldExam id: ${exam.id}, new exam id: ${newExam.id}');
+      GlobalKey<FormBuilderState> examFormKey,
+      ExamModel exam,
+      int revisions,
+      Duration revisionTime,
+      Color examColor) async {
+    //await Future.delayed(Duration(seconds:5));
+    try {
+      ExamModel newExam = ExamModel.copy(exam);
+      newExam.name = examFormKey.currentState!.fields['name']!.value.toString();
+      newExam.revisionTime = revisionTime;
+      newExam.examDate =
+          examFormKey.currentState!.fields['examDate']!.value ?? exam.examDate;
+      newExam.orderMatters =
+          examFormKey.currentState!.fields['orderMatters']!.value;
+      newExam.color = examColor;
 
+      logger.i('oldExam id: ${exam.id}, new exam id: ${newExam.id}');
 
+      newExam.units = List<UnitModel>.from(exam.units);
 
-    await firebaseCrud.editExam(exam.id, newExam);
+      await firebaseCrud.editExam(exam.id, newExam).timeout(timeoutDuration);
 
-    await handleChangeInRevisions(revisions, newExam);
-    var examList = instanceManager.sessionStorage.activeExams;
-    int indexOfItem = examList.indexWhere((item) => item.id == newExam.id);
+      await firebaseCrud.clearUnitsForExam(exam.id);
+      for (UnitModel unit in newExam.units) {
+        unit.name = examFormKey
+            .currentState!.fields['Unit ${unit.order} name']!.value
+            .toString();
 
-    //logger.w('${newExam.id} : ${await firebaseCrud.getExam(newExam.id)}');
+        await firebaseCrud.addUnitToExam(newUnit: unit, examID: exam.id);
+      }
 
-    examList[indexOfItem] = await firebaseCrud.getExam(newExam.id);
+      await handleChangeInRevisions(revisions, newExam);
+      var examList = instanceManager.sessionStorage.activeExams;
+      int indexOfItem = examList.indexWhere((item) => item.id == newExam.id);
 
-    logger.i(getExamsListString(instanceManager.sessionStorage.activeExams));
+      examList[indexOfItem] =
+          await firebaseCrud.getExam(newExam.id).timeout(timeoutDuration);
+      ;
 
-    instanceManager.sessionStorage.needsRecalculation = true;
-    return 1;
-    
+      logger.i(getExamsListString(instanceManager.sessionStorage.activeExams));
+
+      instanceManager.sessionStorage.needsRecalculation = true;
+      return 1;
+    } on Exception catch (e) {
+      logger.e('Error handlEditExam: $e');
+      return -1;
+    }
   }
 
   Future<int> handleChangeInRevisions(int revisions, ExamModel exam) async {
@@ -366,16 +393,20 @@ class ExamsController {
               sessionTime: doubleToDuration(
                   (durationToDouble(exam.revisionTime) * 1.5)));
           logger.i('Adding new revision: ${newUnit.name}');
-          res = await firebaseCrud.addRevisionToExam(
-              newUnit: newUnit, examID: exam.id);
+          res = await firebaseCrud
+              .addRevisionToExam(newUnit: newUnit, examID: exam.id)
+              .timeout(timeoutDuration);
+          ;
           if (res == null) return -1;
         }
       } else if (revisions < currentRevisions) {
         logger.i('new revisions is < current revisions');
         while (revisions < currentRevisions) {
           logger.i('Removing new revision: ${currentRevisions}');
-          res = await firebaseCrud.removeRevisionFromExam(
-              currentRevisions, exam.id);
+          res = await firebaseCrud
+              .removeRevisionFromExam(currentRevisions, exam.id)
+              .timeout(timeoutDuration);
+          ;
           if (res == null) return -1;
           currentRevisions--;
         }
@@ -390,13 +421,18 @@ class ExamsController {
   Future<int> markUnitsCompletedIfInPreviousDays(DateTime date) async {
     try {
       logger.i('updating Day ${date.toString()}');
-      final day = await firebaseCrud.getCalendarDayByDate(date);
+      final day = await firebaseCrud
+          .getCalendarDayByDate(date)
+          .timeout(timeoutDuration);
+      ;
       if (day == null) return 1;
 
       logger.i('DayID: ${day.id}');
 
-      final List<TimeSlot> timeSlotsInDay =
-          await firebaseCrud.getTimeSlotsForCalendarDay(day.id);
+      final List<TimeSlot> timeSlotsInDay = await firebaseCrud
+          .getTimeSlotsForCalendarDay(day.id)
+          .timeout(timeoutDuration);
+      ;
       logger.i(
           'Got timeSlots for day ${day.date.toString()}: ${timeSlotsInDay.length}');
 
@@ -405,10 +441,15 @@ class ExamsController {
         final exam = timeSlot.examID;
         logger.i(
             'Marking unit ${timeSlot.unitName} ${timeSlot.unitID} as complete...');
-        int res = await firebaseCrud.markUnitAsComplete(exam, unit);
+        int res = await firebaseCrud
+            .markUnitAsComplete(exam, unit)
+            .timeout(timeoutDuration);
+        ;
         if (res != 1) return -1;
-        res = await firebaseCrud.markCalendarTimeSlotAsComplete(
-            day.id, timeSlot.id);
+        res = await firebaseCrud
+            .markCalendarTimeSlotAsComplete(day.id, timeSlot.id)
+            .timeout(timeoutDuration);
+        ;
         if (res != 1) return -1;
 
         logger.i('Unit ${timeSlot.unitName} marked as complete');

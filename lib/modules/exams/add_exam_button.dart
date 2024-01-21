@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:study_buddy/main.dart';
@@ -70,7 +72,7 @@ class _AddButtonState extends State<AddButton> {
                         switch (await widget.controller.addExamScreen1(
                             widget.formKey!,
                             widget.sessionTime!,
-                            widget.revisionTime!, 
+                            widget.revisionTime!,
                             widget.examColor!,
                             widget.revisions!)) {
                           case (1):
@@ -140,8 +142,9 @@ class _AddButtonState extends State<AddButton> {
 
                       // int res = await widget.controller
                       //     .handleAddExam(widget.examCreationFormKey);
-                      
-                      switch (await widget.controller.applyWeights(instanceManager.sessionStorage.activeExams)) {
+
+                      switch (await widget.controller.applyWeights(
+                          instanceManager.sessionStorage.activeExams)) {
                         // change to screen3
                         case (3):
                           saveExams(context);
@@ -162,15 +165,21 @@ class _AddButtonState extends State<AddButton> {
   }
 
   void saveExams(BuildContext context) async {
-    if (!instanceManager.sessionStorage.activeExams
-        .contains(instanceManager.sessionStorage.examToAdd)) {
-      instanceManager.sessionStorage.activeExams
-          .add(instanceManager.sessionStorage.examToAdd);
-    }
+    try {
+      if (await widget.controller.handleAddExam()) {
+        // if (!instanceManager.sessionStorage.activeExams
+        //     .contains(instanceManager.sessionStorage.examToAdd)) {
+        //   instanceManager.sessionStorage.activeExams
+        //       .add(instanceManager.sessionStorage.examToAdd);
+        // }
 
-    if (await widget.controller.handleAddExam() == 1) {
-      await closeSuccess(context);
-    } else {
+        await closeSuccess(context);
+      }
+    } on TimeoutException catch (timeoutError) {
+      logger.e('Timeout saving exam: $timeoutError');
+      await closeError(context);
+    } catch (e) {
+      logger.e('Error saving exam: $e');
       await closeError(context);
     }
   }
@@ -180,9 +189,7 @@ class _AddButtonState extends State<AddButton> {
       content: Text(AppLocalizations.of(context)!.errorAddingExam),
       backgroundColor: Colors.red,
     );
-    setState(() {
-      loading = false;
-    });
+
     await closeModal(context, snackbar);
   }
 
@@ -208,10 +215,9 @@ class _AddButtonState extends State<AddButton> {
   Future<void> moveToPage3({bool skipPage2 = false}) async {
     var exams = instanceManager.sessionStorage.activeExams;
     exams.insert(0, instanceManager.sessionStorage.examToAdd);
-    
+
     widget.controller.applyWeights(instanceManager.sessionStorage.activeExams);
 
-    
     widget.lockClose!(false);
     setState(() {
       loading = false;
@@ -230,7 +236,11 @@ class _AddButtonState extends State<AddButton> {
     instanceManager.sessionStorage.examToAdd =
         ExamModel(examDate: DateTime.now(), name: '');
 
-    await widget.controller.getAllExams();
+    try {
+      await widget.controller.getAllExams().timeout(timeoutDuration);
+    } catch (e) {
+      logger.e('Error getting exams: $e');
+    }
 
     widget.refresh!();
     //await Future.delayed(Duration(seconds: 5));

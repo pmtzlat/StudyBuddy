@@ -49,6 +49,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
   DateTime examDate = DateTime.now();
   Color examColor = Colors.white;
   String position = '';
+  List<UnitModel> prechangeUnits = <UnitModel>[];
 
   @override
   void initState() {
@@ -67,7 +68,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
     final cardColor = examColor;
-    final lighterColor = lighten(cardColor, .05);
+    final lighterColor = lighten(cardColor, .04);
     final darkerColor = darken(cardColor, .2);
     ExamModel exam = widget.exam;
 
@@ -149,8 +150,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                   name: "name",
                                   initialValue: widget.exam.name,
                                   readOnly: !editMode,
-                                  decoration: InputDecoration(
-                                  ),
+                                  decoration: InputDecoration(),
                                   style: TextStyle(
                                     height: 1,
                                     color: Colors.white,
@@ -167,24 +167,20 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                 ),
                               )
                             : MarqueeWidget(
-
                                 animationDuration: Duration(
                                     seconds:
-                                        (widget.exam.name.length /6).toInt()),
+                                        (widget.exam.name.length / 6).toInt()),
                                 backDuration: Duration(
                                     seconds:
                                         (widget.exam.name.length / 9).toInt()),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 0),
-                                  child: Text(
-                                    widget.exam.name,
-                                    softWrap: true,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: screenWidth * 0.11,
-                                        fontWeight: FontWeight.w300),
-                                  ),
+                                child: Text(
+                                  widget.exam.name,
+                                  softWrap: true,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: screenWidth * 0.14,
+                                      fontWeight: FontWeight.w300),
                                 ))))
               ],
             ),
@@ -235,6 +231,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
               duration: editSwitchTime,
               height: !editMode ? screenHeight * 0.2 : screenHeight * 0.04,
               child: SingleChildScrollView(
+                physics: NeverScrollableScrollPhysics(),
                 reverse: true,
                 child: Column(
                   children: [
@@ -537,17 +534,21 @@ class _ExamDetailViewState extends State<ExamDetailView> {
 
     var unitsList = SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.07),
+        padding: EdgeInsets.only(
+            left: screenWidth * 0.07,
+            right: screenWidth * 0.07,
+            bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Column(children: [
           for (UnitModel unit in widget.exam.units)
             UnitCard(
+                formKey: editExamFormKey,
                 unit: unit,
                 exam: exam,
                 notifyParent: () {},
                 showError: () {},
-                lightShade: lighten(examColor, 0.1),
+                lightShade: lighten(examColor, 0.5),
                 darkShade: examColor,
-                darkMode: editMode)
+                editMode: editMode)
         ]),
       ),
     );
@@ -558,7 +559,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
       child: Card(
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        clipBehavior: Clip.antiAliasWithSaveLayer,
+        //clipBehavior: Clip.antiAliasWithSaveLayer,
         child: AnimatedContainer(
           duration: editSwitchTime,
           height: screenHeight * 0.85,
@@ -576,6 +577,8 @@ class _ExamDetailViewState extends State<ExamDetailView> {
           ),
           child: SingleChildScrollView(
             physics: NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -629,8 +632,31 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                               key: ValueKey<int>(1),
                                               onPressed: () {
                                                 logger.i('Cancel clicked!');
+
                                                 editExamFormKey.currentState!
                                                     .reset();
+
+                                                for (UnitModel unit
+                                                    in widget.exam.units) {
+                                                  logger.i('Pre: ' +
+                                                      editExamFormKey
+                                                          .currentState!
+                                                          .fields[
+                                                              'Unit ${unit.order} name']!
+                                                          .value);
+                                                  editExamFormKey
+                                                      .currentState!
+                                                      .fields[
+                                                          'Unit ${unit.order} name']!
+                                                      .didChange(unit.name);
+                                                  logger.i('Post: ' +
+                                                      editExamFormKey
+                                                          .currentState!
+                                                          .fields[
+                                                              'Unit ${unit.order} name']!
+                                                          .value);
+                                                }
+
                                                 setState(() {
                                                   editMode = false;
 
@@ -643,6 +669,11 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                   examDate =
                                                       widget.exam.examDate;
                                                   examColor = widget.exam.color;
+                                                  widget.exam.units =
+                                                      prechangeUnits
+                                                          .map((unit) =>
+                                                              unit.deepCopy())
+                                                          .toList();
                                                 });
 
                                                 widget.exam.printMe();
@@ -677,6 +708,9 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                         //toggle edit
                                         setState(() {
                                           editMode = true;
+                                          prechangeUnits = widget.exam.units
+                                              .map((unit) => unit.deepCopy())
+                                              .toList();
                                         });
                                       },
                                       icon:
@@ -716,10 +750,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                       setState(() {
                                                         loading = true;
                                                       });
-                                                      logger.w(editExamFormKey!
-                                                          .currentState!
-                                                          .fields['name']!
-                                                          .value);
+                                                      
                                                       try {
                                                         await _controller
                                                             .handleEditExam(

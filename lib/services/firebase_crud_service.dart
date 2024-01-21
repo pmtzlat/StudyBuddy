@@ -1437,4 +1437,27 @@ class FirebaseCrudService {
       logger.e('Error in Firebase CRUD - saveTimeStudiedForTimeSlot: $e');
     }
   }
+
+  Future<void> clearUnitsForExam(String examID) async {
+    
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final dayDocRef = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('exams')
+          .doc(examID);
+
+      final unitCollectionRef = dayDocRef.collection('units');
+      final unitQuerySnapshot = await unitCollectionRef.get();
+
+      for (final unitDoc in unitQuerySnapshot.docs) {
+        await unitDoc.reference.delete();
+      }
+
+
+  }
+
+  
 }

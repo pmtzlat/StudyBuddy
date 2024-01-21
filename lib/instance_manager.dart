@@ -18,7 +18,7 @@ import 'modules/exams/controllers/exams_controller.dart';
 
 class InstanceManager {
 
-  
+
   final MyScaffold scaffold = MyScaffold();
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn();

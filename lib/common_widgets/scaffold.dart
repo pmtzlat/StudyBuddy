@@ -72,6 +72,7 @@ class MyScaffold {
         return false;
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
           bottomNavigationBar: BottomNavBar(activeIndex: activeIndex),
           body: Container(
               padding: EdgeInsets.only(

@@ -24,9 +24,7 @@ class StudyPlanner {
     // 0 = No time
     // -1 = Error
     try {
-      //logger.d('calculateSchedule');
-      //await firebaseCrud.deleteSchedule();
-
+      
       generalStacks = await generateStacks();
       for (SchedulerStack stack in generalStacks) {
         stack.print();
@@ -92,13 +90,13 @@ class StudyPlanner {
         return 0;
       }
 
-      if (await firebaseCrud.deleteNotPastCalendarDays() == -1) {
+      if (await firebaseCrud.deleteNotPastCalendarDays().timeout(timeoutDuration) == -1) {
         return -1;
       }
       //logger.i('Success deleting calendar Days!');
 
       for (var day in result) {
-        var dayID = await firebaseCrud.addCalendarDay(day);
+        var dayID = await firebaseCrud.addCalendarDay(day).timeout(timeoutDuration);
         if (dayID == null) {
           return -1;
         }
@@ -108,7 +106,7 @@ class StudyPlanner {
           if (timeSlot.examID != 'free') {
             
             timeSlot.date = day.date;
-            res = await firebaseCrud.addTimeSlotToCalendarDay(dayID, timeSlot);
+            res = await firebaseCrud.addTimeSlotToCalendarDay(dayID, timeSlot).timeout(timeoutDuration);
 
             if (res == -1) return -1;
           }
