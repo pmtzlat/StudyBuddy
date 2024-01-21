@@ -540,15 +540,34 @@ class _ExamDetailViewState extends State<ExamDetailView> {
             bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Column(children: [
           for (UnitModel unit in widget.exam.units)
-            UnitCard(
-                formKey: editExamFormKey,
-                unit: unit,
-                exam: exam,
-                notifyParent: () {},
-                showError: () {},
-                lightShade: lighten(examColor, 0.5),
-                darkShade: examColor,
-                editMode: editMode)
+            editMode
+                ? Dismissible(
+                    key: Key(unit.id),
+                    onDismissed: (direction) {
+                      if (editMode) {
+                        widget.exam.units.remove(unit);
+                        widget.exam.updateUnitOrders();
+                      }
+                    },
+                    child: UnitCard(
+                        formKey: editExamFormKey,
+                        unit: unit,
+                        exam: exam,
+                        notifyParent: () {},
+                        showError: () {},
+                        lightShade: lighten(examColor, 0.5),
+                        darkShade: examColor,
+                        editMode: editMode),
+                  )
+                : UnitCard(
+                    formKey: editExamFormKey,
+                    unit: unit,
+                    exam: exam,
+                    notifyParent: () {},
+                    showError: () {},
+                    lightShade: lighten(examColor, 0.5),
+                    darkShade: examColor,
+                    editMode: editMode)
         ]),
       ),
     );
@@ -750,7 +769,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                       setState(() {
                                                         loading = true;
                                                       });
-                                                      
+
                                                       try {
                                                         await _controller
                                                             .handleEditExam(

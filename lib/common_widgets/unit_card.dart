@@ -46,7 +46,6 @@ class _UnitCardState extends State<UnitCard>
   Duration openUnit = Duration(milliseconds: 200);
   Color expandableColor = Color.fromARGB(255, 61, 61, 61);
   Color expandableEditColor = Colors.black;
- 
 
   @override
   void initState() {
@@ -104,14 +103,12 @@ class _UnitCardState extends State<UnitCard>
                     children: [
                       AnimatedContainer(
                         duration: Duration(milliseconds: 300),
-                        width: screenWidth * 0.47 ,
-                        child: 
-                        widget.editMode 
-                            ? 
-                            Container(
+                        width: screenWidth * 0.47,
+                        child: widget.editMode
+                            ? Container(
                                 width: screenWidth * 0.47,
                                 child: FormBuilderTextField(
-                                   key: Key(widget.unit.name),
+                                  key: Key(widget.unit.name),
                                   textCapitalization: TextCapitalization.words,
                                   name: 'Unit ${widget.unit.order} name',
                                   initialValue: widget.unit.name,
@@ -131,11 +128,9 @@ class _UnitCardState extends State<UnitCard>
                                       bottom: MediaQuery.of(context)
                                           .viewInsets
                                           .bottom),
-                                  
                                 ),
                               )
-                            : 
-                            Text(widget.unit.name,
+                            : Text(widget.unit.name,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                     //fontWeight: open ? FontWeight.w600: FontWeight.normal,
@@ -149,7 +144,7 @@ class _UnitCardState extends State<UnitCard>
                       ),
                       AnimatedSwitcher(
                         duration: openUnit,
-                        child:widget.unit.completed && !open
+                        child: widget.unit.completed && !open
                             ? Container(
                                 key: ValueKey<int>(0),
                                 margin: EdgeInsets.only(
@@ -205,28 +200,23 @@ class _UnitCardState extends State<UnitCard>
                                     ? expandableEditColor
                                     : expandableColor,
                                 fontSize: screenWidth * 0.04)),
-                        FormBuilderField<bool>(
-                            name: 'Unit ${widget.unit.order} complete',
-                            enabled: widget.editMode,
-                            initialValue: widget.unit.completed,
-                            builder: (FormFieldState<dynamic> field) {
-                              return Checkbox(
-                                  visualDensity: VisualDensity(
-                                      horizontal: -4, vertical: -4),
-                                  activeColor: Colors.black,
-                                  checkColor: editMode
-                                      ? widget.darkShade
-                                      : Colors.white, // Color of the checkmark
-                                  fillColor:
-                                      MaterialStateProperty.all(Colors.black),
-                                  value: widget.unit.completed,
-                                  onChanged: (bool? newValue) {
-                                    if (widget.editMode) {
-                                      setState(() {
-                                        widget.unit.completed = newValue ?? false;
-                                      });
-                                    }
-                                  });
+                        Checkbox(
+                            visualDensity: VisualDensity(
+                                horizontal: -4, vertical: -4),
+                            activeColor: Colors.black,
+                            checkColor: editMode
+                                ? widget.darkShade
+                                : Colors.white, // Color of the checkmark
+                            fillColor:
+                                MaterialStateProperty.all(Colors.black),
+                            value: widget.unit.completed,
+                            onChanged: (bool? newValue) {
+                              if (widget.editMode) {
+                                setState(() {
+                                  widget.unit.completed =
+                                      newValue ?? false;
+                                });
+                              }
                             })
                       ],
                     ),

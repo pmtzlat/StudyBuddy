@@ -159,4 +159,13 @@ class ExamModel {
 
     logger.i(res);
   }
+
+  void updateUnitOrders() {
+    String res = 'New unit order: \n';
+    for (int i = 0; i < units.length; i++) {
+      units[i].order = i + 1;
+      res += '${units[i].name}: ${units[i].order}\n';
+    }
+    logger.i('$res');
+  }
 }

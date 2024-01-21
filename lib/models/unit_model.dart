@@ -2,7 +2,7 @@ class UnitModel {
   String name;
   Duration sessionTime;
   final String id;
-  final int order;
+  int order;
   bool completed;
   Duration completionTime;
   Duration realStudyTime;
