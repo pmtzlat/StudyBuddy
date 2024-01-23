@@ -50,6 +50,8 @@ class _ExamDetailViewState extends State<ExamDetailView> {
   Color examColor = Colors.white;
   String position = '';
   List<UnitModel> prechangeUnits = <UnitModel>[];
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  int _provisionalListLength = 0;
 
   @override
   void initState() {
@@ -60,6 +62,13 @@ class _ExamDetailViewState extends State<ExamDetailView> {
     examDate = widget.exam.examDate;
     examColor = widget.exam.color;
     position = getPosition(widget.exam);
+  }
+
+  void addUnit(UnitModel newUnit) {
+    final index = widget.exam.units.length;
+    widget.exam.units.add(newUnit);
+    _listKey.currentState?.insertItem(index);
+    _provisionalListLength = widget.exam.units.length;
   }
 
   @override
@@ -377,7 +386,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                   onChanged: (bool? newValue) {
                                     if (editMode) {
                                       setState(() {
-                                        logger.i(newValue);
+                                        //logger.i(newValue);
                                         orderMatters = newValue ?? false;
                                         // Additional logic can be added here based on the new value
                                       });
@@ -470,7 +479,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                               setState(() {
                                 revisionTime = revisionTime;
                               });
-                              logger.i(revisionTime);
+                              //logger.i(revisionTime);
                             }
                           },
                           child: Text(formatDuration(revisionTime),
@@ -524,7 +533,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                           )
                         ],
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -532,44 +541,60 @@ class _ExamDetailViewState extends State<ExamDetailView> {
           ],
         ));
 
-    var unitsList = SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.only(
-            left: screenWidth * 0.07,
-            right: screenWidth * 0.07,
-            bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: Column(children: [
-          for (UnitModel unit in widget.exam.units)
-            editMode
-                ? Dismissible(
-                    key: Key(unit.id),
-                    onDismissed: (direction) {
-                      if (editMode) {
-                        widget.exam.units.remove(unit);
-                        widget.exam.updateUnitOrders();
-                      }
-                    },
-                    child: UnitCard(
-                        formKey: editExamFormKey,
-                        unit: unit,
-                        exam: exam,
-                        notifyParent: () {},
-                        showError: () {},
-                        lightShade: lighten(examColor, 0.5),
-                        darkShade: examColor,
-                        editMode: editMode),
-                  )
-                : UnitCard(
-                    formKey: editExamFormKey,
-                    unit: unit,
-                    exam: exam,
-                    notifyParent: () {},
-                    showError: () {},
-                    lightShade: lighten(examColor, 0.5),
-                    darkShade: examColor,
-                    editMode: editMode)
-        ]),
-      ),
+    var unitsList = AnimatedList(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      key: _listKey,
+      initialItemCount: widget.exam.units.length,
+      itemBuilder: (context, index, animation) {
+        ////logger.i('$index, ${widget.exam.units.length}');
+        try {
+          final unit = widget.exam.units[index];
+
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: Offset(1, 0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: Dismissible(
+              key: Key(unit.id),
+              onDismissed: (direction) {
+                if (editMode) {
+                  UnitModel removedItem = widget.exam.units
+                      .removeAt(widget.exam.units.indexOf(unit));
+
+                  _listKey.currentState?.removeItem(
+                    index,
+                    (context, animation) => SizedBox
+                        .shrink(), // Use an empty SizedBox to suppress the animation
+                    duration: Duration
+                        .zero, // Set the duration to zero to eliminate the animation
+                  );
+
+                  widget.exam.updateUnitOrders(editExamFormKey);
+                  widget.exam.printMe();
+
+                  setState(() {});
+                }
+              },
+              child: UnitCard(
+                textEditingController: TextEditingController(text: unit.name),
+                unit: unit,
+                exam: exam,
+                notifyParent: () {},
+                showError: () {},
+                lightShade: lighten(examColor, 0.5),
+                darkShade: examColor,
+                editMode: editMode,
+              ),
+            ),
+          );
+        } catch (e) {
+          logger.e('Error rendering list item. $e');
+
+          return SizedBox();
+        }
+      },
     );
 
     return Container(
@@ -594,321 +619,412 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                     ? [lighterColor, cardColor, darkerColor]
                     : [Colors.black, darken(darkerColor, .5), darkerColor]),
           ),
-          child: SingleChildScrollView(
-            physics: NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    AnimatedSwitcher(
-                      duration: editSwitchTime,
-                      child: !editMode
-                          ? Container(
-                              key: ValueKey<int>(0),
-                              width: screenWidth * 0.4,
-                              height: screenHeight * 0.06,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    margin: EdgeInsets.only(left: 3),
-                                    padding: EdgeInsets.all(2),
-                                    child: IconButton(
-                                        iconSize: screenWidth * 0.1,
-                                        onPressed: () {
-                                          //return
-                                          widget.pageController.animateToPage(0,
-                                              duration:
-                                                  Duration(milliseconds: 300),
-                                              curve: Curves.decelerate);
-                                        },
-                                        icon: Icon(Icons.close_rounded,
-                                            color: Colors.white,
-                                            size: screenWidth * 0.08)),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Container(
-                              // cancel edit
-                              key: ValueKey<int>(1),
-                              height: screenHeight * 0.06,
-                              width: screenWidth * 0.4,
-                              padding: EdgeInsets.all(2),
-                              child: AnimatedSwitcher(
-                                duration: editSwitchTime,
-                                child: !loading
-                                    ? Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          TextButton.icon(
-                                              key: ValueKey<int>(1),
-                                              onPressed: () {
-                                                logger.i('Cancel clicked!');
-
-                                                editExamFormKey.currentState!
-                                                    .reset();
-
-                                                for (UnitModel unit
-                                                    in widget.exam.units) {
-                                                  logger.i('Pre: ' +
-                                                      editExamFormKey
-                                                          .currentState!
-                                                          .fields[
-                                                              'Unit ${unit.order} name']!
-                                                          .value);
-                                                  editExamFormKey
-                                                      .currentState!
-                                                      .fields[
-                                                          'Unit ${unit.order} name']!
-                                                      .didChange(unit.name);
-                                                  logger.i('Post: ' +
-                                                      editExamFormKey
-                                                          .currentState!
-                                                          .fields[
-                                                              'Unit ${unit.order} name']!
-                                                          .value);
-                                                }
-
-                                                setState(() {
-                                                  editMode = false;
-
-                                                  orderMatters =
-                                                      widget.exam.orderMatters;
-                                                  revisions = widget
-                                                      .exam.revisions.length;
-                                                  revisionTime =
-                                                      widget.exam.revisionTime;
-                                                  examDate =
-                                                      widget.exam.examDate;
-                                                  examColor = widget.exam.color;
-                                                  widget.exam.units =
-                                                      prechangeUnits
-                                                          .map((unit) =>
-                                                              unit.deepCopy())
-                                                          .toList();
-                                                });
-
-                                                widget.exam.printMe();
-                                              },
-                                              label: Text(_localizations.cancel,
-                                                  style: TextStyle(
-                                                      color: Colors.redAccent,
-                                                      fontSize:
-                                                          screenWidth * 0.05)),
-                                              icon: Icon(
-                                                Icons.close_rounded,
-                                                color: Colors.redAccent,
-                                                size: screenWidth * 0.08,
-                                              ))
-                                        ],
-                                      )
-                                    : SizedBox(),
-                              ),
-                            ),
-                    ),
-                    AnimatedSwitcher(
-                      duration: editSwitchTime,
-                      child: !editMode
-                          ? Container(
-                              width: screenWidth * 0.36,
-                              key: ValueKey<int>(0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  TextButton.icon(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  AnimatedSwitcher(
+                    duration: editSwitchTime,
+                    child: !editMode
+                        ? Container(
+                            key: ValueKey<int>(0),
+                            width: screenWidth * 0.4,
+                            height: screenHeight * 0.06,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(left: 3),
+                                  padding: EdgeInsets.all(2),
+                                  child: IconButton(
+                                      iconSize: screenWidth * 0.1,
                                       onPressed: () {
-                                        //toggle edit
-                                        setState(() {
-                                          editMode = true;
-                                          prechangeUnits = widget.exam.units
-                                              .map((unit) => unit.deepCopy())
-                                              .toList();
-                                        });
+                                        //return
+                                        widget.pageController.animateToPage(0,
+                                            duration:
+                                                Duration(milliseconds: 300),
+                                            curve: Curves.decelerate);
                                       },
-                                      icon:
-                                          Icon(Icons.edit, color: Colors.white),
-                                      label: Text(_localizations.edit,
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: screenWidth * 0.05,
-                                              fontWeight: FontWeight.w400))),
-                                ],
-                              ),
-                            )
-                          : Container(
-                              width: screenWidth * 0.36,
-                              key: ValueKey<int>(1),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  AnimatedSwitcher(
-                                      duration: editSwitchTime,
-                                      child: !loading
-                                          ? Container(
-                                              width: screenWidth * 0.36,
-                                              child: TextButton.icon(
-                                                  key: ValueKey<int>(0),
-                                                  onPressed: () async {
-                                                    //confirm edit
-                                                    logger
-                                                        .i('Confirm clicked!');
+                                      icon: Icon(Icons.close_rounded,
+                                          color: Colors.white,
+                                          size: screenWidth * 0.08)),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Container(
+                            // cancel edit
+                            key: ValueKey<int>(1),
+                            height: screenHeight * 0.06,
+                            width: screenWidth * 0.4,
+                            padding: EdgeInsets.all(2),
+                            child: AnimatedSwitcher(
+                              duration: editSwitchTime,
+                              child: !loading
+                                  ? Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        TextButton.icon(
+                                            key: ValueKey<int>(1),
+                                            onPressed: () {
+                                              //logger.i('Cancel clicked!');
 
-                                                    if (editExamFormKey!
+                                              editExamFormKey.currentState!
+                                                  .reset();
+
+                                              ////logger.i('A');
+                                              ///
+
+                                              try {
+                                                if (prechangeUnits.length <
+                                                    widget.exam.units.length) {
+                                                  for (int i =
+                                                          prechangeUnits.length;
+                                                      i < _provisionalListLength;
+                                                      i++) {
+                                                    UnitModel removedItem =
+                                                        widget.exam.units
+                                                            .removeAt(
+                                                                prechangeUnits
+                                                                    .length);
+
+                                                    _listKey.currentState!
+                                                        .removeItem(
+                                                            widget.exam.units
+                                                                .length,
+                                                            (context,
+                                                                    animation) =>
+                                                                SizedBox
+                                                                    .shrink(), // Use an empty SizedBox to suppress the animation
+                                                            duration:
+                                                                Duration.zero);
+                                                  }
+                                                } else if (prechangeUnits
+                                                        .length >
+                                                    widget.exam.units.length) {
+                                                  for (int i = widget
+                                                          .exam.units.length;
+                                                      i < prechangeUnits.length;
+                                                      i++) {
+                                                    _listKey.currentState!
+                                                        .insertItem(i);
+                                                  }
+                                                }
+                                              } catch (e) {
+                                                logger.i(
+                                                    'old list is not longer than new one');
+                                              }
+
+                                              setState(() {
+                                                editMode = false;
+
+                                                orderMatters =
+                                                    widget.exam.orderMatters;
+                                                revisions = widget
+                                                    .exam.revisions.length;
+                                                revisionTime =
+                                                    widget.exam.revisionTime;
+                                                examDate = widget.exam.examDate;
+                                                examColor = widget.exam.color;
+                                                widget.exam.units =
+                                                    prechangeUnits
+                                                        .map((unit) =>
+                                                            unit.deepCopy())
+                                                        .toList();
+                                              });
+                                              // Map<String, dynamic> formFields =
+                                              //     editExamFormKey
+                                              //         .currentState!.fields;
+
+                                              // formFields.forEach(
+                                              //     (fieldName, fieldState) {
+                                              //   logger.d(
+                                              //       '$fieldName: ${fieldState.value}');
+                                              // });
+
+                                              // for (UnitModel unit
+                                              //     in widget.exam.units) {
+                                              //   logger.i('Pre: ' +
+                                              //       editExamFormKey
+                                              //           .currentState!
+                                              //           .fields['${unit.id}']!
+                                              //           .value);
+
+                                              //   editExamFormKey.currentState!
+                                              //       .fields['${unit.id}']!
+                                              //       .setValue(unit.name);
+                                              //   logger.i('Post: ' +
+                                              //       editExamFormKey
+                                              //           .currentState!
+                                              //           .fields['${unit.id}']!
+                                              //           .value);
+                                              // }
+
+                                              widget.exam.printMe();
+
+                                              //widget.exam.printMe();
+                                            },
+                                            label: Text(_localizations.cancel,
+                                                style: TextStyle(
+                                                    color: Colors.redAccent,
+                                                    fontSize:
+                                                        screenWidth * 0.05)),
+                                            icon: Icon(
+                                              Icons.close_rounded,
+                                              color: Colors.redAccent,
+                                              size: screenWidth * 0.08,
+                                            ))
+                                      ],
+                                    )
+                                  : SizedBox(),
+                            ),
+                          ),
+                  ),
+                  AnimatedSwitcher(
+                    duration: editSwitchTime,
+                    child: !editMode
+                        ? Container(
+                            width: screenWidth * 0.36,
+                            key: ValueKey<int>(0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TextButton.icon(
+                                    onPressed: () {
+                                      //toggle edit
+
+                                      widget.exam.printMe();
+
+                                      setState(() {
+                                        editMode = true;
+                                        prechangeUnits = widget.exam.units
+                                            .map((unit) => unit.deepCopy())
+                                            .toList();
+                                      });
+                                    },
+                                    icon: Icon(Icons.edit, color: Colors.white),
+                                    label: Text(_localizations.edit,
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: screenWidth * 0.05,
+                                            fontWeight: FontWeight.w400))),
+                              ],
+                            ),
+                          )
+                        : Container(
+                            width: screenWidth * 0.36,
+                            key: ValueKey<int>(1),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                AnimatedSwitcher(
+                                    duration: editSwitchTime,
+                                    child: !loading
+                                        ? Container(
+                                            width: screenWidth * 0.36,
+                                            child: TextButton.icon(
+                                                key: ValueKey<int>(0),
+                                                onPressed: () async {
+                                                  //confirm edit
+                                                  //logger.i('Confirm clicked!');
+
+                                                  if (editExamFormKey!
+                                                      .currentState!
+                                                      .validate()) {
+                                                    editExamFormKey!
                                                         .currentState!
-                                                        .validate()) {
-                                                      editExamFormKey!
+                                                        .save();
+                                                    setState(() {
+                                                      loading = true;
+                                                    });
+
+                                                    try {
+                                                      await _controller
+                                                          .handleEditExam(
+                                                              editExamFormKey,
+                                                              widget.exam,
+                                                              revisions,
+                                                              revisionTime,
+                                                              examColor);
+                                                    } catch (e) {
+                                                      logger.e(
+                                                          'Error editing exam: $e');
+                                                      editExamFormKey
                                                           .currentState!
-                                                          .save();
-                                                      setState(() {
-                                                        loading = true;
-                                                      });
-
-                                                      try {
-                                                        await _controller
-                                                            .handleEditExam(
-                                                                editExamFormKey,
-                                                                widget.exam,
-                                                                revisions,
-                                                                revisionTime,
-                                                                examColor);
-                                                      } catch (e) {
-                                                        logger.e(
-                                                            'Error editing exam: $e');
-                                                        editExamFormKey
-                                                            .currentState!
-                                                            .reset();
-                                                        showRedSnackbar(
-                                                            context,
-                                                            _localizations
-                                                                .errorEditingExam);
-                                                      }
-
-                                                      final activeExams =
-                                                          instanceManager
-                                                              .sessionStorage
-                                                              .activeExams;
-
-                                                      setState(() {
-                                                        loading = false;
-                                                        editMode = false;
-                                                        widget.exam = activeExams
-                                                            .firstWhere(
-                                                                (examToFind) =>
-                                                                    examToFind
-                                                                        .id ==
-                                                                    widget.exam
-                                                                        .id);
-
-                                                        orderMatters = widget
-                                                            .exam.orderMatters;
-                                                        revisions = widget.exam
-                                                            .revisions.length;
-                                                        revisionTime = widget
-                                                            .exam.revisionTime;
-                                                        examDate = widget
-                                                            .exam.examDate;
-                                                        examColor =
-                                                            widget.exam.color;
-                                                      });
-                                                      widget.exam.printMe();
+                                                          .reset();
+                                                      showRedSnackbar(
+                                                          context,
+                                                          _localizations
+                                                              .errorEditingExam);
                                                     }
-                                                  },
-                                                  label: Text(
-                                                      _localizations.confirm,
-                                                      style: TextStyle(
-                                                          color: Colors
-                                                              .greenAccent,
-                                                          fontSize:
-                                                              screenWidth *
-                                                                  0.05)),
-                                                  icon: Icon(
-                                                    Icons.done,
-                                                    color: Colors.greenAccent,
-                                                    size: screenWidth * 0.08,
-                                                  )),
-                                            )
-                                          : Container(
-                                              width: screenWidth * 0.36,
-                                              child: TextButton.icon(
-                                                  key: ValueKey<int>(1),
-                                                  onPressed: () {},
-                                                  label: Text(
-                                                      _localizations.loading,
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize:
-                                                              screenWidth *
-                                                                  0.04)),
-                                                  icon: Icon(
-                                                    Icons.edit_outlined,
-                                                    color: Colors.white,
-                                                    size: screenWidth * 0.05,
-                                                  )),
-                                            )),
-                                ],
-                              ),
+
+                                                    final activeExams =
+                                                        instanceManager
+                                                            .sessionStorage
+                                                            .activeExams;
+
+                                                    setState(() {
+                                                      loading = false;
+                                                      editMode = false;
+                                                      widget.exam = activeExams
+                                                          .firstWhere(
+                                                              (examToFind) =>
+                                                                  examToFind
+                                                                      .id ==
+                                                                  widget
+                                                                      .exam.id);
+
+                                                      orderMatters = widget
+                                                          .exam.orderMatters;
+                                                      revisions = widget.exam
+                                                          .revisions.length;
+                                                      revisionTime = widget
+                                                          .exam.revisionTime;
+                                                      examDate =
+                                                          widget.exam.examDate;
+                                                      examColor =
+                                                          widget.exam.color;
+                                                    });
+                                                    widget.exam.printMe();
+                                                  }
+                                                },
+                                                label: Text(
+                                                    _localizations.confirm,
+                                                    style: TextStyle(
+                                                        color:
+                                                            Colors.greenAccent,
+                                                        fontSize: screenWidth *
+                                                            0.05)),
+                                                icon: Icon(
+                                                  Icons.done,
+                                                  color: Colors.greenAccent,
+                                                  size: screenWidth * 0.08,
+                                                )),
+                                          )
+                                        : Container(
+                                            width: screenWidth * 0.36,
+                                            child: TextButton.icon(
+                                                key: ValueKey<int>(1),
+                                                onPressed: () {},
+                                                label: Text(
+                                                    _localizations.loading,
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: screenWidth *
+                                                            0.04)),
+                                                icon: Icon(
+                                                  Icons.edit_outlined,
+                                                  color: Colors.white,
+                                                  size: screenWidth * 0.05,
+                                                )),
+                                          )),
+                              ],
                             ),
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: screenHeight * 0.01,
-                ),
-                Container(
-                  height: screenHeight * 0.73,
-                  child: ShaderMask(
-                    shaderCallback: (Rect rect) {
-                      return LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.transparent,
-                          Colors.transparent,
-                          Colors.purple
+                          ),
+                  )
+                ],
+              ),
+              SizedBox(
+                height: screenHeight * 0.01,
+              ),
+              Container(
+                height: screenHeight * 0.73,
+                child: ShaderMask(
+                  shaderCallback: (Rect rect) {
+                    return LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.transparent,
+                        Colors.transparent,
+                        Colors.purple
+                      ],
+                      stops: [
+                        0.0,
+                        0.01,
+                        0.95,
+                        1.0
+                      ], // 10% purple, 80% transparent, 10% purple
+                    ).createShader(rect);
+                  },
+                  blendMode: BlendMode.dstOut,
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: FormBuilder(
+                      key: editExamFormKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          examData,
+                          SizedBox(
+                            height: screenHeight * 0.03,
+                          ),
+                          AnimatedSwitcher(
+                            duration: editSwitchTime,
+                            child: editMode
+                                ? Container(
+                                    key: Key('0'),
+                                    height: screenHeight * 0.03,
+                                    child: Text(_localizations.swipeToDelete,
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: screenWidth * 0.035)),
+                                  )
+                                : SizedBox(
+                                    key: Key('1'),
+                                    height: screenHeight * 0.03,
+                                  ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth * 0.05),
+                            child: unitsList,
+                          ),
+                          AnimatedSwitcher(
+                            duration: editSwitchTime,
+                            child: editMode
+                                ? Container(
+                                    key: Key('0'),
+                                    height: screenHeight * 0.05,
+                                    child: IconButton(
+                                        onPressed: () {
+                                          // //logger.i(
+                                          //     'Pre: ${widget.exam.units.length}');
+                                          addUnit(UnitModel(
+                                              name:
+                                                  'Unit ${widget.exam.units.length + 1}',
+                                              order:
+                                                  widget.exam.units.length + 1,
+                                              id: generateRandomString()));
+                                          widget.exam.printMe();
+                                          // //logger.i(
+                                          //     'Post: ${widget.exam.units.length}');
+                                        },
+                                        icon: Icon(Icons.add,
+                                            color: Colors.white)),
+                                  )
+                                : SizedBox(
+                                    key: Key('1'),
+                                    height: screenHeight * 0.05,
+                                  ),
+                          ),
+                          SizedBox(
+                            height: screenHeight * 0.05,
+                          ),
                         ],
-                        stops: [
-                          0.0,
-                          0.01,
-                          0.95,
-                          1.0
-                        ], // 10% purple, 80% transparent, 10% purple
-                      ).createShader(rect);
-                    },
-                    blendMode: BlendMode.dstOut,
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.only(
-                        bottom: MediaQuery.of(context).viewInsets.bottom +
-                            screenHeight * 0.1,
-                      ),
-                      child: FormBuilder(
-                        key: editExamFormKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            examData,
-                            SizedBox(
-                              height: screenHeight * 0.03,
-                            ),
-                            unitsList,
-                            SizedBox(
-                              height: screenHeight * 0.05,
-                            ),
-                          ],
-                        ),
                       ),
                     ),
                   ),
-                )
-              ],
-            ),
+                ),
+              )
+            ],
           ),
         ),
       ),

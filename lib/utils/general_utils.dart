@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/exam_model.dart';
@@ -51,6 +53,12 @@ int getDaysUntilExam(DateTime examDate) {
   return difference.inDays.abs()+1;
 }
 
-
+String generateRandomString({int length = 8}) {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  final random = Random.secure();
+  return String.fromCharCodes(
+    Iterable.generate(length, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
+  );
+}
 
 

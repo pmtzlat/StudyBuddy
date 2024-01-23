@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
@@ -152,7 +153,7 @@ class ExamModel {
         'Exam $name: \n Date: $examDate:\n Order Matters: $orderMatters\n Units: ';
     for (UnitModel unit in units) {
       res +=
-          '\n       ${unit.name}: ${formatDuration(unit.sessionTime)}, completed: ${unit.completed}';
+          '\n       ${unit.name}: ${formatDuration(unit.sessionTime)}, completed: ${unit.completed}, order: ${unit.order} - ${unit.id}';
     }
     res +=
         '\n Revision days: ${revisions.length}\n Revision session: $revisionTime';
@@ -160,12 +161,17 @@ class ExamModel {
     logger.i(res);
   }
 
-  void updateUnitOrders() {
+  void updateUnitOrders(GlobalKey<FormBuilderState>? formKey) {
     String res = 'New unit order: \n';
     for (int i = 0; i < units.length; i++) {
       units[i].order = i + 1;
+      //logger.i('$i: Unit ${units[i].order} name: ${units[i].name}');
+
+      if (units[i].name == 'Unit ${units[i].order + 1}')
+        units[i].name = 'Unit ${units[i].order}';
       res += '${units[i].name}: ${units[i].order}\n';
+      
     }
-    logger.i('$res');
+    //logger.i('$res');
   }
 }

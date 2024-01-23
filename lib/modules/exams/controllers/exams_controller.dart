@@ -171,7 +171,8 @@ class ExamsController {
           instanceManager.sessionStorage.examToAdd!.units;
       for (int i = 0; i < units; i++) {
         final unitNum = i + 1;
-        final newUnit = UnitModel(name: 'Unit $unitNum', order: unitNum);
+        final newUnit = UnitModel(
+            name: 'Unit $unitNum', order: unitNum, sessionTime: sessionTime);
         unitsList!.add(newUnit);
       }
 
@@ -214,6 +215,7 @@ class ExamsController {
       //     .indexOf(instanceManager.sessionStorage.examToAdd));
 
       for (ExamModel exam in exams) {
+        logger.i('A');
         ExamModel? alreadyInDB = await firebaseCrud.getExam(exam.id);
 
         if (alreadyInDB != null) {
@@ -225,7 +227,10 @@ class ExamsController {
         }
       }
 
-      //await addExam(instanceManager.sessionStorage.examToAdd);
+      if (!instanceManager.sessionStorage.activeExams
+          .contains(instanceManager.sessionStorage.examToAdd)) {
+        await addExam(instanceManager.sessionStorage.examToAdd);
+      }
 
       return true;
     } catch (e) {
@@ -352,10 +357,6 @@ class ExamsController {
 
       await firebaseCrud.clearUnitsForExam(exam.id);
       for (UnitModel unit in newExam.units) {
-        unit.name = examFormKey
-            .currentState!.fields['Unit ${unit.order} name']!.value
-            .toString();
-
         await firebaseCrud.addUnitToExam(newUnit: unit, examID: exam.id);
       }
 

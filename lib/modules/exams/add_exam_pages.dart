@@ -41,7 +41,7 @@ class Page1 extends StatefulWidget {
 
 class _Page1State extends State<Page1> {
   final examCreationFormKey = GlobalKey<FormBuilderState>();
-  Duration sessionTime = Duration(hours: 1);
+  Duration defaultStudyTime = Duration(hours: 1);
   Duration revisionTime = Duration(hours: 1);
   final _controller = instanceManager.examController;
   Color examColor = Colors.redAccent;
@@ -149,7 +149,7 @@ class _Page1State extends State<Page1> {
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           inputType: InputType.date,
                           enabled: true,
-                          format: DateFormat('EEE, M/d/y') ,
+                          format: DateFormat('EEE, M/d/y'),
                           decoration: InputDecoration(
                               labelText: _localizations.examDate),
                           style: TextStyle(
@@ -196,15 +196,16 @@ class _Page1State extends State<Page1> {
                           SizedBox(
                             width: 30,
                           ),
-
                           Column(
                             children: [
                               Text(
                                 _localizations.numberOfRevisions,
-                                style: TextStyle(color: Color.fromRGBO(63, 72, 74, 1.0)),
+                                style: TextStyle(
+                                    color: Color.fromRGBO(63, 72, 74, 1.0)),
                               ),
                               Container(
-                                margin: EdgeInsets.only(top: screenHeight*0.01),
+                                margin:
+                                    EdgeInsets.only(top: screenHeight * 0.01),
                                 child: plusMinusField(
                                     duration: Duration(seconds: 1),
                                     toggle: true,
@@ -217,7 +218,6 @@ class _Page1State extends State<Page1> {
                               ),
                             ],
                           ),
-                          
                         ],
                       ),
                     ),
@@ -251,6 +251,41 @@ class _Page1State extends State<Page1> {
                                 ),
                                 // You can add other child widgets here if needed
                               ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: screenWidth * 0.9,
+                      child: Container(
+                        margin: EdgeInsets.only(top: screenHeight * 0.07),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              width: screenWidth * 0.55,
+                              child: Text(_localizations.defaultStudyTime,
+                                  softWrap: true,
+                                  style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: screenHeight * 0.02)),
+                            ),
+                            TextButton.icon(
+                              label: Text(
+                                '${formatDuration(defaultStudyTime)}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              icon: Icon(Icons.av_timer_rounded,
+                                  color: Colors.white),
+                              onPressed: () async {
+                                defaultStudyTime = await showDurationPicker(
+                                      context: context,
+                                      initialTime: defaultStudyTime,
+                                    ) ??
+                                    defaultStudyTime;
+                                setState(() {});
+                              },
                             )
                           ],
                         ),
@@ -307,7 +342,7 @@ class _Page1State extends State<Page1> {
                 margin: EdgeInsets.only(top: 10),
                 child: AddButton(
                   examColor: examColor,
-                  sessionTime: sessionTime,
+                  sessionTime: defaultStudyTime,
                   revisionTime: revisionTime,
                   revisions: revisions,
                   controller: _controller,
@@ -404,7 +439,9 @@ class Page2State extends State<Page2> {
                   key: unitTimesFormKey,
                   child: SingleChildScrollView(
                     child: Container(
-                      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom + screenHeight * 0.1),
+                      padding: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).viewInsets.bottom +
+                              screenHeight * 0.1),
                       child: Column(children: [
                         for (UnitModel unit
                             in instanceManager.sessionStorage.examToAdd.units)

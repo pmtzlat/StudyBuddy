@@ -19,7 +19,7 @@ class UnitCard extends StatefulWidget {
   Color lightShade;
   Color darkShade;
   bool editMode;
-  GlobalKey<FormBuilderState> formKey;
+  TextEditingController textEditingController;
 
   UnitCard(
       {required this.unit,
@@ -29,7 +29,7 @@ class UnitCard extends StatefulWidget {
       required this.lightShade,
       required this.darkShade,
       required this.editMode,
-      required this.formKey});
+      required this.textEditingController});
 
   @override
   State<UnitCard> createState() => _UnitCardState();
@@ -39,13 +39,13 @@ class _UnitCardState extends State<UnitCard>
     with SingleTickerProviderStateMixin {
   final _controller = instanceManager.examController;
   var editMode = false;
-  final unitFormKey = GlobalKey<FormBuilderState>();
-  //UnitModel unit = UnitModel(name: 'init', order: 0);
+
   bool open = false;
   late AnimationController _animationController;
   Duration openUnit = Duration(milliseconds: 200);
   Color expandableColor = Color.fromARGB(255, 61, 61, 61);
   Color expandableEditColor = Colors.black;
+  late FocusNode _focusNode;
 
   @override
   void initState() {
@@ -56,6 +56,7 @@ class _UnitCardState extends State<UnitCard>
       vsync: this,
       duration: openUnit,
     );
+    _focusNode = FocusNode();
   }
 
   @override
@@ -63,6 +64,8 @@ class _UnitCardState extends State<UnitCard>
     final screenWidth = MediaQuery.of(context).size.width;
     var screenHeight = MediaQuery.of(context).size.height;
     final _localizations = AppLocalizations.of(context)!;
+    widget.textEditingController.selection = TextSelection.collapsed(
+        offset: widget.textEditingController.text.length);
     return Card(
       elevation: 0,
       margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -107,11 +110,15 @@ class _UnitCardState extends State<UnitCard>
                         child: widget.editMode
                             ? Container(
                                 width: screenWidth * 0.47,
-                                child: FormBuilderTextField(
-                                  key: Key(widget.unit.name),
+                                child: TextField(
+                                  //TODO: change to a normal textfield and save like completed
+                                  //key: Key(widget.unit.id),
+
                                   textCapitalization: TextCapitalization.words,
-                                  name: 'Unit ${widget.unit.order} name',
-                                  initialValue: widget.unit.name,
+                                  onChanged: (value) =>
+                                      widget.unit.name = value,
+
+                                  controller: widget.textEditingController,
                                   readOnly: !widget.editMode,
                                   decoration: const InputDecoration(
                                     border:
@@ -201,20 +208,18 @@ class _UnitCardState extends State<UnitCard>
                                     : expandableColor,
                                 fontSize: screenWidth * 0.04)),
                         Checkbox(
-                            visualDensity: VisualDensity(
-                                horizontal: -4, vertical: -4),
+                            visualDensity:
+                                VisualDensity(horizontal: -4, vertical: -4),
                             activeColor: Colors.black,
                             checkColor: editMode
                                 ? widget.darkShade
                                 : Colors.white, // Color of the checkmark
-                            fillColor:
-                                MaterialStateProperty.all(Colors.black),
+                            fillColor: MaterialStateProperty.all(Colors.black),
                             value: widget.unit.completed,
                             onChanged: (bool? newValue) {
                               if (widget.editMode) {
                                 setState(() {
-                                  widget.unit.completed =
-                                      newValue ?? false;
+                                  widget.unit.completed = newValue ?? false;
                                 });
                               }
                             })
