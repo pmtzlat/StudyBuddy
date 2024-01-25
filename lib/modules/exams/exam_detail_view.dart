@@ -69,13 +69,11 @@ class _ExamDetailViewState extends State<ExamDetailView> {
   }
 
   void _scrollDown() {
-    //logger.i('Pre: ${_scrollController.position.maxScrollExtent}');
     _scrollController.animateTo(
       _scrollController.position.maxScrollExtent,
       duration: Duration(milliseconds: 500),
       curve: Curves.fastOutSlowIn,
     );
-    //logger.i('Post: ${_scrollController.position.maxScrollExtent}');
   }
 
   void addUnit(UnitModel newUnit) {
@@ -84,7 +82,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
     _listKey.currentState?.insertItem(index);
     _provisionalListLength = widget.exam.units.length;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // This callback will be executed after the layout is painted
       _scrollDown();
     });
   }
@@ -154,8 +151,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
     }
 
     var examData = Container(
-        //color:Colors.yellow.withOpacity(0.3), // delet this
-
         padding: EdgeInsets.only(
             top: screenWidth * 0.05,
             left: screenWidth * 0.05,
@@ -388,13 +383,9 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                             builder: (FormFieldState<dynamic> field) {
                               return Checkbox(
                                   visualDensity: VisualDensity(
-                                      horizontal: -4,
-                                      vertical:
-                                          -4), // Adjust the values as needed
-                                  activeColor: Colors
-                                      .white, // Color when checkbox is checked
-                                  checkColor:
-                                      Colors.black, // Color of the checkmark
+                                      horizontal: -4, vertical: -4),
+                                  activeColor: Colors.white,
+                                  checkColor: Colors.black,
                                   fillColor:
                                       MaterialStateProperty.all(Colors.white),
                                   value: !editMode
@@ -403,9 +394,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                   onChanged: (bool? newValue) {
                                     if (editMode) {
                                       setState(() {
-                                        //logger.i(newValue);
                                         orderMatters = newValue ?? false;
-                                        // Additional logic can be added here based on the new value
                                       });
                                       field.didChange(newValue);
                                     }
@@ -496,7 +485,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                               setState(() {
                                 revisionTime = revisionTime;
                               });
-                              //logger.i(revisionTime);
                             }
                           },
                           child: Text(formatDuration(revisionTime),
@@ -564,7 +552,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
       key: _listKey,
       initialItemCount: widget.exam.units.length,
       itemBuilder: (context, index, animation) {
-        ////logger.i('$index, ${widget.exam.units.length}');
         try {
           final unit = widget.exam.units[index];
 
@@ -582,14 +569,11 @@ class _ExamDetailViewState extends State<ExamDetailView> {
 
                   _listKey.currentState?.removeItem(
                     index,
-                    (context, animation) => SizedBox
-                        .shrink(), // Use an empty SizedBox to suppress the animation
-                    duration: Duration
-                        .zero, // Set the duration to zero to eliminate the animation
+                    (context, animation) => SizedBox.shrink(),
+                    duration: Duration.zero,
                   );
 
                   widget.exam.updateUnitOrders(editExamFormKey);
-                  //widget.exam.printMe();
 
                   setState(() {});
                 }
@@ -620,7 +604,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
       child: Card(
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        //clipBehavior: Clip.antiAliasWithSaveLayer,
         child: AnimatedContainer(
           duration: editSwitchTime,
           height: screenHeight * 0.85,
@@ -662,10 +645,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                         //return
 
                                         widget.updateParent();
-                                        logger.i(
-                                            'active exams: \n${getExamsListString(instanceManager.sessionStorage.activeExams)}');
-                                        logger.i(
-                                            'past exams: \n${getExamsListString(instanceManager.sessionStorage.pastExams)}');
 
                                         widget.pageController.animateToPage(0,
                                             duration:
@@ -680,7 +659,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                             ),
                           )
                         : Container(
-                            // cancel edit
                             key: ValueKey<int>(1),
                             height: screenHeight * 0.06,
                             width: screenWidth * 0.4,
@@ -695,13 +673,11 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                         TextButton.icon(
                                             key: ValueKey<int>(1),
                                             onPressed: () {
-                                              //logger.i('Cancel clicked!');
+                                              // cancel
+                                              closeKeyboard(context);
 
                                               editExamFormKey.currentState!
                                                   .reset();
-
-                                              ////logger.i('A');
-                                              ///
 
                                               try {
                                                 if (prechangeUnits.length <
@@ -723,7 +699,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                             (context,
                                                                     animation) =>
                                                                 SizedBox
-                                                                    .shrink(), // Use an empty SizedBox to suppress the animation
+                                                                    .shrink(),
                                                             duration:
                                                                 Duration.zero);
                                                   }
@@ -738,10 +714,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                         .insertItem(i);
                                                   }
                                                 }
-                                              } catch (e) {
-                                                // logger.i(
-                                                //     'old list is not longer than new one');
-                                              }
+                                              } catch (e) {}
 
                                               setState(() {
                                                 editMode = false;
@@ -760,37 +733,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                             unit.deepCopy())
                                                         .toList();
                                               });
-                                              // Map<String, dynamic> formFields =
-                                              //     editExamFormKey
-                                              //         .currentState!.fields;
-
-                                              // formFields.forEach(
-                                              //     (fieldName, fieldState) {
-                                              //   logger.d(
-                                              //       '$fieldName: ${fieldState.value}');
-                                              // });
-
-                                              // for (UnitModel unit
-                                              //     in widget.exam.units) {
-                                              //   logger.i('Pre: ' +
-                                              //       editExamFormKey
-                                              //           .currentState!
-                                              //           .fields['${unit.id}']!
-                                              //           .value);
-
-                                              //   editExamFormKey.currentState!
-                                              //       .fields['${unit.id}']!
-                                              //       .setValue(unit.name);
-                                              //   logger.i('Post: ' +
-                                              //       editExamFormKey
-                                              //           .currentState!
-                                              //           .fields['${unit.id}']!
-                                              //           .value);
-                                              // }
-
-                                              //widget.exam.printMe();
-
-                                              //widget.exam.printMe();
                                             },
                                             label: Text(_localizations.cancel,
                                                 style: TextStyle(
@@ -820,8 +762,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                 TextButton.icon(
                                     onPressed: () {
                                       //toggle edit
-
-                                      //widget.exam.printMe();
 
                                       setState(() {
                                         editMode = true;
@@ -854,7 +794,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                 key: ValueKey<int>(0),
                                                 onPressed: () async {
                                                   //confirm edit
-                                                  //logger.i('Confirm clicked!');
+                                                  closeKeyboard(context);
 
                                                   if (editExamFormKey!
                                                       .currentState!
@@ -925,7 +865,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                                           .exam
                                                                           .id);
                                                         }
-                                                        //logger.i(examData);
+
                                                         widget.exam = examData;
 
                                                         orderMatters = widget
@@ -939,7 +879,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                         examColor =
                                                             widget.exam.color;
                                                       });
-                                                      //widget.exam.printMe();
                                                     } catch (e) {
                                                       logger.e(
                                                           'Error editing exam (buttonClick): $e');
@@ -1001,12 +940,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                         Colors.transparent,
                         Colors.purple
                       ],
-                      stops: [
-                        0.0,
-                        0.01,
-                        0.95,
-                        1.0
-                      ], // 10% purple, 80% transparent, 10% purple
+                      stops: [0.0, 0.01, 0.95, 1.0],
                     ).createShader(rect);
                   },
                   blendMode: BlendMode.dstOut,
@@ -1053,17 +987,12 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                     height: screenHeight * 0.05,
                                     child: IconButton(
                                         onPressed: () {
-                                          // //logger.i(
-                                          //     'Pre: ${widget.exam.units.length}');
                                           addUnit(UnitModel(
                                               name:
                                                   'Unit ${widget.exam.units.length + 1}',
                                               order:
                                                   widget.exam.units.length + 1,
                                               id: generateRandomString()));
-                                          //widget.exam.printMe();
-                                          // //logger.i(
-                                          //     'Post: ${widget.exam.units.length}');
                                         },
                                         icon: Icon(Icons.add,
                                             color: Colors.white)),

@@ -12,6 +12,7 @@ import 'package:study_buddy/modules/desync_page.dart';
 import 'package:study_buddy/modules/sign_in/sign_in_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
+import 'package:study_buddy/utils/general_utils.dart';
 import 'firebase_options.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -100,13 +101,7 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
     return GestureDetector(
       onTap: () {
         logger.i('tapped outside');
-        FocusScopeNode currentFocus = FocusScope.of(context);
-
-        if (!currentFocus.hasPrimaryFocus) {
-          logger.i('unfocused');
-          
-          FocusScope.of(context).requestFocus(new FocusNode());
-        }
+        closeKeyboard(context);
       },
       child: MaterialApp(
         title: 'StudyBuddy',

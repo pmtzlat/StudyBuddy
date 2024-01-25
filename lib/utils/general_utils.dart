@@ -3,6 +3,23 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/exam_model.dart';
+import 'package:study_buddy/services/logging_service.dart';
+
+const colorOptions = [
+  Colors.amberAccent,
+  Colors.blueAccent,
+  Colors.cyan,
+  Colors.deepOrangeAccent,
+  Colors.purple,
+  Colors.indigo,
+  Colors.lightGreen,
+  Colors.lime,
+  Colors.orangeAccent,
+  Colors.pinkAccent,
+  Colors.purpleAccent,
+  Colors.redAccent,
+  Colors.teal,
+];
 
 List<double> generateDescendingList(int n) {
   List<double> resultList = [];
@@ -50,15 +67,24 @@ extension HexColor on Color {
 int getDaysUntilExam(DateTime examDate) {
   DateTime currentDate = DateTime.now();
   Duration difference = currentDate.difference(examDate);
-  return difference.inDays.abs()+1;
+  return difference.inDays.abs() + 1;
 }
 
 String generateRandomString({int length = 8}) {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   final random = Random.secure();
   return String.fromCharCodes(
-    Iterable.generate(length, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
+    Iterable.generate(
+        length, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
   );
 }
 
+void closeKeyboard(BuildContext context) {
+  FocusScopeNode currentFocus = FocusScope.of(context);
 
+  if (!currentFocus.hasPrimaryFocus) {
+    logger.i('unfocused');
+
+    FocusScope.of(context).requestFocus(new FocusNode());
+  }
+}

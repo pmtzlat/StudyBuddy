@@ -21,7 +21,7 @@ class SchedulerStack {
       daysUntilExam = getDaysUntilExam(exam.examDate);
 
     } catch (e) {
-      logger.d('Error initializing unitsWithRevision: $e');
+      logger.e('Error initializing unitsWithRevision: $e');
       units = [];
     }
   }

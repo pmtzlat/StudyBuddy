@@ -512,7 +512,7 @@ class _ExamsViewState extends State<ExamsView> {
                   ),
                   onDismissed: (direction) async {
                     setState(() {
-                      activeExams.remove(exam);
+                      pastExams.remove(exam);
                       instanceManager.sessionStorage.savedExams.remove(exam);
                     });
 

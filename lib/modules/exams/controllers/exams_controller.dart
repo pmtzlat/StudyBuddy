@@ -338,7 +338,6 @@ class ExamsController {
       int revisions,
       Duration revisionTime,
       Color examColor) async {
-    //await Future.delayed(Duration(seconds:5));
     try {
       ExamModel newExam = ExamModel.copy(exam);
       newExam.name = examFormKey.currentState!.fields['name']!.value.toString();
@@ -349,7 +348,7 @@ class ExamsController {
           examFormKey.currentState!.fields['orderMatters']!.value;
       newExam.color = examColor;
 
-      //logger.i('oldExam id: ${exam.id}, new exam id: ${newExam.id}');
+      
 
       newExam.units = List<UnitModel>.from(exam.units);
 

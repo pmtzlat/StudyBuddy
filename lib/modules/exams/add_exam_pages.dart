@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:duration_picker/duration_picker.dart';
@@ -48,6 +49,21 @@ class _Page1State extends State<Page1> {
   int revisions = 2;
 
   @override
+  void initState() {
+    super.initState();
+    examColor = getUnusedColors();
+  }
+
+  Color getUnusedColors() {
+    for (Color color in colorOptions) {
+      if (!instanceManager.sessionStorage.activeExams
+          .any((exam) => exam.color.value == color.value)) return color;
+    }
+
+    return colorOptions[Random().nextInt(colorOptions.length)];
+  }
+
+  @override
   Widget build(BuildContext context) {
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
@@ -85,21 +101,7 @@ class _Page1State extends State<Page1> {
       _openDialog(
         _localizations.chooseColor,
         MaterialColorPicker(
-          colors: const [
-            Colors.amberAccent,
-            Colors.blueAccent,
-            Colors.cyan,
-            Colors.deepOrangeAccent,
-            Colors.deepPurpleAccent,
-            Colors.indigo,
-            Colors.lightGreen,
-            Colors.lime,
-            Colors.orangeAccent,
-            Colors.pinkAccent,
-            Colors.purpleAccent,
-            Colors.redAccent,
-            Colors.teal,
-          ],
+          colors: colorOptions,
           selectedColor: examColor,
           allowShades: false,
           onMainColorChange: (color) => setState(() => examColor = color!),
