@@ -72,104 +72,126 @@ class _UnitCardState extends State<UnitCard>
       color: widget.editMode ? widget.darkShade : widget.lightShade,
       child: AnimatedContainer(
         duration: openUnit,
-        height: !open ? screenHeight * 0.07 : screenHeight * 0.14,
+        height: !open ? screenHeight * 0.08 : screenHeight * 0.15,
         child: SingleChildScrollView(
           physics: NeverScrollableScrollPhysics(),
           child: Column(
             children: [
-              Theme(
-                data: ThemeData().copyWith(dividerColor: Colors.transparent),
-                child: ExpansionTile(
-                  iconColor:
-                      widget.editMode ? expandableEditColor : expandableColor,
-                  collapsedIconColor:
-                      widget.editMode ? expandableEditColor : expandableColor,
-                  backgroundColor: Colors.transparent,
-                  trailing: RotationTransition(
-                      turns: Tween<double>(begin: 0.0, end: 0.5)
-                          .animate(_animationController),
-                      child: Icon(Icons.expand_more,
-                          color: widget.editMode
-                              ? expandableEditColor
-                              : expandableColor)),
-                  onExpansionChanged: (bool expanded) {
-                    setState(() {
-                      open = expanded;
-                      if (open) {
-                        _animationController.forward();
-                      } else {
-                        _animationController.reverse();
-                      }
-                    });
-                  },
-                  title: Row(
-                    children: [
-                      AnimatedContainer(
-                        duration: Duration(milliseconds: 300),
-                        width: screenWidth * 0.47,
-                        child: widget.editMode
-                            ? Container(
-                                width: screenWidth * 0.47,
-                                child: TextField(
-                                  //TODO: change to a normal textfield and save like completed
-                                  //key: Key(widget.unit.id),
+              Container(
+                padding: EdgeInsets.symmetric(
+                    vertical: screenHeight * 0.016,
+                    horizontal: screenWidth * 0.035),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        AnimatedContainer(
+                          duration: Duration(milliseconds: 300),
+                          //width: screenWidth * 0.55,
+                          child: widget.editMode
+                              ? Container(
+                                  constraints: BoxConstraints(
+                                      maxWidth: screenWidth * 0.45,
+                                      minWidth: screenWidth * 0.2),
+                                  child: IntrinsicWidth(
+                                    child: TextField(
+                                      //TODO: change to a normal textfield and save like completed
+                                      //key: Key(widget.unit.id),
 
-                                  textCapitalization: TextCapitalization.words,
-                                  onChanged: (value) =>
-                                      widget.unit.name = value,
+                                      textCapitalization:
+                                          TextCapitalization.words,
+                                      onChanged: (value) =>
+                                          widget.unit.name = value,
 
-                                  controller: widget.textEditingController,
-                                  readOnly: !widget.editMode,
-                                  decoration: const InputDecoration(
-                                    border:
-                                        InputBorder.none, // Remove the border
-                                    focusedBorder: InputBorder
-                                        .none, // Remove the focused border
+                                      controller: widget.textEditingController,
+                                      readOnly: !widget.editMode,
+                                      decoration: InputDecoration(
+                                        border: InputBorder
+                                            .none, // Remove the border
+                                        isDense: true,
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide.none,
+                                          borderRadius: BorderRadius.circular(
+                                              10.0), // Adjust the border radius
+                                        ),
+                                        focusedBorder: InputBorder
+                                            .none, // Remove the focused border
+                                        fillColor:
+                                            Colors.white.withOpacity(0.5),
+                                        filled: true,
+                                        contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 5),
+                                      ),
+                                      style: TextStyle(
+                                          color: widget.editMode
+                                              ? expandableEditColor
+                                              : expandableColor,
+                                          fontSize: screenWidth * 0.05),
+                                      scrollPadding: EdgeInsets.only(
+                                          bottom: MediaQuery.of(context)
+                                              .viewInsets
+                                              .bottom),
+                                    ),
                                   ),
-                                  style: TextStyle(
-                                      color: widget.editMode
-                                          ? expandableEditColor
-                                          : expandableColor,
-                                      fontSize: screenWidth * 0.05),
-                                  scrollPadding: EdgeInsets.only(
-                                      bottom: MediaQuery.of(context)
-                                          .viewInsets
-                                          .bottom),
+                                )
+                              : Container(
+                                  constraints: BoxConstraints(
+                                      maxWidth: screenWidth * 0.45),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 10.5, vertical: 5),
+                                  child: Text(widget.unit.name,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          //fontWeight: open ? FontWeight.w600: FontWeight.normal,
+                                          color: widget.editMode
+                                              ? expandableEditColor
+                                              : expandableColor,
+                                          fontSize: screenWidth * 0.05)),
                                 ),
-                              )
-                            : Text(widget.unit.name,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    //fontWeight: open ? FontWeight.w600: FontWeight.normal,
+                        ),
+                        
+                        AnimatedSwitcher(
+                          duration: openUnit,
+                          child: widget.unit.completed && !open
+                              ? Container(
+                                  key: ValueKey<int>(0),
+                                  // margin:
+                                  //     EdgeInsets.only(bottom: screenHeight * 0.005),
+                                  child: Icon(
+                                    Icons.done,
+                                    size: screenWidth * 0.07,
                                     color: widget.editMode
-                                        ? expandableEditColor
-                                        : expandableColor,
-                                    fontSize: screenWidth * 0.05)),
-                      ),
-                      SizedBox(
-                        width: screenWidth * 0.02,
-                      ),
-                      AnimatedSwitcher(
-                        duration: openUnit,
-                        child: widget.unit.completed && !open
-                            ? Container(
-                                key: ValueKey<int>(0),
-                                margin: EdgeInsets.only(
-                                    bottom: screenHeight * 0.005),
-                                child: Icon(
-                                  Icons.done,
-                                  size: screenWidth * 0.08,
-                                  color: widget.editMode
-                                      ? Colors.white
-                                      : Colors.green,
+                                        ? Colors.white
+                                        : Colors.green,
+                                  ),
+                                )
+                              : SizedBox(
+                                  key: ValueKey<int>(1),
                                 ),
-                              )
-                            : SizedBox(
-                                key: ValueKey<int>(1),
-                              ),
-                      )
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                    GestureDetector(
+                      child: RotationTransition(
+                          turns: Tween<double>(begin: 0.0, end: 0.5)
+                              .animate(_animationController),
+                          child: Icon(Icons.expand_more,
+                              color: widget.editMode
+                                  ? expandableEditColor
+                                  : expandableColor)),
+                      onTap: () {
+                        setState(() {
+                          open = !open;
+                          if (open) {
+                            _animationController.forward();
+                          } else {
+                            _animationController.reverse();
+                          }
+                        });
+                      },
+                    ),
+                  ],
                 ),
               ),
               Row(
@@ -191,12 +213,23 @@ class _UnitCardState extends State<UnitCard>
                           color: widget.editMode
                               ? expandableEditColor
                               : expandableColor),
-                      label: Text(formatDuration(widget.unit.sessionTime),
-                          style: TextStyle(
-                              color: widget.editMode
-                                  ? expandableEditColor
-                                  : expandableColor,
-                              fontSize: screenWidth * 0.04))),
+                      label: AnimatedContainer(
+                        duration: Duration(milliseconds: 300),
+                        padding: widget.editMode
+                            ? EdgeInsets.symmetric(horizontal: 10, vertical: 5)
+                            : EdgeInsets.all(0),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(
+                              10.0), // Adjust the border radius as needed
+                        ),
+                        child: Text(formatDuration(widget.unit.sessionTime),
+                            style: TextStyle(
+                                color: widget.editMode
+                                    ? expandableEditColor
+                                    : expandableColor,
+                                fontSize: screenWidth * 0.04)),
+                      )),
                   Container(
                     margin: EdgeInsets.only(right: screenWidth * 0.035),
                     child: Row(
@@ -207,22 +240,34 @@ class _UnitCardState extends State<UnitCard>
                                     ? expandableEditColor
                                     : expandableColor,
                                 fontSize: screenWidth * 0.04)),
-                        Checkbox(
-                            visualDensity:
-                                VisualDensity(horizontal: -4, vertical: -4),
-                            activeColor: Colors.black,
-                            checkColor: editMode
-                                ? widget.darkShade
-                                : Colors.white, // Color of the checkmark
-                            fillColor: MaterialStateProperty.all(Colors.black),
-                            value: widget.unit.completed,
-                            onChanged: (bool? newValue) {
-                              if (widget.editMode) {
-                                setState(() {
-                                  widget.unit.completed = newValue ?? false;
-                                });
-                              }
-                            })
+                        AnimatedContainer(
+                          duration: Duration(milliseconds: 300),
+                          padding: widget.editMode
+                              ? EdgeInsets.all(1)
+                              : EdgeInsets.all(0),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(
+                                10.0), // Adjust the border radius as needed
+                          ),
+                          child: Checkbox(
+                              visualDensity:
+                                  VisualDensity(horizontal: -4, vertical: -4),
+                              activeColor: Colors.black,
+                              checkColor: editMode
+                                  ? widget.darkShade
+                                  : Colors.white, // Color of the checkmark
+                              fillColor:
+                                  MaterialStateProperty.all(Colors.black),
+                              value: widget.unit.completed,
+                              onChanged: (bool? newValue) {
+                                if (widget.editMode) {
+                                  setState(() {
+                                    widget.unit.completed = newValue ?? false;
+                                  });
+                                }
+                              }),
+                        )
                       ],
                     ),
                   )

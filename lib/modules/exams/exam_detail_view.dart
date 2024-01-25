@@ -26,11 +26,14 @@ class ExamDetailView extends StatefulWidget {
   ExamModel exam;
   Function refreshParent;
   PageController pageController;
+  Function updateParent;
+
   ExamDetailView(
       {super.key,
       required ExamModel this.exam,
       required this.refreshParent,
-      required this.pageController});
+      required this.pageController,
+      required this.updateParent});
 
   @override
   State<ExamDetailView> createState() => _ExamDetailViewState();
@@ -52,6 +55,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
   List<UnitModel> prechangeUnits = <UnitModel>[];
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   int _provisionalListLength = 0;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -64,11 +68,25 @@ class _ExamDetailViewState extends State<ExamDetailView> {
     position = getPosition(widget.exam);
   }
 
+  void _scrollDown() {
+    //logger.i('Pre: ${_scrollController.position.maxScrollExtent}');
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.fastOutSlowIn,
+    );
+    //logger.i('Post: ${_scrollController.position.maxScrollExtent}');
+  }
+
   void addUnit(UnitModel newUnit) {
     final index = widget.exam.units.length;
     widget.exam.units.add(newUnit);
     _listKey.currentState?.insertItem(index);
     _provisionalListLength = widget.exam.units.length;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // This callback will be executed after the layout is painted
+      _scrollDown();
+    });
   }
 
   @override
@@ -216,7 +234,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                         format: DateFormat('EEE, M/d/y'),
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(),
-                          futureDateValidator,
                         ]),
                         autovalidateMode: AutovalidateMode.onUserInteraction,
                         onChanged: (DateTime? value) {
@@ -572,7 +589,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                   );
 
                   widget.exam.updateUnitOrders(editExamFormKey);
-                  widget.exam.printMe();
+                  //widget.exam.printMe();
 
                   setState(() {});
                 }
@@ -643,6 +660,13 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                       iconSize: screenWidth * 0.1,
                                       onPressed: () {
                                         //return
+
+                                        widget.updateParent();
+                                        logger.i(
+                                            'active exams: \n${getExamsListString(instanceManager.sessionStorage.activeExams)}');
+                                        logger.i(
+                                            'past exams: \n${getExamsListString(instanceManager.sessionStorage.pastExams)}');
+
                                         widget.pageController.animateToPage(0,
                                             duration:
                                                 Duration(milliseconds: 300),
@@ -715,8 +739,8 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                   }
                                                 }
                                               } catch (e) {
-                                                logger.i(
-                                                    'old list is not longer than new one');
+                                                // logger.i(
+                                                //     'old list is not longer than new one');
                                               }
 
                                               setState(() {
@@ -764,7 +788,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                               //           .value);
                                               // }
 
-                                              widget.exam.printMe();
+                                              //widget.exam.printMe();
 
                                               //widget.exam.printMe();
                                             },
@@ -797,7 +821,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                     onPressed: () {
                                       //toggle edit
 
-                                      widget.exam.printMe();
+                                      //widget.exam.printMe();
 
                                       setState(() {
                                         editMode = true;
@@ -841,9 +865,10 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                     setState(() {
                                                       loading = true;
                                                     });
+                                                    int res = 0;
 
                                                     try {
-                                                      await _controller
+                                                      res = await _controller
                                                           .handleEditExam(
                                                               editExamFormKey,
                                                               widget.exam,
@@ -852,7 +877,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                               examColor);
                                                     } catch (e) {
                                                       logger.e(
-                                                          'Error editing exam: $e');
+                                                          'Error editing exam (handleEditExam): $e');
                                                       editExamFormKey
                                                           .currentState!
                                                           .reset();
@@ -867,29 +892,58 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                             .sessionStorage
                                                             .activeExams;
 
-                                                    setState(() {
-                                                      loading = false;
-                                                      editMode = false;
-                                                      widget.exam = activeExams
-                                                          .firstWhere(
-                                                              (examToFind) =>
-                                                                  examToFind
-                                                                      .id ==
-                                                                  widget
-                                                                      .exam.id);
+                                                    final pastExams =
+                                                        instanceManager
+                                                            .sessionStorage
+                                                            .pastExams;
 
-                                                      orderMatters = widget
-                                                          .exam.orderMatters;
-                                                      revisions = widget.exam
-                                                          .revisions.length;
-                                                      revisionTime = widget
-                                                          .exam.revisionTime;
-                                                      examDate =
-                                                          widget.exam.examDate;
-                                                      examColor =
-                                                          widget.exam.color;
-                                                    });
-                                                    widget.exam.printMe();
+                                                    try {
+                                                      setState(() {
+                                                        loading = false;
+                                                        editMode = false;
+                                                        ExamModel examData =
+                                                            instanceManager
+                                                                .sessionStorage
+                                                                .examToAdd;
+
+                                                        try {
+                                                          examData = activeExams
+                                                              .firstWhere(
+                                                                  (examToFind) =>
+                                                                      examToFind
+                                                                          .id ==
+                                                                      widget
+                                                                          .exam
+                                                                          .id);
+                                                        } catch (e) {
+                                                          examData = pastExams
+                                                              .firstWhere(
+                                                                  (examToFind) =>
+                                                                      examToFind
+                                                                          .id ==
+                                                                      widget
+                                                                          .exam
+                                                                          .id);
+                                                        }
+                                                        //logger.i(examData);
+                                                        widget.exam = examData;
+
+                                                        orderMatters = widget
+                                                            .exam.orderMatters;
+                                                        revisions = widget.exam
+                                                            .revisions.length;
+                                                        revisionTime = widget
+                                                            .exam.revisionTime;
+                                                        examDate = widget
+                                                            .exam.examDate;
+                                                        examColor =
+                                                            widget.exam.color;
+                                                      });
+                                                      //widget.exam.printMe();
+                                                    } catch (e) {
+                                                      logger.e(
+                                                          'Error editing exam (buttonClick): $e');
+                                                    }
                                                   }
                                                 },
                                                 label: Text(
@@ -916,10 +970,13 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                         color: Colors.white,
                                                         fontSize: screenWidth *
                                                             0.04)),
-                                                icon: Icon(
-                                                  Icons.edit_outlined,
-                                                  color: Colors.white,
-                                                  size: screenWidth * 0.05,
+                                                icon: Container(
+                                                  width: screenWidth * 0.05,
+                                                  height: screenWidth * 0.05,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    color: Colors.white,
+                                                  ),
                                                 )),
                                           )),
                               ],
@@ -954,6 +1011,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                   },
                   blendMode: BlendMode.dstOut,
                   child: SingleChildScrollView(
+                    controller: _scrollController,
                     padding: EdgeInsets.only(
                       bottom: MediaQuery.of(context).viewInsets.bottom,
                     ),
@@ -1003,7 +1061,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                               order:
                                                   widget.exam.units.length + 1,
                                               id: generateRandomString()));
-                                          widget.exam.printMe();
+                                          //widget.exam.printMe();
                                           // //logger.i(
                                           //     'Post: ${widget.exam.units.length}');
                                         },

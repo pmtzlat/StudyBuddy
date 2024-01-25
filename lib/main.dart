@@ -97,25 +97,37 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
       );
     }
 
-    return MaterialApp(
-      title: 'StudyBuddy',
-      home: (user != null) ? CalendarView() : SignInView(),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color.fromARGB(255, 46, 46, 46)),
-        useMaterial3: true,
-        textSelectionTheme: TextSelectionThemeData(
-          selectionHandleColor: Colors.transparent,
+    return GestureDetector(
+      onTap: () {
+        logger.i('tapped outside');
+        FocusScopeNode currentFocus = FocusScope.of(context);
+
+        if (!currentFocus.hasPrimaryFocus) {
+          logger.i('unfocused');
+          
+          FocusScope.of(context).requestFocus(new FocusNode());
+        }
+      },
+      child: MaterialApp(
+        title: 'StudyBuddy',
+        home: (user != null) ? CalendarView() : SignInView(),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color.fromARGB(255, 46, 46, 46)),
+          useMaterial3: true,
+          textSelectionTheme: TextSelectionThemeData(
+            selectionHandleColor: Colors.transparent,
+          ),
         ),
+        supportedLocales: [Locale('es'), Locale('en')],
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          FormBuilderLocalizations.delegate,
+        ],
       ),
-      supportedLocales: [Locale('es'), Locale('en')],
-      localizationsDelegates: [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        FormBuilderLocalizations.delegate,
-      ],
     );
   }
 }

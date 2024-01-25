@@ -40,10 +40,20 @@ class _ExamsViewState extends State<ExamsView> {
   ExamModel selectedExam =
       ExamModel(name: 'placeholder', examDate: DateTime.now());
   final PageController examPageController = PageController();
+  late PageController timePageController = PageController(
+      initialPage: instanceManager.sessionStorage.activeOrAllExams);
 
   void updateExamPage() {
-    setState(() {});
+    setState(() {
+      activeExams = instanceManager.sessionStorage.activeExams;
+      pastExams = instanceManager.sessionStorage.pastExams;
+    });
+    
   }
+
+  
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -51,8 +61,8 @@ class _ExamsViewState extends State<ExamsView> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    final PageController timePageController = PageController(
-        initialPage: instanceManager.sessionStorage.activeOrAllExams);
+    
+    
 
     Widget page1 = Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -232,7 +242,10 @@ class _ExamsViewState extends State<ExamsView> {
                         onTap: () {},
                         onDoubleTap: () {},
                         onSwipe: () {},
-                        value: false,
+                        value:
+                            instanceManager.sessionStorage.activeOrAllExams == 1
+                                ? true
+                                : false,
                         width: screenWidth * 0.6,
                         height: screenHeight * 0.04,
                         textOff: _localizations.futureExams,
@@ -276,8 +289,12 @@ class _ExamsViewState extends State<ExamsView> {
       ],
     );
 
-    Widget page2 =
-        ExamDetailView(exam: selectedExam, refreshParent: refresh, pageController: examPageController,); //TODO:
+    Widget page2 = ExamDetailView(
+      exam: selectedExam,
+      refreshParent: refresh,
+      pageController: examPageController,
+      updateParent: updateExamPage,
+    ); //TODO:
 
     List<Widget> pages = [page1, page2];
 

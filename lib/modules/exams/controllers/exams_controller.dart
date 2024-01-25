@@ -51,7 +51,7 @@ class ExamsController {
       applyWeights(exams);
 
       for (ExamModel exam in exams) {
-        logger.i(exam.name);
+        //logger.i(exam.name);
         await firebaseCrud.editExamWeight(exam).timeout(timeoutDuration);
       }
       return 1;
@@ -263,7 +263,7 @@ class ExamsController {
     try {
       final exams = await firebaseCrud.getAllExams();
       ;
-      logger.i('getAllexams: ${getExamsListString(exams)}');
+      //logger.i('getAllexams: ${getExamsListString(exams)}');
 
       instanceManager.sessionStorage.savedExams = exams;
       instanceManager.sessionStorage.activeExams = filterActiveExams(exams);
@@ -349,7 +349,7 @@ class ExamsController {
           examFormKey.currentState!.fields['orderMatters']!.value;
       newExam.color = examColor;
 
-      logger.i('oldExam id: ${exam.id}, new exam id: ${newExam.id}');
+      //logger.i('oldExam id: ${exam.id}, new exam id: ${newExam.id}');
 
       newExam.units = List<UnitModel>.from(exam.units);
 
@@ -361,18 +361,18 @@ class ExamsController {
       }
 
       await handleChangeInRevisions(revisions, newExam);
-      var examList = instanceManager.sessionStorage.activeExams;
-      int indexOfItem = examList.indexWhere((item) => item.id == newExam.id);
 
-      examList[indexOfItem] =
-          await firebaseCrud.getExam(newExam.id).timeout(timeoutDuration);
-      ;
+      instanceManager.sessionStorage.activeOrAllExams = 0;
+     
 
-      logger.i(getExamsListString(instanceManager.sessionStorage.activeExams));
+      await getAllExams();
+      // return to exams page
+
+      
 
       instanceManager.sessionStorage.needsRecalculation = true;
       return 1;
-    } on Exception catch (e) {
+    } catch (e) {
       logger.e('Error handlEditExam: $e');
       return -1;
     }
@@ -382,10 +382,10 @@ class ExamsController {
     try {
       var res;
       int currentRevisions = exam.revisions.length;
-      logger.i('CurrentRevisions: $currentRevisions');
-      logger.i('revisions: $revisions');
+      // logger.i('CurrentRevisions: $currentRevisions');
+      // logger.i('revisions: $revisions');
       if (revisions > currentRevisions) {
-        logger.i('new revisions is >= current revisions');
+        //logger.i('new revisions is >= current revisions');
         while (revisions > currentRevisions) {
           currentRevisions++;
           final newUnit = UnitModel(
@@ -393,7 +393,7 @@ class ExamsController {
               order: currentRevisions,
               sessionTime: doubleToDuration(
                   (durationToDouble(exam.revisionTime) * 1.5)));
-          logger.i('Adding new revision: ${newUnit.name}');
+          //logger.i('Adding new revision: ${newUnit.name}');
           res = await firebaseCrud
               .addRevisionToExam(newUnit: newUnit, examID: exam.id)
               .timeout(timeoutDuration);
@@ -401,9 +401,9 @@ class ExamsController {
           if (res == null) return -1;
         }
       } else if (revisions < currentRevisions) {
-        logger.i('new revisions is < current revisions');
+        //logger.i('new revisions is < current revisions');
         while (revisions < currentRevisions) {
-          logger.i('Removing new revision: ${currentRevisions}');
+          //logger.i('Removing new revision: ${currentRevisions}');
           res = await firebaseCrud
               .removeRevisionFromExam(currentRevisions, exam.id)
               .timeout(timeoutDuration);
@@ -421,27 +421,27 @@ class ExamsController {
 
   Future<int> markUnitsCompletedIfInPreviousDays(DateTime date) async {
     try {
-      logger.i('updating Day ${date.toString()}');
+      //logger.i('updating Day ${date.toString()}');
       final day = await firebaseCrud
           .getCalendarDayByDate(date)
           .timeout(timeoutDuration);
       ;
       if (day == null) return 1;
 
-      logger.i('DayID: ${day.id}');
+      //logger.i('DayID: ${day.id}');
 
       final List<TimeSlot> timeSlotsInDay = await firebaseCrud
           .getTimeSlotsForCalendarDay(day.id)
           .timeout(timeoutDuration);
       ;
-      logger.i(
-          'Got timeSlots for day ${day.date.toString()}: ${timeSlotsInDay.length}');
+      // logger.i(
+      //     'Got timeSlots for day ${day.date.toString()}: ${timeSlotsInDay.length}');
 
       for (var timeSlot in timeSlotsInDay) {
         final unit = timeSlot.unitID;
         final exam = timeSlot.examID;
-        logger.i(
-            'Marking unit ${timeSlot.unitName} ${timeSlot.unitID} as complete...');
+        // logger.i(
+        //     'Marking unit ${timeSlot.unitName} ${timeSlot.unitID} as complete...');
         int res = await firebaseCrud
             .markUnitAsComplete(exam, unit)
             .timeout(timeoutDuration);
@@ -453,8 +453,8 @@ class ExamsController {
         ;
         if (res != 1) return -1;
 
-        logger.i('Unit ${timeSlot.unitName} marked as complete');
-        logger.i('TimeSlot ${timeSlot.id} marked as complete');
+        // logger.i('Unit ${timeSlot.unitName} marked as complete');
+        // logger.i('TimeSlot ${timeSlot.id} marked as complete');
       }
 
       return 1;
