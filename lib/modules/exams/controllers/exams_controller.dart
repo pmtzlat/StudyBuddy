@@ -235,12 +235,17 @@ class ExamsController {
       return true;
     } catch (e) {
       logger.e('Error in handleAddExam: $e');
+      instanceManager.sessionStorage.activeExams.removeAt(instanceManager
+          .sessionStorage.activeExams
+          .indexOf(instanceManager.sessionStorage.examToAdd));
       rethrow; // Rethrow the exception after logging it
     }
   }
 
   Future<void> addExam(ExamModel exam) async {
     try {
+      List<int> numbers = [1, 2, 3];
+      print(numbers[5]);
       String examID = await firebaseCrud.addExam(newExam: exam);
 
       if (examID != null) {
@@ -263,7 +268,7 @@ class ExamsController {
     try {
       final exams = await firebaseCrud.getAllExams();
       ;
-      //logger.i('getAllexams: ${getExamsListString(exams)}');
+      logger.i('Getting all exams...');
 
       instanceManager.sessionStorage.savedExams = exams;
       instanceManager.sessionStorage.activeExams = filterActiveExams(exams);
@@ -291,47 +296,6 @@ class ExamsController {
     }
   }
 
-  Future<int?> handleEditUnit(GlobalKey<FormBuilderState> unitFormKey,
-      ExamModel exam, UnitModel oldUnit) async {
-    try {
-      if (unitFormKey.currentState!.validate()) {
-        unitFormKey.currentState!.save();
-
-        final name =
-            unitFormKey.currentState!.fields['unitName']!.value.toString();
-        final sessionTime = doubleToDuration(double.parse(
-            unitFormKey.currentState!.fields['sessionTime']!.value.toString()));
-        final completed = unitFormKey.currentState!.fields['completed']!.value;
-        final completionTime;
-        if (completed == false) {
-          completionTime = Duration.zero;
-        } else {
-          completionTime = sessionTime;
-        }
-
-        final updatedUnit = UnitModel(
-            name: name,
-            order: oldUnit.order,
-            sessionTime: sessionTime,
-            completed: completed,
-            completionTime: completionTime);
-
-        dynamic res = await firebaseCrud
-            .editUnit(exam: exam, unitID: oldUnit.id, updatedUnit: updatedUnit)
-            .timeout(timeoutDuration);
-        ;
-        if (res == 1) instanceManager.sessionStorage.needsRecalculation = true;
-
-        return res;
-      } else {
-        logger.e('Error validating unit keys!');
-      }
-    } on Exception catch (e) {
-      logger.e('Error handling edit Unit: $e');
-      return -1;
-    }
-  }
-
   Future<int?> handleEditExam(
       GlobalKey<FormBuilderState> examFormKey,
       ExamModel exam,
@@ -348,8 +312,6 @@ class ExamsController {
           examFormKey.currentState!.fields['orderMatters']!.value;
       newExam.color = examColor;
 
-      
-
       newExam.units = List<UnitModel>.from(exam.units);
 
       await firebaseCrud.editExam(exam.id, newExam).timeout(timeoutDuration);
@@ -362,17 +324,15 @@ class ExamsController {
       await handleChangeInRevisions(revisions, newExam);
 
       instanceManager.sessionStorage.activeOrAllExams = 0;
-     
 
       await getAllExams();
       // return to exams page
-
-      
 
       instanceManager.sessionStorage.needsRecalculation = true;
       return 1;
     } catch (e) {
       logger.e('Error handlEditExam: $e');
+      await getAllExams();
       return -1;
     }
   }

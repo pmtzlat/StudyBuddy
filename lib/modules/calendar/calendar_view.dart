@@ -24,14 +24,14 @@ class _CalendarViewState extends State<CalendarView> {
   late bool autoRecalc;
   final _controller = instanceManager.calendarController;
   GlobalKey<CalendarDayTimesState> _timesKey = GlobalKey();
+
+  bool scrollSheetIsUp = false;
+
   late CalendarDayTimes events = CalendarDayTimes(
     key: _timesKey,
     updateParent: () {
       logger.i(instanceManager.sessionStorage.needsRecalculation);
-      setState(() {
-        
-      });
-      
+      setState(() {});
     },
   );
 
@@ -46,8 +46,6 @@ class _CalendarViewState extends State<CalendarView> {
             instanceManager.sessionStorage.incompletePreviousDays);
       });
     }
-
-    
   }
 
   void _showRecalculationAdvice(BuildContext context) {
@@ -131,7 +129,7 @@ class _CalendarViewState extends State<CalendarView> {
                   Text(_localizations.completePreviousDaysDesc),
                   Container(
                     height: screenHeight * 0.4,
-                    width: screenWidth*0.8,
+                    width: screenWidth * 0.8,
                     child: PageView.builder(
                       controller: pageController,
                       itemCount: keys.length,
@@ -140,7 +138,7 @@ class _CalendarViewState extends State<CalendarView> {
                         // Return a widget for each page based on the array item
                         DateTime dateInQuestion = DateTime.parse(keys[index]);
                         return Container(
-                          width: screenWidth*0.75,
+                          width: screenWidth * 0.75,
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -160,30 +158,32 @@ class _CalendarViewState extends State<CalendarView> {
                                           onPressed: () {
                                             _controller.markDayAsNotified(
                                                 dateInQuestion);
-                        
+
                                             leftDaysUnsaved = true;
                                             if (index < keys.length - 1) {
                                               dateInQuestion = dateInQuestion
                                                   .add(Duration(days: 1));
                                               pageController.nextPage(
-                                                  duration:
-                                                      Duration(milliseconds: 300),
+                                                  duration: Duration(
+                                                      milliseconds: 300),
                                                   curve: Curves.easeInOut);
                                             } else {
                                               instanceManager.sessionStorage
                                                       .incompletePreviousDays =
                                                   <String, List<TimeSlot>>{};
-                        
+
                                               if (leftDaysUnsaved) {
-                                                _showRecalculationAdvice(context);
+                                                _showRecalculationAdvice(
+                                                    context);
                                               } else {
                                                 Navigator.pop(context);
                                               }
-                        
+
                                               setState(() {});
                                             }
                                           },
-                                          child: Text(_localizations.leaveAsIs)),
+                                          child:
+                                              Text(_localizations.leaveAsIs)),
                                       ElevatedButton(
                                           onPressed: () async {
                                             _controller.markDayAsNotified(
@@ -198,15 +198,16 @@ class _CalendarViewState extends State<CalendarView> {
                                               dateInQuestion = dateInQuestion
                                                   .add(Duration(days: 1));
                                               pageController.nextPage(
-                                                  duration:
-                                                      Duration(milliseconds: 300),
+                                                  duration: Duration(
+                                                      milliseconds: 300),
                                                   curve: Curves.easeInOut);
                                             } else {
                                               instanceManager.sessionStorage
                                                       .incompletePreviousDays =
                                                   <String, List<TimeSlot>>{};
                                               if (leftDaysUnsaved) {
-                                                _showRecalculationAdvice(context);
+                                                _showRecalculationAdvice(
+                                                    context);
                                               } else {
                                                 Navigator.pop(context);
                                               }
@@ -265,91 +266,144 @@ class _CalendarViewState extends State<CalendarView> {
     });
   }
 
+  void moveSheetUp() {
+    setState(() {
+      scrollSheetIsUp = true;
+    });
+  }
+
+  void moveSheetDown() {
+    setState(() {
+      scrollSheetIsUp = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    logger.w('Needs recalc: ${instanceManager.sessionStorage.needsRecalculation}');
+
+    logger.w(
+        'Needs recalc: ${instanceManager.sessionStorage.needsRecalculation}');
     if (autoRecalc) {
       handleScheduleCalculation(context, _localizations);
       autoRecalc = false;
     }
     ;
+
     return instanceManager.scaffold.getScaffold(
         context: context,
         activeIndex: 1,
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: false,
+        body: Stack(
           children: [
             Container(
-              margin: EdgeInsets.all(screenWidth * 0.05),
-              child: Text(
-                _localizations.calendarTitle,
-                style: Theme.of(context).textTheme.displayMedium,
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
+              child: Column(
+                children: [
+                  Container(
+                    margin: EdgeInsets.all(screenWidth * 0.05),
+                    child: Text(
+                      _localizations.calendarTitle,
+                      style: Theme.of(context).textTheme.displayMedium,
+                    ),
+                  ),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     Container(
+                  //       height: screenHeight * 0.15,
+                  //       child: Column(
+                  //         children: [
+                  //           ElevatedButton.icon(
+                  //               onPressed: () {
+                  //                 Navigator.push(
+                  //                   context,
+                  //                   MaterialPageRoute(
+                  //                     builder: (context) => RestrictionsDetailView(),
+                  //                   ),
+                  //                 );
+                  //               },
+                  //               icon: Icon(Icons.settings),
+                  //               label: Text(_localizations.changeScheduleGaps)),
+                  //           instanceManager.sessionStorage.needsRecalculation
+                  //               ? Text(
+                  //                   _localizations.needsRecalculationInfo,
+                  //                   style: const TextStyle(
+                  //                       fontSize: 13,
+                  //                       color: Color.fromARGB(255, 219, 164, 0)),
+                  //                 )
+                  //               : const SizedBox(),
+                  //           ElevatedButton.icon(
+                  //               onPressed: () async {
+                  //                 handleScheduleCalculation(context, _localizations);
+                  //               },
+                  //               icon:
+                  //                   instanceManager.sessionStorage.needsRecalculation
+                  //                       ? const Icon(
+                  //                           Icons.warning_amber_outlined,
+                  //                           color: Colors.black,
+                  //                         )
+                  //                       : const Icon(Icons.calculate),
+                  //               label:
+                  //                   instanceManager.sessionStorage.needsRecalculation
+                  //                       ? Text(
+                  //                           _localizations.needsRecalculation,
+                  //                           style: const TextStyle(
+                  //                             color: Colors.black,
+                  //                           ),
+                  //                         )
+                  //                       : Text(_localizations.calculateSchedule),
+                  //               style:
+                  //                   instanceManager.sessionStorage.needsRecalculation
+                  //                       ? ElevatedButton.styleFrom(
+                  //                           backgroundColor: Colors.amber)
+                  //                       : ElevatedButton.styleFrom()),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+                  Center(
+                    child: Container(
+                        color: Colors.black.withOpacity(0.2),
+                        height: screenHeight * 0.584,
+                        width: screenWidth * 0.8,
+                        child: events),
+                  ),
+                ],
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  height: screenHeight * 0.15,
-                  child: Column(
-                    children: [
-                      ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RestrictionsDetailView(),
-                              ),
-                            );
-                          },
-                          icon: Icon(Icons.settings),
-                          label: Text(_localizations.changeScheduleGaps)),
-                      instanceManager.sessionStorage.needsRecalculation
-                          ? Text(
-                              _localizations.needsRecalculationInfo,
-                              style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Color.fromARGB(255, 219, 164, 0)),
-                            )
-                          : const SizedBox(),
-                      ElevatedButton.icon(
-                          onPressed: () async {
-                            handleScheduleCalculation(context, _localizations);
-                          },
-                          icon:
-                              instanceManager.sessionStorage.needsRecalculation
-                                  ? const Icon(
-                                      Icons.warning_amber_outlined,
-                                      color: Colors.black,
-                                    )
-                                  : const Icon(Icons.calculate),
-                          label:
-                              instanceManager.sessionStorage.needsRecalculation
-                                  ? Text(
-                                      _localizations.needsRecalculation,
-                                      style: const TextStyle(
-                                        color: Colors.black,
-                                      ),
-                                    )
-                                  : Text(_localizations.calculateSchedule),
-                          style:
-                              instanceManager.sessionStorage.needsRecalculation
-                                  ? ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.amber)
-                                  : ElevatedButton.styleFrom()),
-                    ],
-                  ),
+            Container(
+              height: double.infinity,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      height: scrollSheetIsUp
+                          ? screenHeight * 0.7
+                          : screenHeight * 0.1,
+                    ),
+                    Container(
+                      width: screenWidth,
+                      color: Colors.amber,
+                      child: Column(
+                        children: [
+                          IconButton(
+                              onPressed: () {
+                                scrollSheetIsUp
+                                    ? moveSheetDown()
+                                    : moveSheetUp();
+                              },
+                              icon: Icon(Icons.arrow_upward))
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            Center(
-              child: Container(
-                  height: screenHeight * 0.584,
-                  width: screenWidth * 0.8,
-                  child: events),
+              ),
             )
           ],
         ));

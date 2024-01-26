@@ -62,7 +62,8 @@ class MyScaffold {
   Widget getScaffold(
       {required int activeIndex,
       required Widget body,
-      required BuildContext context}) {
+      required BuildContext context,
+      bool padding = true}) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
 
@@ -77,8 +78,8 @@ class MyScaffold {
           body: Container(
               padding: EdgeInsets.only(
                   top: screenHeight * 0.08,
-                  left: screenWidth * 0.03,
-                  right: screenWidth * 0.03),
+                  left: padding ? screenWidth * 0.03 : 0,
+                  right: padding ? screenWidth * 0.03 : 0),
               child: body)),
     );
   }

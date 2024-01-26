@@ -111,6 +111,8 @@ class _ExamsViewState extends State<ExamsView> {
                               key: ValueKey<int>(1),
                               onPressed: () {
                                 logger.i('Cancel clicked!');
+                                logger.i(
+                                              'reorderExams after cancel clicked: ${getExamsListString(reorderExams)}');
                                 setState(() {
                                   prioritizing = false;
                                 });
@@ -387,7 +389,10 @@ class _ExamsViewState extends State<ExamsView> {
                     index: index,
                     context: context,
                   );
-                  setState(() {});
+                  await _controller.getAllExams();
+                  setState(() {
+                    activeExams = instanceManager.sessionStorage.activeExams;
+                  });
                 } else {
                   setState(() {
                     reorderExams.remove(exam);
@@ -522,6 +527,10 @@ class _ExamsViewState extends State<ExamsView> {
                       index: index,
                       context: context,
                     );
+                    await _controller.getAllExams();
+                  setState(() {
+                    pastExams = instanceManager.sessionStorage.pastExams;
+                  });
                   },
                   child: ExamCard(
                     exam: examList![index],

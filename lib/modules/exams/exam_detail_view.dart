@@ -645,6 +645,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                         //return
 
                                         widget.updateParent();
+                                        instanceManager.sessionStorage.activeOrAllExams = 0;
 
                                         widget.pageController.animateToPage(0,
                                             duration:
