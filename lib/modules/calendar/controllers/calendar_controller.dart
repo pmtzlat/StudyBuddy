@@ -114,17 +114,21 @@ class CalendarController {
 
   Future<bool?> getCalendarDay(DateTime date) async {
     try {
+      await Future.delayed(Duration(milliseconds:500));
       bool initialLoad = instanceManager.sessionStorage.initialDayLoad;
       if (!initialLoad) await Future.delayed(Duration(seconds: 2));
       instanceManager.sessionStorage.prevDay =
           instanceManager.sessionStorage.loadedCalendarDay;
       instanceManager.sessionStorage.prevDayDate =
-          instanceManager.sessionStorage.currentDay;
+          instanceManager.sessionStorage.currentDate;
 
-      instanceManager.sessionStorage.currentDay =
+      instanceManager.sessionStorage.currentDate=
           DateTime(date.year, date.month, date.day);
+      
+      // var x = [];
+      // var y = x[1];
 
-      var savedDate = instanceManager.sessionStorage.currentDay;
+      var savedDate = instanceManager.sessionStorage.currentDate;
 
       instanceManager.sessionStorage.loadedCalendarDay = await _firebaseCrud
           .getCalendarDay(savedDate)
@@ -140,7 +144,7 @@ class CalendarController {
       logger.e('Error getting current days (in calendarController): $e');
       instanceManager.sessionStorage.loadedCalendarDay =
           instanceManager.sessionStorage.prevDay;
-      instanceManager.sessionStorage.currentDay =
+      instanceManager.sessionStorage.currentDate =
           instanceManager.sessionStorage.prevDayDate;
       return false;
     }

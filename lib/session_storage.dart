@@ -21,12 +21,12 @@ class SessionStorage {
   DayModel loadedCalendarDay = 
     DayModel(weekday: DateTime.now().weekday, date: DateTime.now(), id: 'Placeholder');
 
-  DateTime currentDay = stripTime(DateTime.now());
+  DateTime currentDate = stripTime(DateTime.now());
   //bool dayLoaded = false;
 
-  DateTime? prevDayDate = null;
+  DateTime? prevDayDate = stripTime(DateTime.now());
 
-  DayModel? prevDay = null;
+  DayModel prevDay = DayModel(weekday: DateTime.now().weekday, date: DateTime.now(), id: 'Placeholder');
 
   var savedWeekday = 0;
   int? schedulePresent;

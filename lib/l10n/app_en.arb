@@ -121,6 +121,7 @@
     "errorChangingTimeSlotCompletion": "Error updating Time Slot",
     "errorLoadingDay":"Error loading day!",
     "reload": "Reload",
+    "openCalendar": "Open Calendar",
     
 
 

@@ -31,6 +31,7 @@ class _CalendarViewState extends State<CalendarView>
   final _controller = instanceManager.calendarController;
   GlobalKey<CalendarDayTimesState> _timesKey = GlobalKey();
   DayModel day = instanceManager.sessionStorage.loadedCalendarDay;
+  DateTime date = instanceManager.sessionStorage.currentDate;
   Duration recalcTime = Duration(milliseconds: 150);
   bool needsRecalc = instanceManager.sessionStorage.needsRecalculation;
   Color titleGrey = Color.fromARGB(255, 92, 92, 92);
@@ -316,9 +317,6 @@ class _CalendarViewState extends State<CalendarView>
       autoRecalc = false;
     }
 
-    logger.i(
-        'Day: ${instanceManager.sessionStorage.loadedCalendarDay.getString()}');
-
     return instanceManager.scaffold.getScaffold(
         context: context,
         activeIndex: 1,
@@ -341,15 +339,20 @@ class _CalendarViewState extends State<CalendarView>
                               if (!dayLoaded) return;
                               setState(() {
                                 dayLoaded = false;
+                                date = instanceManager
+                                    .sessionStorage.currentDate
+                                    .subtract(Duration(days: 1));
                               });
 
                               if (!await _controller.getCalendarDay(
-                                  instanceManager.sessionStorage.currentDay
+                                  instanceManager.sessionStorage.currentDate
                                       .subtract(Duration(days: 1))))
                                 showRedSnackbar(
                                     context, _localizations.errorLoadingDay);
                               setState(() {
                                 dayLoaded = true;
+                                date =
+                                    instanceManager.sessionStorage.currentDate;
                               });
                             },
                             icon: Icon(
@@ -358,8 +361,8 @@ class _CalendarViewState extends State<CalendarView>
                               size: screenWidth * 0.1,
                             )),
                         Text(
-                          DateFormat('dd MMM. yyyy', Intl.defaultLocale).format(
-                              instanceManager.sessionStorage.currentDay),
+                          DateFormat('dd MMM. yyyy', Intl.defaultLocale)
+                              .format(date),
                           style: TextStyle(
                               fontSize: screenWidth * 0.08, color: titleGrey),
                         ),
@@ -368,15 +371,20 @@ class _CalendarViewState extends State<CalendarView>
                               if (!dayLoaded) return;
                               setState(() {
                                 dayLoaded = false;
+                                date = instanceManager
+                                    .sessionStorage.currentDate
+                                    .add(Duration(days: 1));
                               });
 
                               if (!await _controller.getCalendarDay(
-                                  instanceManager.sessionStorage.currentDay
+                                  instanceManager.sessionStorage.currentDate
                                       .add(Duration(days: 1))))
                                 showRedSnackbar(
                                     context, _localizations.errorLoadingDay);
                               setState(() {
                                 dayLoaded = true;
+                                date =
+                                    instanceManager.sessionStorage.currentDate;
                               });
                             },
                             icon: Icon(Icons.chevron_right_rounded,
@@ -574,97 +582,50 @@ class _CalendarViewState extends State<CalendarView>
                               padding:
                                   EdgeInsets.all(0), // Set your desired padding
                             ),
-                            onPressed: () {
+                            onPressed: () async {
+                              final DateTime? selectedDate =
+                                  await showDatePicker(
+                                context: context,
+                                initialDate:
+                                    instanceManager.sessionStorage.currentDate,
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2101),
+                                builder: (BuildContext context, Widget? child) {
+                                  return Theme(
+                                    data: ThemeData.light(),
+                                    child: child!,
+                                  );
+                                },
+                              );
+                              if (selectedDate != null) {
+                                
+                                setState(() {
+                                  date = selectedDate;
+                                  dayLoaded = false;
+                                });
+
+                                
+
+                                if (!await _controller
+                                    .getCalendarDay(selectedDate))
+                                  showRedSnackbar(
+                                      context, _localizations.errorLoadingDay);
+                                
+                              }
                               setState(() {
-                                needsRecalc = !needsRecalc;
-                              });
+                                  dayLoaded = true;
+                                  date = instanceManager
+                                      .sessionStorage.currentDate;
+                                });
                             },
-                            child: Text('needsrecalc')),
+                            child: Text(_localizations.openCalendar,
+                                style: TextStyle(color: Colors.lightBlue))),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            // Column(
-            //   mainAxisAlignment: MainAxisAlignment.end,
-            //   children: [
-            //     AnimatedContainer(
-            //       //color: Colors.yellow,
-            //       curve: Curves.decelerate,
-            //       duration: scrollUpTime,
-            //       height: scrollSheetIsUp
-            //           ? screenHeight * 0.73
-            //           : screenHeight * 0.12,
-            //       child: SingleChildScrollView(
-            //         physics: NeverScrollableScrollPhysics(),
-            //         child: Container(
-            //           padding: EdgeInsets.only(top: 10),
-            //           child: ClipShadowPath(
-            //             shadow: const Shadow(
-            //                 blurRadius: 10,
-            //                 color: Color.fromARGB(255, 222, 222, 222)),
-            //             clipper: CustomShapeClipper(),
-            //             child: Container(
-            //               height: screenHeight * 0.8,
-            //               width: screenWidth,
-            //               color: const Color.fromARGB(255, 255, 255, 255),
-            //               child: Column(
-            //                 children: [
-            //                   GestureDetector(
-            //                     child: Container(
-            //                       width: screenWidth / 6,
-            //                       padding: EdgeInsets.only(
-            //                           top: screenWidth * 0.02,
-            //                           left: screenWidth * 0.02,
-            //                           right: screenWidth * 0.02),
-            //                       child: RotationTransition(
-            //                         turns: Tween<double>(begin: 0.0, end: 0.5)
-            //                             .animate(_animationController),
-            //                         child: Icon(Icons.keyboard_arrow_up),
-            //                       ),
-            //                     ),
-            //                     onTap: () {
-            //                       scrollSheetIsUp
-            //                           ? moveSheetDown()
-            //                           : moveSheetUp();
-            //                     },
-            //                   ),
-            //                   TextButton(
-            //                       style: TextButton.styleFrom(
-            //                         padding: EdgeInsets.all(
-            //                             0), // Set your desired padding
-            //                       ),
-            //                       onPressed: () {
-            //                         setState(() {
-            //                           needsRecalc = !needsRecalc;
-            //                         });
-            //                       },
-            //                       child: Text('needsrecalc')),
-            //                   // Container(
-
-            //                   //   child:
-            //                   //   TextButton(
-            //                   //     onPressed: () {
-            //                   //     scrollSheetIsUp
-            //                   //         ? moveSheetDown()
-            //                   //         : moveSheetUp();
-            //                   //     },
-            //                   //     child: Text(_localizations.viewMonth,
-            //                   //     style: TextStyle(
-            //                   //         fontSize: screenWidth * 0.04,
-            //                   //         color: Color.fromARGB(255, 92, 92, 92)),)
-            //                   //   ),
-            //                   // )
-            //                 ],
-            //               ),
-            //             ),
-            //           ),
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // )
           ],
         ));
   }

@@ -185,7 +185,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                             child: TextButton.icon(
                                 onPressed: () async {
                                   if (instanceManager
-                                          .sessionStorage.currentDay !=
+                                          .sessionStorage.currentDate !=
                                       stripTime(DateTime.now())) {
                                     return showRedSnackbar(
                                         context,

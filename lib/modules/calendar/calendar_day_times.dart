@@ -32,21 +32,18 @@ class CalendarDayTimes extends StatefulWidget {
 class CalendarDayTimesState extends State<CalendarDayTimes> {
   final _controller = instanceManager.calendarController;
   final dayFormKey = GlobalKey<FormBuilderState>();
-  late DayModel day;
 
   @override
   void initState() {
     super.initState();
-    day = instanceManager.sessionStorage.loadedCalendarDay;
+    
   }
 
  
 
   void updateParent() {
     logger.i('Calendar Day Times: updateParents');
-    setState(() {
-      day = instanceManager.sessionStorage.loadedCalendarDay;
-    });
+    
     logger.d(instanceManager.sessionStorage.initialDayLoad);
     widget.updateParent();
   }
@@ -71,7 +68,7 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
         children: [
           instanceManager.sessionStorage.initialDayLoad
               ? TimeShower(
-                  times: day.times,
+                  times: instanceManager.sessionStorage.loadedCalendarDay.times,
                   updateAllParents: updateParent,
                 )
               : ReloadButton(
@@ -82,27 +79,7 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
     );
   }
 
-  Future<void> _showDatePicker(BuildContext context, DayModel day) async {
-    final DateTime? selectedDate = await showDatePicker(
-      context: context,
-      initialDate: day.date,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.light(),
-          child: child!,
-        );
-      },
-    );
-
-    if (selectedDate != null) {
-      await _controller
-          .getCalendarDay(instanceManager.sessionStorage.currentDay);
-      day = instanceManager.sessionStorage.loadedCalendarDay;
-      updateParent();
-    }
-  }
+  
 }
 
 
