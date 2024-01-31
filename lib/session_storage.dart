@@ -5,33 +5,41 @@ import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 
 class SessionStorage {
-  List<ExamModel> savedExams =[];
+  List<ExamModel> savedExams = [];
   List<ExamModel> pastExams = [];
   List<ExamModel> activeExams = [];
-  
 
   //NEEDS: a varibale that saves wether the calendar needs recalculating
   // after a new exam is added!!
 
-  List<List<TimeSlot>> weeklyGaps = [];
-  List<Day> customDays = [];
-  List<Day> activeCustomDays = [];
+  List<List<TimeSlotModel>> weeklyGaps = [];
+  List<DayModel> customDays = [];
+  List<DayModel> activeCustomDays = [];
 
   int activeOrAllExams = 0;
 
-  Day loadedCalendarDay = Day(
-      date: DateTime.now(), weekday: DateTime.now().weekday, id: 'Placeholder');
+  DayModel loadedCalendarDay = 
+    DayModel(weekday: DateTime.now().weekday, date: DateTime.now(), id: 'Placeholder');
 
   DateTime currentDay = stripTime(DateTime.now());
-  bool dayLoaded = false;
+  //bool dayLoaded = false;
+
+  DateTime? prevDayDate = null;
+
+  DayModel? prevDay = null;
 
   var savedWeekday = 0;
   int? schedulePresent;
   List<String> leftoverExams = <String>[];
 
+  bool initialDayLoad = false;
+  bool initialExamsLoad = false;
+  bool initialGapsLoad = false;
+  bool initialCustomDaysLoad = false;
+
   ExamModel examToAdd = ExamModel(examDate: DateTime.now(), name: '');
   List<double> examWeightArray = [];
 
   bool needsRecalculation = false;
-  Map<String,List<TimeSlot>> incompletePreviousDays = {};
+  Map<String, List<TimeSlotModel>> incompletePreviousDays = {};
 }

@@ -45,7 +45,6 @@ class _UnitCardState extends State<UnitCard>
   Duration openUnit = Duration(milliseconds: 200);
   Color expandableColor = Color.fromARGB(255, 61, 61, 61);
   Color expandableEditColor = Colors.black;
-  late FocusNode _focusNode;
 
   @override
   void initState() {
@@ -56,7 +55,6 @@ class _UnitCardState extends State<UnitCard>
       vsync: this,
       duration: openUnit,
     );
-    _focusNode = FocusNode();
   }
 
   @override

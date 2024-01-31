@@ -13,9 +13,9 @@ void main() {
 
         final weekday = 1;
 
-        final provisionalList = <TimeSlot>[];
+        final provisionalList = <TimeSlotModel>[];
         final expectedResult = [
-          TimeSlot(
+          TimeSlotModel(
               examID: 'free',
               startTime: start,
               endTime: end,
@@ -35,7 +35,7 @@ void main() {
 
         final weekday = 1;
 
-        final provisionalList = <TimeSlot>[];
+        final provisionalList = <TimeSlotModel>[];
         final expectedResult = [];
 
         final result = await controller.checkGapClash(
@@ -51,9 +51,9 @@ void main() {
 
         final weekday = 1;
 
-        final provisionalList = <TimeSlot>[];
+        final provisionalList = <TimeSlotModel>[];
         final expectedResult = [
-          TimeSlot(
+          TimeSlotModel(
               examID: 'free',
               startTime: start,
               endTime: end,
@@ -73,9 +73,9 @@ void main() {
 
         final weekday = 1;
 
-        final provisionalList = <TimeSlot>[];
+        final provisionalList = <TimeSlotModel>[];
         final expectedResult = [
-          TimeSlot(
+          TimeSlotModel(
               examID: 'free',
               startTime: start,
               endTime: end,
@@ -95,9 +95,9 @@ void main() {
 
         final weekday = 1;
 
-        final provisionalList = <TimeSlot>[];
+        final provisionalList = <TimeSlotModel>[];
         final expectedResult = [
-          TimeSlot(
+          TimeSlotModel(
               examID: 'free',
               startTime: start,
               endTime: end,
@@ -116,8 +116,8 @@ void main() {
           // Test logic for new.start = old.one + x
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
@@ -129,12 +129,12 @@ void main() {
           final end = TimeOfDay(hour: 12, minute: 00);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 examID: 'free',
                 startTime: start,
                 endTime: end,
@@ -150,8 +150,8 @@ void main() {
           // Test logic for new.end = old.start - x
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
@@ -163,12 +163,12 @@ void main() {
           final end = TimeOfDay(hour: 9, minute: 30);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 examID: 'free',
                 startTime: start,
                 endTime: end,
@@ -187,8 +187,8 @@ void main() {
           // Test logic for new.start = old.start, new.end = old.end
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
@@ -200,7 +200,7 @@ void main() {
           final end = TimeOfDay(hour: 11, minute: 00);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
@@ -216,8 +216,8 @@ void main() {
           // Test logic for new.start = old.start + x, new.end = old.end - x
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
@@ -229,7 +229,7 @@ void main() {
           final end = TimeOfDay(hour: 10, minute: 58);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
@@ -248,8 +248,8 @@ void main() {
           // Test logic for new.start = old.start, new.end = old.end
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
@@ -261,7 +261,7 @@ void main() {
           final end = TimeOfDay(hour: 11, minute: 00);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
@@ -278,8 +278,8 @@ void main() {
           // Test logic for new.start = old.start + a, new.end = old.end - a
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
@@ -291,7 +291,7 @@ void main() {
           final end = TimeOfDay(hour: 11, minute: 02);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 examID: 'free',
                 startTime: start,
                 endTime: end,
@@ -309,13 +309,13 @@ void main() {
         test('new.start = old.start, new.end = old.end + x', () async {
           // Test logic for new.start = old.start, new.end = old.end + x
           final weekday = 1;
-          final old = TimeSlot(
+          final old = TimeSlotModel(
               weekday: weekday,
               startTime: TimeOfDay(hour: 10, minute: 0),
               endTime: TimeOfDay(hour: 11, minute: 0),
               examID: 'free');
 
-          final provisionalList = <TimeSlot>[
+          final provisionalList = <TimeSlotModel>[
             old,
           ];
 
@@ -324,7 +324,7 @@ void main() {
           final end = TimeOfDay(hour: 11, minute: 02);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 examID: 'free',
                 startTime: start,
                 endTime: end,
@@ -339,13 +339,13 @@ void main() {
         test('new.start = old.start + x, new.end = old.end + x', () async {
           // Test logic for new.start = old.start + x, new.end = old.end + x
           final weekday = 1;
-          final old = TimeSlot(
+          final old = TimeSlotModel(
               weekday: weekday,
               startTime: TimeOfDay(hour: 10, minute: 0),
               endTime: TimeOfDay(hour: 11, minute: 0),
               examID: 'free');
 
-          final provisionalList = <TimeSlot>[
+          final provisionalList = <TimeSlotModel>[
             old,
           ];
 
@@ -354,7 +354,7 @@ void main() {
           final end = TimeOfDay(hour: 11, minute: 02);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 examID: 'free',
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: end,
@@ -369,13 +369,13 @@ void main() {
         test('new.start = old.end, new.end = old.end + x', () async {
           // Test logic for new.start = old.end, new.end = old.end + x
           final weekday = 1;
-          final old = TimeSlot(
+          final old = TimeSlotModel(
               weekday: weekday,
               startTime: TimeOfDay(hour: 10, minute: 0),
               endTime: TimeOfDay(hour: 11, minute: 0),
               examID: 'free');
 
-          final provisionalList = <TimeSlot>[
+          final provisionalList = <TimeSlotModel>[
             old,
           ];
 
@@ -384,7 +384,7 @@ void main() {
           final end = TimeOfDay(hour: 11, minute: 02);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 examID: 'free',
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: end,
@@ -401,13 +401,13 @@ void main() {
       group('old starts in new:', () {
         test('old.start = new.start, old.end = new.end + x', () async {
           final weekday = 1;
-          final old = TimeSlot(
+          final old = TimeSlotModel(
               weekday: weekday,
               startTime: TimeOfDay(hour: 10, minute: 0),
               endTime: TimeOfDay(hour: 11, minute: 2),
               examID: 'free');
 
-          final provisionalList = <TimeSlot>[
+          final provisionalList = <TimeSlotModel>[
             old,
           ];
 
@@ -416,7 +416,7 @@ void main() {
           final end = TimeOfDay(hour: 11, minute: 00);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 examID: 'free',
                 startTime: start,
                 endTime: TimeOfDay(hour: 11, minute: 2),
@@ -430,13 +430,13 @@ void main() {
         });
         test('old.start = new.start + x, old.end = new.end + x', () async {
           final weekday = 1;
-          final old = TimeSlot(
+          final old = TimeSlotModel(
               weekday: weekday,
               startTime: TimeOfDay(hour: 10, minute: 2),
               endTime: TimeOfDay(hour: 11, minute: 2),
               examID: 'free');
 
-          final provisionalList = <TimeSlot>[
+          final provisionalList = <TimeSlotModel>[
             old,
           ];
 
@@ -445,7 +445,7 @@ void main() {
           final end = TimeOfDay(hour: 11, minute: 00);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 examID: 'free',
                 startTime: start,
                 endTime: TimeOfDay(hour: 11, minute: 2),
@@ -459,13 +459,13 @@ void main() {
         });
         test('old.start = new.end, old.end = new.end + x', () async {
           final weekday = 1;
-          final old = TimeSlot(
+          final old = TimeSlotModel(
               weekday: weekday,
               startTime: TimeOfDay(hour: 10, minute: 1),
               endTime: TimeOfDay(hour: 11, minute: 2),
               examID: 'free');
 
-          final provisionalList = <TimeSlot>[
+          final provisionalList = <TimeSlotModel>[
             old,
           ];
 
@@ -474,7 +474,7 @@ void main() {
           final end = TimeOfDay(hour: 11, minute: 00);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 examID: 'free',
                 startTime: start,
                 endTime: TimeOfDay(hour: 11, minute: 2),
@@ -496,13 +496,13 @@ void main() {
             // Test logic for new.start = old.one + x
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -514,17 +514,17 @@ void main() {
             final end = TimeOfDay(hour: 12, minute: 00);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   examID: 'free',
                   startTime: start,
                   endTime: end,
@@ -540,13 +540,13 @@ void main() {
             // Test logic for new.end = old.start - x
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -558,17 +558,17 @@ void main() {
             final end = TimeOfDay(hour: 9, minute: 30);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   examID: 'free',
                   startTime: start,
                   endTime: end,
@@ -587,13 +587,13 @@ void main() {
             // Test logic for new.start = old.start, new.end = old.end
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -605,12 +605,12 @@ void main() {
             final end = TimeOfDay(hour: 11, minute: 00);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
@@ -627,13 +627,13 @@ void main() {
             // Test logic for new.start = old.start + x, new.end = old.end - x
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -645,12 +645,12 @@ void main() {
             final end = TimeOfDay(hour: 10, minute: 58);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
@@ -669,13 +669,13 @@ void main() {
             // Test logic for new.start = old.start, new.end = old.end
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -687,12 +687,12 @@ void main() {
             final end = TimeOfDay(hour: 11, minute: 00);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
@@ -709,13 +709,13 @@ void main() {
             // Test logic for new.start = old.start + a, new.end = old.end - a
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -727,12 +727,12 @@ void main() {
             final end = TimeOfDay(hour: 11, minute: 02);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   examID: 'free',
                   startTime: start,
                   endTime: end,
@@ -750,15 +750,15 @@ void main() {
           test('new.start = old.start, new.end = old.end + x', () async {
             // Test logic for new.start = old.start, new.end = old.end + x
             final weekday = 1;
-            final old = TimeSlot(
+            final old = TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free');
 
-            final provisionalList = <TimeSlot>[
+            final provisionalList = <TimeSlotModel>[
               old,
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -770,12 +770,12 @@ void main() {
             final end = TimeOfDay(hour: 11, minute: 02);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   examID: 'free',
                   startTime: start,
                   endTime: end,
@@ -791,15 +791,15 @@ void main() {
           test('new.start = old.start + x, new.end = old.end + x', () async {
             // Test logic for new.start = old.start + x, new.end = old.end + x
             final weekday = 1;
-            final old = TimeSlot(
+            final old = TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free');
 
-            final provisionalList = <TimeSlot>[
+            final provisionalList = <TimeSlotModel>[
               old,
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -811,12 +811,12 @@ void main() {
             final end = TimeOfDay(hour: 11, minute: 02);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   examID: 'free',
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: end,
@@ -831,15 +831,15 @@ void main() {
           test('new.start = old.end, new.end = old.end + x', () async {
             // Test logic for new.start = old.end, new.end = old.end + x
             final weekday = 1;
-            final old = TimeSlot(
+            final old = TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free');
 
-            final provisionalList = <TimeSlot>[
+            final provisionalList = <TimeSlotModel>[
               old,
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -851,12 +851,12 @@ void main() {
             final end = TimeOfDay(hour: 11, minute: 02);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   examID: 'free',
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: end,
@@ -873,15 +873,15 @@ void main() {
         group('old starts in new:', () {
           test('old.start = new.start, old.end = new.end + x', () async {
             final weekday = 1;
-            final old = TimeSlot(
+            final old = TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 2),
                 examID: 'free');
 
-            final provisionalList = <TimeSlot>[
+            final provisionalList = <TimeSlotModel>[
               old,
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -893,12 +893,12 @@ void main() {
             final end = TimeOfDay(hour: 11, minute: 00);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   examID: 'free',
                   startTime: start,
                   endTime: TimeOfDay(hour: 11, minute: 2),
@@ -913,15 +913,15 @@ void main() {
 
           test('old.start = new.start + x, old.end = new.end + x', () async {
             final weekday = 1;
-            final old = TimeSlot(
+            final old = TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 2),
                 endTime: TimeOfDay(hour: 11, minute: 2),
                 examID: 'free');
 
-            final provisionalList = <TimeSlot>[
+            final provisionalList = <TimeSlotModel>[
               old,
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -933,12 +933,12 @@ void main() {
             final end = TimeOfDay(hour: 11, minute: 00);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   examID: 'free',
                   startTime: start,
                   endTime: TimeOfDay(hour: 11, minute: 2),
@@ -953,15 +953,15 @@ void main() {
 
           test('old.start = new.end, old.end = new.end + x', () async {
             final weekday = 1;
-            final old = TimeSlot(
+            final old = TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 1),
                 endTime: TimeOfDay(hour: 11, minute: 2),
                 examID: 'free');
 
-            final provisionalList = <TimeSlot>[
+            final provisionalList = <TimeSlotModel>[
               old,
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -973,12 +973,12 @@ void main() {
             final end = TimeOfDay(hour: 11, minute: 00);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   examID: 'free',
                   startTime: start,
                   endTime: TimeOfDay(hour: 11, minute: 2),
@@ -997,13 +997,13 @@ void main() {
           // Test logic for t(new.start = old1.start, new.end = old2.end)
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1015,7 +1015,7 @@ void main() {
           final end = TimeOfDay(hour: 13, minute: 00);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1032,13 +1032,13 @@ void main() {
           // Test logic for t(new.start = old1.start + a, new.end = old2.end) where 1 < a
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1050,7 +1050,7 @@ void main() {
           final end = TimeOfDay(hour: 13, minute: 00);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1067,13 +1067,13 @@ void main() {
           // Test logic for t(new.start = old1.start, new.end = old2.end - a) where 1 < a
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1085,7 +1085,7 @@ void main() {
           final end = TimeOfDay(hour: 12, minute: 30);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1103,13 +1103,13 @@ void main() {
           // Test logic for t(new.start = old1.start + a, new.start = old2.end - a) where 1 < a
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1121,7 +1121,7 @@ void main() {
           final end = TimeOfDay(hour: 12, minute: 30);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1137,13 +1137,13 @@ void main() {
           // Test logic for t(new.start = old1.end, new.end = old2.start)
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1155,7 +1155,7 @@ void main() {
           final end = TimeOfDay(hour: 12, minute: 00);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1176,13 +1176,13 @@ void main() {
           // Test logic for t(new.start = old1.start - a, new.end = old1.start - b) where a > b > 2
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1194,17 +1194,17 @@ void main() {
           final end = TimeOfDay(hour: 9, minute: 55);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 6, minute: 0),
                 endTime: TimeOfDay(hour: 9, minute: 55),
@@ -1223,13 +1223,13 @@ void main() {
           // Test logic for t(new.start = old1.end + a, new.end = old2.start - b) where a, b > 2
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1241,17 +1241,17 @@ void main() {
           final end = TimeOfDay(hour: 11, minute: 55);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 11, minute: 05),
                 endTime: TimeOfDay(hour: 11, minute: 55),
@@ -1270,13 +1270,13 @@ void main() {
 
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1288,17 +1288,17 @@ void main() {
           final end = TimeOfDay(hour: 19, minute: 55);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 13, minute: 05),
                 endTime: TimeOfDay(hour: 19, minute: 55),
@@ -1319,13 +1319,13 @@ void main() {
 
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1337,7 +1337,7 @@ void main() {
           final end = TimeOfDay(hour: 13, minute: 0);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
@@ -1355,13 +1355,13 @@ void main() {
 
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1373,7 +1373,7 @@ void main() {
           final end = TimeOfDay(hour: 13, minute: 05);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
@@ -1390,13 +1390,13 @@ void main() {
           // Test logic for t(new.start = old1.start - a, new.end = old2.end + a)
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1408,7 +1408,7 @@ void main() {
           final end = TimeOfDay(hour: 13, minute: 05);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
@@ -1434,18 +1434,18 @@ void main() {
             // Test logic for t(new.start = old1.start, new.end = old2.end)
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -1457,12 +1457,12 @@ void main() {
             final end = TimeOfDay(hour: 13, minute: 00);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1479,18 +1479,18 @@ void main() {
             // Test logic for t(new.start = old1.start + a, new.end = old2.end) where 1 < a
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -1502,12 +1502,12 @@ void main() {
             final end = TimeOfDay(hour: 13, minute: 00);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1524,18 +1524,18 @@ void main() {
             // Test logic for t(new.start = old1.start, new.end = old2.end - a) where 1 < a
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -1547,12 +1547,12 @@ void main() {
             final end = TimeOfDay(hour: 12, minute: 30);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1570,18 +1570,18 @@ void main() {
             // Test logic for t(new.start = old1.start + a, new.start = old2.end - a) where 1 < a
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -1593,12 +1593,12 @@ void main() {
             final end = TimeOfDay(hour: 12, minute: 30);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1614,18 +1614,18 @@ void main() {
             // Test logic for t(new.start = old1.end, new.end = old2.start)
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -1637,12 +1637,12 @@ void main() {
             final end = TimeOfDay(hour: 12, minute: 00);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1663,13 +1663,13 @@ void main() {
             // Test logic for t(new.start = old1.start - a, new.end = old1.start - b) where a > b > 2
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1681,17 +1681,17 @@ void main() {
             final end = TimeOfDay(hour: 9, minute: 55);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 6, minute: 0),
                   endTime: TimeOfDay(hour: 9, minute: 55),
@@ -1710,13 +1710,13 @@ void main() {
             // Test logic for t(new.start = old1.end + a, new.end = old2.start - b) where a, b > 2
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1728,17 +1728,17 @@ void main() {
             final end = TimeOfDay(hour: 11, minute: 55);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 11, minute: 05),
                   endTime: TimeOfDay(hour: 11, minute: 55),
@@ -1757,13 +1757,13 @@ void main() {
 
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
@@ -1775,17 +1775,17 @@ void main() {
             final end = TimeOfDay(hour: 19, minute: 55);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 13, minute: 05),
                   endTime: TimeOfDay(hour: 19, minute: 55),
@@ -1806,18 +1806,18 @@ void main() {
 
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -1829,12 +1829,12 @@ void main() {
             final end = TimeOfDay(hour: 13, minute: 0);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: start,
                   endTime: end,
@@ -1852,18 +1852,18 @@ void main() {
 
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -1875,12 +1875,12 @@ void main() {
             final end = TimeOfDay(hour: 13, minute: 05);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: start,
                   endTime: end,
@@ -1898,18 +1898,18 @@ void main() {
             // Test logic for t(new.start = old1.start - a, new.end = old2.end + a)
             final weekday = 1;
 
-            final provisionalList = <TimeSlot>[
-              TimeSlot(
+            final provisionalList = <TimeSlotModel>[
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 10, minute: 0),
                   endTime: TimeOfDay(hour: 11, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 12, minute: 0),
                   endTime: TimeOfDay(hour: 13, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
@@ -1921,12 +1921,12 @@ void main() {
             final end = TimeOfDay(hour: 13, minute: 05);
 
             final expectedResult = [
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: TimeOfDay(hour: 22, minute: 0),
                   endTime: TimeOfDay(hour: 23, minute: 0),
                   examID: 'free'),
-              TimeSlot(
+              TimeSlotModel(
                   weekday: weekday,
                   startTime: start,
                   endTime: end,
@@ -1947,18 +1947,18 @@ void main() {
 
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 22, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),
@@ -1970,7 +1970,7 @@ void main() {
           final end = TimeOfDay(hour: 23, minute: 00);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
@@ -1989,18 +1989,18 @@ void main() {
 
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 22, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),
@@ -2012,7 +2012,7 @@ void main() {
           final end = TimeOfDay(hour: 23, minute: 00);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
@@ -2029,18 +2029,18 @@ void main() {
           // Test logic for new.start = old1.start, new.end = old3.end + a
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 22, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),
@@ -2052,7 +2052,7 @@ void main() {
           final end = TimeOfDay(hour: 23, minute: 05);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
@@ -2070,18 +2070,18 @@ void main() {
 
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 22, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),
@@ -2093,7 +2093,7 @@ void main() {
           final end = TimeOfDay(hour: 23, minute: 05);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: start,
                 endTime: end,
@@ -2110,18 +2110,18 @@ void main() {
         test('new.start = old1.start+x, new.end = old3.end-x', () async {
           final weekday = 1;
 
-          final provisionalList = <TimeSlot>[
-            TimeSlot(
+          final provisionalList = <TimeSlotModel>[
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 11, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 12, minute: 0),
                 endTime: TimeOfDay(hour: 13, minute: 0),
                 examID: 'free'),
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 22, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),
@@ -2133,7 +2133,7 @@ void main() {
           final end = TimeOfDay(hour: 22, minute: 05);
 
           final expectedResult = [
-            TimeSlot(
+            TimeSlotModel(
                 weekday: weekday,
                 startTime: TimeOfDay(hour: 10, minute: 0),
                 endTime: TimeOfDay(hour: 23, minute: 0),

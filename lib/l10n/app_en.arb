@@ -64,6 +64,8 @@
     "swipeToDelete": "Swipe the cards to delete units",
     "defaultStudyTime": "Default study time for each unit: ",
     "completeTrue":"Complete!",
+    "errorLoadingExams":"Error loading exams!",
+
     
 
     
@@ -72,7 +74,7 @@
     "configureCalendar":"Start configuring Calendar!",
     "chooseFreeSchedule":"Check the times you can study:",
     "needsRecalculation":"Update schedule",
-    "needsRecalculationInfo":"You have made unsaved changes that affect your schedule.",
+    "needsRecalculationInfo":"You have made unsaved changes that affect your schedule.\n Please calculate your schedule again.",
     "monday":"Monday",
     "tuesday":"Tuesday",
     "wednesday":"Wednesday",
@@ -81,9 +83,9 @@
     "saturday":"Saturday",
     "sunday":"Sunday",
     "nextDay":"Next Day",
-    "calculateSchedule": "Calculate my Study Schedule!",
+    "calculatePlan": "Calculate Plan",
     "loadingSchedule": "Loading Schedule...",
-    "changeScheduleGaps": "Change your availability",
+    "changeAvailability": "Change Availability",
     "tryAgain":"Try Again",
     "inactiveCalendar": "You need to have exams to have an active calendar!",
     "errorDeletingGap": "Error deleting time gap!",
@@ -107,13 +109,18 @@
     "completePreviousDaysTitle":"Mark previous days as complete?",
     "completePreviousDaysDesc": "There are past days that have study sessions that are not marked as complete. Do you want to mark them as complete? If you don't want to mark them as complete, you can leave them as incomplete and recalucalte a new schedule including them.", 
     "leaveAsIs": "Leave them",
-    "recalculateWithMissedSections":"Recalculate schedule",
+    "updatePlan":"Update Plan",
     "markAsComplete": "Mark as complete",
     "keepOrRecalc":"You have decided to leave some sessions incomplete. Do you want to recalculate a new schedule to include the missed sessions?",
     "keep":"Leave incomplete",
     "recalc":"Recalculate",
     "editUnitCompletionInExamsPage":"If you want to change as past session's completeness, you can edit that exam's units in the 'Exams' page",
     "cantStartSessionForFuture": "You can't start studying for a day that is not today",
+    "viewMonth": "View Month",
+    "swipeForNextDay": "Change day",
+    "errorChangingTimeSlotCompletion": "Error updating Time Slot",
+    "errorLoadingDay":"Error loading day!",
+    "reload": "Reload",
     
 
 
@@ -131,6 +138,14 @@
     "sessionCompletedBody":"You have completed your goal for this session! Do you want to continue, or mark the session as complete?",
     "continueTimer":"Continue",
     "completeSession": "Complete",
+    "dontCloseApp": "If the app is closed, the timer will stop ;)",
+    "hoursCapitalized": "Hours",
+    "minutesCapitalized": "Minutes",
+    "secondsCapitalized": "Seconds",
+    "goal":"Goal",
+    "errorSaving": "Error Saving!",
+
+
 
 
 

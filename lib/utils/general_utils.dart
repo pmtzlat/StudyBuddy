@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:study_buddy/main.dart';
+import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
@@ -88,3 +89,91 @@ void closeKeyboard(BuildContext context) {
     FocusScope.of(context).requestFocus(new FocusNode());
   }
 }
+
+bool containsDayWithID(List<DayModel> days, String targetId) {
+  // Using any() method to check if any element satisfies the condition
+  return days.any((day) => day.id == targetId);
+}
+
+class CustomShapeClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+
+    double x = size.width;
+    double y = size.height;
+
+    double r = x/12; // variable that changes
+
+
+    double a = x/2 - (r + r/6);
+    double b = r/6;
+    double c = x/2 - r;
+
+
+    path.moveTo(0, r);
+    path.lineTo(a, r);
+    path.quadraticBezierTo( c, r, c, r-b);
+    path.quadraticBezierTo( c, 0, x/2, 0);
+    path.quadraticBezierTo( x/2 + r, 0, x/2 + r, r-b);
+    path.quadraticBezierTo( x/2 + r, r, x/2 + r + b, r);
+    path.lineTo(x, r);
+
+    path.lineTo(x, y);
+    path.lineTo(0, y);
+    path.lineTo(0, 0);
+
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return false;
+  }
+}
+
+class ClipShadowPath extends StatelessWidget {
+  final Shadow shadow;
+  final CustomClipper<Path> clipper;
+  final Widget child;
+
+  const ClipShadowPath({
+    Key? key,
+    required this.shadow,
+    required this.clipper,
+    required this.child,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _ClipShadowShadowPainter(
+        clipper: clipper,
+        shadow: shadow,
+      ),
+      child: ClipPath(child: child, clipper: clipper),
+    );
+  }
+}
+
+class _ClipShadowShadowPainter extends CustomPainter {
+  final Shadow shadow;
+  final CustomClipper<Path> clipper;
+
+  _ClipShadowShadowPainter({required this.shadow, required this.clipper});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = shadow.toPaint();
+    var clipPath = clipper.getClip(size).shift(shadow.offset);
+    canvas.drawPath(clipPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+

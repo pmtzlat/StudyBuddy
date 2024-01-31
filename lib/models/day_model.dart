@@ -4,25 +4,25 @@ import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 
-class Day {
+class DayModel {
   final int weekday;
   final String id;
   final DateTime date;
-  List<TimeSlot> times;
+  List<TimeSlotModel> times;
   late Duration totalAvailableTime;
   bool notifiedIncompleteness;
 
-  Day({
+  DayModel({
     required this.weekday,
     this.id = '',
     required this.date,
-    List<TimeSlot>? times,
+    List<TimeSlotModel>? times,
     this.notifiedIncompleteness = false,
   }) : times = times ?? [];
 
   String getString() {
     String timesString = '';
-    for (TimeSlot slot in times!) {
+    for (TimeSlotModel slot in times!) {
       timesString +=
           '\n ${slot.startTime} - ${slot.endTime} : ${slot.examName ?? slot.examID} ${slot.unitName}';
     }
@@ -37,19 +37,19 @@ class Day {
 
   Future<void> getGaps() async {
     if (times.isEmpty) {
-      Day dayInQuestion = instanceManager.sessionStorage.activeCustomDays
+      DayModel dayInQuestion = instanceManager.sessionStorage.activeCustomDays
           .firstWhere((obj) => obj.date == date,
-              orElse: () => Day(id: 'empty', weekday: 0, date: DateTime.now()));
+              orElse: () => DayModel(id: 'empty', weekday: 0, date: DateTime.now()));
 
       if (dayInQuestion.id != 'empty') {
         times = await instanceManager.firebaseCrudService
                 .getTimeSlotsForCustomDay(dayInQuestion.id) ??
             [];
       } else {
-        final List<TimeSlot> timeSlotList =
+        final List<TimeSlotModel> timeSlotList =
             instanceManager.sessionStorage.weeklyGaps[date.weekday - 1];
         final updated = timeSlotList.map((timeSlot) {
-          return TimeSlot(
+          return TimeSlotModel(
             id: timeSlot.id,
             weekday: timeSlot.weekday,
             startTime: timeSlot.startTime,
@@ -58,6 +58,7 @@ class Day {
             unitID: timeSlot.unitID,
             examName: timeSlot.examName,
             unitName: timeSlot.unitName,
+            examColor: timeSlot.examColor
           );
         }).toList();
 
@@ -66,7 +67,7 @@ class Day {
     }
   }
 
-  Duration getTotal(List<TimeSlot> timeSlots) {
+  Duration getTotal(List<TimeSlotModel> timeSlots) {
     Duration totalDuration = Duration.zero;
 
     for (var timeSlot in timeSlots) {

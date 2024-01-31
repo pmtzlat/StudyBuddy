@@ -30,7 +30,7 @@ class StudyPlanner {
         stack.print();
       }
 
-      List<Day> result = [];
+      List<DayModel> result = [];
 
       DateTime loopDate =
           getLastDayOfStudy(instanceManager.sessionStorage.activeExams)!
@@ -40,7 +40,7 @@ class StudyPlanner {
         return 1;
       }
 
-      Day dayToAdd = Day(
+      DayModel dayToAdd = DayModel(
           id: DateTime(
                   loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0)
               .toString(),
@@ -59,7 +59,7 @@ class StudyPlanner {
 
         result.insert(0, dayToAdd);
         loopDate = loopDate.subtract(Duration(days: 1));
-        dayToAdd = Day(
+        dayToAdd = DayModel(
             id: DateTime(
                     loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0)
                 .toString(),
@@ -141,7 +141,7 @@ class StudyPlanner {
 
   }
 
-  Future<void> fillDayWithSessions(Day day, List<SchedulerStack> stacks) async {
+  Future<void> fillDayWithSessions(DayModel day, List<SchedulerStack> stacks) async {
     try {
       //logger.d('fillDayWithSessions');
 
@@ -160,8 +160,8 @@ class StudyPlanner {
         return aEndMinutes - bEndMinutes;
       });
 
-      late TimeSlot gap;
-      var newTimes = <TimeSlot>[];
+      late TimeSlotModel gap;
+      var newTimes = <TimeSlotModel>[];
 
       if (filteredStacks.length == 0) {
         return;
@@ -187,7 +187,7 @@ class StudyPlanner {
     }
   }
 
-  List<SchedulerStack> getFilteredStacks(Day day, List<SchedulerStack> stacks) {
+  List<SchedulerStack> getFilteredStacks(DayModel day, List<SchedulerStack> stacks) {
     //logger.d('GetfilteredStacks');
     return stacks
         .where((schedulerStack) =>
@@ -195,8 +195,8 @@ class StudyPlanner {
         .toList();
   }
 
-  TimeSlot getTimeSlotWithUnit(
-      TimeSlot gap, List<SchedulerStack> filteredStacks, Day day) {
+  TimeSlotModel getTimeSlotWithUnit(
+      TimeSlotModel gap, List<SchedulerStack> filteredStacks, DayModel day) {
     //printFilteredStacks(filteredStacks, day, 'getTimeSlotWithUnit');
     try {
       //logger.d('getTimeSlotWithUnit');
@@ -211,7 +211,7 @@ class StudyPlanner {
       TimeOfDay startTime = subtractDurationFromTimeOfDay(
           gap.endTime, selectedUnit['sessionTime']);
 
-      final result = TimeSlot(
+      final result = TimeSlotModel(
           weekday: day.weekday,
           startTime: startTime,
           endTime: gap.endTime,
@@ -240,7 +240,7 @@ class StudyPlanner {
     }
   }
 
-  void calculateWeights(List<SchedulerStack> stacks, Day day) {
+  void calculateWeights(List<SchedulerStack> stacks, DayModel day) {
     //logger.d('calculateWeights');
     try {
       for (SchedulerStack stack in stacks) {
@@ -259,7 +259,7 @@ class StudyPlanner {
     }
   }
 
-  int _getDaysToExam(Day day, SchedulerStack stack) {
+  int _getDaysToExam(DayModel day, SchedulerStack stack) {
     //logger.d('getDaysToExam');
     try {
       Duration difference = stack.exam.examDate.difference(day.date);
@@ -273,7 +273,7 @@ class StudyPlanner {
   }
 
   Map<String, dynamic>? selectExamAndUnit(
-      List<SchedulerStack> stacks, TimeSlot gap, Duration availableTime) {
+      List<SchedulerStack> stacks, TimeSlotModel gap, Duration availableTime) {
     //logger.d('getUnitToFillGap');
     stacks.sort((a, b) => b.weight!.compareTo(a.weight!));
     late Map<String, dynamic>? selectedUnit;
@@ -299,7 +299,7 @@ class StudyPlanner {
   }
 
   Map<String, dynamic>? selectUnit(
-      SchedulerStack stack, TimeSlot gap, Duration availableTime) {
+      SchedulerStack stack, TimeSlotModel gap, Duration availableTime) {
     //logger.d('selectUnitInStack');
     //logger.d(availableTime);
     if (stack.revisions.length == 0) {
@@ -316,7 +316,7 @@ class StudyPlanner {
             'sessionTime': calculateSessionTime(candidateUnit, gap, stack),
             'examID': stack.exam.id,
             'sessionInfo': [stack.exam.name, candidateUnit.name],
-            'unitID': candidateUnit.id
+            'unitID': candidateUnit.id,
           };
           if (candidateUnit.sessionTime == Duration.zero)
             stack.units.removeAt(i);
@@ -364,7 +364,7 @@ class StudyPlanner {
   }
 
   Duration calculateSessionTime(
-      UnitModel unit, TimeSlot gap, SchedulerStack stack) {
+      UnitModel unit, TimeSlotModel gap, SchedulerStack stack) {
     try {
       //logger.d('calculateSessionTime');
       final sessionHours = unit.sessionTime;

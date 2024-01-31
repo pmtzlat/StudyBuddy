@@ -244,8 +244,8 @@ class ExamsController {
 
   Future<void> addExam(ExamModel exam) async {
     try {
-      List<int> numbers = [1, 2, 3];
-      print(numbers[5]);
+      // List<int> numbers = [1, 2, 3];
+      // print(numbers[5]);
       String examID = await firebaseCrud.addExam(newExam: exam);
 
       if (examID != null) {
@@ -264,7 +264,7 @@ class ExamsController {
     }
   }
 
-  Future<void> getAllExams() async {
+  Future<bool?> getAllExams() async {
     try {
       final exams = await firebaseCrud.getAllExams();
       ;
@@ -277,8 +277,13 @@ class ExamsController {
           .sort((ExamModel a, ExamModel b) => b.weight.compareTo(a.weight));
       instanceManager.sessionStorage.pastExams
           .sort((ExamModel a, ExamModel b) => b.examDate.compareTo(a.examDate));
+
+      bool initialLoad = instanceManager.sessionStorage.initialExamsLoad;
+      if (initialLoad== false) initialLoad = true;
+      return true;
     } catch (e) {
       logger.e('Error getting exams: $e');
+      return false;
     }
   }
 
@@ -389,7 +394,7 @@ class ExamsController {
 
       //logger.i('DayID: ${day.id}');
 
-      final List<TimeSlot> timeSlotsInDay = await firebaseCrud
+      final List<TimeSlotModel> timeSlotsInDay = await firebaseCrud
           .getTimeSlotsForCalendarDay(day.id)
           .timeout(timeoutDuration);
       ;

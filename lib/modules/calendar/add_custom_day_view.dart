@@ -21,7 +21,7 @@ class _AddCustomDayViewState extends State<AddCustomDayView> {
   final dateFormKey = GlobalKey<FormBuilderState>();
   final _controller = instanceManager.calendarController;
   final gapFormKey = GlobalKey<FormBuilderState>();
-  List<TimeSlot> customSchedule = [];
+  List<TimeSlotModel> customSchedule = [];
 
   @override
   Widget build(BuildContext context) {

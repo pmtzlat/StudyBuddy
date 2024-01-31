@@ -67,6 +67,7 @@ dependencies:
   flutter_slidable: ^3.0.1
   flutter_shakemywidget: ^1.0.5+1
   firebase_database: ^10.4.0
+  auto_size_text: ^3.0.0
   
   
   

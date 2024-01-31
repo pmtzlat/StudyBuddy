@@ -91,50 +91,59 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      currentIndex: activeIndex,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      elevation: 0,
-      selectedItemColor: Color.fromARGB(255, 73, 73, 73),
-      unselectedItemColor: Color.fromARGB(255, 179, 179, 179),
-      onTap: (index) {
-        if (index != activeIndex) {
-          switch (index) {
-            case 0:
-              Navigator.of(context)
-                  .pushReplacement(fadePageRouteBuilder(ExamsView()));
-
-              break;
-            case 1:
-              Navigator.of(context)
-                  .pushReplacement(fadePageRouteBuilder(CalendarView()));
-
-              break;
-
-            case 2:
-              Navigator.of(context)
-                  .pushReplacement(fadePageRouteBuilder(ProfileView()));
-
-              break;
+    return Container(
+        decoration: BoxDecoration(
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: Color.fromARGB(255, 197, 197, 197),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child:BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: activeIndex,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        selectedItemColor: Color.fromARGB(255, 73, 73, 73),
+        unselectedItemColor: Color.fromARGB(255, 179, 179, 179),
+        onTap: (index) {
+          if (index != activeIndex) {
+            switch (index) {
+              case 0:
+                Navigator.of(context)
+                    .pushReplacement(fadePageRouteBuilder(ExamsView()));
+    
+                break;
+              case 1:
+                Navigator.of(context)
+                    .pushReplacement(fadePageRouteBuilder(CalendarView()));
+    
+                break;
+    
+              case 2:
+                Navigator.of(context)
+                    .pushReplacement(fadePageRouteBuilder(ProfileView()));
+    
+                break;
+            }
           }
-        }
-      },
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.list),
-          label: 'List',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_today),
-          label: 'Calendar',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'User',
-        ),
-      ],
+        },
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list),
+            label: 'List',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Calendar',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'User',
+          ),
+        ],
+      ),
     );
   }
 }

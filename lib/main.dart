@@ -46,10 +46,10 @@ void main() async {
           DateTime.parse(instanceManager.localStorage.getString('oldDate')));
     }
 
-    await instanceManager.examController.getAllExams();
-    await instanceManager.calendarController.getGaps();
-    await instanceManager.calendarController.getCustomDays();
-    await instanceManager.calendarController.getCalendarDay(now);
+    instanceManager.sessionStorage.initialExamsLoad = await instanceManager.examController.getAllExams();
+    instanceManager.sessionStorage.initialGapsLoad = await instanceManager.calendarController.getGaps();
+    instanceManager.sessionStorage.initialCustomDaysLoad = await instanceManager.calendarController.getCustomDays();
+    instanceManager.sessionStorage.initialDayLoad = await instanceManager.calendarController.getCalendarDay(now);
   }
 
   runApp(StudyBuddyApp());

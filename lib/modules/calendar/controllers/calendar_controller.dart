@@ -13,20 +13,24 @@ class CalendarController {
   final _firebaseCrud = instanceManager.firebaseCrudService;
   final uid = instanceManager.localStorage.getString('uid') ?? '';
 
-  void printList(List<TimeSlot> list) {
+  void printList(List<TimeSlotModel> list) {
     var res = [];
-    for (TimeSlot x in list) {
+    for (TimeSlotModel x in list) {
       res.add([x.weekday, x.startTime, x.endTime]);
     }
     logger.i(res);
   }
 
-  void getGaps() async {
+  Future<bool?> getGaps() async {
     try {
       instanceManager.sessionStorage.weeklyGaps =
           await _firebaseCrud.getGaps().timeout(timeoutDuration);
+      bool initialLoad = instanceManager.sessionStorage.initialGapsLoad;
+      if (initialLoad == false) initialLoad = true;
+      return true;
     } catch (e) {
       logger.e('Error getting gaps: $e');
+      return false;
     }
   }
 
@@ -46,14 +50,14 @@ class CalendarController {
     return result;
   }
 
-  Future<int?> deleteGap(TimeSlot timeSlot) async {
+  Future<int?> deleteGap(TimeSlotModel timeSlot) async {
     final res = await instanceManager.firebaseCrudService.deleteGap(timeSlot);
     instanceManager.sessionStorage.needsRecalculation = true;
     return res;
   }
 
   Future<int> addGap(GlobalKey<FormBuilderState> key, int weekday,
-      List<TimeSlot> provisionalList, String purpose) async {
+      List<TimeSlotModel> provisionalList, String purpose) async {
     try {
       if (key.currentState!.validate()) {
         key.currentState!.save();
@@ -86,7 +90,7 @@ class CalendarController {
               logger.f(
                   '${timeSlot.startTime.toString()} - ${timeSlot.endTime.toString()}');
               final res = await _firebaseCrud
-                  .addGeneralTimeSlot(timeSlot: timeSlot)
+                  .addTimeSlotGap(timeSlot: timeSlot)
                   .timeout(timeoutDuration);
               if (res != 1) {
                 return -1;
@@ -108,26 +112,45 @@ class CalendarController {
     }
   }
 
-  Future<void> getCalendarDay(DateTime date) async {
+  Future<bool?> getCalendarDay(DateTime date) async {
     try {
+      bool initialLoad = instanceManager.sessionStorage.initialDayLoad;
+      if (!initialLoad) await Future.delayed(Duration(seconds: 2));
+      instanceManager.sessionStorage.prevDay =
+          instanceManager.sessionStorage.loadedCalendarDay;
+      instanceManager.sessionStorage.prevDayDate =
+          instanceManager.sessionStorage.currentDay;
+
       instanceManager.sessionStorage.currentDay =
           DateTime(date.year, date.month, date.day);
+
       var savedDate = instanceManager.sessionStorage.currentDay;
+
       instanceManager.sessionStorage.loadedCalendarDay = await _firebaseCrud
           .getCalendarDay(savedDate)
           .timeout(timeoutDuration);
-      ;
 
-      instanceManager.sessionStorage.dayLoaded = true;
+      if (instanceManager.sessionStorage.initialDayLoad == false)
+        instanceManager.sessionStorage.initialDayLoad = true;
+
       logger.i(
           'Got current Day! ${instanceManager.sessionStorage.loadedCalendarDay.getString()}');
+      return true;
     } catch (e) {
       logger.e('Error getting current days (in calendarController): $e');
+      instanceManager.sessionStorage.loadedCalendarDay =
+          instanceManager.sessionStorage.prevDay;
+      instanceManager.sessionStorage.currentDay =
+          instanceManager.sessionStorage.prevDayDate;
+      return false;
     }
   }
 
-  Future<List<TimeSlot>> checkGapClash(TimeOfDay newStart, TimeOfDay newEnd,
-      int weekday, List<TimeSlot> provisionalList) async {
+  Future<List<TimeSlotModel>> checkGapClash(
+      TimeOfDay newStart,
+      TimeOfDay newEnd,
+      int weekday,
+      List<TimeSlotModel> provisionalList) async {
     try {
       if (newStart == newEnd) return provisionalList;
 
@@ -160,7 +183,7 @@ class CalendarController {
         provisionalList.removeAt(index);
       }
 
-      provisionalList.add(TimeSlot(
+      provisionalList.add(TimeSlotModel(
           examID: 'free',
           startTime: newStart,
           endTime: newEnd,
@@ -173,20 +196,25 @@ class CalendarController {
     }
   }
 
-  Future<void> getCustomDays() async {
+  Future<bool?> getCustomDays() async {
     try {
       final days = await _firebaseCrud.getCustomDays().timeout(timeoutDuration);
       instanceManager.sessionStorage.customDays = days;
-      instanceManager.sessionStorage.activeCustomDays =
-          days.where((Day day) => day.date.isAfter(DateTime.now())).toList();
+      instanceManager.sessionStorage.activeCustomDays = days
+          .where((DayModel day) => day.date.isAfter(DateTime.now()))
+          .toList();
       logger.i('Got custom days! ${instanceManager.sessionStorage.customDays}');
+      bool initialLoad = instanceManager.sessionStorage.initialCustomDaysLoad;
+      if (initialLoad == false) initialLoad = true;
+      return true;
     } on Exception catch (e) {
       logger.e('Error getting cutom days. $e');
+      return false;
     }
   }
 
-  Future<int> addCustomDay(
-      GlobalKey<FormBuilderState> key, List<TimeSlot> customSchdule) async {
+  Future<int> addCustomDay(GlobalKey<FormBuilderState> key,
+      List<TimeSlotModel> customSchdule) async {
     try {
       if (key.currentState!.validate()) {
         key.currentState!.save();
@@ -206,7 +234,7 @@ class CalendarController {
           return 3;
         }
 
-        Day customDay = Day(
+        DayModel customDay = DayModel(
             date: date, weekday: date.weekday, id: date.toString(), times: []);
 
         final res = await _firebaseCrud
@@ -241,7 +269,7 @@ class CalendarController {
     }
   }
 
-  Future<int> updateCustomDayTimes(Day day) async {
+  Future<int> updateCustomDayTimes(DayModel day) async {
     try {
       var res = await _firebaseCrud
           .clearTimesForCustomDay(day.id)
@@ -267,7 +295,7 @@ class CalendarController {
     }
   }
 
-  Future<void> getTimeSlotsForCustomDay(Day day) async {
+  Future<void> getTimeSlotsForCustomDay(DayModel day) async {
     try {
       final times = await _firebaseCrud
           .getTimeSlotsForCustomDay(day.id)
@@ -292,10 +320,11 @@ class CalendarController {
     }
   }
 
-  Future<int> markTimeSlotAsComplete(String dayID, TimeSlot timeSlot) async {
+  Future<int> markTimeSlotAsComplete(
+      String dayID, TimeSlotModel timeSlot) async {
     try {
       await _firebaseCrud.markCalendarTimeSlotAsComplete(dayID, timeSlot.id);
-      await getCalendarDay(instanceManager.sessionStorage.currentDay);
+      //await getCalendarDay(instanceManager.sessionStorage.currentDay);
       final String unitOrRevision = getUnitOrRevision(timeSlot.unitName) + 's';
 
       final UnitModel unit = await _firebaseCrud
@@ -332,9 +361,15 @@ class CalendarController {
 
   Future<int> markAllTimeSlotsAsCompleteForDay(DateTime date) async {
     try {
-      Day day = await _firebaseCrud.getCalendarDayByDate(date).timeout(timeoutDuration);;
+      DayModel day = await _firebaseCrud
+          .getCalendarDayByDate(date)
+          .timeout(timeoutDuration);
+      ;
       logger.i('Obtained day: ${day.id}');
-      day.times = await _firebaseCrud.getTimeSlotsForCalendarDay(day.id).timeout(timeoutDuration);;
+      day.times = await _firebaseCrud
+          .getTimeSlotsForCalendarDay(day.id)
+          .timeout(timeoutDuration);
+      ;
       int res = 1;
       for (var timeSlot in day.times) {
         logger.i('Marking timeSlot ${timeSlot.id} as complete...');
@@ -350,9 +385,9 @@ class CalendarController {
     }
   }
 
-  Future<int> markTimeSlotListAsComplete(List<TimeSlot> arr) async {
+  Future<int> markTimeSlotListAsComplete(List<TimeSlotModel> arr) async {
     try {
-      for (TimeSlot timeSlot in arr) {
+      for (TimeSlotModel timeSlot in arr) {
         logger.i(timeSlot.getInfoString());
         int res = await markTimeSlotAsComplete(timeSlot.dayID, timeSlot);
         if (res == -1) return -1;
@@ -364,28 +399,36 @@ class CalendarController {
     }
   }
 
-  Future<int> markTimeSlotAsIncomplete(Day day, TimeSlot timeSlot) async {
+  Future<int> markTimeSlotAsIncomplete(
+      DayModel day, TimeSlotModel timeSlot) async {
     try {
-      await _firebaseCrud.markCalendarTimeSlotAsIncomplete(day.id, timeSlot.id).timeout(timeoutDuration);;
-      await getCalendarDay(instanceManager.sessionStorage.currentDay);
+      await _firebaseCrud
+          .markCalendarTimeSlotAsIncomplete(day.id, timeSlot.id)
+          .timeout(timeoutDuration);
+      ;
+      //await getCalendarDay(instanceManager.sessionStorage.currentDay);
       final unitOrRevision = getUnitOrRevision(timeSlot.unitName) + 's';
-      final UnitModel unit = await _firebaseCrud.getSpecificUnit(
-          timeSlot.examID, timeSlot.unitID, unitOrRevision.toLowerCase()).timeout(timeoutDuration);;
+      final UnitModel unit = await _firebaseCrud
+          .getSpecificUnit(
+              timeSlot.examID, timeSlot.unitID, unitOrRevision.toLowerCase())
+          .timeout(timeoutDuration);
+      ;
       unit.completionTime = unit.completionTime - timeSlot.duration;
 
-      if (await _firebaseCrud.updateUnitCompletionTime(
-              timeSlot.examID,
-              timeSlot.unitID,
-              unitOrRevision.toLowerCase(),
-              unit.completionTime).timeout(timeoutDuration) !=
+      if (await _firebaseCrud
+              .updateUnitCompletionTime(timeSlot.examID, timeSlot.unitID,
+                  unitOrRevision.toLowerCase(), unit.completionTime)
+              .timeout(timeoutDuration) !=
           1) {
         unit.completionTime = unit.completionTime + timeSlot.duration;
         return -1;
       }
       ;
 
-      await _firebaseCrud.markUnitAsIncomplete(
-          timeSlot.examID, timeSlot.unitID).timeout(timeoutDuration);;
+      await _firebaseCrud
+          .markUnitAsIncomplete(timeSlot.examID, timeSlot.unitID)
+          .timeout(timeoutDuration);
+      ;
 
       //logger.i('Success marking timeSlot as not complete!');
       if (stripTime(DateTime.now()).isAfter(day.date))
@@ -402,11 +445,13 @@ class CalendarController {
       final now = stripTime(DateTime.now());
 
       while (now.isAfter(date)) {
-        final obtainedDay = await _firebaseCrud.getCalendarDay(date).timeout(timeoutDuration);;
+        final obtainedDay =
+            await _firebaseCrud.getCalendarDay(date).timeout(timeoutDuration);
+        ;
 
         bool addToResult = false;
 
-        var listOfTimeSlots = <TimeSlot>[];
+        var listOfTimeSlots = <TimeSlotModel>[];
         for (var timeSlot in obtainedDay.times) {
           if (timeSlot.completed == false) {
             addToResult = true;
@@ -425,35 +470,66 @@ class CalendarController {
 
   Future<void> markDayAsNotified(DateTime date) async {
     try {
-      Day dayToChange = await _firebaseCrud.getCalendarDayByDate(date).timeout(timeoutDuration);;
-      await _firebaseCrud.markCalendarDayAsNotified(dayToChange.id).timeout(timeoutDuration);;
+      DayModel dayToChange = await _firebaseCrud
+          .getCalendarDayByDate(date)
+          .timeout(timeoutDuration);
+      ;
+      await _firebaseCrud
+          .markCalendarDayAsNotified(dayToChange.id)
+          .timeout(timeoutDuration);
+      ;
     } catch (e) {
       logger.e('Error marking Day as notified: $e');
     }
   }
 
-  Future<void> saveTimeStudied(TimeSlot timeSlot) async {
+  Future<void> saveTimeStudied(TimeSlotModel timeSlot) async {
     try {
-      await _firebaseCrud.updateTimeStudiedForTimeSlot(
-          timeSlot.id, timeSlot.dayID, timeSlot.timeStudied).timeout(timeoutDuration);
-      
+      await _firebaseCrud
+          .updateTimeStudiedForTimeSlot(
+              timeSlot.id, timeSlot.dayID, timeSlot.timeStudied)
+          .timeout(timeoutDuration);
     } catch (e) {
       logger.e('Error saving time Studied for timeslot: $e');
     }
   }
 
-  Future<int> resetTimeStudied(TimeSlot timeSlot) async {
+  Future<int> resetTimeStudied(TimeSlotModel timeSlot) async {
     try {
-      await _firebaseCrud.resetTimeSlotTimeStudied(
-          timeSlot.id, timeSlot.dayID, timeSlot.timeStudied).timeout(timeoutDuration);;
-      await _firebaseCrud.subtractTimeFromUnitRealStudyTime(
-          timeSlot.examID, timeSlot.unitID, timeSlot.timeStudied).timeout(timeoutDuration);;
-      await _firebaseCrud.subtractTimeFromExamTimeStudied(
-          timeSlot.examID, timeSlot.timeStudied).timeout(timeoutDuration);;
+      await _firebaseCrud
+          .resetTimeSlotTimeStudied(
+              timeSlot.id, timeSlot.dayID, timeSlot.timeStudied)
+          .timeout(timeoutDuration);
+      ;
+      await _firebaseCrud
+          .subtractTimeFromUnitRealStudyTime(
+              timeSlot.examID, timeSlot.unitID, timeSlot.timeStudied)
+          .timeout(timeoutDuration);
+      ;
+      await _firebaseCrud
+          .subtractTimeFromExamTimeStudied(
+              timeSlot.examID, timeSlot.timeStudied)
+          .timeout(timeoutDuration);
+      ;
       return 1;
     } catch (e) {
       logger.e('Error resetting time studied for timeSlot: $e');
       return -1;
+    }
+  }
+
+  Future<TimeSlotModel> getTimeSlot(String timeSlotID, String dayID) async {
+    return await _firebaseCrud.getTimeSlot(timeSlotID, dayID);
+  }
+
+  Future<void> updateTimeSlotCompleteness(TimeSlotModel timeSlot) async {
+    if (timeSlot.completed) {
+      await markTimeSlotAsComplete(timeSlot.dayID, timeSlot);
+    } else {
+      await markTimeSlotAsIncomplete(
+          await instanceManager.firebaseCrudService
+              .getCalendarDayByID(timeSlot.dayID),
+          timeSlot);
     }
   }
 }

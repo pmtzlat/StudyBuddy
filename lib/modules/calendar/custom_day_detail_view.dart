@@ -11,7 +11,7 @@ import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 class CustomDayDetailView extends StatefulWidget {
-  final Day customDay;
+  final DayModel customDay;
   const CustomDayDetailView({super.key, required this.customDay});
 
   @override

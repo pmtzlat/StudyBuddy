@@ -1,7 +1,10 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
+import 'package:study_buddy/common_widgets/reload_button.dart';
 import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/modules/calendar/calendar_day_times.dart';
@@ -12,6 +15,7 @@ import 'package:study_buddy/modules/calendar/restrictions_detail_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/utils/error_&_success_messages.dart';
+import 'package:study_buddy/utils/general_utils.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -20,18 +24,31 @@ class CalendarView extends StatefulWidget {
   State<CalendarView> createState() => _CalendarViewState();
 }
 
-class _CalendarViewState extends State<CalendarView> {
+class _CalendarViewState extends State<CalendarView>
+    with SingleTickerProviderStateMixin {
   late bool autoRecalc;
+  late AnimationController _animationController;
   final _controller = instanceManager.calendarController;
   GlobalKey<CalendarDayTimesState> _timesKey = GlobalKey();
+  DayModel day = instanceManager.sessionStorage.loadedCalendarDay;
+  Duration recalcTime = Duration(milliseconds: 150);
+  bool needsRecalc = instanceManager.sessionStorage.needsRecalculation;
+  Color titleGrey = Color.fromARGB(255, 92, 92, 92);
+  Color backgroundColor = Color.fromARGB(255, 250, 253, 253);
+  bool dayLoaded = true;
 
   bool scrollSheetIsUp = false;
+  Duration scrollUpTime = Duration(milliseconds: 400);
 
   late CalendarDayTimes events = CalendarDayTimes(
     key: _timesKey,
     updateParent: () {
-      logger.i(instanceManager.sessionStorage.needsRecalculation);
-      setState(() {});
+      //logger.i(instanceManager.sessionStorage.needsRecalculation);
+      day = instanceManager.sessionStorage.loadedCalendarDay;
+      if (instanceManager.sessionStorage.initialDayLoad) {
+        dayLoaded = !(instanceManager.sessionStorage.loadedCalendarDay.id ==
+            'Placeholder');
+      }
     },
   );
 
@@ -39,6 +56,7 @@ class _CalendarViewState extends State<CalendarView> {
   void initState() {
     super.initState();
     autoRecalc = false;
+    // dayLoaded = instanceManager.sessionStorage.initialDayLoad;
     // Add a post frame callback to show the dialog after the page has been rendered.
     if (!instanceManager.sessionStorage.incompletePreviousDays.isEmpty) {
       WidgetsBinding.instance?.addPostFrameCallback((_) {
@@ -46,6 +64,10 @@ class _CalendarViewState extends State<CalendarView> {
             instanceManager.sessionStorage.incompletePreviousDays);
       });
     }
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 50),
+    );
   }
 
   void _showRecalculationAdvice(BuildContext context) {
@@ -97,7 +119,8 @@ class _CalendarViewState extends State<CalendarView> {
     );
   }
 
-  void _showPrevDayCompletionDialog(Map<String, List<TimeSlot>> dictionary) {
+  void _showPrevDayCompletionDialog(
+      Map<String, List<TimeSlotModel>> dictionary) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
@@ -170,7 +193,8 @@ class _CalendarViewState extends State<CalendarView> {
                                             } else {
                                               instanceManager.sessionStorage
                                                       .incompletePreviousDays =
-                                                  <String, List<TimeSlot>>{};
+                                                  <String,
+                                                      List<TimeSlotModel>>{};
 
                                               if (leftDaysUnsaved) {
                                                 _showRecalculationAdvice(
@@ -204,7 +228,8 @@ class _CalendarViewState extends State<CalendarView> {
                                             } else {
                                               instanceManager.sessionStorage
                                                       .incompletePreviousDays =
-                                                  <String, List<TimeSlot>>{};
+                                                  <String,
+                                                      List<TimeSlotModel>>{};
                                               if (leftDaysUnsaved) {
                                                 _showRecalculationAdvice(
                                                     context);
@@ -267,12 +292,14 @@ class _CalendarViewState extends State<CalendarView> {
   }
 
   void moveSheetUp() {
+    _animationController.forward();
     setState(() {
       scrollSheetIsUp = true;
     });
   }
 
   void moveSheetDown() {
+    _animationController.reverse();
     setState(() {
       scrollSheetIsUp = false;
     });
@@ -284,13 +311,13 @@ class _CalendarViewState extends State<CalendarView> {
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
 
-    logger.w(
-        'Needs recalc: ${instanceManager.sessionStorage.needsRecalculation}');
     if (autoRecalc) {
       handleScheduleCalculation(context, _localizations);
       autoRecalc = false;
     }
-    ;
+
+    logger.i(
+        'Day: ${instanceManager.sessionStorage.loadedCalendarDay.getString()}');
 
     return instanceManager.scaffold.getScaffold(
         context: context,
@@ -299,112 +326,345 @@ class _CalendarViewState extends State<CalendarView> {
         body: Stack(
           children: [
             Container(
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
+              //padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
               child: Column(
                 children: [
                   Container(
-                    margin: EdgeInsets.all(screenWidth * 0.05),
-                    child: Text(
-                      _localizations.calendarTitle,
-                      style: Theme.of(context).textTheme.displayMedium,
+                    height: screenHeight * 0.07,
+                    width: screenWidth * 0.8,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        IconButton(
+                            onPressed: () async {
+                              if (!dayLoaded) return;
+                              setState(() {
+                                dayLoaded = false;
+                              });
+
+                              if (!await _controller.getCalendarDay(
+                                  instanceManager.sessionStorage.currentDay
+                                      .subtract(Duration(days: 1))))
+                                showRedSnackbar(
+                                    context, _localizations.errorLoadingDay);
+                              setState(() {
+                                dayLoaded = true;
+                              });
+                            },
+                            icon: Icon(
+                              Icons.chevron_left_rounded,
+                              color: titleGrey.withOpacity(0.3),
+                              size: screenWidth * 0.1,
+                            )),
+                        Text(
+                          DateFormat('dd MMM. yyyy', Intl.defaultLocale).format(
+                              instanceManager.sessionStorage.currentDay),
+                          style: TextStyle(
+                              fontSize: screenWidth * 0.08, color: titleGrey),
+                        ),
+                        IconButton(
+                            onPressed: () async {
+                              if (!dayLoaded) return;
+                              setState(() {
+                                dayLoaded = false;
+                              });
+
+                              if (!await _controller.getCalendarDay(
+                                  instanceManager.sessionStorage.currentDay
+                                      .add(Duration(days: 1))))
+                                showRedSnackbar(
+                                    context, _localizations.errorLoadingDay);
+                              setState(() {
+                                dayLoaded = true;
+                              });
+                            },
+                            icon: Icon(Icons.chevron_right_rounded,
+                                color: titleGrey.withOpacity(0.3),
+                                size: screenWidth * 0.1)),
+                      ],
                     ),
                   ),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.center,
-                  //   children: [
-                  //     Container(
-                  //       height: screenHeight * 0.15,
-                  //       child: Column(
-                  //         children: [
-                  //           ElevatedButton.icon(
-                  //               onPressed: () {
-                  //                 Navigator.push(
-                  //                   context,
-                  //                   MaterialPageRoute(
-                  //                     builder: (context) => RestrictionsDetailView(),
-                  //                   ),
-                  //                 );
-                  //               },
-                  //               icon: Icon(Icons.settings),
-                  //               label: Text(_localizations.changeScheduleGaps)),
-                  //           instanceManager.sessionStorage.needsRecalculation
-                  //               ? Text(
-                  //                   _localizations.needsRecalculationInfo,
-                  //                   style: const TextStyle(
-                  //                       fontSize: 13,
-                  //                       color: Color.fromARGB(255, 219, 164, 0)),
-                  //                 )
-                  //               : const SizedBox(),
-                  //           ElevatedButton.icon(
-                  //               onPressed: () async {
-                  //                 handleScheduleCalculation(context, _localizations);
-                  //               },
-                  //               icon:
-                  //                   instanceManager.sessionStorage.needsRecalculation
-                  //                       ? const Icon(
-                  //                           Icons.warning_amber_outlined,
-                  //                           color: Colors.black,
-                  //                         )
-                  //                       : const Icon(Icons.calculate),
-                  //               label:
-                  //                   instanceManager.sessionStorage.needsRecalculation
-                  //                       ? Text(
-                  //                           _localizations.needsRecalculation,
-                  //                           style: const TextStyle(
-                  //                             color: Colors.black,
-                  //                           ),
-                  //                         )
-                  //                       : Text(_localizations.calculateSchedule),
-                  //               style:
-                  //                   instanceManager.sessionStorage.needsRecalculation
-                  //                       ? ElevatedButton.styleFrom(
-                  //                           backgroundColor: Colors.amber)
-                  //                       : ElevatedButton.styleFrom()),
-                  //         ],
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
-                  Center(
-                    child: Container(
-                        color: Colors.black.withOpacity(0.2),
-                        height: screenHeight * 0.584,
-                        width: screenWidth * 0.8,
-                        child: events),
+                  AnimatedContainer(
+                    duration: recalcTime,
+                    height: needsRecalc ? screenHeight * 0.09 : 0,
+                    child: SingleChildScrollView(
+                      physics: NeverScrollableScrollPhysics(),
+                      reverse: true,
+                      child: Container(
+                          width: double.infinity,
+                          color: Colors.amber,
+                          padding: EdgeInsets.symmetric(vertical: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.warning_rounded,
+                                color: Colors.black,
+                                size: screenHeight * 0.05,
+                              ),
+                              Container(
+                                  width: screenWidth * 0.6,
+                                  child: Text(
+                                    _localizations.needsRecalculationInfo,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: screenWidth * 0.03,
+                                    ),
+                                  )),
+                              Icon(Icons.warning_rounded,
+                                  color: Colors.black,
+                                  size: screenHeight * 0.05),
+                            ],
+                          )),
+                    ),
+                  ),
+                  AnimatedContainer(
+                    duration: recalcTime,
+                    height: needsRecalc ? screenHeight * 0.02 : 0,
+                  ),
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                    child: Column(
+                      children: [
+                        Center(
+                          child: AnimatedContainer(
+                              duration: recalcTime,
+                              width: double.infinity,
+                              height: needsRecalc
+                                  ? screenHeight * 0.5
+                                  : screenHeight * 0.61,
+                              child: dayLoaded
+                                  ? events
+                                  : Container(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: screenHeight * 0.015,
+                                          horizontal: screenHeight * 0.007),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            Color.fromARGB(255, 236, 236, 236),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Container(
+                                              child: Container(
+                                            height: screenWidth * 0.1,
+                                            width: screenWidth * 0.1,
+                                            child:
+                                                const CircularProgressIndicator(
+                                              color: Colors.black12,
+                                            ),
+                                          )),
+                                        ],
+                                      ),
+                                    )),
+                        ),
+                        SizedBox(
+                          height: screenHeight * 0.02,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                logger.i('tapped');
+                                handleScheduleCalculation(
+                                    context, _localizations);
+                              },
+                              child: AnimatedContainer(
+                                duration: recalcTime,
+                                width: screenWidth * 0.35,
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: backgroundColor,
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  boxShadow: needsRecalc
+                                      ? [
+                                          BoxShadow(
+                                            color: Colors.grey.withOpacity(
+                                                0.5), // Shadow color
+                                            spreadRadius:
+                                                3, // Spread of the shadow
+                                            blurRadius:
+                                                7, // Blur radius of the shadow
+                                            offset: Offset(
+                                                0, 0), // Offset of the shadow
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.calculate,
+                                      color: needsRecalc
+                                          ? Colors.amber
+                                          : titleGrey,
+                                      size: screenWidth * 0.12,
+                                    ),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Flexible(
+                                      child: Text(
+                                          needsRecalc
+                                              ? _localizations.updatePlan
+                                              : _localizations.calculatePlan,
+                                          maxLines: 2,
+                                          softWrap: true,
+                                          style: TextStyle(
+                                              fontWeight: needsRecalc
+                                                  ? FontWeight.bold
+                                                  : FontWeight.normal,
+                                              color: needsRecalc
+                                                  ? Colors.amber
+                                                  : titleGrey)),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                logger.i('tapped');
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        RestrictionsDetailView(),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Container(
+                                        width: screenWidth * 0.22,
+                                        child: Text(
+                                            _localizations.changeAvailability,
+                                            maxLines: 2,
+                                            textAlign: TextAlign.end,
+                                            softWrap: true,
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.normal,
+                                                color: titleGrey)),
+                                      ),
+                                      SizedBox(
+                                        width: 5,
+                                      ),
+                                      Icon(
+                                        Icons.settings,
+                                        color: titleGrey,
+                                        size: screenWidth * 0.12,
+                                      )
+                                    ]),
+                              ),
+                            )
+                          ],
+                        ),
+                        TextButton(
+                            style: TextButton.styleFrom(
+                              padding:
+                                  EdgeInsets.all(0), // Set your desired padding
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                needsRecalc = !needsRecalc;
+                              });
+                            },
+                            child: Text('needsrecalc')),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            Container(
-              height: double.infinity,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    AnimatedContainer(
-                      duration: Duration(milliseconds: 300),
-                      height: scrollSheetIsUp
-                          ? screenHeight * 0.7
-                          : screenHeight * 0.1,
-                    ),
-                    Container(
-                      width: screenWidth,
-                      color: Colors.amber,
-                      child: Column(
-                        children: [
-                          IconButton(
-                              onPressed: () {
-                                scrollSheetIsUp
-                                    ? moveSheetDown()
-                                    : moveSheetUp();
-                              },
-                              icon: Icon(Icons.arrow_upward))
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
+            // Column(
+            //   mainAxisAlignment: MainAxisAlignment.end,
+            //   children: [
+            //     AnimatedContainer(
+            //       //color: Colors.yellow,
+            //       curve: Curves.decelerate,
+            //       duration: scrollUpTime,
+            //       height: scrollSheetIsUp
+            //           ? screenHeight * 0.73
+            //           : screenHeight * 0.12,
+            //       child: SingleChildScrollView(
+            //         physics: NeverScrollableScrollPhysics(),
+            //         child: Container(
+            //           padding: EdgeInsets.only(top: 10),
+            //           child: ClipShadowPath(
+            //             shadow: const Shadow(
+            //                 blurRadius: 10,
+            //                 color: Color.fromARGB(255, 222, 222, 222)),
+            //             clipper: CustomShapeClipper(),
+            //             child: Container(
+            //               height: screenHeight * 0.8,
+            //               width: screenWidth,
+            //               color: const Color.fromARGB(255, 255, 255, 255),
+            //               child: Column(
+            //                 children: [
+            //                   GestureDetector(
+            //                     child: Container(
+            //                       width: screenWidth / 6,
+            //                       padding: EdgeInsets.only(
+            //                           top: screenWidth * 0.02,
+            //                           left: screenWidth * 0.02,
+            //                           right: screenWidth * 0.02),
+            //                       child: RotationTransition(
+            //                         turns: Tween<double>(begin: 0.0, end: 0.5)
+            //                             .animate(_animationController),
+            //                         child: Icon(Icons.keyboard_arrow_up),
+            //                       ),
+            //                     ),
+            //                     onTap: () {
+            //                       scrollSheetIsUp
+            //                           ? moveSheetDown()
+            //                           : moveSheetUp();
+            //                     },
+            //                   ),
+            //                   TextButton(
+            //                       style: TextButton.styleFrom(
+            //                         padding: EdgeInsets.all(
+            //                             0), // Set your desired padding
+            //                       ),
+            //                       onPressed: () {
+            //                         setState(() {
+            //                           needsRecalc = !needsRecalc;
+            //                         });
+            //                       },
+            //                       child: Text('needsrecalc')),
+            //                   // Container(
+
+            //                   //   child:
+            //                   //   TextButton(
+            //                   //     onPressed: () {
+            //                   //     scrollSheetIsUp
+            //                   //         ? moveSheetDown()
+            //                   //         : moveSheetUp();
+            //                   //     },
+            //                   //     child: Text(_localizations.viewMonth,
+            //                   //     style: TextStyle(
+            //                   //         fontSize: screenWidth * 0.04,
+            //                   //         color: Color.fromARGB(255, 92, 92, 92)),)
+            //                   //   ),
+            //                   // )
+            //                 ],
+            //               ),
+            //             ),
+            //           ),
+            //         ),
+            //       ),
+            //     ),
+            //   ],
+            // )
           ],
         ));
   }

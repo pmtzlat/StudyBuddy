@@ -6,14 +6,23 @@ import 'package:flutter/material.dart';
 import 'package:screen_state/screen_state.dart';
 
 import 'package:study_buddy/common_widgets/pause_play_button.dart';
+import 'package:study_buddy/models/time_slot_model.dart';
+import 'package:study_buddy/modules/calendar/controllers/calendar_controller.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:flutter/services.dart';
+import 'package:study_buddy/utils/datatype_utils.dart';
+import 'package:study_buddy/utils/error_&_success_messages.dart';
+
+import '../main.dart';
+
+Color foregroundColor = Colors.black;
 
 class TimerWidget extends StatefulWidget {
   final int hours;
   final int minutes;
   final int seconds;
   Duration timerTime;
+  TimeSlotModel timeSlot;
   Duration sessionTime;
   Function completeAndClose;
 
@@ -22,6 +31,7 @@ class TimerWidget extends StatefulWidget {
       this.hours = 0,
       this.minutes = 0,
       this.seconds = 0,
+      required this.timeSlot,
       required this.sessionTime,
       required this.completeAndClose})
       : timerTime = Duration(hours: hours, minutes: minutes, seconds: seconds);
@@ -35,6 +45,7 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   bool timerWasRunning = false;
   late Screen _screen;
   late StreamSubscription<ScreenStateEvent>? _subscription;
+
   bool screenOn = true;
   DateTime? preLockTimeStamp;
   DateTime? postLockTimeStamp;
@@ -102,6 +113,12 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    var screenHeight = MediaQuery.of(context).size.height;
+    var screenWidth = MediaQuery.of(context).size.width;
+    final _localizations = AppLocalizations.of(context)!;
+    double iconSize = screenWidth * 0.16;
+    double textSize = screenWidth * 0.04;
+    double timeSize = screenWidth * 0.125;
     int hoursShown = widget.timerTime.inHours % 23;
     int minutesShown =
         (widget.timerTime.inMinutes - Duration(hours: hoursShown).inMinutes) %
@@ -111,36 +128,93 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
         60;
     return Column(
       children: [
-        Text('${hoursShown < 10 ? '0${hoursShown}' : hoursShown} : '
-            '${minutesShown < 10 ? '0${minutesShown}' : minutesShown} : '
-            '${secondsShown < 10 ? '0${secondsShown}' : secondsShown}'),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Column(
               children: [
-                IconButton(
-                    onPressed: play
-                        ? () {
-                            startTimer();
-                            timerWasRunning = true;
-                          }
-                        : () {
-                            stopTimer();
-                            timerWasRunning = false;
-                          },
-                    icon: play
-                        ? const Icon(Icons.play_arrow_rounded)
-                        : const Icon(Icons.pause_rounded)),
-                IconButton(
-                  icon: Icon(Icons.restart_alt_rounded),
-                  onPressed: () {
-                    resetTimer();
-                  },
+                Text(
+                  _localizations.hoursCapitalized,
+                  style: TextStyle(fontSize: textSize),
+                ),
+                Text(
+                  '${hoursShown < 10 ? '0${hoursShown}' : hoursShown}',
+                  style: TextStyle(fontSize: timeSize),
+                )
+              ],
+            ),
+            Text(' : ', style: TextStyle(fontSize: timeSize)),
+            Column(
+              children: [
+                Text(
+                  _localizations.minutesCapitalized,
+                  style: TextStyle(fontSize: textSize),
+                ),
+                Text(
+                  '${minutesShown < 10 ? '0${minutesShown}' : minutesShown}',
+                  style: TextStyle(fontSize: timeSize),
+                )
+              ],
+            ),
+            Text(' : ', style: TextStyle(fontSize: timeSize)),
+            Column(
+              children: [
+                Text(
+                  _localizations.secondsCapitalized,
+                  style: TextStyle(fontSize: textSize),
+                ),
+                Text(
+                  '${secondsShown < 10 ? '0${secondsShown}' : secondsShown}',
+                  style: TextStyle(fontSize: timeSize),
                 )
               ],
             ),
           ],
+        ),
+        SizedBox(
+          height: screenHeight * 0.03,
+        ),
+        Text(
+            '${_localizations.goal}: ${formatDuration(widget.timeSlot.duration)}',
+            style: TextStyle(fontSize: screenWidth * 0.05)),
+        SizedBox(
+          height: screenHeight * 0.01,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            IconButton(
+                onPressed: play
+                    ? () {
+                        startTimer();
+                        timerWasRunning = true;
+                      }
+                    : () {
+                        stopTimer();
+                        timerWasRunning = false;
+                      },
+                icon: Icon(
+                  play ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                  color: Colors.white,
+                  size: iconSize,
+                )),
+            SizedBox(width: screenWidth * 0.3),
+            IconButton(
+              icon: Icon(
+                Icons.replay_rounded,
+                color: Colors.white,
+                size: iconSize,
+              ),
+              onPressed: () {
+                resetTimer();
+              },
+            ),
+          ],
+        ),
+        SizedBox(
+          height: screenHeight * 0.03,
         )
       ],
     );
@@ -152,6 +226,9 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
     await showDialog(
         context: context,
         builder: (context) {
+          var screenHeight = MediaQuery.of(context).size.height;
+          var screenWidth = MediaQuery.of(context).size.width;
+          final _localizations = AppLocalizations.of(context)!;
           return AlertDialog(
             title: Text(_localizations.sessionCompleted),
             content: Text(_localizations.sessionCompletedBody),
@@ -161,13 +238,19 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
                     result = true;
                     Navigator.pop(context);
                   },
-                  child: Text(_localizations.continueTimer)),
+                  child: Text(_localizations.continueTimer,
+                      style: TextStyle(
+                          color: widget.timeSlot.examColor,
+                          fontSize: screenWidth * 0.05))),
               TextButton(
                   onPressed: () {
                     result = false;
                     Navigator.pop(context);
                   },
-                  child: Text(_localizations.completeSession))
+                  child: Text(_localizations.completeSession,
+                      style: TextStyle(
+                          color: widget.timeSlot.examColor,
+                          fontSize: screenWidth * 0.05)))
             ],
           );
         });
@@ -192,7 +275,7 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
     while (stopwatch.isRunning) {
       await Future.delayed(Duration(seconds: 1));
       updatetimer();
-      if (widget.timerTime == widget.sessionTime) {
+      if (widget.timerTime == widget.timeSlot.duration) {
         bool continueTimer = await showContinueDialog();
         if (!continueTimer) {
           widget.completeAndClose(widget.timerTime, context);
@@ -223,4 +306,148 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   void pauseTimer() {
     stopwatch.stop();
   }
+}
+
+Future<TimeSlotModel> showTimerDialog(BuildContext context,
+    TimeSlotModel timeSlot, CalendarController controller) async {
+  final GlobalKey<TimerWidgetState> timerKey = GlobalKey<TimerWidgetState>();
+
+  var screenHeight = MediaQuery.of(context).size.height;
+  var screenWidth = MediaQuery.of(context).size.width;
+  final _localizations = AppLocalizations.of(context)!;
+  final lighterColor = lighten(timeSlot.examColor, .05);
+  final darkerColor = darken(timeSlot.examColor, .15);
+
+  List<int> formatDuration(Duration duration) {
+    int hours = duration.inHours;
+    int minutes = (duration.inMinutes - Duration(hours: hours).inMinutes) % 60;
+    int seconds = (duration.inSeconds -
+            Duration(hours: hours, minutes: minutes).inSeconds) %
+        60;
+
+    return [hours, minutes, seconds];
+  }
+
+  Future<void> saveChangesToTimeSlot(
+      Duration time, BuildContext context) async {
+    timeSlot.timeStudied = time;
+    if (timeSlot.timeStudied >= timeSlot.duration &&
+        timeSlot.completed == false) {
+      timeSlot.completed = true;
+    } else if (timeSlot.timeStudied < Duration(seconds: 5) &&
+        timeSlot.completed == true) {
+      timeSlot.completed = false;
+    }
+  }
+
+  void completeAndClose(Duration time, BuildContext context) async {
+    await saveChangesToTimeSlot(time, context);
+    Navigator.pop(context, timeSlot);
+  }
+
+  List<int> formattedDuration = formatDuration(timeSlot.timeStudied);
+
+  TimerWidget timer = TimerWidget(
+    key: timerKey,
+    hours: formattedDuration[0],
+    minutes: formattedDuration[1],
+    seconds: formattedDuration[2],
+    sessionTime: timeSlot.duration, //timeSlot.duration,
+    completeAndClose: completeAndClose,
+    timeSlot: timeSlot,
+  );
+
+  await showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Color.fromARGB(208, 0, 0, 0),
+      transitionDuration: Duration(milliseconds: 200),
+
+      // Create the dialog's content
+      pageBuilder: (context, animation, secondaryAnimation) {
+        final int duration = timeSlot.duration.inSeconds;
+        int initialValue = timeSlot.timeStudied.inSeconds;
+
+        return Center(
+          child: Card(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            child: Container(
+              decoration: BoxDecoration(
+                //borderRadius: BorderRadius.all(Radius.circular(20)),
+                gradient: LinearGradient(
+                    end: Alignment.bottomLeft,
+                    begin: Alignment.topRight,
+                    //stops: [ 0.1, 0.9],
+                    colors: [lighterColor, darkerColor]),
+              ),
+              child: Stack(
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(top: 10),
+                    margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                                width: screenWidth * 0.5,
+                                child: Text(
+                                  _localizations.dontCloseApp,
+                                  maxLines: 2,
+                                  textAlign: TextAlign.center,
+                                  softWrap: true,
+                                  overflow: TextOverflow.ellipsis,
+                                ))
+                          ],
+                        ),
+                        SizedBox(
+                          height: screenHeight * 0.05,
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            timer,
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      IconButton(
+                          onPressed: () async {
+                            timerKey.currentState?.stopListening();
+                            timerKey.currentState?.stopTimer();
+
+                            await saveChangesToTimeSlot(
+                                timer.timerTime, context);
+
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(
+                            Icons.close_rounded,
+                            size: screenWidth * 0.1,
+                            color: Colors.black,
+                          )),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      });
+
+  return timeSlot;
 }

@@ -197,3 +197,16 @@ Color lighten(Color color, [double amount = .1]) {
 
   return hslLight.toColor();
 }
+
+String formatDurationNoWords(Duration duration) {
+  // Calculate hours, minutes, and seconds
+  int hours = duration.inHours;
+  int minutes = (duration.inMinutes % 60);
+  int seconds = (duration.inSeconds % 60);
+
+  // Format the string
+  String formattedString =
+      '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
+  return formattedString;
+}
