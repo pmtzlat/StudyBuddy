@@ -19,45 +19,29 @@ class _RestrictionsDetailViewState extends State<RestrictionsDetailView> {
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
 
-    return instanceManager.scaffold.getScaffold(
-        context: context,
-        activeIndex: 1,
-        body: Column(
+    return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  children: [
-                    Text(_localizations.chooseFreeSchedule),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  CustomDaysView(), // Replace NewPage with the page you want to navigate to
-                            ),
-                          );
-                        },
-                        icon: Icon(Icons.calendar_month_outlined),
-                        label: Text(_localizations.viewCustomDays)),
-                    Container(
-                        width: screenWidth * 0.8,
-                        height: screenHeight * 0.6,
-                        child: HourPickerForm()),
-                    SizedBox(
-                      height: 20,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+            Text(_localizations.chooseFreeSchedule),
+            
+            // ElevatedButton.icon(
+            //     onPressed: () {
+            //       Navigator.push(
+            //         context,
+            //         MaterialPageRoute(
+            //           builder: (context) =>
+            //               CustomDaysView(), // Replace NewPage with the page you want to navigate to
+            //         ),
+            //       );
+            //     },
+            //     icon: Icon(Icons.calendar_month_outlined),
+            //     label: Text(_localizations.viewCustomDays)),
+            Container(
+                width: screenWidth * 0.8,
+                height: screenHeight * 0.65,
+                child: HourPickerForm()),
+            
           ],
-        ));
+        );
   }
 }

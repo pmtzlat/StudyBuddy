@@ -21,90 +21,84 @@ class _CustomDaysViewState extends State<CustomDaysView> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    return instanceManager.scaffold.getScaffold(
-        context: context,
-        activeIndex: 2,
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Title(
-                color: Colors.black,
-                child: Text(_localizations.customDays),
-              ),
-              Center(
-                child: IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () {
-                    showGeneralDialog(
-                        context: context,
-                        barrierDismissible: true,
-                        barrierLabel: MaterialLocalizations.of(context)
-                            .modalBarrierDismissLabel,
-                        barrierColor: Colors.black.withOpacity(0.5),
-                        transitionDuration: Duration(milliseconds: 200),
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          return AddCustomDayView(refreshParent: refresh);
-                        });
-                  },
-                ),
-              ),
-              Expanded(
-                  child: ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: instanceManager.sessionStorage.activeCustomDays.length,
-                itemBuilder: (context, index) {
-                  var day = instanceManager.sessionStorage.activeCustomDays[index];
-                  return GestureDetector(
-                    onTap: () async{
-                      await _controller.getTimeSlotsForCustomDay(day);
-
-
-                      showGeneralDialog(
-                        context: context,
-                        barrierDismissible: true,
-                        barrierLabel: MaterialLocalizations.of(context)
-                            .modalBarrierDismissLabel,
-                        barrierColor: Colors.black.withOpacity(0.5),
-                        transitionDuration: Duration(milliseconds: 200),
-                        pageBuilder: (context, animation, secondaryAnimation) {
-                          return CustomDayDetailView(customDay: day,);
-                        });
-
-                    },
-                    child: Card(
-                      color: Colors.orange,
-                      child: Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth * 0.04),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(DateFormat("d MMMM, y").format(day.date)),
-                              IconButton(
-                                  onPressed: () async {
-                                    instanceManager.sessionStorage.activeCustomDays
-                                        .removeAt(index);
-                                    final res = await _controller.deleteCustomDay(day.id);
-                                    if (res == -1) {
-                                      showRedSnackbar(context,
-                                          _localizations.errorDeletingCustomDay);
-                                    }
-                                    
-                  
-                                    setState(() {});
-                                  },
-                                  icon: Icon(Icons.delete))
-                            ],
-                          )),
-                    ),
-                  );
-                },
-              ))
-            ],
+    return Column(
+      children: [
+        Title(
+          color: Colors.black,
+          child: Text(_localizations.customDays),
+        ),
+        Center(
+          child: IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              showGeneralDialog(
+                  context: context,
+                  barrierDismissible: true,
+                  barrierLabel: MaterialLocalizations.of(context)
+                      .modalBarrierDismissLabel,
+                  barrierColor: Colors.black.withOpacity(0.5),
+                  transitionDuration: Duration(milliseconds: 200),
+                  pageBuilder: (context, animation, secondaryAnimation) {
+                    return AddCustomDayView(refreshParent: refresh);
+                  });
+            },
           ),
-        ));
+        ),
+        Expanded(
+            child: ListView.builder(
+          scrollDirection: Axis.vertical,
+          shrinkWrap: true,
+          itemCount: instanceManager.sessionStorage.activeCustomDays.length,
+          itemBuilder: (context, index) {
+            var day = instanceManager.sessionStorage.activeCustomDays[index];
+            return GestureDetector(
+              onTap: () async{
+                await _controller.getTimeSlotsForCustomDay(day);
+
+
+                showGeneralDialog(
+                  context: context,
+                  barrierDismissible: true,
+                  barrierLabel: MaterialLocalizations.of(context)
+                      .modalBarrierDismissLabel,
+                  barrierColor: Colors.black.withOpacity(0.5),
+                  transitionDuration: Duration(milliseconds: 200),
+                  pageBuilder: (context, animation, secondaryAnimation) {
+                    return CustomDayDetailView(customDay: day,);
+                  });
+
+              },
+              child: Card(
+                color: Colors.orange,
+                child: Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.04),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(DateFormat("d MMMM, y").format(day.date)),
+                        IconButton(
+                            onPressed: () async {
+                              instanceManager.sessionStorage.activeCustomDays
+                                  .removeAt(index);
+                              final res = await _controller.deleteCustomDay(day.id);
+                              if (res == -1) {
+                                showRedSnackbar(context,
+                                    _localizations.errorDeletingCustomDay);
+                              }
+                              
+            
+                              setState(() {});
+                            },
+                            icon: Icon(Icons.delete))
+                      ],
+                    )),
+              ),
+            );
+          },
+        ))
+      ],
+    );
   }
 
   void refresh() async {

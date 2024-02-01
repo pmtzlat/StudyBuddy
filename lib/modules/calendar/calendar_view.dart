@@ -11,6 +11,7 @@ import 'package:study_buddy/modules/calendar/calendar_day_times.dart';
 import 'package:study_buddy/common_widgets/scaffold.dart';
 import 'package:study_buddy/instance_manager.dart';
 import 'package:study_buddy/main.dart';
+import 'package:study_buddy/modules/calendar/custom_days_view.dart';
 import 'package:study_buddy/modules/calendar/restrictions_detail_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
@@ -541,13 +542,15 @@ class _CalendarViewState extends State<CalendarView>
                             GestureDetector(
                               onTap: () {
                                 logger.i('tapped');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        RestrictionsDetailView(),
-                                  ),
-                                );
+
+                                moveSheetUp();
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (context) =>
+                                //         RestrictionsDetailView(),
+                                //   ),
+                                // );
                               },
                               child: Container(
                                 child: Row(
@@ -626,6 +629,65 @@ class _CalendarViewState extends State<CalendarView>
                 ],
               ),
             ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                AnimatedContainer(
+                  //color: Colors.yellow,
+                  curve: Curves.decelerate,
+                  duration: scrollUpTime,
+                  height: scrollSheetIsUp
+                      ? screenHeight * 0.8
+                      : 0,
+                  child: SingleChildScrollView(
+                    physics: NeverScrollableScrollPhysics(),
+                    child: Container(
+                      padding: EdgeInsets.only(top: 10),
+                      child: ClipShadowPath(
+                        shadow: const Shadow(
+                            blurRadius: 10,
+                            color: Color.fromARGB(255, 222, 222, 222)),
+                        clipper: CustomShapeClipper(),
+                        child: Container(
+                          height: screenHeight * 0.8,
+                          width: screenWidth,
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                child: Container(
+                                  width: screenWidth / 6,
+                                  padding: EdgeInsets.only(
+                                      top: screenWidth * 0.02,
+                                      left: screenWidth * 0.02,
+                                      right: screenWidth * 0.02),
+                                  child: RotationTransition(
+                                    turns: Tween<double>(begin: 0.0, end: 0.5)
+                                        .animate(_animationController),
+                                    child: Icon(Icons.keyboard_arrow_up),
+                                  ),
+                                ),
+                                onTap: () {
+                                  scrollSheetIsUp
+                                      ? moveSheetDown()
+                                      : moveSheetUp();
+                                },
+                              ),
+                              Container(
+                                padding: EdgeInsets.only( top: screenHeight*0.04),
+                                
+                                height: screenHeight*0.73,
+                                child: RestrictionsDetailView())
+                              
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
           ],
         ));
   }

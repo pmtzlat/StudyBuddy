@@ -50,6 +50,8 @@ void main() async {
     instanceManager.sessionStorage.initialGapsLoad = await instanceManager.calendarController.getGaps();
     instanceManager.sessionStorage.initialCustomDaysLoad = await instanceManager.calendarController.getCustomDays();
     instanceManager.sessionStorage.initialDayLoad = await instanceManager.calendarController.getCalendarDay(now);
+    instanceManager.sessionStorage.savedWeekday = instanceManager.sessionStorage.currentDate.weekday-1;
+
   }
 
   runApp(StudyBuddyApp());

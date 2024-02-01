@@ -4,9 +4,11 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl/intl.dart';
+import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/utils/error_&_success_messages.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/services/logging_service.dart';
+import 'package:study_buddy/utils/general_utils.dart';
 
 class HourPickerForm extends StatefulWidget {
   const HourPickerForm({super.key});
@@ -34,9 +36,12 @@ class _HourPickerFormState extends State<HourPickerForm> {
     List<Widget> dayFormWidgets = [];
     for (int i = 0; i < weekdays.length; i++) {
       dayFormWidgets.add(
-        DayForm(
-          day: weekdays[i],
-          pageController: _pageController,
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          child: DayForm(
+              day: weekdays[i],
+              pageController: _pageController,
+              color: colorOptions[i]),
         ),
       );
     }
@@ -58,8 +63,12 @@ class _HourPickerFormState extends State<HourPickerForm> {
 class DayForm extends StatefulWidget {
   final String day;
   final PageController pageController;
+  final Color color;
   const DayForm(
-      {super.key, required String this.day, required this.pageController});
+      {super.key,
+      required String this.day,
+      required this.pageController,
+      required this.color});
 
   @override
   State<DayForm> createState() => _DayFormState();
@@ -183,9 +192,13 @@ class _DayFormState extends State<DayForm> {
                           curve: Curves.ease,
                         );
                       },
-                      icon: Icon(Icons.arrow_left),
+                      icon: Icon(Icons.chevron_left_rounded),
                     )
-                  : SizedBox(),
+                  : IconButton(
+                      onPressed: () {},
+                      icon:
+                          Icon(Icons.chevron_left_rounded, color: Colors.white),
+                    ),
               Text('${widget.day}'),
               widget.day != 'Sunday'
                   ? IconButton(
@@ -197,10 +210,87 @@ class _DayFormState extends State<DayForm> {
                           curve: Curves.ease,
                         );
                       },
-                      icon: Icon(Icons.arrow_right),
+                      icon: Icon(Icons.chevron_right_rounded),
                     )
-                  : SizedBox(),
+                  : IconButton(
+                      onPressed: () {},
+                      icon:
+                          Icon(Icons.chevron_left_rounded, color: Colors.white),
+                    ),
             ],
+          ),
+          SizedBox(
+            height: screenHeight * 0.025,
+          ),
+          Flexible(
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              removeBottom: true,
+              child: ListView.builder(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  itemCount: instanceManager.sessionStorage
+                      .weeklyGaps[daysStrToNum[widget.day]].length,
+                  itemBuilder: (context, index) {
+                    final timeSlot = instanceManager.sessionStorage
+                        .weeklyGaps[daysStrToNum[widget.day]][index];
+                    final color = widget.color;
+                    final darkerColor = darken(color, 0.1);
+
+                    return Card(
+                        elevation: 0,
+                        margin: const EdgeInsets.symmetric(vertical: 5),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        clipBehavior: Clip.antiAliasWithSaveLayer,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                                end: Alignment.bottomLeft,
+                                begin: Alignment.topRight,
+                                //stops: [ 0.1, 0.9],
+                                colors: [color, darkerColor]),
+                          ),
+                          child: Padding(
+                              padding:
+                                  EdgeInsets.only(left: screenWidth * 0.05),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                      '${timeSlot.timeOfDayToString(timeSlot.startTime)} - ${timeSlot.timeOfDayToString(timeSlot.endTime)}',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: screenWidth * 0.05)),
+                                  IconButton(
+                                      onPressed: () async {
+                                        instanceManager
+                                            .sessionStorage
+                                            .weeklyGaps[
+                                                daysStrToNum[widget.day]]
+                                            .removeAt(index);
+                                        setState(() {});
+                                        final res = await _controller
+                                            .deleteGap(timeSlot);
+                                        if (res != 1) {
+                                          showRedSnackbar(context,
+                                              _localizations.errorDeletingGap);
+                                        }
+                                        await _controller.getGaps();
+                                        setState(() {
+                                          instanceManager.sessionStorage
+                                              .needsRecalculation = true;
+                                        });
+                                      },
+                                      icon: Icon(Icons.delete,
+                                          color: Colors.white))
+                                ],
+                              )),
+                        ));
+                  }),
+            ),
           ),
           SizedBox(
             height: screenHeight * 0.025,
@@ -211,49 +301,6 @@ class _DayFormState extends State<DayForm> {
               onPressed: () => showPopUp((daysStrToNum[widget.day])! + 1),
             ),
           ),
-          Expanded(
-            child: ListView.builder(
-                    scrollDirection: Axis.vertical,
-                    shrinkWrap: true,
-                    itemCount: instanceManager.sessionStorage
-                        .weeklyGaps[daysStrToNum[widget.day]].length,
-                    itemBuilder: (context, index) {
-                      final timeSlot = instanceManager.sessionStorage
-                          .weeklyGaps[daysStrToNum[widget.day]][index];
-
-                      return Card(
-                        color: Colors.orange,
-                        child: Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: screenWidth * 0.05),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                    '${timeSlot.timeOfDayToString(timeSlot.startTime)} - ${timeSlot.timeOfDayToString(timeSlot.endTime)}'),
-                                IconButton(
-                                    onPressed: () async {
-                                      instanceManager.sessionStorage
-                                          .weeklyGaps[daysStrToNum[widget.day]]
-                                          .removeAt(index);
-                                      setState(() {
-                                        
-                                      });
-                                      final res =
-                                          await _controller.deleteGap(timeSlot);
-                                      if (res != 1) {
-                                        showRedSnackbar(context,
-                                            _localizations.errorDeletingGap);
-                                      }
-                                      await _controller.getGaps();
-                                      setState(() {instanceManager.sessionStorage.needsRecalculation = true;});
-                                    },
-                                    icon: Icon(Icons.delete))
-                              ],
-                            )),
-                      );
-                    }),
-          )
         ],
       ),
     );
