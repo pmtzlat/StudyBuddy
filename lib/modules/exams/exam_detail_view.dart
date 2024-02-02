@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
-import 'package:flutter_shakemywidget/flutter_shakemywidget.dart';
+
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl/intl.dart';
 import 'package:study_buddy/common_widgets/marquee.dart';
@@ -564,8 +564,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
               key: Key(unit.id),
               onDismissed: (direction) {
                 if (editMode) {
-                  UnitModel removedItem = widget.exam.units
-                      .removeAt(widget.exam.units.indexOf(unit));
+                  widget.exam.units.removeAt(widget.exam.units.indexOf(unit));
 
                   _listKey.currentState?.removeItem(
                     index,
@@ -645,7 +644,8 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                         //return
 
                                         widget.updateParent();
-                                        instanceManager.sessionStorage.activeOrAllExams = 0;
+                                        instanceManager.sessionStorage
+                                            .activeOrAllExams = 0;
 
                                         widget.pageController.animateToPage(0,
                                             duration:

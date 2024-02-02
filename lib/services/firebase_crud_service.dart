@@ -833,6 +833,16 @@ class FirebaseCrudService {
         }
       }
 
+      for (List<TimeSlotModel> timeSlots in gaps) {
+        timeSlots.sort((a, b) {
+          if (a.startTime.hour != b.startTime.hour) {
+            return b.startTime.hour - a.startTime.hour;
+          } else {
+            return b.startTime.minute - a.startTime.minute;
+          }
+        });
+      }
+
       logger.i('Got Gaps! $gaps');
       return gaps as List<List<TimeSlotModel>>;
     } catch (e) {

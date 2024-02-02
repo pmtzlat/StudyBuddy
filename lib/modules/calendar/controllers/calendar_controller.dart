@@ -59,52 +59,45 @@ class CalendarController {
   Future<int> addGap(GlobalKey<FormBuilderState> key, int weekday,
       List<TimeSlotModel> provisionalList, String purpose) async {
     try {
-      if (key.currentState!.validate()) {
-        key.currentState!.save();
-        final startTime =
-            dateTimeToTimeOfDay(key.currentState!.fields['startTime']!.value);
-        var endTime =
-            dateTimeToTimeOfDay(key.currentState!.fields['endTime']!.value);
+      logger.i('Adding gap...');
 
-        if (endTime.hour == 0 && endTime.minute == 0) {
-          endTime = TimeOfDay(hour: 23, minute: 59);
-        }
+      final startTime =
+          dateTimeToTimeOfDay(key.currentState!.fields['startTime']!.value);
+      var endTime =
+          dateTimeToTimeOfDay(key.currentState!.fields['endTime']!.value);
 
-        if (!isTimeBefore(startTime, endTime)) {
-          return 0;
-        }
+      if (endTime.hour == 0 && endTime.minute == 0) {
+        endTime = const TimeOfDay(hour: 23, minute: 59);
+      }
 
-        provisionalList =
-            await checkGapClash(startTime, endTime, weekday, provisionalList);
+      provisionalList =
+          await checkGapClash(startTime, endTime, weekday, provisionalList);
 
-        switch (purpose) {
-          case ('generalGaps'):
-            if (await _firebaseCrud
-                    .clearGapsForWeekday(_firebaseCrud.weekDays[weekday - 1])
-                    .timeout(timeoutDuration) ==
-                -1) {
+      switch (purpose) {
+        case ('generalGaps'):
+          if (await _firebaseCrud
+                  .clearGapsForWeekday(_firebaseCrud.weekDays[weekday - 1])
+                  .timeout(timeoutDuration) ==
+              -1) {
+            return -1;
+          }
+
+          for (var timeSlot in provisionalList) {
+            logger.f(
+                '${timeSlot.startTime.toString()} - ${timeSlot.endTime.toString()}');
+            final res = await _firebaseCrud
+                .addTimeSlotGap(timeSlot: timeSlot)
+                .timeout(timeoutDuration);
+            if (res != 1) {
               return -1;
             }
+          }
+          instanceManager.sessionStorage.needsRecalculation = true;
+          return 1;
 
-            for (var timeSlot in provisionalList) {
-              logger.f(
-                  '${timeSlot.startTime.toString()} - ${timeSlot.endTime.toString()}');
-              final res = await _firebaseCrud
-                  .addTimeSlotGap(timeSlot: timeSlot)
-                  .timeout(timeoutDuration);
-              if (res != 1) {
-                return -1;
-              }
-            }
-            instanceManager.sessionStorage.needsRecalculation = true;
-            return 1;
-
-          default:
-            instanceManager.sessionStorage.needsRecalculation = true;
-            return 1;
-        }
-      } else {
-        return 0;
+        default:
+          instanceManager.sessionStorage.needsRecalculation = true;
+          return 1;
       }
     } catch (e) {
       logger.e('Error adding gap: $e');
@@ -114,7 +107,7 @@ class CalendarController {
 
   Future<bool?> getCalendarDay(DateTime date) async {
     try {
-      await Future.delayed(Duration(milliseconds:500));
+      await Future.delayed(Duration(milliseconds: 500));
       bool initialLoad = instanceManager.sessionStorage.initialDayLoad;
       if (!initialLoad) await Future.delayed(Duration(seconds: 2));
       instanceManager.sessionStorage.prevDay =
@@ -122,9 +115,9 @@ class CalendarController {
       instanceManager.sessionStorage.prevDayDate =
           instanceManager.sessionStorage.currentDate;
 
-      instanceManager.sessionStorage.currentDate=
+      instanceManager.sessionStorage.currentDate =
           DateTime(date.year, date.month, date.day);
-      
+
       // var x = [];
       // var y = x[1];
 
