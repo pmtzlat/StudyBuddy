@@ -7,20 +7,25 @@ import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 const colorOptions = [
-  Colors.amberAccent,
+  
   Colors.blueAccent,
   Colors.cyan,
   Colors.deepOrangeAccent,
   Colors.purple,
   Colors.indigo,
   Colors.lightGreen,
-  Colors.lime,
   Colors.orangeAccent,
   Colors.pinkAccent,
   Colors.purpleAccent,
   Colors.redAccent,
   Colors.teal,
 ];
+
+Color getRandomColor() {
+  final random = Random();
+  final index = random.nextInt(colorOptions.length);
+  return colorOptions[index];
+}
 
 List<double> generateDescendingList(int n) {
   List<double> resultList = [];

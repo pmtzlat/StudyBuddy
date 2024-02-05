@@ -20,9 +20,11 @@ import 'package:study_buddy/common_widgets/timer_widget.dart';
 
 class CalendarDayTimes extends StatefulWidget {
   Function updateParent;
+  bool needsRecalc;
   CalendarDayTimes({
     required Key key,
     required this.updateParent,
+    required this.needsRecalc,
   }) : super(key: key);
 
   @override
@@ -36,15 +38,12 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
   @override
   void initState() {
     super.initState();
-    
   }
-
- 
 
   void updateParent() {
     logger.i('Calendar Day Times: updateParents');
-    
-    logger.d(instanceManager.sessionStorage.initialDayLoad);
+
+    //logger.d(instanceManager.sessionStorage.initialDayLoad);
     widget.updateParent();
   }
 
@@ -53,36 +52,63 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    
 
     return Container(
       padding: EdgeInsets.symmetric(
           vertical: screenHeight * 0.015, horizontal: screenHeight * 0.007),
       decoration: BoxDecoration(
-        color: Color.fromARGB(255, 236, 236, 236),
+        color: widget.needsRecalc ? Colors.amber : Color.fromARGB(255, 236, 236, 236),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          AnimatedContainer(
+            duration: Duration(milliseconds: 300),
+            height: widget.needsRecalc ? screenHeight * 0.09 : 0,
+            child: SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              reverse: true,
+              child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.warning_rounded,
+                        color: Colors.black,
+                        size: screenHeight * 0.05,
+                      ),
+                      Container(
+                          width: screenWidth * 0.6,
+                          child: Text(
+                            _localizations.needsRecalculationInfo,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: screenWidth * 0.03,
+                            ),
+                          )),
+                      Icon(Icons.warning_rounded,
+                          color: Colors.black, size: screenHeight * 0.05),
+                    ],
+                  )),
+            ),
+          ),
           instanceManager.sessionStorage.initialDayLoad
               ? TimeShower(
                   times: instanceManager.sessionStorage.loadedCalendarDay.times,
                   updateAllParents: updateParent,
                 )
               : ReloadButton(
-                  updatePage: updateParent,
-                  message: _localizations.reload)
+                  updatePage: updateParent, message: _localizations.reload)
         ],
       ),
     );
   }
-
-  
 }
-
-
 
 class TimeShower extends StatefulWidget {
   TimeShower({super.key, required this.times, required this.updateAllParents});

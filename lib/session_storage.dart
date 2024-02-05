@@ -14,7 +14,6 @@ class SessionStorage {
 
   List<List<TimeSlotModel>> weeklyGaps = [];
   List<DayModel> customDays = [];
-  List<DayModel> activeCustomDays = [];
 
   int activeOrAllExams = 0;
 
@@ -28,7 +27,7 @@ class SessionStorage {
 
   DayModel prevDay = DayModel(weekday: DateTime.now().weekday, date: DateTime.now(), id: 'Placeholder');
 
-  var savedWeekday = 0;
+  int savedWeekday = 0;
   int? schedulePresent;
   List<String> leftoverExams = <String>[];
 

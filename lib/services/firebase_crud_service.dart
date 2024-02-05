@@ -1046,7 +1046,9 @@ class FirebaseCrudService {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
-      final color = await getExamColor(timeSlot.examID);
+      Color color = await getExamColor(timeSlot.examID) ??
+          Colors.blue;
+      logger.i(timeSlot.date);
 
       final dayRef = firebaseInstance
           .collection('users')
@@ -1067,7 +1069,7 @@ class FirebaseCrudService {
         'id': '',
         'dayID': dayID,
         'date': timeSlot.date.toString(),
-        'examColor': color
+        'examColor': color.toHex()
       };
 
       final timeSlotRef =
@@ -1149,6 +1151,7 @@ class FirebaseCrudService {
 
   Future<int> deleteCustomDay(String dayID) async {
     try {
+      logger.i('deleting...');
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
@@ -1204,6 +1207,7 @@ class FirebaseCrudService {
       final List<TimeSlotModel> timeSlotsList =
           List<TimeSlotModel>.from(timeSlotsQuery.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
+        
         return TimeSlotModel(
           id: doc.id,
           weekday: data['weekday'],
@@ -1220,9 +1224,11 @@ class FirebaseCrudService {
         );
       }));
 
+      
+
       return timeSlotsList;
     } catch (e) {
-      logger.e('Error gettimg timeSlots for day: $e');
+      logger.e('Error gettimg timeSlots for custom day: $e');
       return <TimeSlotModel>[];
     }
   }
@@ -1531,6 +1537,25 @@ class FirebaseCrudService {
     } else {
       logger.w('TimeSlot $timeSlotID not found in calendar day $dayID');
       return null;
+    }
+  }
+
+  Future<bool> checkIfCustomDayExists(DateTime date) async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+
+    final userRef = firebaseInstance.collection('users').doc(uid);
+
+    final customDaysRef = userRef.collection('customDays');
+    //logger.i(date);
+
+    QuerySnapshot<Map<String, dynamic>> snapshot =
+        await customDaysRef.where('date', isEqualTo: date.toString()).get();
+
+    if (snapshot.docs.isNotEmpty) {
+      return true;
+    } else {
+      return false;
     }
   }
 }

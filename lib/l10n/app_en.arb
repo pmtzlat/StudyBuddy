@@ -92,7 +92,7 @@
     "addGap":"Add Gap",
     "errorAddingGap": "Error adding Time Gap!",
     "wrongInputGap": "The start must be before the end!",
-    "viewCustomDays": "View gaps for a specific day",
+    "editCustomDays": "Your days with a custom availability: ",
     "customDays": "Your custom days (in the future)",
     "addCustomDay": "Add Custom Schedule for Day",
     "day": "Day",
@@ -122,6 +122,9 @@
     "errorLoadingDay":"Error loading day!",
     "reload": "Reload",
     "openCalendar": "Open Calendar",
+    "availabilityForSpecificDays": "Customize specific days",
+    "nothingHereYet": "Nothing here yet!",
+    "backToWeeklyAvailability": "Back to weekly view",
     
 
 

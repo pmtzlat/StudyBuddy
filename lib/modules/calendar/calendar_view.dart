@@ -17,6 +17,7 @@ import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/utils/error_&_success_messages.dart';
 import 'package:study_buddy/utils/general_utils.dart';
+import 'package:calendar_timeline/calendar_timeline.dart';
 
 class CalendarView extends StatefulWidget {
   const CalendarView({super.key});
@@ -38,21 +39,10 @@ class _CalendarViewState extends State<CalendarView>
   Color titleGrey = Color.fromARGB(255, 92, 92, 92);
   Color backgroundColor = Color.fromARGB(255, 250, 253, 253);
   bool dayLoaded = true;
+  final PageController _pageController = PageController(initialPage: 0);
 
   bool scrollSheetIsUp = false;
-  Duration scrollUpTime = Duration(milliseconds: 400);
-
-  late CalendarDayTimes events = CalendarDayTimes(
-    key: _timesKey,
-    updateParent: () {
-      //logger.i(instanceManager.sessionStorage.needsRecalculation);
-      day = instanceManager.sessionStorage.loadedCalendarDay;
-      if (instanceManager.sessionStorage.initialDayLoad) {
-        dayLoaded = !(instanceManager.sessionStorage.loadedCalendarDay.id ==
-            'Placeholder');
-      }
-    },
-  );
+  Duration scrollUpTime = Duration(milliseconds: 700);
 
   @override
   void initState() {
@@ -294,6 +284,7 @@ class _CalendarViewState extends State<CalendarView>
   }
 
   void moveSheetUp() {
+    _pageController.jumpToPage(0);
     _animationController.forward();
     setState(() {
       scrollSheetIsUp = true;
@@ -302,6 +293,7 @@ class _CalendarViewState extends State<CalendarView>
 
   void moveSheetDown() {
     _animationController.reverse();
+
     setState(() {
       scrollSheetIsUp = false;
     });
@@ -312,6 +304,18 @@ class _CalendarViewState extends State<CalendarView>
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
+    CalendarDayTimes events = CalendarDayTimes(
+      key: _timesKey,
+      needsRecalc: needsRecalc,
+      updateParent: () {
+        //logger.i(instanceManager.sessionStorage.needsRecalculation);
+        day = instanceManager.sessionStorage.loadedCalendarDay;
+        if (instanceManager.sessionStorage.initialDayLoad) {
+          dayLoaded = !(instanceManager.sessionStorage.loadedCalendarDay.id ==
+              'Placeholder');
+        }
+      },
+    );
 
     if (autoRecalc) {
       handleScheduleCalculation(context, _localizations);
@@ -326,306 +330,247 @@ class _CalendarViewState extends State<CalendarView>
           children: [
             Container(
               //padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
+              height: screenHeight * 0.82,
               child: Column(
                 children: [
-                  Container(
-                    height: screenHeight * 0.07,
-                    width: screenWidth * 0.8,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        IconButton(
-                            onPressed: () async {
-                              if (!dayLoaded) return;
-                              setState(() {
-                                dayLoaded = false;
-                                date = instanceManager
-                                    .sessionStorage.currentDate
-                                    .subtract(Duration(days: 1));
-                              });
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5, bottom: 15),
+                    child: CalendarTimeline(
+                      initialDate: date,
+                      firstDate: DateTime.now().subtract(Duration(days: 365)),
+                      lastDate: DateTime.now().add(Duration(days: 365)),
+                      onDateSelected: (newDate) async {
+                        if (!dayLoaded) return;
+                        setState(() {
+                          dayLoaded = false;
+                          date = newDate;
+                        });
 
-                              if (!await _controller.getCalendarDay(
-                                  instanceManager.sessionStorage.currentDate
-                                      .subtract(Duration(days: 1))))
-                                showRedSnackbar(
-                                    context, _localizations.errorLoadingDay);
-                              setState(() {
-                                dayLoaded = true;
-                                date =
-                                    instanceManager.sessionStorage.currentDate;
-                              });
-                            },
-                            icon: Icon(
-                              Icons.chevron_left_rounded,
-                              color: titleGrey.withOpacity(0.3),
-                              size: screenWidth * 0.1,
-                            )),
-                        Text(
-                          DateFormat('dd MMM. yyyy', Intl.defaultLocale)
-                              .format(date),
-                          style: TextStyle(
-                              fontSize: screenWidth * 0.08, color: titleGrey),
-                        ),
-                        IconButton(
-                            onPressed: () async {
-                              if (!dayLoaded) return;
-                              setState(() {
-                                dayLoaded = false;
-                                date = instanceManager
-                                    .sessionStorage.currentDate
-                                    .add(Duration(days: 1));
-                              });
-
-                              if (!await _controller.getCalendarDay(
-                                  instanceManager.sessionStorage.currentDate
-                                      .add(Duration(days: 1))))
-                                showRedSnackbar(
-                                    context, _localizations.errorLoadingDay);
-                              setState(() {
-                                dayLoaded = true;
-                                date =
-                                    instanceManager.sessionStorage.currentDate;
-                              });
-                            },
-                            icon: Icon(Icons.chevron_right_rounded,
-                                color: titleGrey.withOpacity(0.3),
-                                size: screenWidth * 0.1)),
-                      ],
+                        if (!await _controller.getCalendarDay(newDate))
+                          showRedSnackbar(
+                              context, _localizations.errorLoadingDay);
+                        setState(() {
+                          dayLoaded = true;
+                          date = instanceManager.sessionStorage.currentDate;
+                        });
+                      },
+                      leftMargin: 20,
+                      monthColor: Colors.blueGrey,
+                      dayColor: Colors.teal[200],
+                      activeDayColor: Colors.white,
+                      activeBackgroundDayColor: Color.fromARGB(255, 33, 33, 33),
+                      dotsColor: Color.fromARGB(255, 100, 100, 100),
+                      locale: Localizations.localeOf(context).countryCode,
                     ),
                   ),
-                  AnimatedContainer(
-                    duration: recalcTime,
-                    height: needsRecalc ? screenHeight * 0.09 : 0,
-                    child: SingleChildScrollView(
-                      physics: NeverScrollableScrollPhysics(),
-                      reverse: true,
-                      child: Container(
-                          width: double.infinity,
-                          color: Colors.amber,
-                          padding: EdgeInsets.symmetric(vertical: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.warning_rounded,
-                                color: Colors.black,
-                                size: screenHeight * 0.05,
+                  // Container(
+                  //     height: screenHeight * 0.07,
+                  //     width: screenWidth * 0.8,
+                  //     child:
+
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //   mainAxisSize: MainAxisSize.max,
+                  //   children: [
+                  //     IconButton(
+                  //         onPressed: () async {
+                  //           if (!dayLoaded) return;
+                  //           setState(() {
+                  //             dayLoaded = false;
+                  //             date = instanceManager
+                  //                 .sessionStorage.currentDate
+                  //                 .subtract(Duration(days: 1));
+                  //           });
+
+                  //           if (!await _controller.getCalendarDay(
+                  //               instanceManager.sessionStorage.currentDate
+                  //                   .subtract(Duration(days: 1))))
+                  //             showRedSnackbar(
+                  //                 context, _localizations.errorLoadingDay);
+                  //           setState(() {
+                  //             dayLoaded = true;
+                  //             date =
+                  //                 instanceManager.sessionStorage.currentDate;
+                  //           });
+                  //         },
+                  //         icon: Icon(
+                  //           Icons.chevron_left_rounded,
+                  //           color: titleGrey.withOpacity(0.3),
+                  //           size: screenWidth * 0.1,
+                  //         )),
+                  //     Text(
+                  //       DateFormat('dd MMM. yyyy', Intl.defaultLocale)
+                  //           .format(date),
+                  //       style: TextStyle(
+                  //           fontSize: screenWidth * 0.08, color: titleGrey),
+                  //     ),
+                  //     IconButton(
+                  //         onPressed: () async {
+                  //           if (!dayLoaded) return;
+                  //           setState(() {
+                  //             dayLoaded = false;
+                  //             date = instanceManager
+                  //                 .sessionStorage.currentDate
+                  //                 .add(Duration(days: 1));
+                  //           });
+
+                  //           if (!await _controller.getCalendarDay(
+                  //               instanceManager.sessionStorage.currentDate
+                  //                   .add(Duration(days: 1))))
+                  //             showRedSnackbar(
+                  //                 context, _localizations.errorLoadingDay);
+                  //           setState(() {
+                  //             dayLoaded = true;
+                  //             date =
+                  //                 instanceManager.sessionStorage.currentDate;
+                  //           });
+                  //         },
+                  //         icon: Icon(Icons.chevron_right_rounded,
+                  //             color: titleGrey.withOpacity(0.3),
+                  //             size: screenWidth * 0.1)),
+                  //   ],
+                  // ),
+
+                  //),
+
+                  Expanded(
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                      child: dayLoaded
+                          ? events
+                          : Container(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: screenHeight * 0.015,
+                                  horizontal: screenHeight * 0.007),
+                              decoration: BoxDecoration(
+                                color: Color.fromARGB(255, 236, 236, 236),
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                              Container(
-                                  width: screenWidth * 0.6,
-                                  child: Text(
-                                    _localizations.needsRecalculationInfo,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: screenWidth * 0.03,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Container(
+                                      child: Container(
+                                    height: screenWidth * 0.1,
+                                    width: screenWidth * 0.1,
+                                    child: const CircularProgressIndicator(
+                                      color: Colors.black12,
                                     ),
                                   )),
-                              Icon(Icons.warning_rounded,
-                                  color: Colors.black,
-                                  size: screenHeight * 0.05),
-                            ],
-                          )),
+                                ],
+                              ),
+                            ),
                     ),
                   ),
-                  AnimatedContainer(
-                    duration: recalcTime,
-                    height: needsRecalc ? screenHeight * 0.02 : 0,
+                  SizedBox(
+                    height: screenHeight * 0.02,
                   ),
                   Container(
                     padding:
-                        EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                    child: Column(
+                        EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Center(
+                        GestureDetector(
+                          onTap: () {
+                            logger.i('tapped');
+                            handleScheduleCalculation(context, _localizations);
+                          },
                           child: AnimatedContainer(
-                              duration: recalcTime,
-                              width: double.infinity,
-                              height: needsRecalc
-                                  ? screenHeight * 0.5
-                                  : screenHeight * 0.61,
-                              child: dayLoaded
-                                  ? events
-                                  : Container(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: screenHeight * 0.015,
-                                          horizontal: screenHeight * 0.007),
-                                      decoration: BoxDecoration(
-                                        color:
-                                            Color.fromARGB(255, 236, 236, 236),
-                                        borderRadius: BorderRadius.circular(20),
+                            duration: recalcTime,
+                            width: screenWidth * 0.35,
+                            padding: EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: backgroundColor,
+                              borderRadius: BorderRadius.circular(10.0),
+                              boxShadow: needsRecalc
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.grey
+                                            .withOpacity(0.5), // Shadow color
+                                        spreadRadius: 3, // Spread of the shadow
+                                        blurRadius:
+                                            7, // Blur radius of the shadow
+                                        offset: Offset(
+                                            0, 0), // Offset of the shadow
                                       ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: [
-                                          Container(
-                                              child: Container(
-                                            height: screenWidth * 0.1,
-                                            width: screenWidth * 0.1,
-                                            child:
-                                                const CircularProgressIndicator(
-                                              color: Colors.black12,
-                                            ),
-                                          )),
-                                        ],
-                                      ),
-                                    )),
-                        ),
-                        SizedBox(
-                          height: screenHeight * 0.02,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                logger.i('tapped');
-                                handleScheduleCalculation(
-                                    context, _localizations);
-                              },
-                              child: AnimatedContainer(
-                                duration: recalcTime,
-                                width: screenWidth * 0.35,
-                                padding: EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                  color: backgroundColor,
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  boxShadow: needsRecalc
-                                      ? [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(
-                                                0.5), // Shadow color
-                                            spreadRadius:
-                                                3, // Spread of the shadow
-                                            blurRadius:
-                                                7, // Blur radius of the shadow
-                                            offset: Offset(
-                                                0, 0), // Offset of the shadow
-                                          ),
-                                        ]
-                                      : [],
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.calculate,
-                                      color: needsRecalc
-                                          ? Colors.amber
-                                          : titleGrey,
-                                      size: screenWidth * 0.12,
-                                    ),
-                                    SizedBox(
-                                      width: 5,
-                                    ),
-                                    Flexible(
-                                      child: Text(
-                                          needsRecalc
-                                              ? _localizations.updatePlan
-                                              : _localizations.calculatePlan,
-                                          maxLines: 2,
-                                          softWrap: true,
-                                          style: TextStyle(
-                                              fontWeight: needsRecalc
-                                                  ? FontWeight.bold
-                                                  : FontWeight.normal,
-                                              color: needsRecalc
-                                                  ? Colors.amber
-                                                  : titleGrey)),
-                                    )
-                                  ],
-                                ),
-                              ),
+                                    ]
+                                  : [],
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                logger.i('tapped');
-
-                                moveSheetUp();
-                                // Navigator.push(
-                                //   context,
-                                //   MaterialPageRoute(
-                                //     builder: (context) =>
-                                //         RestrictionsDetailView(),
-                                //   ),
-                                // );
-                              },
-                              child: Container(
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Container(
-                                        width: screenWidth * 0.22,
-                                        child: Text(
-                                            _localizations.changeAvailability,
-                                            maxLines: 2,
-                                            textAlign: TextAlign.end,
-                                            softWrap: true,
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.normal,
-                                                color: titleGrey)),
-                                      ),
-                                      SizedBox(
-                                        width: 5,
-                                      ),
-                                      Icon(
-                                        Icons.settings,
-                                        color: titleGrey,
-                                        size: screenWidth * 0.12,
-                                      )
-                                    ]),
-                              ),
-                            )
-                          ],
-                        ),
-                        TextButton(
-                            style: TextButton.styleFrom(
-                              padding:
-                                  EdgeInsets.all(0), // Set your desired padding
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.calculate,
+                                  color: needsRecalc ? Colors.amber : titleGrey,
+                                  size: screenWidth * 0.12,
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Flexible(
+                                  child: Text(
+                                      needsRecalc
+                                          ? _localizations.updatePlan
+                                          : _localizations.calculatePlan,
+                                      maxLines: 2,
+                                      softWrap: true,
+                                      style: TextStyle(
+                                          fontWeight: needsRecalc
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                          color: needsRecalc
+                                              ? Colors.amber
+                                              : titleGrey)),
+                                )
+                              ],
                             ),
-                            onPressed: () async {
-                              final DateTime? selectedDate =
-                                  await showDatePicker(
-                                context: context,
-                                initialDate:
-                                    instanceManager.sessionStorage.currentDate,
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime(2101),
-                                builder: (BuildContext context, Widget? child) {
-                                  return Theme(
-                                    data: ThemeData.light(),
-                                    child: child!,
-                                  );
-                                },
-                              );
-                              if (selectedDate != null) {
-                                
-                                setState(() {
-                                  date = selectedDate;
-                                  dayLoaded = false;
-                                });
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            logger.i('tapped');
 
-                                
-
-                                if (!await _controller
-                                    .getCalendarDay(selectedDate))
-                                  showRedSnackbar(
-                                      context, _localizations.errorLoadingDay);
-                                
-                              }
-                              setState(() {
-                                  dayLoaded = true;
-                                  date = instanceManager
-                                      .sessionStorage.currentDate;
-                                });
-                            },
-                            child: Text(_localizations.openCalendar,
-                                style: TextStyle(color: Colors.lightBlue))),
+                            moveSheetUp();
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) =>
+                            //         RestrictionsDetailView(),
+                            //   ),
+                            // );
+                          },
+                          child: Container(
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Container(
+                                    width: screenWidth * 0.22,
+                                    child: Text(
+                                        _localizations.changeAvailability,
+                                        maxLines: 2,
+                                        textAlign: TextAlign.end,
+                                        softWrap: true,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.normal,
+                                            color: titleGrey)),
+                                  ),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Icon(
+                                    Icons.settings,
+                                    color: titleGrey,
+                                    size: screenWidth * 0.12,
+                                  )
+                                ]),
+                          ),
+                        )
                       ],
                     ),
                   ),
+                  
                 ],
               ),
             ),
@@ -636,9 +581,7 @@ class _CalendarViewState extends State<CalendarView>
                   //color: Colors.yellow,
                   curve: Curves.decelerate,
                   duration: scrollUpTime,
-                  height: scrollSheetIsUp
-                      ? screenHeight * 0.8
-                      : 0,
+                  height: scrollSheetIsUp ? screenHeight * 0.8 : 0,
                   child: SingleChildScrollView(
                     physics: NeverScrollableScrollPhysics(),
                     child: Container(
@@ -674,11 +617,11 @@ class _CalendarViewState extends State<CalendarView>
                                 },
                               ),
                               Container(
-                                padding: EdgeInsets.only( top: screenHeight*0.04),
-                                
-                                height: screenHeight*0.73,
-                                child: RestrictionsDetailView())
-                              
+                                  padding:
+                                      EdgeInsets.only(top: screenHeight * 0.04),
+                                  height: screenHeight * 0.73,
+                                  child: RestrictionsDetailView(
+                                      pageController: _pageController))
                             ],
                           ),
                         ),

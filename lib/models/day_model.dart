@@ -6,11 +6,12 @@ import 'package:study_buddy/utils/datatype_utils.dart';
 
 class DayModel {
   final int weekday;
-  final String id;
+  String id;
   final DateTime date;
   List<TimeSlotModel> times;
   late Duration totalAvailableTime;
   bool notifiedIncompleteness;
+  Color? color;
 
   DayModel({
     required this.weekday,
@@ -18,6 +19,7 @@ class DayModel {
     required this.date,
     List<TimeSlotModel>? times,
     this.notifiedIncompleteness = false,
+    this.color,
   }) : times = times ?? [];
 
   String getString() {
@@ -36,20 +38,21 @@ class DayModel {
   }
 
   Future<void> getGaps() async {
-    if (times.isEmpty) {
-      DayModel dayInQuestion = instanceManager.sessionStorage.activeCustomDays
-          .firstWhere((obj) => obj.date == date,
-              orElse: () => DayModel(id: 'empty', weekday: 0, date: DateTime.now()));
-
-      if (dayInQuestion.id != 'empty') {
-        times = await instanceManager.firebaseCrudService
-                .getTimeSlotsForCustomDay(dayInQuestion.id) ??
-            [];
-      } else {
-        final List<TimeSlotModel> timeSlotList =
-            instanceManager.sessionStorage.weeklyGaps[date.weekday - 1];
-        final updated = timeSlotList.map((timeSlot) {
-          return TimeSlotModel(
+    if (id != 'empty') {
+      times = await instanceManager.firebaseCrudService
+          .getTimeSlotsForCustomDay(id);
+      times.sort((a, b) {
+        if (a.startTime.hour != b.startTime.hour) {
+          return b.startTime.hour - a.startTime.hour;
+        } else {
+          return b.startTime.minute - a.startTime.minute;
+        }
+      });
+    } else {
+      final List<TimeSlotModel> timeSlotList =
+          instanceManager.sessionStorage.weeklyGaps[date.weekday - 1];
+      var updated = timeSlotList.map((timeSlot) {
+        return TimeSlotModel(
             id: timeSlot.id,
             weekday: timeSlot.weekday,
             startTime: timeSlot.startTime,
@@ -58,12 +61,10 @@ class DayModel {
             unitID: timeSlot.unitID,
             examName: timeSlot.examName,
             unitName: timeSlot.unitName,
-            examColor: timeSlot.examColor
-          );
-        }).toList();
+            examColor: timeSlot.examColor);
+      }).toList();
 
-        times = updated;
-      }
+      times = updated;
     }
   }
 

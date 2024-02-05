@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 TimeOfDay dateTimeToTimeOfDay(DateTime dateTime) {
@@ -209,4 +212,40 @@ String formatDurationNoWords(Duration duration) {
       '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
   return formattedString;
+}
+
+String getStringFromTimeSlotList(List<TimeSlotModel> list){
+  String res = 'TimeSlots:';
+  for(TimeSlotModel timeSlot in list){
+    res += '\n ${timeSlot.date}, ${timeSlot.duration}, ${timeSlot.startTime}, ${timeSlot.endTime}';
+  }
+  return res;
+}
+
+bool compareTimeSlotLists(List<TimeSlotModel> list1, List<TimeSlotModel> list2){
+  try{
+    logger.f(getStringFromTimeSlotList(list1));
+    logger.f(getStringFromTimeSlotList(list2));
+
+
+  for(int i = 0; i<max(list1.length,list2.length); i++){
+    TimeSlotModel slot1 = list1[i];
+    TimeSlotModel slot2 = list2[i];
+    
+    if (
+      
+      slot1.duration == slot2.duration &&
+      slot1.startTime == slot2.startTime &&
+      slot1.endTime == slot2.endTime
+    ){}else{
+      return false;
+    }
+
+  }
+  return true;
+  }
+  catch(e){
+    return false;
+  }
+
 }
