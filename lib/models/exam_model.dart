@@ -4,6 +4,7 @@ import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ExamModel {
   String name;
@@ -91,12 +92,13 @@ class ExamModel {
     }
   }
 
-  Future<void> addUnit() async {
+  Future<void> addUnit(BuildContext context) async {
     final firebaseCrud = instanceManager.firebaseCrudService;
+    final _localizations = AppLocalizations.of(context)!;
     try {
       if (units == null) {
         final newUnit = UnitModel(
-            name: 'Unit 1',
+            name: ' ${_localizations.unit} 1',
             order: 1,
             sessionTime: revisionTime,
             completed: false);
@@ -105,7 +107,7 @@ class ExamModel {
             .timeout(timeoutDuration);
       } else {
         final newUnit = UnitModel(
-            name: 'Unit ${units!.length + 1}',
+            name: ' ${_localizations.unit} ${units!.length + 1}',
             order: units!.length + 1,
             sessionTime: revisionTime,
             completed: false);
@@ -161,14 +163,15 @@ class ExamModel {
     logger.i(res);
   }
 
-  void updateUnitOrders(GlobalKey<FormBuilderState>? formKey) {
+  void updateUnitOrders(GlobalKey<FormBuilderState>? formKey, BuildContext context) {
+    final _localizations = AppLocalizations.of(context)!;
     String res = 'New unit order: \n';
     for (int i = 0; i < units.length; i++) {
       units[i].order = i + 1;
       //logger.i('$i: Unit ${units[i].order} name: ${units[i].name}');
 
-      if (units[i].name == 'Unit ${units[i].order + 1}')
-        units[i].name = 'Unit ${units[i].order}';
+      if (units[i].name == ' ${_localizations.unit} ${units[i].order + 1}')
+        units[i].name = ' ${_localizations.unit} ${units[i].order}';
       res += '${units[i].name}: ${units[i].order}\n';
       
     }

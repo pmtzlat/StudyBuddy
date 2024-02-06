@@ -55,7 +55,7 @@ class StudyPlanner {
 
         await fillDayWithSessions(dayToAdd, generalStacks);
 
-        logger.w(dayToAdd.getString());
+        //logger.w(dayToAdd.getString());
 
         result.insert(0, dayToAdd);
         loopDate = loopDate.subtract(Duration(days: 1));
@@ -79,7 +79,7 @@ class StudyPlanner {
 
           //logger.d(dayToAdd.getString());
           await fillDayWithSessions(dayToAdd, generalStacks);
-          logger.w(dayToAdd.getString());
+          //logger.w(dayToAdd.getString());
           result.insert(0, dayToAdd);
         }
       }

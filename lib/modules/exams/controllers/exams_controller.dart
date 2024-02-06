@@ -98,7 +98,9 @@ class ExamsController {
     }
   }
 
-  int addExamScreen2(GlobalKey<FormBuilderState> unitsFormKey) {
+  int addExamScreen2(
+      GlobalKey<FormBuilderState> unitsFormKey, BuildContext context) {
+    final _localizations = AppLocalizations.of(context)!;
     //returns index of page the addExam flow goes through
     // -1 = error
     // 2 = exam priority page
@@ -107,10 +109,11 @@ class ExamsController {
       List<UnitModel> units = instanceManager.sessionStorage.examToAdd.units;
       //logger.i(unitsFormKey.currentState!.fields);
       for (UnitModel unit in units) {
-        unit.name = unitsFormKey
-            .currentState!.fields['Unit ${unit.order} name']!.value
+        unit.name = unitsFormKey.currentState!
+            .fields[' ${_localizations.unit} ${unit.order} name']!.value
             .toString();
-        if (unit.name == '') unit.name = 'Unit ${unit.order}';
+        if (unit.name == '')
+          unit.name = ' ${_localizations.unit} ${unit.order}';
         // logger.i(
         //     'Name and time for unit ${unit.order}: ${unit.name}, ${formatDuration(unit.sessionTime)}');
       }
@@ -132,13 +135,15 @@ class ExamsController {
       Duration sessionTime,
       Duration revisionTime,
       Color examColor,
-      int revisions) {
+      int revisions,
+      BuildContext context) {
     //returns index of page the addExam flow goes through
     // -1 = error
     // 1 = unit session page
     // 2 = exam priority page
     // 3 = finish successfully
     try {
+      final _localizations = AppLocalizations.of(context)!;
       final examDate = DateTime.parse(examCreationFormKey
           .currentState!.fields['examDate']!.value
           .toString());
@@ -172,7 +177,9 @@ class ExamsController {
       for (int i = 0; i < units; i++) {
         final unitNum = i + 1;
         final newUnit = UnitModel(
-            name: 'Unit $unitNum', order: unitNum, sessionTime: sessionTime);
+            name: ' ${_localizations.unit} $unitNum',
+            order: unitNum,
+            sessionTime: sessionTime);
         unitsList!.add(newUnit);
       }
 
@@ -215,7 +222,6 @@ class ExamsController {
       //     .indexOf(instanceManager.sessionStorage.examToAdd));
 
       for (ExamModel exam in exams) {
-        logger.i('A');
         ExamModel? alreadyInDB = await firebaseCrud.getExam(exam.id);
 
         if (alreadyInDB != null) {
@@ -267,8 +273,9 @@ class ExamsController {
   Future<bool?> getAllExams() async {
     try {
       final exams = await firebaseCrud.getAllExams();
-      ;
-      logger.i('Getting all exams...');
+
+      logger.i(
+          'Getting all exams... ${instanceManager.sessionStorage.gettingAllExams}');
 
       instanceManager.sessionStorage.savedExams = exams;
       instanceManager.sessionStorage.activeExams = filterActiveExams(exams);
@@ -279,7 +286,8 @@ class ExamsController {
           .sort((ExamModel a, ExamModel b) => b.examDate.compareTo(a.examDate));
 
       bool initialLoad = instanceManager.sessionStorage.initialExamsLoad;
-      if (initialLoad== false) initialLoad = true;
+      if (initialLoad == false) initialLoad = true;
+
       return true;
     } catch (e) {
       logger.e('Error getting exams: $e');
@@ -417,7 +425,7 @@ class ExamsController {
         ;
         if (res != 1) return -1;
 
-        // logger.i('Unit ${timeSlot.unitName} marked as complete');
+        // logger.i(' ${_localizations.unit} ${timeSlot.unitName} marked as complete');
         // logger.i('TimeSlot ${timeSlot.id} marked as complete');
       }
 

@@ -38,16 +38,11 @@ class DayModel {
   }
 
   Future<void> getGaps() async {
+    //await Future.delayed(Duration(seconds: 1));
     if (id != 'empty') {
       times = await instanceManager.firebaseCrudService
           .getTimeSlotsForCustomDay(id);
-      times.sort((a, b) {
-        if (a.startTime.hour != b.startTime.hour) {
-          return b.startTime.hour - a.startTime.hour;
-        } else {
-          return b.startTime.minute - a.startTime.minute;
-        }
-      });
+      sortTimeSlotList(times);
     } else {
       final List<TimeSlotModel> timeSlotList =
           instanceManager.sessionStorage.weeklyGaps[date.weekday - 1];

@@ -572,7 +572,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                     duration: Duration.zero,
                   );
 
-                  widget.exam.updateUnitOrders(editExamFormKey);
+                  widget.exam.updateUnitOrders(editExamFormKey, context);
 
                   setState(() {});
                 }
@@ -602,14 +602,13 @@ class _ExamDetailViewState extends State<ExamDetailView> {
       width: screenWidth * 0.9,
       child: Card(
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: AnimatedContainer(
           duration: editSwitchTime,
           height: screenHeight * 0.85,
           width: screenWidth * 0.9,
           padding: EdgeInsets.all(screenWidth * 0.01),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(25),
             gradient: LinearGradient(
                 end: Alignment.bottomLeft,
                 begin: Alignment.topRight,
@@ -990,7 +989,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                         onPressed: () {
                                           addUnit(UnitModel(
                                               name:
-                                                  'Unit ${widget.exam.units.length + 1}',
+                                                  ' ${_localizations.unit} ${widget.exam.units.length + 1}',
                                               order:
                                                   widget.exam.units.length + 1,
                                               id: generateRandomString()));

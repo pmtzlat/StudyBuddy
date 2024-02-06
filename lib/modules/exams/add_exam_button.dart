@@ -74,7 +74,7 @@ class _AddButtonState extends State<AddButton> {
                             widget.sessionTime!,
                             widget.revisionTime!,
                             widget.examColor!,
-                            widget.revisions!)) {
+                            widget.revisions!, context)) {
                           case (1):
                             await moveToPage2();
 
@@ -111,7 +111,7 @@ class _AddButtonState extends State<AddButton> {
                         widget.lockClose!(true);
 
                         switch (await widget.controller
-                            .addExamScreen2(widget.formKey!)) {
+                            .addExamScreen2(widget.formKey!, context)) {
                           case (2):
                             await moveToPage3();
 

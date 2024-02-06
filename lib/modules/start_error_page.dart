@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/common_widgets/reload_button.dart';
+import 'package:study_buddy/common_widgets/scaffold.dart';
 import 'package:study_buddy/main.dart';
+import 'package:study_buddy/modules/calendar/calendar_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/error_&_success_messages.dart';
 
@@ -45,6 +47,8 @@ class _StartErrorPageState extends State<StartErrorPage> {
                 await Future.delayed(const Duration(seconds: 3));
                 if(await handleAppStart()){
                   logger.i('Successful start!');
+                  Navigator.of(context)
+                    .pushReplacement(fadePageRouteBuilder(CalendarView()));
                 }else{
                   throw Exception;
                 }

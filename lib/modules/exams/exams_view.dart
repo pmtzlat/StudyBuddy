@@ -48,12 +48,7 @@ class _ExamsViewState extends State<ExamsView> {
       activeExams = instanceManager.sessionStorage.activeExams;
       pastExams = instanceManager.sessionStorage.pastExams;
     });
-    
   }
-
-  
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +56,6 @@ class _ExamsViewState extends State<ExamsView> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    
-    
 
     Widget page1 = Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -112,7 +105,7 @@ class _ExamsViewState extends State<ExamsView> {
                               onPressed: () {
                                 logger.i('Cancel clicked!');
                                 logger.i(
-                                              'reorderExams after cancel clicked: ${getExamsListString(reorderExams)}');
+                                    'reorderExams after cancel clicked: ${getExamsListString(reorderExams)}');
                                 setState(() {
                                   prioritizing = false;
                                 });
@@ -389,7 +382,14 @@ class _ExamsViewState extends State<ExamsView> {
                     index: index,
                     context: context,
                   );
-                  await _controller.getAllExams();
+
+                  if (!instanceManager.sessionStorage.gettingAllExams) {
+                    instanceManager.sessionStorage.gettingAllExams = true;
+                    await Future.delayed(const Duration(seconds: 13));
+                    await _controller.getAllExams();
+                    instanceManager.sessionStorage.gettingAllExams = false;
+                  }
+
                   setState(() {
                     activeExams = instanceManager.sessionStorage.activeExams;
                   });
@@ -527,10 +527,15 @@ class _ExamsViewState extends State<ExamsView> {
                       index: index,
                       context: context,
                     );
-                    await _controller.getAllExams();
-                  setState(() {
-                    pastExams = instanceManager.sessionStorage.pastExams;
-                  });
+                    if (!instanceManager.sessionStorage.gettingAllExams) {
+                      instanceManager.sessionStorage.gettingAllExams = true;
+                      await Future.delayed(const Duration(seconds: 13));
+                      await _controller.getAllExams();
+                      instanceManager.sessionStorage.gettingAllExams = false;
+                    }
+                    setState(() {
+                      pastExams = instanceManager.sessionStorage.pastExams;
+                    });
                   },
                   child: ExamCard(
                     exam: examList![index],

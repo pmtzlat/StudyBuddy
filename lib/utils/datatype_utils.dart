@@ -227,6 +227,9 @@ bool compareTimeSlotLists(List<TimeSlotModel> list1, List<TimeSlotModel> list2){
     logger.f(getStringFromTimeSlotList(list1));
     logger.f(getStringFromTimeSlotList(list2));
 
+    sortTimeSlotList(list1);
+    sortTimeSlotList(list2);
+
 
   for(int i = 0; i<max(list1.length,list2.length); i++){
     TimeSlotModel slot1 = list1[i];
@@ -248,4 +251,15 @@ bool compareTimeSlotLists(List<TimeSlotModel> list1, List<TimeSlotModel> list2){
     return false;
   }
 
+}
+
+
+void sortTimeSlotList(List<TimeSlotModel> times){
+  times.sort((a, b) {
+        if (a.startTime.hour != b.startTime.hour) {
+          return b.startTime.hour - a.startTime.hour;
+        } else {
+          return b.startTime.minute - a.startTime.minute;
+        }
+      });
 }

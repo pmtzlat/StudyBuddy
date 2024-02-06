@@ -477,7 +477,7 @@ class Page2State extends State<Page2> {
                                                   textCapitalization:
                                                       TextCapitalization.words,
                                                   name:
-                                                      'Unit ${unit.order} name',
+                                                      ' ${_localizations.unit} ${unit.order} name',
                                                   initialValue: '${unit.name}',
                                                   style: TextStyle(
                                                       color: Colors.white),

@@ -9,6 +9,7 @@ import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/utils/general_utils.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/exam_model.dart';
 import '../models/user_model.dart';
@@ -569,9 +570,10 @@ class FirebaseCrudService {
     }
   }
 
-  Future<bool> deleteUnit({required UnitModel unit, required examID}) async {
+  Future<bool> deleteUnit({required UnitModel unit, required examID, required BuildContext context}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
+    final _localizations = AppLocalizations.of(context)!;
 
     try {
       if (uid == null) {
@@ -602,8 +604,8 @@ class FirebaseCrudService {
         final data = doc.data() as Map<String, dynamic>;
         final currentOrder = data['order'] as int;
         String newName = '';
-        if (data['name'] == 'Unit $currentOrder') {
-          newName = 'Unit ${currentOrder - 1}';
+        if (data['name'] == ' ${_localizations.unit} $currentOrder') {
+          newName = ' ${_localizations.unit} ${currentOrder - 1}';
         } else {
           newName = data['name'];
         }

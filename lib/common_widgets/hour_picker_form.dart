@@ -234,7 +234,14 @@ class _DayFormState extends State<DayForm> {
                           showRedSnackbar(
                               context, _localizations.errorDeletingGap);
                         }
-                        await _controller.getGaps();
+                        if(!instanceManager.sessionStorage.gettingAllGaps){
+                          instanceManager.sessionStorage.gettingAllGaps = true;
+                          await Future.delayed(Duration(seconds:10));
+                          await _controller.getGaps();
+                          instanceManager.sessionStorage.gettingAllGaps = false;
+
+                        }
+                        
                         setState(() {
                           timeSlotList = timeSlotList = instanceManager
                               .sessionStorage.weeklyGaps[widget.dayNum];

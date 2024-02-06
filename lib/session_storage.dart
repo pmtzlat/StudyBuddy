@@ -17,6 +17,11 @@ class SessionStorage {
 
   int activeOrAllExams = 0;
 
+  bool gettingAllExams = false;
+  bool gettingAllGaps = false;
+  bool gettingAllCustomDays = false;
+  
+
   DayModel loadedCalendarDay = 
     DayModel(weekday: DateTime.now().weekday, date: DateTime.now(), id: 'Placeholder');
 
@@ -46,4 +51,5 @@ class SessionStorage {
 
   bool connected = true;
   bool synced = true;
+
 }

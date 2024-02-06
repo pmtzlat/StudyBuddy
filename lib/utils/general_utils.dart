@@ -5,6 +5,7 @@ import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
+import 'package:study_buddy/utils/datatype_utils.dart';
 
 const colorOptions = [
   
@@ -98,6 +99,11 @@ void closeKeyboard(BuildContext context) {
 bool containsDayWithID(List<DayModel> days, String targetId) {
   // Using any() method to check if any element satisfies the condition
   return days.any((day) => day.id == targetId);
+}
+
+bool containsDayWithDate(List<DayModel> days, DateTime targetDate) {
+  // Using any() method to check if any element satisfies the condition
+  return days.any((day) => day.date == stripTime(targetDate));
 }
 
 class CustomShapeClipper extends CustomClipper<Path> {

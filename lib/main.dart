@@ -43,6 +43,7 @@ void main() async {
 }
 
 Future<bool> handleAppStart() async {
+  connectivityResult = await (Connectivity().checkConnectivity()); //this line
   if (connectivityResult == ConnectivityResult.wifi ||
       connectivityResult == ConnectivityResult.ethernet ||
       connectivityResult == ConnectivityResult.mobile) {
@@ -153,3 +154,5 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
     );
   }
 }
+
+
