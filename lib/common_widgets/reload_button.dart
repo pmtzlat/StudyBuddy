@@ -4,11 +4,15 @@ import 'package:study_buddy/main.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 class ReloadButton extends StatefulWidget {
-  Function updatePage;
-  String message;
+  Function buttonAction;
+  Function updateParent;
+  String buttonMessage;
+  String bodyMessage;
   ReloadButton({super.key, 
-  required this.updatePage,
-  required this.message});
+  required this.updateParent,
+  required this.buttonMessage,
+  required this.bodyMessage,
+  required this.buttonAction});
 
   @override
   State<ReloadButton> createState() => _ReloadButtonState();
@@ -26,7 +30,9 @@ class _ReloadButtonState extends State<ReloadButton> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          _localizations.errorLoadingDay,
+          
+          widget.bodyMessage,
+          textAlign: TextAlign.center,
           style: TextStyle(fontSize: screenWidth * 0.05, color: Colors.black54),
         ),
         Container(
@@ -36,13 +42,13 @@ class _ReloadButtonState extends State<ReloadButton> {
               setState(() {
                 loading = true;
               });
-              await instanceManager.calendarController
-                  .getCalendarDay(DateTime.now());
+              
+              await widget.buttonAction();
               
               setState(() {
                 loading = false;
               });
-              widget.updatePage();
+              widget.updateParent();
             },
             icon: !loading
                 ? Icon(Icons.replay_outlined,
@@ -51,7 +57,7 @@ class _ReloadButtonState extends State<ReloadButton> {
                     color: Colors.black54,
                   ),
             label: !loading
-                ? Text(widget.message,
+                ? Text(widget.buttonMessage,
                     style: TextStyle(
                       color: Colors.black54,
                       fontSize: screenWidth * 0.05,

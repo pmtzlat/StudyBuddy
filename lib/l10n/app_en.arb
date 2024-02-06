@@ -157,6 +157,8 @@
     "logOut": "Log Out",
 
     "desyncMsg":"Please use the real, correct date in your device for the App to work properly!",
-    "warning":"Warning"
+    "warning":"Warning",
+    "noConnectionMsg":"No internet connection detected.\n Please restart the application with an internet connection.",
+    "errorLoading": "Error loading!"
     
 }

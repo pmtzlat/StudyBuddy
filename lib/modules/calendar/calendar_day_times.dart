@@ -57,7 +57,9 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
       padding: EdgeInsets.symmetric(
           vertical: screenHeight * 0.015, horizontal: screenHeight * 0.007),
       decoration: BoxDecoration(
-        color: widget.needsRecalc ? Colors.amber : Color.fromARGB(255, 236, 236, 236),
+        color: widget.needsRecalc
+            ? Colors.amber
+            : Color.fromARGB(255, 236, 236, 236),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -103,7 +105,13 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
                   updateAllParents: updateParent,
                 )
               : ReloadButton(
-                  updatePage: updateParent, message: _localizations.reload)
+                  updateParent: updateParent,
+                  buttonAction: () async {
+                    await instanceManager.calendarController
+                        .getCalendarDay(DateTime.now());
+                  },
+                  bodyMessage: _localizations.errorLoadingDay,
+                  buttonMessage: _localizations.reload)
         ],
       ),
     );

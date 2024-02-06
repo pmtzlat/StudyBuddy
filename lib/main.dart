@@ -8,7 +8,9 @@ import 'package:ntp/ntp.dart';
 import 'package:study_buddy/instance_manager.dart';
 import 'package:study_buddy/modules/calendar/calendar_view.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:study_buddy/modules/desync_page.dart';
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:study_buddy/modules/start_error_page.dart';
 import 'package:study_buddy/modules/sign_in/sign_in_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
@@ -19,6 +21,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 var instanceManager;
 var now;
 late bool synced;
+late bool connected;
 late ConnectivityResult connectivityResult;
 Duration timeoutDuration = Duration(seconds: 10);
 
@@ -31,30 +34,48 @@ void main() async {
   FirebaseDatabase.instance.setPersistenceEnabled(true);
 
   instanceManager = InstanceManager();
-  synced = true;
+  synced = false;
 
   await instanceManager.startDependantInstances();
+  await handleAppStart();
+
+  runApp(StudyBuddyApp());
+}
+
+Future<bool> handleAppStart() async {
   if (connectivityResult == ConnectivityResult.wifi ||
       connectivityResult == ConnectivityResult.ethernet ||
       connectivityResult == ConnectivityResult.mobile) {
+    connected = true;
     now = await NTP.now();
     synced = await instanceManager.localStorageCustomOperations.isCorrectDate();
+  
+    if (!synced) return false;
 
-    if (synced) {
+
       instanceManager.localStorageCustomOperations.updateDateHandling();
       await instanceManager.calendarController.getIncompletePreviousDays(
           DateTime.parse(instanceManager.localStorage.getString('oldDate')));
-    }
+    
+    
+  
+    instanceManager.sessionStorage.initialExamsLoad =
+        await instanceManager.examController.getAllExams();
+    instanceManager.sessionStorage.initialGapsLoad =
+        await instanceManager.calendarController.getGaps();
+    instanceManager.sessionStorage.initialCustomDaysLoad =
+        await instanceManager.calendarController.getCustomDays();
+    instanceManager.sessionStorage.initialDayLoad =
+        await instanceManager.calendarController.getCalendarDay(now);
+    instanceManager.sessionStorage.savedWeekday =
+        instanceManager.sessionStorage.currentDate.weekday - 1;
 
-    instanceManager.sessionStorage.initialExamsLoad = await instanceManager.examController.getAllExams();
-    instanceManager.sessionStorage.initialGapsLoad = await instanceManager.calendarController.getGaps();
-    instanceManager.sessionStorage.initialCustomDaysLoad = await instanceManager.calendarController.getCustomDays();
-    instanceManager.sessionStorage.initialDayLoad = await instanceManager.calendarController.getCalendarDay(now);
-    instanceManager.sessionStorage.savedWeekday = instanceManager.sessionStorage.currentDate.weekday-1;
-
+    return true;
+  } else {
+    logger.i('Not connected!');
+    connected = false;
+    return false;
   }
-
-  runApp(StudyBuddyApp());
 }
 
 class StudyBuddyApp extends StatefulWidget {
@@ -77,13 +98,14 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    logger.i('uid found on boot: $uid');
-    logger.i('Got all exams! ${instanceManager.sessionStorage.savedExams}');
+    
+    
 
     if (!synced) {
+      logger.i('Showing not connected');
       return MaterialApp(
         title: 'StudyBuddy',
-        home: DesyncView(),
+        home: StartErrorPage(errorMsg: connected ? 'desyncMsg' : 'noConnectionMsg'),
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromARGB(255, 46, 46, 46)),
@@ -98,6 +120,9 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
           FormBuilderLocalizations.delegate,
         ],
       );
+
+
+    
     }
 
     return GestureDetector(

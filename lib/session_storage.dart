@@ -41,4 +41,9 @@ class SessionStorage {
 
   bool needsRecalculation = false;
   Map<String, List<TimeSlotModel>> incompletePreviousDays = {};
+
+
+
+  bool connected = true;
+  bool synced = true;
 }
