@@ -4,7 +4,7 @@ import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
-class SchedulerStack {
+class SchedulerStackModel {
   late List<UnitModel> units;
   late List<UnitModel> revisions;
   int? daysUntilExam;
@@ -12,7 +12,7 @@ class SchedulerStack {
   ExamModel exam;
   int unitsInDay = 0;
 
-  SchedulerStack({required this.exam});
+  SchedulerStackModel({required this.exam});
 
   Future<void> initializeUnitsAndRevision(ExamModel exam) async {
     try {
@@ -54,6 +54,19 @@ class SchedulerStack {
     }
     logger.f(
         'Stack ${exam.name} \n Session Time: ${formatDuration(exam.revisionTime)} \n Exam date: ${exam.examDate} \n Order matters: ${exam.orderMatters} \n Weight: ${exam.weight}\n $unitString');
+  }
+
+  String getString() {
+    String unitString = 'Units:';
+    for (UnitModel unit in units) {
+      unitString += '\n ${unit.name}, hours: ${formatDuration(unit.sessionTime)}';
+    }
+    unitString += '\n Revisons: ';
+    for (UnitModel revision in revisions) {
+      unitString += '\n ${revision.name}, hours: ${formatDuration(revision.sessionTime)}';
+    }
+    return 
+        'Stack ${exam.name} \n Session Time: ${formatDuration(exam.revisionTime)} \n Exam date: ${exam.examDate} \n Order matters: ${exam.orderMatters} \n Weight: ${exam.weight}\n $unitString';
   }
 
   int getDaysUntilExam(DateTime date) {

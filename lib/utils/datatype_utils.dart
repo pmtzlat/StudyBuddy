@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:study_buddy/models/scheduler_stack_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
@@ -170,12 +172,13 @@ String getUnitOrRevision(String unitName) {
   }
 }
 
-String formatDateTime(DateTime dateTime) {
-  String day = dateTime.day.toString().padLeft(2, '0');
-  String month = dateTime.month.toString().padLeft(2, '0');
-  String year = dateTime.year.toString();
+String formatDateTime(BuildContext context, DateTime dateTime ) {
+  // Retrieve the current locale from the context
+  Locale currentLocale = Localizations.localeOf(context);
 
-  return '$day/$month/$year';
+  // Format the DateTime using the appropriate locale
+  DateFormat dateFormat = DateFormat.yMMMMd(currentLocale.toString());
+  return dateFormat.format(dateTime);
 }
 
 Color stringToColor(String string){
@@ -262,4 +265,14 @@ void sortTimeSlotList(List<TimeSlotModel> times){
           return b.startTime.minute - a.startTime.minute;
         }
       });
+}
+
+String getStringFromStackList(List<SchedulerStackModel> list){
+  String res = '';
+  for(SchedulerStackModel stack in list){
+    res += stack.getString();
+    res+= '\n\n';
+  }
+  return res;
+  
 }

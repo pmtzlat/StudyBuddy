@@ -16,11 +16,21 @@ class StartErrorPage extends StatefulWidget {
 }
 
 class _StartErrorPageState extends State<StartErrorPage> {
+
+  
   
   @override
   Widget build(BuildContext context) {
     final _localizations = AppLocalizations.of(context)!;
     var screenWidth = MediaQuery.of(context).size.width;
+    String displayedMessage = '';
+    
+    switch(widget.errorMsg){
+      case('Sync Error'): displayedMessage = _localizations.desyncMsg;
+      case('Connection Error'): displayedMessage = _localizations.noConnectionMsg;
+      case('Start Error'): displayedMessage = _localizations.errorLoading;
+
+    }
     return Scaffold(
       body: Center(
           child: Column(
@@ -39,6 +49,7 @@ class _StartErrorPageState extends State<StartErrorPage> {
           Padding(
             padding: const EdgeInsets.all(30.0),
             child: ReloadButton(
+              buttonMessage: _localizations.reload,
               updateParent: ()async{
 
             }, 
@@ -60,9 +71,7 @@ class _StartErrorPageState extends State<StartErrorPage> {
 
             },
             
-            bodyMessage: widget.errorMsg == 'desyncMsg'
-                      ? _localizations.desyncMsg
-                      : _localizations.noConnectionMsg, buttonMessage: _localizations.reload)
+            bodyMessage: displayedMessage)
           )
         ],
       )),

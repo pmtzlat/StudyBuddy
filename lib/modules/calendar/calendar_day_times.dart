@@ -1,22 +1,12 @@
-import 'dart:async';
 
-import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:intl/intl.dart';
-import 'package:screen_state/screen_state.dart';
-import 'package:study_buddy/common_widgets/pause_play_button.dart';
 import 'package:study_buddy/common_widgets/reload_button.dart';
 import 'package:study_buddy/common_widgets/time_slot_card.dart';
 import 'package:study_buddy/main.dart';
-import 'package:study_buddy/models/day_model.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
-import 'package:study_buddy/modules/loader/loader.dart';
 import 'package:study_buddy/services/logging_service.dart';
-import 'package:study_buddy/utils/datatype_utils.dart';
-import 'package:study_buddy/utils/error_&_success_messages.dart';
-import 'package:study_buddy/common_widgets/timer_widget.dart';
 
 class CalendarDayTimes extends StatefulWidget {
   Function updateParent;
@@ -57,9 +47,14 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
       padding: EdgeInsets.symmetric(
           vertical: screenHeight * 0.015, horizontal: screenHeight * 0.007),
       decoration: BoxDecoration(
-        color: widget.needsRecalc
-            ? Colors.amber
-            : Color.fromARGB(255, 236, 236, 236),
+        gradient: LinearGradient(
+                end: Alignment.bottomCenter,
+                begin: Alignment.topCenter,
+                stops: const [0.2, 0.3],
+                colors: widget.needsRecalc
+                    ? [Colors.amber, Color.fromARGB(255, 236, 236, 236)]
+                    : [Color.fromARGB(255, 236, 236, 236), Color.fromARGB(255, 236, 236, 236)]),
+        
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -101,7 +96,7 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
           ),
           instanceManager.sessionStorage.initialDayLoad
               ? TimeShower(
-                  times: instanceManager.sessionStorage.loadedCalendarDay.times,
+                  times: instanceManager.sessionStorage.loadedCalendarDay.timeSlots,
                   updateAllParents: updateParent,
                 )
               : ReloadButton(

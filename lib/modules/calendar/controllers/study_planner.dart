@@ -9,10 +9,17 @@ import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'dart:math';
 
+///Debugging color code:
+/// .f - stacks
+/// .w - days
+/// .i - information
+/// .d - selected unit
+///
+
 class StudyPlanner {
   final firebaseCrud;
   final uid;
-  late List<SchedulerStack> generalStacks;
+  late List<SchedulerStackModel> generalStacks;
 
   StudyPlanner({
     required this.firebaseCrud,
@@ -23,63 +30,57 @@ class StudyPlanner {
     // 1 = Success
     // 0 = No time
     // -1 = Error
+
     try {
-      
       generalStacks = await generateStacks();
-      for (SchedulerStack stack in generalStacks) {
-        stack.print();
-      }
+      logger.f('Stacks generated! \n${getStringFromStackList(generalStacks)}');
 
       List<DayModel> result = [];
 
-      DateTime loopDate =
+      DateTime startDate =
           getLastDayOfStudy(instanceManager.sessionStorage.activeExams)!
               .subtract(Duration(days: 1));
 
-      if (loopDate == null) {
+      if (startDate == null) {
+        logger.i('startDate = null');
         return 1;
       }
 
+      logger.i('Start date: ${startDate}');
+
       DayModel dayToAdd = DayModel(
-          id: DateTime(
-                  loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0)
-              .toString(),
-          weekday: loopDate.weekday,
+          id: 'empty',
+          weekday: startDate.weekday,
           date: DateTime(
-              loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0));
+              startDate.year, startDate.month, startDate.day, 0, 0, 0, 0, 0));
+
       while (
           generalStacks.length != 0 && dayToAdd!.date.isAfter(DateTime.now())) {
-        //logger.f(dayToAdd.getString());
         await dayToAdd.getGaps();
         dayToAdd.getTotalAvailableTime();
 
         await fillDayWithSessions(dayToAdd, generalStacks);
-
-        //logger.w(dayToAdd.getString());
+        logger.w('Full day to add: \n\n ${dayToAdd.getString()}');
 
         result.insert(0, dayToAdd);
-        loopDate = loopDate.subtract(Duration(days: 1));
+        startDate = startDate.subtract(Duration(days: 1));
         dayToAdd = DayModel(
-            id: DateTime(
-                    loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0)
-                .toString(),
-            weekday: loopDate.weekday,
+            id: 'empty',
+            weekday: startDate.weekday,
             date: DateTime(
-                loopDate.year, loopDate.month, loopDate.day, 0, 0, 0, 0, 0));
+                startDate.year, startDate.month, startDate.day, 0, 0, 0, 0, 0));
       }
 
       final now = DateTime.now();
 
       if (areDatesEqual(dayToAdd.date, now) && generalStacks.length != 0) {
-        final newStart = now.add(Duration(hours: 1));
+        final newStart = now.add(Duration(minutes: 15));
         if (!isSecondDayNext(now, newStart)) {
           await dayToAdd.getGaps();
           dayToAdd.headStart(dateTimeToTimeOfDay(newStart));
           dayToAdd.getTotalAvailableTime();
 
-          //logger.d(dayToAdd.getString());
           await fillDayWithSessions(dayToAdd, generalStacks);
-          //logger.w(dayToAdd.getString());
           result.insert(0, dayToAdd);
         }
       }
@@ -90,23 +91,27 @@ class StudyPlanner {
         return 0;
       }
 
-      if (await firebaseCrud.deleteNotPastCalendarDays().timeout(timeoutDuration) == -1) {
+      if (await firebaseCrud
+              .deleteNotPastCalendarDays()
+              .timeout(timeoutDuration) ==
+          -1) {
         return -1;
       }
-      //logger.i('Success deleting calendar Days!');
 
       for (var day in result) {
-        var dayID = await firebaseCrud.addCalendarDay(day).timeout(timeoutDuration);
+        var dayID =
+            await firebaseCrud.addCalendarDay(day).timeout(timeoutDuration);
         if (dayID == null) {
           return -1;
         }
 
         var res = 1;
-        for (var timeSlot in day.times) {
+        for (var timeSlot in day.timeSlots) {
           if (timeSlot.examID != 'free') {
-            
             timeSlot.date = day.date;
-            res = await firebaseCrud.addTimeSlotToCalendarDay(dayID, timeSlot).timeout(timeoutDuration);
+            res = await firebaseCrud
+                .addTimeSlotToCalendarDay(dayID, timeSlot)
+                .timeout(timeoutDuration);
 
             if (res == -1) return -1;
           }
@@ -120,91 +125,76 @@ class StudyPlanner {
     }
   }
 
-  void saveLeftoverExams(List<SchedulerStack> stacks) {
+  void saveLeftoverExams(List<SchedulerStackModel> stacks) {
     var leftovers = instanceManager.sessionStorage.leftoverExams;
     for (var exam in stacks) {
       String toAdd = '';
-      toAdd += ' ${exam.exam.name}: \n';
+      toAdd += '${exam.exam.name}/';
       if (exam.units != null) {
         for (var unit in exam.units!) {
-          toAdd += '${unit.name}, ';
+          toAdd += '${unit.name}/';
         }
       }
       if (exam.revisions != null) {
         for (var revision in exam.revisions!) {
-          toAdd += '${revision.name}, ';
+          toAdd += '${revision.name}/';
         }
       }
-      //logger.d(toAdd);
       leftovers.add(toAdd);
     }
-
   }
 
-  Future<void> fillDayWithSessions(DayModel day, List<SchedulerStack> stacks) async {
+  Future<void> fillDayWithSessions(
+      DayModel day, List<SchedulerStackModel> stacks) async {
     try {
-      //logger.d('fillDayWithSessions');
-
-      //logger.w(day.getString());
-      //logger.w(day.totalAvailableTime);
-
-      List<SchedulerStack> filteredStacks = getFilteredStacks(day, stacks);
-      if (filteredStacks.length == 0) {
-        //logger.w('empty filtered stacks');
+      if (stacks.length == 0) {
         return;
       }
 
-      day.times.sort((a, b) {
+      day.timeSlots.sort((a, b) {
         final aEndMinutes = a.endTime.hour * 60 + a.endTime.minute;
         final bEndMinutes = b.endTime.hour * 60 + b.endTime.minute;
         return aEndMinutes - bEndMinutes;
       });
 
+      logger.w('Sorted day times: ${day.getString()}');
+
       late TimeSlotModel gap;
       var newTimes = <TimeSlotModel>[];
 
-      if (filteredStacks.length == 0) {
+      if (stacks.length == 0) {
         return;
       }
 
-      calculateWeights(filteredStacks, day);
+      calculateWeights(stacks, day);
 
       while (day.totalAvailableTime != Duration.zero) {
-        gap = day.times.last;
-        //logger.t('chosen gap: ${gap.startTime} - ${gap.endTime}');
+        gap = day.timeSlots.last;
+        logger.t(
+            'Gap to fill: ${timeOfDayToStr(gap.startTime)} - ${timeOfDayToStr(gap.endTime)}');
 
-        newTimes.add(getTimeSlotWithUnit(gap, filteredStacks, day));
+        newTimes.add(getTimeSlotWithUnit(gap, stacks, day));
+        logger.f('New stacks: \n ${getStringFromStackList(stacks)}');
 
         day.getTotalAvailableTime();
-        //logger.w(day.totalAvailableTime);
-
-        ;
+        logger.w(
+            'Day: ${day.getString()}\n\nNew total available time: ${day.totalAvailableTime}');
       }
 
-      day.times = newTimes;
+      day.timeSlots = newTimes;
     } catch (e) {
       logger.e('Error filling day with sessions: $e');
     }
   }
 
-  List<SchedulerStack> getFilteredStacks(DayModel day, List<SchedulerStack> stacks) {
-    //logger.d('GetfilteredStacks');
-    return stacks
-        .where((schedulerStack) =>
-            schedulerStack.exam.examDate.isAfter(day.date))
-        .toList();
-  }
-
-  TimeSlotModel getTimeSlotWithUnit(
-      TimeSlotModel gap, List<SchedulerStack> filteredStacks, DayModel day) {
-    //printFilteredStacks(filteredStacks, day, 'getTimeSlotWithUnit');
+  TimeSlotModel getTimeSlotWithUnit(TimeSlotModel gap,
+      List<SchedulerStackModel> filteredStacks, DayModel day) {
     try {
-      //logger.d('getTimeSlotWithUnit');
       Map<String, dynamic>? selectedUnit =
           selectExamAndUnit(filteredStacks, gap, day.totalAvailableTime);
 
       if (selectedUnit == null) {
-        day.times.remove(gap);
+        day.timeSlots.remove(gap);
         return gap;
       }
 
@@ -222,28 +212,22 @@ class StudyPlanner {
 
       gap.endTime = startTime;
       gap.calculateDuration(gap.startTime, gap.endTime);
-      //logger.w('Trigger deletion? ${gap.startTime} =? ${gap.endTime}');
+
       if (gap.startTime == gap.endTime) {
-        //logger.w('Trigger deletion: ${gap.startTime} =? ${gap.endTime}');
-        day.times.remove(gap);
-        //logger.w(day.times);
+        day.timeSlots.remove(gap);
       }
 
-      //logger.i('Selected unit: ${result.examName}: ${result.startTime} - ${result.endTime}');
-      //logger.f(
-      //   'Result: ${result.examID} - ${result.examName}, ${result.startTime} - ${result.endTime}');
       return result;
     } catch (e) {
-      logger.e('Error getting time slot with unit: $e');
-      day.times.remove(gap);
+      logger.e('Error getting timeslot with unit: $e');
+      day.timeSlots.remove(gap);
       return gap;
     }
   }
 
-  void calculateWeights(List<SchedulerStack> stacks, DayModel day) {
-    //logger.d('calculateWeights');
+  void calculateWeights(List<SchedulerStackModel> stacks, DayModel day) {
     try {
-      for (SchedulerStack stack in stacks) {
+      for (SchedulerStackModel stack in stacks) {
         final daysToExam = _getDaysToExam(day, stack);
         if (daysToExam > 0) {
           stack.weight = (stack.exam.weight + (1 / daysToExam));
@@ -254,13 +238,14 @@ class StudyPlanner {
         ;
       }
       stacks.sort((a, b) => b.weight!.compareTo(a.weight!));
+      logger
+          .f('Stacks sorted by weight: \n\n${getStringFromStackList(stacks)}');
     } catch (e) {
       logger.e('Error calculating weights: $e');
     }
   }
 
-  int _getDaysToExam(DayModel day, SchedulerStack stack) {
-    //logger.d('getDaysToExam');
+  int _getDaysToExam(DayModel day, SchedulerStackModel stack) {
     try {
       Duration difference = stack.exam.examDate.difference(day.date);
       int daysDifference = difference.inDays;
@@ -272,14 +257,12 @@ class StudyPlanner {
     }
   }
 
-  Map<String, dynamic>? selectExamAndUnit(
-      List<SchedulerStack> stacks, TimeSlotModel gap, Duration availableTime) {
-    //logger.d('getUnitToFillGap');
+  Map<String, dynamic>? selectExamAndUnit(List<SchedulerStackModel> stacks,
+      TimeSlotModel gap, Duration availableTime) {
     stacks.sort((a, b) => b.weight!.compareTo(a.weight!));
     late Map<String, dynamic>? selectedUnit;
 
     for (int i = 0; i < stacks.length; i++) {
-      //logger.w('Weight of ${stacks[i].exam.name}: ${stacks[i].weight}');
       if (i != stacks.length - 1 &&
           (stacks[i].weight == stacks[i + 1].weight &&
               stacks[i].unitsInDay > stacks[i + 1].unitsInDay)) continue;
@@ -287,10 +270,11 @@ class StudyPlanner {
 
       if (selectedUnit != null) {
         if (stacks[i].units.isEmpty && stacks[i].revisions.isEmpty) {
-          //logger.i('Removed stack: ${stacks[i].exam.name}');
+          
           generalStacks
               .removeWhere((stack) => stack.exam.id == stacks[i].exam.id);
-          stacks.removeAt(i);
+          logger.e(generalStacks == stacks);
+          stacks.removeAt(i); //THIS LINE GIVES PROBLEMS WHEN UNITS ARE SELECTED - stacks and generalstacks are the same
         }
         return selectedUnit;
       }
@@ -299,13 +283,10 @@ class StudyPlanner {
   }
 
   Map<String, dynamic>? selectUnit(
-      SchedulerStack stack, TimeSlotModel gap, Duration availableTime) {
-    //logger.d('selectUnitInStack');
-    //logger.d(availableTime);
+      SchedulerStackModel stack, TimeSlotModel gap, Duration availableTime) {
     if (stack.revisions.length == 0) {
       for (int i = stack.units.length - 1; i >= 0; i--) {
         final candidateUnit = stack.units[i];
-        //logger.i('Candidate unit: ${candidateUnit.name}: ${candidateUnit.hours/ 3600} hours');
         if (candidateUnit.sessionTime == Duration.zero ||
             candidateUnit.completed == true) {
           continue;
@@ -318,8 +299,11 @@ class StudyPlanner {
             'sessionInfo': [stack.exam.name, candidateUnit.name],
             'unitID': candidateUnit.id,
           };
+
+          logResult(result);
           if (candidateUnit.sessionTime == Duration.zero)
             stack.units.removeAt(i);
+
           return result;
         } else {
           if (stack.exam.orderMatters) {
@@ -328,10 +312,8 @@ class StudyPlanner {
         }
       }
     } else {
-      //logger.i(stack.revisions);
       for (int i = stack.revisions.length - 1; i >= 0; i--) {
         final candidateRevision = stack.revisions[i];
-        //logger.i('Candidate revision: ${candidateRevision.name}');
 
         if (candidateRevision.sessionTime == Duration.zero) {
           continue;
@@ -344,6 +326,7 @@ class StudyPlanner {
             'sessionInfo': [stack.exam.name, candidateRevision.name],
             'unitID': candidateRevision.id
           };
+          logResult(result);
           if (candidateRevision.sessionTime == Duration.zero)
             stack.revisions.removeAt(i);
           return result;
@@ -355,6 +338,7 @@ class StudyPlanner {
             'sessionInfo': [stack.exam.name, candidateRevision.name],
             'unitID': candidateRevision.id
           };
+          logResult(result);
           if (candidateRevision.sessionTime == Duration.zero)
             stack.revisions.removeAt(i);
           return result;
@@ -364,24 +348,17 @@ class StudyPlanner {
   }
 
   Duration calculateSessionTime(
-      UnitModel unit, TimeSlotModel gap, SchedulerStack stack) {
+      UnitModel unit, TimeSlotModel gap, SchedulerStackModel stack) {
     try {
-      //logger.d('calculateSessionTime');
       final sessionHours = unit.sessionTime;
-      //logger.w('$sessionHours, ${gap.duration}');
       if (sessionHours > (gap.duration)) {
         unit.sessionTime -= gap.duration;
-        //logger.w('Sessiontime: ${gap.duration}');
 
         return gap.duration;
       } else {
         unit.sessionTime = Duration.zero;
         stack.weight = stack.weight! / 2;
         stack.unitsInDay++;
-        //logger.d(
-        //  'Stack ${stack.exam.name} weight divided by 2! - ${stack.weight}');
-
-        //logger.w('Sessiontime: ${sessionHours}');
 
         return sessionHours;
       }
@@ -391,14 +368,13 @@ class StudyPlanner {
     }
   }
 
-  Future<List<SchedulerStack>> generateStacks() async {
+  Future<List<SchedulerStackModel>> generateStacks() async {
     try {
-      //logger.d('generateStacks');
-      List<SchedulerStack> result = [];
+      List<SchedulerStackModel> result = [];
       for (ExamModel exam in instanceManager.sessionStorage.activeExams) {
         await exam.getUnits();
         await exam.getRevisions();
-        SchedulerStack stack = SchedulerStack(exam: exam);
+        SchedulerStackModel stack = SchedulerStackModel(exam: exam);
         await stack.initializeUnitsAndRevision(exam);
         result.add(stack);
       }
@@ -410,7 +386,6 @@ class StudyPlanner {
   }
 
   DateTime? getLastDayOfStudy(dynamic activeExams) {
-    //logger.d('getLastDayOfStudy');
     DateTime? currentDate = null;
     for (ExamModel exam in activeExams) {
       if (currentDate != null) {
@@ -426,5 +401,11 @@ class StudyPlanner {
       return null;
     }
     return currentDate!;
+  }
+
+  void logResult(Map<String, dynamic> result) {
+    String output =
+        'Selected unit: \n ${result['sessionInfo'][0]}: ${result['sessionInfo'][1]}\nDuration: ${formatDuration(result['sessionTime'])}';
+    logger.d(output);
   }
 }

@@ -5,15 +5,15 @@ import 'package:study_buddy/main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:study_buddy/modules/calendar/custom_days_view.dart';
 
-class RestrictionsDetailView extends StatefulWidget {
+class GeneralAvailabilityView extends StatefulWidget {
   PageController pageController;
-  RestrictionsDetailView({super.key, required this.pageController});
+  GeneralAvailabilityView({super.key, required this.pageController});
 
   @override
-  State<RestrictionsDetailView> createState() => _RestrictionsDetailViewState();
+  State<GeneralAvailabilityView> createState() => _GeneralAvailabilityViewState();
 }
 
-class _RestrictionsDetailViewState extends State<RestrictionsDetailView> {
+class _GeneralAvailabilityViewState extends State<GeneralAvailabilityView> {
 
  
 
@@ -71,7 +71,7 @@ class _RestrictionsDetailViewState extends State<RestrictionsDetailView> {
     List<Widget> pages = [generalGaps, customDays];
 
     return PageView(
-      physics: NeverScrollableScrollPhysics(),
+      physics: const  NeverScrollableScrollPhysics(),
       controller: widget.pageController,
       scrollDirection: Axis.vertical,
       children: pages,

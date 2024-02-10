@@ -214,7 +214,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                 duration: editSwitchTime,
                 child: !editMode
                     ? Text(
-                        DateFormat('EEE, M/d/y').format(widget.exam.examDate),
+                        formatDateTime(context, widget.exam.examDate),
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: screenWidth * 0.06,
@@ -226,7 +226,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                         inputType: InputType.date,
                         decoration: InputDecoration.collapsed(hintText: ''),
                         initialValue: widget.exam.examDate,
-                        format: DateFormat('EEE, M/d/y'),
+                        format: DateFormat.yMMMMd( Localizations.localeOf(context).toString()),
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(),
                         ]),
@@ -612,7 +612,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
             gradient: LinearGradient(
                 end: Alignment.bottomLeft,
                 begin: Alignment.topRight,
-                stops: [0.05, 0.3, 0.9],
+                stops: const [0.05, 0.3, 0.9],
                 colors: !editMode
                     ? [lighterColor, cardColor, darkerColor]
                     : [Colors.black, darken(darkerColor, .5), darkerColor]),

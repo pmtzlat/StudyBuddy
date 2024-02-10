@@ -25,14 +25,30 @@ class FirebaseCrudService {
     'Saturday',
     'Sunday'
   ];
+
+  Future<bool> getNeedsRecalc() async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+
+    final userDoc = await firebaseInstance.collection('users').doc(uid).get();
+
+    return userDoc['calendarNeedsRecalc'] ?? false;
+  }
+
+  Future<void> setNeedsRecalc(bool value) async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+
+    final userDoc = firebaseInstance.collection('users').doc(uid);
+
+    await userDoc.update({
+      'calendarNeedsRecalc': value,
+    });
+  }
+
   Future<String?> addExam({required ExamModel newExam}) async {
     // Check if the user document exists
     final uid = instanceManager.localStorage.getString('uid');
-    final connectivityResult =
-        await instanceManager.connectivity.checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      return null;
-    }
 
     final userDocRef = instanceManager.db.collection('users').doc(uid);
     final userDoc = await userDocRef.get();
@@ -204,9 +220,9 @@ class FirebaseCrudService {
 
       final userRef = firebaseInstance.collection('users').doc(uid);
 
-      final customDaysRef = userRef.collection('calendarDays');
+      final calendarDaysRef = userRef.collection('calendarDays');
 
-      final newDocumentRef = await customDaysRef.add({
+      final newDocumentRef = await calendarDaysRef.add({
         'weekday': day.weekday,
         'date': day.date.toString(),
         'notifiedIncompleteness': day.notifiedIncompleteness,
@@ -294,7 +310,8 @@ class FirebaseCrudService {
       final DayModel? matchingDay = await getCalendarDayByDate(date);
 
       if (matchingDay != null) {
-        matchingDay.times = await getTimeSlotsForCalendarDay(matchingDay.id);
+        matchingDay.timeSlots =
+            await getTimeSlotsForCalendarDay(matchingDay.id);
 
         return matchingDay;
       }
@@ -570,7 +587,10 @@ class FirebaseCrudService {
     }
   }
 
-  Future<bool> deleteUnit({required UnitModel unit, required examID, required BuildContext context}) async {
+  Future<bool> deleteUnit(
+      {required UnitModel unit,
+      required examID,
+      required BuildContext context}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     final _localizations = AppLocalizations.of(context)!;
@@ -1048,8 +1068,7 @@ class FirebaseCrudService {
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
-      Color color = await getExamColor(timeSlot.examID) ??
-          Colors.blue;
+      Color color = await getExamColor(timeSlot.examID) ?? Colors.blue;
       logger.i(timeSlot.date);
 
       final dayRef = firebaseInstance
@@ -1209,7 +1228,7 @@ class FirebaseCrudService {
       final List<TimeSlotModel> timeSlotsList =
           List<TimeSlotModel>.from(timeSlotsQuery.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        
+
         return TimeSlotModel(
           id: doc.id,
           weekday: data['weekday'],
@@ -1225,8 +1244,6 @@ class FirebaseCrudService {
           examColor: HexColor.fromHex(data['examColor']),
         );
       }));
-
-      
 
       return timeSlotsList;
     } catch (e) {
@@ -1558,6 +1575,75 @@ class FirebaseCrudService {
       return true;
     } else {
       return false;
+    }
+  }
+
+  Future<Map<DateTime, int>> getAllCalendarDaySessionsNumbers() async {
+    Map<DateTime, int> resultMap = {};
+
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      // Reference to the users collection
+      CollectionReference usersCollection =
+          FirebaseFirestore.instance.collection('users');
+
+      // Reference to the user's document
+      DocumentReference userDocument = usersCollection.doc(uid);
+
+      // Query calendarDays subcollection
+      QuerySnapshot calendarDaysSnapshot =
+          await userDocument.collection('calendarDays').get();
+
+      for (QueryDocumentSnapshot calendarDayDoc in calendarDaysSnapshot.docs) {
+        // Extract date from calendarDay document
+        String date = calendarDayDoc['date'];
+
+        // Reference to the timeSlots subcollection within the current calendarDay
+        CollectionReference timeSlotsCollection =
+            calendarDayDoc.reference.collection('timeSlots');
+
+        // Query timeSlots subcollection
+        QuerySnapshot timeSlotsSnapshot = await timeSlotsCollection.get();
+
+        // Get the number of timeSlots and add to the resultMap
+        int numberOfTimeSlots = timeSlotsSnapshot.size;
+        resultMap[DateTime.parse(date)] = numberOfTimeSlots;
+      }
+    } catch (e) {
+      logger.e('Error gettimg Calendar days sessions: $e');
+    }
+
+    return resultMap;
+  }
+
+  Future<void> checkRevisionSessionTimeUpdated(ExamModel exam) async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+    String examID = exam.id;
+    Duration sessionTime = exam.revisionTime;
+
+    // Get reference to the user's exam revisions collection
+    CollectionReference revisionsCollection = firebaseInstance
+        .collection('users')
+        .doc(uid)
+        .collection('exams')
+        .doc(examID)
+        .collection('revisions');
+
+    // Query for revision documents
+    QuerySnapshot revisionDocuments = await revisionsCollection.get();
+
+    // Iterate through each revision document
+    for (QueryDocumentSnapshot revisionDoc in revisionDocuments.docs) {
+      // Get the sessionTime from the document
+      String documentSessionTime = revisionDoc.get('sessionTime');
+
+      // Check if the document's sessionTime is different from the variable sessionTime
+      if (documentSessionTime != sessionTime.toString()) {
+        // If different, update the document with the new sessionTime
+        await revisionDoc.reference
+            .update({'sessionTime': sessionTime.toString()});
+      }
     }
   }
 }

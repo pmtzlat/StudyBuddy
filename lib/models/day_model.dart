@@ -8,8 +8,8 @@ class DayModel {
   final int weekday;
   String id;
   final DateTime date;
-  List<TimeSlotModel> times;
-  late Duration totalAvailableTime;
+  List<TimeSlotModel> timeSlots;
+  Duration totalAvailableTime;
   bool notifiedIncompleteness;
   Color? color;
 
@@ -17,32 +17,33 @@ class DayModel {
     required this.weekday,
     this.id = '',
     required this.date,
+    this.totalAvailableTime = const Duration(hours:24),
     List<TimeSlotModel>? times,
     this.notifiedIncompleteness = false,
     this.color,
-  }) : times = times ?? [];
+  }) : timeSlots = times ?? [];
 
   String getString() {
     String timesString = '';
-    for (TimeSlotModel slot in times!) {
+    for (TimeSlotModel slot in timeSlots!) {
       timesString +=
           '\n ${slot.startTime} - ${slot.endTime} : ${slot.examName ?? slot.examID} ${slot.unitName}';
     }
 
-    return '$id -> $date: $weekday\n Times: $timesString';
+    return '$id -> $date: $weekday\n Times: $timesString \n Available Time: ${formatDuration(totalAvailableTime)}';
   }
 
   void getTotalAvailableTime() {
-    totalAvailableTime = getTotal(times);
+    totalAvailableTime = getTotal(timeSlots);
     //logger.d('new total available: $totalAvailableTime');
   }
 
   Future<void> getGaps() async {
     //await Future.delayed(Duration(seconds: 1));
     if (id != 'empty') {
-      times = await instanceManager.firebaseCrudService
+      timeSlots = await instanceManager.firebaseCrudService
           .getTimeSlotsForCustomDay(id);
-      sortTimeSlotList(times);
+      sortTimeSlotList(timeSlots);
     } else {
       final List<TimeSlotModel> timeSlotList =
           instanceManager.sessionStorage.weeklyGaps[date.weekday - 1];
@@ -59,7 +60,7 @@ class DayModel {
             examColor: timeSlot.examColor);
       }).toList();
 
-      times = updated;
+      timeSlots = updated;
     }
   }
 
@@ -81,10 +82,10 @@ class DayModel {
   }
 
   void headStart(TimeOfDay newStart) {
-    for (int i = times.length - 1; i >= 0; i--) {
-      var currentItem = times[i];
+    for (int i = timeSlots.length - 1; i >= 0; i--) {
+      var currentItem = timeSlots[i];
       if (isTimeBefore(currentItem.endTime, newStart)) {
-        times.removeAt(i);
+        timeSlots.removeAt(i);
       } else {
         if (isTimeBefore(currentItem.startTime, newStart)) {
           currentItem.startTime = newStart;

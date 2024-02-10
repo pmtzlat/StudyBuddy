@@ -717,7 +717,7 @@ class Page3State extends State<Page3> {
                                             Row(
                                               children: [
                                                 Text(
-                                                    '${formatDateTime(exam.examDate)}',
+                                                    '${formatDateTime(context, exam.examDate)}',
                                                     style: TextStyle(
                                                         color: Colors.white,
                                                         fontSize: screenWidth *

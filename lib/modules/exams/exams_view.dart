@@ -438,7 +438,7 @@ class _ExamsViewState extends State<ExamsView> {
             //                             prioritizing ? screenWidth * 0.05 : 0,
             //                         child: SizedBox(),
             //                       ),
-            //                       Text('${formatDateTime(exam.examDate)}',
+            //                       Text('${formatDateTime(contextexam.examDate)}',
             //                           style: TextStyle(
             //                               color: Colors.white,
             //                               fontSize: screenWidth * 0.035)),

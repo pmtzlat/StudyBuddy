@@ -82,8 +82,8 @@ class _ExamCardState extends State<ExamCard> {
                     curve: Curves.decelerate,
                     duration: Duration(milliseconds: 300),
                     width: !widget.prioritizing
-                        ? screenWidth * 0.23
-                        : screenWidth * 0.35,
+                        ? screenWidth * 0.35
+                        : screenWidth * 0.45,
 
                     // color: Colors.yellow,
                     child: SingleChildScrollView(
@@ -92,11 +92,11 @@ class _ExamCardState extends State<ExamCard> {
                       child: Row(
                         children: [
                           Container(
-                            width: screenWidth * 0.23,
+                            width: screenWidth * 0.313,
                             child: Row(
                               // widget 1
                               children: [
-                                Text('${formatDateTime(widget.exam.examDate)}',
+                                Text('${formatDateTime(context, widget.exam.examDate)}',
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontSize: screenWidth * 0.035)),

@@ -29,7 +29,7 @@ class ExamsController {
               Text(name + AppLocalizations.of(context)!.examDeletedCorrectly),
           backgroundColor: Color.fromARGB(255, 0, 172, 6));
 
-      instanceManager.sessionStorage.needsRecalculation = true;
+      instanceManager.sessionStorage.setNeedsRecalc(true);
       applyWeights(instanceManager.sessionStorage.activeExams);
       await updateExamWeights();
 
@@ -264,6 +264,7 @@ class ExamsController {
               newUnit: revision, examID: examID);
         }
       }
+      instanceManager.sessionStorage.setNeedsRecalc(true);
     } catch (e) {
       logger.e('Error in addExam: $e');
       rethrow; // Rethrow the exception after logging it
@@ -341,7 +342,7 @@ class ExamsController {
       await getAllExams();
       // return to exams page
 
-      instanceManager.sessionStorage.needsRecalculation = true;
+      instanceManager.sessionStorage.setNeedsRecalc(true);
       return 1;
     } catch (e) {
       logger.e('Error handlEditExam: $e');
@@ -354,17 +355,17 @@ class ExamsController {
     try {
       var res;
       int currentRevisions = exam.revisions.length;
-      // logger.i('CurrentRevisions: $currentRevisions');
-      // logger.i('revisions: $revisions');
+      
       if (revisions > currentRevisions) {
-        //logger.i('new revisions is >= current revisions');
+        logger.i('A');
+       
         while (revisions > currentRevisions) {
           currentRevisions++;
           final newUnit = UnitModel(
               name: 'Revision $currentRevisions',
               order: currentRevisions,
               sessionTime: doubleToDuration(
-                  (durationToDouble(exam.revisionTime) * 1.5)));
+                  (durationToDouble(exam.revisionTime))));
           //logger.i('Adding new revision: ${newUnit.name}');
           res = await firebaseCrud
               .addRevisionToExam(newUnit: newUnit, examID: exam.id)
@@ -373,6 +374,7 @@ class ExamsController {
           if (res == null) return -1;
         }
       } else if (revisions < currentRevisions) {
+        logger.i('B');
         //logger.i('new revisions is < current revisions');
         while (revisions < currentRevisions) {
           //logger.i('Removing new revision: ${currentRevisions}');
@@ -384,6 +386,7 @@ class ExamsController {
           currentRevisions--;
         }
       }
+      await firebaseCrud.checkRevisionSessionTimeUpdated(exam);
       return 1;
     } catch (e) {
       logger.e('Error handling change in revisions: $e');
@@ -406,6 +409,7 @@ class ExamsController {
           .getTimeSlotsForCalendarDay(day.id)
           .timeout(timeoutDuration);
       ;
+      day.getTotalTimes();
       // logger.i(
       //     'Got timeSlots for day ${day.date.toString()}: ${timeSlotsInDay.length}');
 

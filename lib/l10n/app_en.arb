@@ -75,7 +75,7 @@
     "configureCalendar":"Start configuring Calendar!",
     "chooseFreeSchedule":"Choose at what times you can study:",
     "needsRecalculation":"Update schedule",
-    "needsRecalculationInfo":"You have made unsaved changes that affect your schedule.\n Please calculate your schedule again.",
+    "needsRecalculationInfo":"You have made unsaved changes that affect your schedule.\n Please update your plan again.",
     "monday":"Monday",
     "tuesday":"Tuesday",
     "wednesday":"Wednesday",
@@ -108,7 +108,7 @@
     "recalcNoTimeTitle": "No time!",
     "recalcNoTimeBody":"Based on your availability, the days left until your exams, and the amount of time you want to dedicate to each topic/exam, there is not enough time to study everything. You can reduce the session time or the number of revision days for some exams, or change your availablity to suit your needs. These are the exams that didn't have any space left: ",
     "completePreviousDaysTitle":"Mark previous days as complete?",
-    "completePreviousDaysDesc": "There are past days that have study sessions that are not marked as complete. Do you want to mark them as complete? If you don't want to mark them as complete, you can leave them as incomplete and recalucalte a new schedule including them.", 
+    "completePreviousDaysDesc": "There are past days that have study sessions which are not marked as complete. Do you want to mark them as complete? If you don't want to mark them as complete, you can leave them as incomplete and recalculate a new schedule including them.", 
     "leaveAsIs": "Leave them",
     "updatePlan":"Update Plan",
     "markAsComplete": "Mark as complete",
@@ -126,6 +126,8 @@
     "availabilityForSpecificDays": "Customize specific days",
     "nothingHereYet": "Nothing here yet!",
     "backToWeeklyAvailability": "Back to weekly view",
+    "busy": "Busy",
+    "resetToDefault": "Reset to default",
     
 
 
