@@ -17,6 +17,7 @@ class ExamModel {
   List<UnitModel> units;
   bool orderMatters;
   List<UnitModel> revisions;
+  bool sessionsSplittable; // determines if sessions should be splittable between days if a day doesn't have enough time
 
   /*
   var iconData = IconData(58717, fontFamily: 'MaterialIcons')
@@ -39,6 +40,7 @@ class ExamModel {
     this.units = const <UnitModel>[],
     this.orderMatters = false,
     this.revisions = const [],
+    this.sessionsSplittable = true,
   });
 
   ExamModel.copy(ExamModel other)
@@ -51,7 +53,8 @@ class ExamModel {
         id = other.id,
         units = List<UnitModel>.from(other.units),
         orderMatters = other.orderMatters,
-        revisions = List<UnitModel>.from(other.revisions);
+        revisions = List<UnitModel>.from(other.revisions),
+        sessionsSplittable = other.sessionsSplittable;
 
   bool inFuture(DateTime date) {
     if (examDate.isAfter(date)) {

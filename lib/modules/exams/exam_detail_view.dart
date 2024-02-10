@@ -213,8 +213,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
             AnimatedSwitcher(
                 duration: editSwitchTime,
                 child: !editMode
-                    ? Text(
-                        formatDateTime(context, widget.exam.examDate),
+                    ? Text(formatDateTime(context, widget.exam.examDate),
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: screenWidth * 0.06,
@@ -226,7 +225,8 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                         inputType: InputType.date,
                         decoration: InputDecoration.collapsed(hintText: ''),
                         initialValue: widget.exam.examDate,
-                        format: DateFormat.yMMMMd( Localizations.localeOf(context).toString()),
+                        format: DateFormat.yMMMMd(
+                            Localizations.localeOf(context).toString()),
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(),
                         ]),
@@ -353,11 +353,61 @@ class _ExamDetailViewState extends State<ExamDetailView> {
             ),
             AnimatedContainer(
               duration: editSwitchTime,
-              height: !editMode ? screenHeight * 0.15 : screenHeight * 0.31,
+              height: !editMode ? screenHeight * 0.2 : screenHeight * 0.36,
               child: SingleChildScrollView(
                 physics: NeverScrollableScrollPhysics(),
                 child: Column(
                   children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.my_library_books_rounded,
+                              color: Colors.white,
+                              size: screenWidth * 0.08,
+                            ),
+                            SizedBox(width: 10),
+                            Text(_localizations.keepSessionsInDay,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: screenWidth * 0.043))
+                          ],
+                        ),
+                        FormBuilderField<bool>(
+                            name: 'sessionSplittable',
+                            enabled: editMode,
+                            initialValue: widget.exam.orderMatters,
+                            builder: (FormFieldState<dynamic> field) {
+                              return Checkbox(
+                                  visualDensity: VisualDensity(
+                                      horizontal: -4, vertical: -4),
+                                  activeColor: Colors.white,
+                                  checkColor: Colors.black,
+                                  fillColor:
+                                      MaterialStateProperty.all(Colors.white),
+                                  value: !editMode
+                                      ? widget.exam.orderMatters
+                                      : orderMatters,
+                                  onChanged: (bool? newValue) {
+                                    if (editMode) {
+                                      setState(() {
+                                        orderMatters = newValue ?? false;
+                                      });
+                                      field.didChange(newValue);
+                                    }
+                                  });
+                            })
+                      ],
+                    ),
+                    AnimatedContainer(
+                      duration: editSwitchTime,
+                      height: !editMode
+                          ? screenHeight * 0.015
+                          : screenHeight * 0.04,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -554,38 +604,43 @@ class _ExamDetailViewState extends State<ExamDetailView> {
       itemBuilder: (context, index, animation) {
         try {
           final unit = widget.exam.units[index];
+          logger.i(unit.getString());
 
-          return SlideTransition(
-            position: Tween<Offset>(
-              begin: Offset(1, 0),
-              end: Offset.zero,
-            ).animate(animation),
-            child: Dismissible(
-              key: Key(unit.id),
-              onDismissed: (direction) {
-                if (editMode) {
-                  widget.exam.units.removeAt(widget.exam.units.indexOf(unit));
+          return MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: Offset(1, 0),
+                end: Offset.zero,
+              ).animate(animation),
+              child: Dismissible(
+                key: Key(unit.id),
+                onDismissed: (direction) {
+                  if (editMode) {
+                    widget.exam.units.removeAt(widget.exam.units.indexOf(unit));
 
-                  _listKey.currentState?.removeItem(
-                    index,
-                    (context, animation) => SizedBox.shrink(),
-                    duration: Duration.zero,
-                  );
+                    _listKey.currentState?.removeItem(
+                      index,
+                      (context, animation) => SizedBox.shrink(),
+                      duration: Duration.zero,
+                    );
 
-                  widget.exam.updateUnitOrders(editExamFormKey, context);
+                    widget.exam.updateUnitOrders(editExamFormKey, context);
 
-                  setState(() {});
-                }
-              },
-              child: UnitCard(
-                textEditingController: TextEditingController(text: unit.name),
-                unit: unit,
-                exam: exam,
-                notifyParent: () {},
-                showError: () {},
-                lightShade: lighten(examColor, 0.5),
-                darkShade: examColor,
-                editMode: editMode,
+                    setState(() {});
+                  }
+                },
+                child: UnitCard(
+                  textEditingController: TextEditingController(text: unit.name),
+                  unit: unit,
+                  exam: exam,
+                  notifyParent: () {},
+                  showError: () {},
+                  lightShade: lighten(examColor, 0.5),
+                  darkShade: examColor,
+                  editMode: editMode,
+                ),
               ),
             ),
           );
@@ -971,7 +1026,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                   )
                                 : SizedBox(
                                     key: Key('1'),
-                                    height: screenHeight * 0.03,
+                                    height: 1,
                                   ),
                           ),
                           Padding(
@@ -979,28 +1034,24 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                 horizontal: screenWidth * 0.05),
                             child: unitsList,
                           ),
-                          AnimatedSwitcher(
+                          AnimatedContainer(
                             duration: editSwitchTime,
-                            child: editMode
-                                ? Container(
-                                    key: Key('0'),
-                                    height: screenHeight * 0.05,
-                                    child: IconButton(
-                                        onPressed: () {
-                                          addUnit(UnitModel(
-                                              name:
-                                                  ' ${_localizations.unit} ${widget.exam.units.length + 1}',
-                                              order:
-                                                  widget.exam.units.length + 1,
-                                              id: generateRandomString()));
-                                        },
-                                        icon: Icon(Icons.add,
-                                            color: Colors.white)),
-                                  )
-                                : SizedBox(
-                                    key: Key('1'),
-                                    height: screenHeight * 0.05,
-                                  ),
+                            height: editMode ? screenHeight * 0.03 : 0,
+                            child: SingleChildScrollView(
+                              child: Container(
+                                key: Key('0'),
+                                height: screenHeight * 0.05,
+                                child: IconButton(
+                                    onPressed: () {
+                                      addUnit(UnitModel(
+                                          name:
+                                              ' ${_localizations.unit} ${widget.exam.units.length + 1}',
+                                          order: widget.exam.units.length + 1,
+                                          id: generateRandomString()));
+                                    },
+                                    icon: Icon(Icons.add, color: Colors.white)),
+                              ),
+                            ),
                           ),
                           SizedBox(
                             height: screenHeight * 0.05,

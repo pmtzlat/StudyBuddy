@@ -16,8 +16,8 @@ class SchedulerStackModel {
 
   Future<void> initializeUnitsAndRevision(ExamModel exam) async {
     try {
-      units = exam.units!.where((unit) => unit.completed == false).toList();
-      revisions = exam.revisions.where((result) => result.completed == false).toList();
+      units = exam.units.map((unit) => unit.deepCopy()).toList();;
+      revisions = exam.revisions.map((unit) => unit.deepCopy()).toList();
       daysUntilExam = getDaysUntilExam(exam.examDate);
 
     } catch (e) {

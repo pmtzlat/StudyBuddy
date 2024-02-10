@@ -1,3 +1,5 @@
+import 'package:study_buddy/utils/datatype_utils.dart';
+
 class UnitModel {
   String name;
   Duration sessionTime;
@@ -67,4 +69,11 @@ class UnitModel {
       realStudyTime: realStudyTime ?? this.realStudyTime,
     );
   }
+
+  String getString() {
+    return 'Unit $order: $name \n\n${formatDuration(sessionTime)} - $completed';
+  }
+
+  
+
 }

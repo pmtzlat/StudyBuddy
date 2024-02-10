@@ -163,12 +163,17 @@ class ExamsController {
           examCreationFormKey.currentState!.fields['orderMatters']!.value ??
               false;
 
+      final bool sessionSplittable =
+          examCreationFormKey.currentState!.fields['sessionSplittable']!.value ??
+              false;
+
       //logger.i('Validation done');
 
       instanceManager.sessionStorage.examToAdd = ExamModel(
           name: name,
           examDate: examDate,
           orderMatters: orderMatters,
+          sessionsSplittable: sessionSplittable,
           color: examColor);
 
       instanceManager.sessionStorage.examToAdd!.units = <UnitModel>[];
@@ -324,6 +329,8 @@ class ExamsController {
           examFormKey.currentState!.fields['examDate']!.value ?? exam.examDate;
       newExam.orderMatters =
           examFormKey.currentState!.fields['orderMatters']!.value;
+      newExam.sessionsSplittable =
+          examFormKey.currentState!.fields['sessionSplittable']!.value;
       newExam.color = examColor;
 
       newExam.units = List<UnitModel>.from(exam.units);

@@ -65,6 +65,7 @@ class FirebaseCrudService {
         'color': newExam.color.toHex(),
         'id': '',
         'orderMatters': newExam.orderMatters,
+        'sessionSplittable': newExam.sessionsSplittable,
       });
 
       await newExamDocRef.update({'id': newExamDocRef.id});
@@ -564,15 +565,15 @@ class FirebaseCrudService {
         final double weight = ((data['weight'] as double) / 10.0);
 
         return ExamModel(
-          name: data['name'] as String,
-          weight: weight,
-          examDate: DateTime.parse((data['examDate'] as String)),
-          timeStudied: parseTime(data['timeStudied']),
-          color: HexColor.fromHex(data['color']),
-          revisionTime: parseTime(data['revisionTime']),
-          id: data['id'] as String,
-          orderMatters: data['orderMatters'] as bool,
-        );
+            name: data['name'] as String,
+            weight: weight,
+            examDate: DateTime.parse((data['examDate'] as String)),
+            timeStudied: parseTime(data['timeStudied']),
+            color: HexColor.fromHex(data['color']),
+            revisionTime: parseTime(data['revisionTime']),
+            id: data['id'] as String,
+            orderMatters: data['orderMatters'] as bool,
+            sessionsSplittable: data['sessionSplittable'] as bool);
       }).toList();
 
       for (ExamModel exam in exams) {
@@ -965,7 +966,8 @@ class FirebaseCrudService {
       'weight': newExam.weight * 10,
       'revisionTime': newExam.revisionTime.toString(),
       'orderMatters': newExam.orderMatters,
-      'color': newExam.color.toHex()
+      'color': newExam.color.toHex(),
+      'sessionSplittable': newExam.sessionsSplittable,
     });
 
     logger.i('editExam: updated exam');
@@ -988,15 +990,15 @@ class FirebaseCrudService {
       final double weight = ((data['weight'] as double) / 10.0);
 
       var exam = ExamModel(
-        name: data['name'] as String,
-        weight: weight,
-        examDate: DateTime.parse(data['examDate'] as String),
-        timeStudied: parseTime(data['timeStudied']),
-        color: HexColor.fromHex(data['color']),
-        revisionTime: parseTime(data['revisionTime']),
-        id: data['id'] as String,
-        orderMatters: data['orderMatters'] as bool,
-      );
+          name: data['name'] as String,
+          weight: weight,
+          examDate: DateTime.parse(data['examDate'] as String),
+          timeStudied: parseTime(data['timeStudied']),
+          color: HexColor.fromHex(data['color']),
+          revisionTime: parseTime(data['revisionTime']),
+          id: data['id'] as String,
+          orderMatters: data['orderMatters'] as bool,
+          sessionsSplittable: data['sessionSplittable'] as bool);
 
       exam.units = await getUnitsForExam(examID: exam.id) ?? <UnitModel>[];
       exam.revisions =

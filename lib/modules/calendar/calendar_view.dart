@@ -438,6 +438,11 @@ class _CalendarViewState extends State<CalendarView>
       },
     );
 
+    while (instanceManager.sessionStorage.gettingAllExams ||
+        instanceManager.sessionStorage.gettingAllGaps ||
+        instanceManager.sessionStorage.gettingAllCustomDays)
+      await Future.delayed(Duration(seconds: 2));
+
     final result = await _controller.calculateSchedule();
 
     switch (result) {

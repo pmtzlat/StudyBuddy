@@ -48,41 +48,31 @@ class StudyPlanner {
 
       logger.i('Start date: ${startDate}');
 
-      DayModel dayToAdd = DayModel(
-          id: 'empty',
-          weekday: startDate.weekday,
-          date: DateTime(
-              startDate.year, startDate.month, startDate.day, 0, 0, 0, 0, 0));
+      DayModel dayToAdd = await getGeneralOrCustomday(startDate);
+      List<SchedulerStackModel> singularDayStacks = <SchedulerStackModel>[];
+      
 
-      while (
-          generalStacks.length != 0 && dayToAdd!.date.isAfter(DateTime.now())) {
+      while (generalStacks.length != 0 &&
+          !((dayToAdd!.date.isBefore(stripTime(DateTime.now()))))) {
         await dayToAdd.getGaps();
         dayToAdd.getTotalAvailableTime();
+        final now = DateTime.now();
 
-        await fillDayWithSessions(dayToAdd, generalStacks);
+        if (areDatesEqual(dayToAdd.date, now) && generalStacks.length != 0) {
+          final newStart = now.add(Duration(minutes: 15));
+          if (!isSecondDayNext(now, newStart)) {
+            dayToAdd.headStart(dateTimeToTimeOfDay(newStart));
+            dayToAdd.getTotalAvailableTime();
+          }
+        }
+        singularDayStacks = List.from(generalStacks);
+
+        await fillDayWithSessions(dayToAdd, singularDayStacks);
         logger.w('Full day to add: \n\n ${dayToAdd.getString()}');
 
         result.insert(0, dayToAdd);
         startDate = startDate.subtract(Duration(days: 1));
-        dayToAdd = DayModel(
-            id: 'empty',
-            weekday: startDate.weekday,
-            date: DateTime(
-                startDate.year, startDate.month, startDate.day, 0, 0, 0, 0, 0));
-      }
-
-      final now = DateTime.now();
-
-      if (areDatesEqual(dayToAdd.date, now) && generalStacks.length != 0) {
-        final newStart = now.add(Duration(minutes: 15));
-        if (!isSecondDayNext(now, newStart)) {
-          await dayToAdd.getGaps();
-          dayToAdd.headStart(dateTimeToTimeOfDay(newStart));
-          dayToAdd.getTotalAvailableTime();
-
-          await fillDayWithSessions(dayToAdd, generalStacks);
-          result.insert(0, dayToAdd);
-        }
+        dayToAdd = await getGeneralOrCustomday(startDate);
       }
 
       if (generalStacks.length != 0) {
@@ -123,6 +113,17 @@ class StudyPlanner {
       logger.e('Error recalculating schedule: $e');
       return -1;
     }
+  }
+
+  Future<DayModel> getGeneralOrCustomday(DateTime startDate) async {
+    await instanceManager.calendarController.getCustomDays();
+    return instanceManager.sessionStorage.customDays.firstWhere(
+        (element) => element.date == startDate,
+        orElse: () => DayModel(
+            id: 'empty',
+            weekday: startDate.weekday,
+            date: DateTime(startDate.year, startDate.month, startDate.day, 0, 0,
+                0, 0, 0)));
   }
 
   void saveLeftoverExams(List<SchedulerStackModel> stacks) {
@@ -166,9 +167,8 @@ class StudyPlanner {
         return;
       }
 
-      calculateWeights(stacks, day);
-
       while (day.totalAvailableTime != Duration.zero) {
+        calculateWeights(stacks, day);
         gap = day.timeSlots.last;
         logger.t(
             'Gap to fill: ${timeOfDayToStr(gap.startTime)} - ${timeOfDayToStr(gap.endTime)}');
@@ -270,11 +270,11 @@ class StudyPlanner {
 
       if (selectedUnit != null) {
         if (stacks[i].units.isEmpty && stacks[i].revisions.isEmpty) {
-          
           generalStacks
               .removeWhere((stack) => stack.exam.id == stacks[i].exam.id);
-          logger.e(generalStacks == stacks);
-          stacks.removeAt(i); //THIS LINE GIVES PROBLEMS WHEN UNITS ARE SELECTED - stacks and generalstacks are the same
+
+          stacks.removeAt(
+              i); //THIS LINE GIVES PROBLEMS WHEN UNITS ARE SELECTED - stacks and generalstacks are the same
         }
         return selectedUnit;
       }
@@ -306,8 +306,14 @@ class StudyPlanner {
 
           return result;
         } else {
-          if (stack.exam.orderMatters) {
+          if (!stack.exam.sessionsSplittable) {
             return null;
+          } else {
+            if (stack.exam.orderMatters) {
+              return null;
+            } else {
+              continue;
+            }
           }
         }
       }
