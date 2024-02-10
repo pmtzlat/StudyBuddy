@@ -50,7 +50,6 @@ class StudyPlanner {
 
       DayModel dayToAdd = await getGeneralOrCustomday(startDate);
       List<SchedulerStackModel> singularDayStacks = <SchedulerStackModel>[];
-      
 
       while (generalStacks.length != 0 &&
           !((dayToAdd!.date.isBefore(stripTime(DateTime.now()))))) {
@@ -307,12 +306,28 @@ class StudyPlanner {
           return result;
         } else {
           if (!stack.exam.sessionsSplittable) {
-            return null;
-          } else {
             if (stack.exam.orderMatters) {
               return null;
             } else {
               continue;
+            }
+          } else {
+            if (stack.exam.orderMatters) {
+              return null;
+            } else {
+              final result = {
+                'unit': candidateUnit,
+                'sessionTime': calculateSessionTime(candidateUnit, gap, stack),
+                'examID': stack.exam.id,
+                'sessionInfo': [stack.exam.name, candidateUnit.name],
+                'unitID': candidateUnit.id,
+              };
+
+              logResult(result);
+              if (candidateUnit.sessionTime == Duration.zero)
+                stack.units.removeAt(i);
+
+              return result;
             }
           }
         }

@@ -47,6 +47,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
   bool loading = false;
   Duration editSwitchTime = Duration(milliseconds: 300);
   bool orderMatters = false;
+  bool sessionsSplittable = false;
   int revisions = 0;
   Duration revisionTime = Duration(seconds: 0);
   DateTime examDate = DateTime.now();
@@ -61,6 +62,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
   void initState() {
     super.initState();
     orderMatters = widget.exam.orderMatters;
+    sessionsSplittable = widget.exam.sessionsSplittable;
     revisions = widget.exam.revisions.length;
     revisionTime = widget.exam.revisionTime;
     examDate = widget.exam.examDate;
@@ -379,7 +381,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                         FormBuilderField<bool>(
                             name: 'sessionSplittable',
                             enabled: editMode,
-                            initialValue: widget.exam.orderMatters,
+                            initialValue: widget.exam.sessionsSplittable,
                             builder: (FormFieldState<dynamic> field) {
                               return Checkbox(
                                   visualDensity: VisualDensity(
@@ -389,12 +391,12 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                   fillColor:
                                       MaterialStateProperty.all(Colors.white),
                                   value: !editMode
-                                      ? widget.exam.orderMatters
-                                      : orderMatters,
+                                      ? widget.exam.sessionsSplittable
+                                      : sessionsSplittable,
                                   onChanged: (bool? newValue) {
                                     if (editMode) {
                                       setState(() {
-                                        orderMatters = newValue ?? false;
+                                        sessionsSplittable = newValue ?? false;
                                       });
                                       field.didChange(newValue);
                                     }

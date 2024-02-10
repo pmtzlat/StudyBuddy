@@ -1214,7 +1214,7 @@ class FirebaseCrudService {
   }
 
   Future<List<TimeSlotModel>> getTimeSlotsForCustomDay(String dayID) async {
-    try {
+    
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
@@ -1248,10 +1248,7 @@ class FirebaseCrudService {
       }));
 
       return timeSlotsList;
-    } catch (e) {
-      logger.e('Error gettimg timeSlots for custom day: $e');
-      return <TimeSlotModel>[];
-    }
+    
   }
 
   Future<List<TimeSlotModel>> getTimeSlotsForCalendarDay(String dayID) async {

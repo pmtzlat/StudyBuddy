@@ -305,8 +305,10 @@ class CalendarController {
           await _firebaseCrud.deleteCustomDay(day.id);
         } else {
           logger.i('Day exists but is not the same as normal schedule');
+          DayModel dayObject = DayModel(weekday: day.date.weekday, date: day.date, times: day.timeSlots);
+          dayObject.getTotalAvailableTime();
           instanceManager.sessionStorage.customDays
-              .add(DayModel(weekday: day.date.weekday, date: day.date));
+              .add(dayObject);
           await _firebaseCrud.clearTimesForCustomDay(day.id);
           for (TimeSlotModel timeSlot in day.timeSlots) {
             timeSlot.date = day.date;
@@ -317,8 +319,10 @@ class CalendarController {
         if (!compareTimeSlotLists(day.timeSlots,
             instanceManager.sessionStorage.weeklyGaps[day.date.weekday - 1])) {
           logger.i('Day doesn\'t exist but is different from normal schedule');
+          DayModel dayObject = DayModel(weekday: day.date.weekday, date: day.date, times: day.timeSlots);
+          dayObject.getTotalAvailableTime();
           instanceManager.sessionStorage.customDays
-              .add(DayModel(weekday: day.date.weekday, date: day.date));
+              .add(dayObject);
           day.id = await _firebaseCrud.addCustomDay(day);
           await _firebaseCrud.clearTimesForCustomDay(day.id);
           for (TimeSlotModel timeSlot in day.timeSlots) {
@@ -340,18 +344,7 @@ class CalendarController {
     }
   }
 
-  Future<void> getTimeSlotsForCustomDay(DayModel day) async {
-    try {
-      final times = await _firebaseCrud
-          .getTimeSlotsForCustomDay(day.id)
-          .timeout(timeoutDuration);
-      ;
-      day.timeSlots = times;
-      if (day.timeSlots == null) day.timeSlots = [];
-    } on Exception catch (e) {
-      logger.e('Error getting timeslots for custom day $e');
-    }
-  }
+ 
 
   Future<int> deleteCustomDay(String dayID) async {
     try {

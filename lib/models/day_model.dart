@@ -41,8 +41,15 @@ class DayModel {
   Future<void> getGaps() async {
     //await Future.delayed(Duration(seconds: 1));
     if (id != 'empty') {
-      timeSlots = await instanceManager.firebaseCrudService
+      try{ 
+      List<TimeSlotModel> provTimeSlots = await instanceManager.firebaseCrudService
           .getTimeSlotsForCustomDay(id);
+          timeSlots = provTimeSlots;
+      }
+      catch(e){
+        logger.w('Error getting timeSlots for custom day $date: $e');
+      }
+      logger.f(getString());
       sortTimeSlotList(timeSlots);
     } else {
       final List<TimeSlotModel> timeSlotList =

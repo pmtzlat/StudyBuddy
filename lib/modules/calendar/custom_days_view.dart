@@ -71,7 +71,6 @@ class _CustomDaysViewState extends State<CustomDaysView> {
             shrinkWrap: true,
             itemCount: timeSlotList.length,
             itemBuilder: (context, index) {
-              //logger.i(loading);
               final timeSlot = timeSlotList[index];
 
               return Dismissible(
@@ -93,8 +92,9 @@ class _CustomDaysViewState extends State<CustomDaysView> {
 
                   if (!instanceManager.sessionStorage.gettingAllCustomDays) {
                     instanceManager.sessionStorage.gettingAllCustomDays = true;
+                    
 
-                    await Future.delayed(Duration(seconds: 6));
+                    await Future.delayed(Duration(seconds: 5));
                     await _controller.getCustomDays();
 
                     customDay = instanceManager.sessionStorage.customDays
@@ -215,12 +215,22 @@ class _CustomDaysViewState extends State<CustomDaysView> {
             date = stripTime(focusedDay);
             loading = true;
           });
+          
 
           customDay = instanceManager.sessionStorage.customDays.firstWhere(
               (element) => element.date == date,
               orElse: () =>
                   DayModel(weekday: date.weekday, date: date, id: 'empty'));
-          await customDay.getGaps();
+
+          try {
+            await customDay.getGaps();
+          } catch (e) {
+            customDay = instanceManager.sessionStorage.customDays.firstWhere(
+                (element) => element.date == date,
+                orElse: () =>
+                    DayModel(weekday: date.weekday, date: date, id: 'empty'));
+          }
+          
 
           setState(() {
             timeSlotList = customDay.timeSlots;
