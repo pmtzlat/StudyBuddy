@@ -267,7 +267,7 @@ class ExamsController {
 
         for (UnitModel revision in exam.revisions) {
           await firebaseCrud.addRevisionToExam(
-              newUnit: revision, examID: examID);
+              newRevision: revision, examID: examID);
         }
       }
       instanceManager.sessionStorage.setNeedsRecalc(true);
@@ -365,7 +365,7 @@ class ExamsController {
       int currentRevisions = exam.revisions.length;
       
       if (revisions > currentRevisions) {
-        logger.i('A');
+        
        
         while (revisions > currentRevisions) {
           currentRevisions++;
@@ -382,7 +382,7 @@ class ExamsController {
           if (res == null) return -1;
         }
       } else if (revisions < currentRevisions) {
-        logger.i('B');
+        
         //logger.i('new revisions is < current revisions');
         while (revisions < currentRevisions) {
           //logger.i('Removing new revision: ${currentRevisions}');
@@ -427,7 +427,7 @@ class ExamsController {
         // logger.i(
         //     'Marking unit ${timeSlot.unitName} ${timeSlot.unitID} as complete...');
         int res = await firebaseCrud
-            .markUnitAsComplete(exam, unit)
+            .changeUnitCompleteness(exam, unit, true)
             .timeout(timeoutDuration);
         ;
         if (res != 1) return -1;
@@ -449,4 +449,30 @@ class ExamsController {
       return -1;
     }
   }
+
+  UnitModel? getUnitModelById(String examID, String unitID) {
+    var exams = instanceManager.sessionStorage.savedExams;
+    ExamModel targetExam = exams.firstWhere(
+      (exam) => exam.id == examID,
+      orElse: () => ExamModel(name: 'examNotFound', examDate: DateTime.now()),
+    );
+
+  if (targetExam.name != 'examNotFound') {
+    UnitModel targetUnit = targetExam.units.firstWhere(
+      (unit) => unit.id == unitID,
+      orElse: () => UnitModel(name: 'unitNotFound', order: 0),
+    );
+    if(targetUnit.name != 'unitNotFound') return targetUnit;
+
+    UnitModel targetRevision = targetExam.revisions.firstWhere(
+      (unit) => unit.id == unitID,
+      orElse: () => UnitModel(name: 'revisionNotFound', order: 0),
+    );
+
+    if(targetUnit.name != 'revisionNotFound') return targetRevision;
+  }
+
+  return null;
+}
+
 }

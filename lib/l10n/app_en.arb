@@ -117,7 +117,7 @@
     "keepOrRecalc":"You have decided to leave some sessions incomplete. Do you want to recalculate a new schedule to include the missed sessions?",
     "keep":"Leave incomplete",
     "recalc":"Recalculate",
-    "editUnitCompletionInExamsPage":"If you want to change as past session's completeness, you can edit that exam's units in the 'Exams' page",
+    "editUnitCompletionInExamsPage":"If you want to change as past session's completeness, you can edit that exam's units in the 'Exams' , and then recalculate the plan to include your changes.",
     "cantStartSessionForFuture": "You can't start studying for a day that is not today",
     "viewMonth": "View Month",
     "swipeForNextDay": "Change day",

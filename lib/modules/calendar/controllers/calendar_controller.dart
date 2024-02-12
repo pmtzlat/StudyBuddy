@@ -305,10 +305,10 @@ class CalendarController {
           await _firebaseCrud.deleteCustomDay(day.id);
         } else {
           logger.i('Day exists but is not the same as normal schedule');
-          DayModel dayObject = DayModel(weekday: day.date.weekday, date: day.date, times: day.timeSlots);
+          DayModel dayObject = DayModel(
+              weekday: day.date.weekday, date: day.date, times: day.timeSlots);
           dayObject.getTotalAvailableTime();
-          instanceManager.sessionStorage.customDays
-              .add(dayObject);
+          instanceManager.sessionStorage.customDays.add(dayObject);
           await _firebaseCrud.clearTimesForCustomDay(day.id);
           for (TimeSlotModel timeSlot in day.timeSlots) {
             timeSlot.date = day.date;
@@ -319,10 +319,10 @@ class CalendarController {
         if (!compareTimeSlotLists(day.timeSlots,
             instanceManager.sessionStorage.weeklyGaps[day.date.weekday - 1])) {
           logger.i('Day doesn\'t exist but is different from normal schedule');
-          DayModel dayObject = DayModel(weekday: day.date.weekday, date: day.date, times: day.timeSlots);
+          DayModel dayObject = DayModel(
+              weekday: day.date.weekday, date: day.date, times: day.timeSlots);
           dayObject.getTotalAvailableTime();
-          instanceManager.sessionStorage.customDays
-              .add(dayObject);
+          instanceManager.sessionStorage.customDays.add(dayObject);
           day.id = await _firebaseCrud.addCustomDay(day);
           await _firebaseCrud.clearTimesForCustomDay(day.id);
           for (TimeSlotModel timeSlot in day.timeSlots) {
@@ -344,8 +344,6 @@ class CalendarController {
     }
   }
 
- 
-
   Future<int> deleteCustomDay(String dayID) async {
     try {
       instanceManager.sessionStorage.setNeedsRecalc(true);
@@ -362,33 +360,7 @@ class CalendarController {
       String dayID, TimeSlotModel timeSlot) async {
     try {
       await _firebaseCrud.markCalendarTimeSlotAsComplete(dayID, timeSlot.id);
-      //await getCalendarDay(instanceManager.sessionStorage.currentDay);
-      final String unitOrRevision = getUnitOrRevision(timeSlot.unitName) + 's';
 
-      final UnitModel unit = await _firebaseCrud
-          .getSpecificUnit(
-              timeSlot.examID, timeSlot.unitID, unitOrRevision.toLowerCase())
-          .timeout(timeoutDuration);
-      ;
-      unit.completionTime = unit.completionTime + timeSlot.duration;
-
-      if (await _firebaseCrud.updateUnitCompletionTime(
-              timeSlot.examID,
-              timeSlot.unitID,
-              unitOrRevision.toLowerCase(),
-              unit.completionTime) !=
-          1) {
-        unit.completionTime = unit.completionTime - timeSlot.duration;
-        return -1;
-      }
-      ;
-      if (unit.completionTime >= unit.sessionTime) {
-        //logger.i('Changing unit to complete...');
-        await _firebaseCrud
-            .markUnitAsComplete(timeSlot.examID, timeSlot.unitID)
-            .timeout(timeoutDuration);
-      }
-      //logger.i('Success marking timeSlot as complete!');
       return 1;
     } catch (e) {
       logger.e(
@@ -443,34 +415,7 @@ class CalendarController {
       await _firebaseCrud
           .markCalendarTimeSlotAsIncomplete(day.id, timeSlot.id)
           .timeout(timeoutDuration);
-      ;
-      //await getCalendarDay(instanceManager.sessionStorage.currentDay);
-      final unitOrRevision = getUnitOrRevision(timeSlot.unitName) + 's';
-      final UnitModel unit = await _firebaseCrud
-          .getSpecificUnit(
-              timeSlot.examID, timeSlot.unitID, unitOrRevision.toLowerCase())
-          .timeout(timeoutDuration);
-      ;
-      unit.completionTime = unit.completionTime - timeSlot.duration;
-
-      if (await _firebaseCrud
-              .updateUnitCompletionTime(timeSlot.examID, timeSlot.unitID,
-                  unitOrRevision.toLowerCase(), unit.completionTime)
-              .timeout(timeoutDuration) !=
-          1) {
-        unit.completionTime = unit.completionTime + timeSlot.duration;
-        return -1;
-      }
       
-
-      await _firebaseCrud
-          .markUnitAsIncomplete(timeSlot.examID, timeSlot.unitID)
-          .timeout(timeoutDuration);
-      
-
-      //logger.i('Success marking timeSlot as not complete!');
-      if (stripTime(DateTime.now()).isAfter(day.date))
-        instanceManager.sessionStorage.setNeedsRecalc(true);
       return 1;
     } catch (e) {
       logger.e('Error marking timeSlot as not complete: $e');

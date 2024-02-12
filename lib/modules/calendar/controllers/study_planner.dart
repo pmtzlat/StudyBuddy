@@ -1,3 +1,5 @@
+
+
 import 'package:flutter/material.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
@@ -7,7 +9,6 @@ import 'package:study_buddy/models/scheduler_stack_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
-import 'dart:math';
 
 ///Debugging color code:
 /// .f - stacks
@@ -32,12 +33,38 @@ class StudyPlanner {
     // -1 = Error
 
     try {
+      Map<String, Map<String, int>> unitTotalSessions = {};
+
+      void fillTotalUnitSessions(TimeSlotModel timeSlot) {
+        if (unitTotalSessions.containsKey(timeSlot.examID)) {
+          if (unitTotalSessions[timeSlot.examID]!
+              .containsKey(timeSlot.unitID)) {
+            unitTotalSessions[timeSlot.examID]![timeSlot.unitID] =
+                (unitTotalSessions[timeSlot.examID]![timeSlot.unitID] ?? 0) + 1;
+          } else {
+            unitTotalSessions[timeSlot.examID]![timeSlot.unitID] = 1;
+          }
+        } else {
+          unitTotalSessions[timeSlot.examID] = {timeSlot.unitID: 1};
+        }
+      }
+
+      Future<void> updateAllUnitSessionCompletionInfo() async {
+        for (var examID in unitTotalSessions.keys) {
+          for (var unitID in unitTotalSessions[examID]!.keys) {
+            final totalSessions = unitTotalSessions[examID]![unitID]!;
+            await firebaseCrud.updateUnitSessionCompletionInfo(
+                examID, unitID, totalSessions);
+          }
+        }
+      }
+
       generalStacks = await generateStacks();
       logger.f('Stacks generated! \n${getStringFromStackList(generalStacks)}');
 
       List<DayModel> result = [];
 
-      DateTime startDate =
+      DateTime? startDate =
           getLastDayOfStudy(instanceManager.sessionStorage.activeExams)!
               .subtract(Duration(days: 1));
 
@@ -71,7 +98,7 @@ class StudyPlanner {
         logger.w('Full day to add: \n\n ${dayToAdd.getString()}');
 
         result.insert(0, dayToAdd);
-        startDate = startDate.subtract(Duration(days: 1));
+        startDate = startDate!.subtract(Duration(days: 1));
         dayToAdd = await getGeneralOrCustomday(startDate);
       }
 
@@ -98,6 +125,8 @@ class StudyPlanner {
         var res = 1;
         for (var timeSlot in day.timeSlots) {
           if (timeSlot.examID != 'free') {
+            fillTotalUnitSessions(timeSlot);
+
             timeSlot.date = day.date;
             res = await firebaseCrud
                 .addTimeSlotToCalendarDay(dayID, timeSlot)
@@ -107,6 +136,9 @@ class StudyPlanner {
           }
         }
       }
+
+      await updateAllUnitSessionCompletionInfo();
+      await instanceManager.examController.getAllExams();
 
       return 1;
     } catch (e) {

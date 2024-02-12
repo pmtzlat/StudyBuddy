@@ -50,14 +50,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
         showRedSnackbar(context, _localizations.editUnitCompletionInExamsPage);
         return;
       }
-      if (!widget.timeSlot.completed) {
-        await _controller.markTimeSlotAsComplete(
-            instanceManager.sessionStorage.loadedCalendarDay.id,
-            widget.timeSlot);
-      } else {
-        await _controller.markTimeSlotAsIncomplete(
-            instanceManager.sessionStorage.loadedCalendarDay, widget.timeSlot);
-      }
+      widget.timeSlot.changeCompleteness(checked);
 
       widget.timeSlot = await _controller.getTimeSlot(
           widget.timeSlot.id, widget.timeSlot.dayID);
@@ -210,7 +203,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                     try {
                                       await _controller
                                           .saveTimeStudied(widget.timeSlot);
-                                      if(widget.timeSlot.completed != completenessBefore )await _controller
+                                      if(widget.timeSlot.completed != completenessBefore ) await _controller
                                           .updateTimeSlotCompleteness(
                                               widget.timeSlot);
                                     } catch (e) {

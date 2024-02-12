@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:study_buddy/main.dart';
+import 'package:study_buddy/models/exam_model.dart';
+import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
 class TimeSlotModel {
@@ -97,6 +100,18 @@ class TimeSlotModel {
         return res;
   }
 
+  Future<void> changeCompleteness(bool newValue) async {
+
+    await instanceManager.firebaseCrudService.changeTimeSlotCompleteness(dayID, id, newValue);
+    UnitModel? parentUnit = instanceManager.examController.getUnitModelById(examID, unitID);
+    if(parentUnit == null) return;
+    int x = -1;
+    if(newValue) x += 2;
+    parentUnit.editCompletedSessions(x);
+
+  }
+
+  
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

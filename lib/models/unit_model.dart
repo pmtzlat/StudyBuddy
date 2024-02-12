@@ -1,23 +1,28 @@
+import 'package:study_buddy/main.dart';
+import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
+
 
 class UnitModel {
   String name;
   Duration sessionTime;
   final String id;
   int order;
+  int totalSessions;
+  int completedSessions;
   bool completed;
-  Duration completionTime;
-  Duration realStudyTime;
+  String examID;
 
   UnitModel({
     required this.name,
     this.sessionTime = const Duration(hours: 2),
     this.id = '',
+    this.examID = '',
     required this.order,
+    this.totalSessions = 1,
+    this.completedSessions = 0,
     this.completed = false,
-    this.completionTime = Duration.zero,
-    this.realStudyTime = Duration.zero,
-  });
+  }) ;
 
   // Deserialize from JSON
   factory UnitModel.fromJson(Map<String, dynamic> json) {
@@ -26,10 +31,9 @@ class UnitModel {
       sessionTime: Duration(milliseconds: json['sessionTime'] ?? 0),
       id: json['id'] ?? '',
       order: json['order'] ?? 0,
-      completed: json['completed'] ?? false,
-      completionTime: Duration(milliseconds: json['completionTime'] ?? 0),
-      realStudyTime: Duration(milliseconds: json['realStudyTime'] ?? 0),
-    );
+      totalSessions: json['totalSessions'] ?? 0,
+      completedSessions: json['completedSessions'] ?? 0,
+    )..completed = (json['completedSessions'] == json['totalSessions']);
   }
 
   // Serialize to JSON
@@ -39,9 +43,8 @@ class UnitModel {
       'sessionTime': sessionTime.inMilliseconds,
       'id': id,
       'order': order,
-      'completed': completed,
-      'completionTime': completionTime.inMilliseconds,
-      'realStudyTime': realStudyTime.inMilliseconds,
+      'totalSessions': totalSessions,
+      'completedSessions': completedSessions,
     };
   }
 
@@ -50,30 +53,38 @@ class UnitModel {
     return UnitModel.fromJson(this.toJson());
   }
 
+  Future<void> editCompletedSessions(int x) async { //doesn't work properly with revisions, needs debugging
+    completedSessions += x;
+    
+    await instanceManager.firebaseCrudService.changeUnitCompletedSessions(examID, id, completedSessions);
+    bool newCompletion = (completedSessions == totalSessions);
+    logger.i(getString());
+    await instanceManager.firebaseCrudService
+        .changeUnitCompleteness(examID, id, newCompletion);
+    
+  }
+
+  String getString(){
+    return '\n\nUnit $name: \nSessions completed: $completedSessions / $totalSessions\nCompleted: $completed\nExam: $examID\n\n';
+  }
+
   UnitModel copyWith({
     String? name,
     Duration? sessionTime,
     String? id,
     int? order,
-    bool? completed,
-    Duration? completionTime,
-    Duration? realStudyTime,
+    int? totalSessions,
+    int? completedSessions,
   }) {
     return UnitModel(
       name: name ?? this.name,
       sessionTime: sessionTime ?? this.sessionTime,
       id: id ?? this.id,
       order: order ?? this.order,
-      completed: completed ?? this.completed,
-      completionTime: completionTime ?? this.completionTime,
-      realStudyTime: realStudyTime ?? this.realStudyTime,
-    );
-  }
-
-  String getString() {
-    return 'Unit $order: $name \n\n${formatDuration(sessionTime)} - $completed';
+      totalSessions: totalSessions ?? this.totalSessions,
+      completedSessions: completedSessions ?? this.completedSessions,
+    )..completed = (completedSessions == totalSessions);
   }
 
   
-
 }

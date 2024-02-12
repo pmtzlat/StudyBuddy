@@ -104,7 +104,7 @@ class ExamModel {
             name: ' ${_localizations.unit} 1',
             order: 1,
             sessionTime: revisionTime,
-            completed: false);
+            );
         await firebaseCrud
             .addUnitToExam(newUnit: newUnit, examID: id)
             .timeout(timeoutDuration);
@@ -112,8 +112,7 @@ class ExamModel {
         final newUnit = UnitModel(
             name: ' ${_localizations.unit} ${units!.length + 1}',
             order: units!.length + 1,
-            sessionTime: revisionTime,
-            completed: false);
+            sessionTime: revisionTime);
         await firebaseCrud
             .addUnitToExam(newUnit: newUnit, examID: id)
             .timeout(timeoutDuration);
