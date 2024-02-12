@@ -47,6 +47,7 @@ class StudyPlanner {
       }
 
       logger.i('Start date: ${startDate}');
+      await instanceManager.calendarController.getCustomDays();
 
       DayModel dayToAdd = await getGeneralOrCustomday(startDate);
       List<SchedulerStackModel> singularDayStacks = <SchedulerStackModel>[];
@@ -115,7 +116,6 @@ class StudyPlanner {
   }
 
   Future<DayModel> getGeneralOrCustomday(DateTime startDate) async {
-    await instanceManager.calendarController.getCustomDays();
     return instanceManager.sessionStorage.customDays.firstWhere(
         (element) => element.date == startDate,
         orElse: () => DayModel(
@@ -172,8 +172,14 @@ class StudyPlanner {
         logger.t(
             'Gap to fill: ${timeOfDayToStr(gap.startTime)} - ${timeOfDayToStr(gap.endTime)}');
 
-        newTimes.add(getTimeSlotWithUnit(gap, stacks, day));
-        logger.f('New stacks: \n ${getStringFromStackList(stacks)}');
+        TimeSlotModel? obtainedSession = getTimeSlotWithUnit(gap, stacks, day);
+
+        if (obtainedSession != null) {
+          newTimes.add(obtainedSession);
+        } else {
+          logger.d('No unit found!');
+        }
+        //logger.f('New stacks: \n ${getStringFromStackList(stacks)}');
 
         day.getTotalAvailableTime();
         logger.w(
@@ -186,7 +192,7 @@ class StudyPlanner {
     }
   }
 
-  TimeSlotModel getTimeSlotWithUnit(TimeSlotModel gap,
+  TimeSlotModel? getTimeSlotWithUnit(TimeSlotModel gap,
       List<SchedulerStackModel> filteredStacks, DayModel day) {
     try {
       Map<String, dynamic>? selectedUnit =
@@ -194,7 +200,7 @@ class StudyPlanner {
 
       if (selectedUnit == null) {
         day.timeSlots.remove(gap);
-        return gap;
+        return null;
       }
 
       TimeOfDay startTime = subtractDurationFromTimeOfDay(

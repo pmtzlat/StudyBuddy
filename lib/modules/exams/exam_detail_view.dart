@@ -606,7 +606,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
       itemBuilder: (context, index, animation) {
         try {
           final unit = widget.exam.units[index];
-          logger.i(unit.getString());
+          
 
           return MediaQuery.removePadding(
             context: context,

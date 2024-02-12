@@ -461,12 +461,12 @@ class CalendarController {
         unit.completionTime = unit.completionTime + timeSlot.duration;
         return -1;
       }
-      ;
+      
 
       await _firebaseCrud
           .markUnitAsIncomplete(timeSlot.examID, timeSlot.unitID)
           .timeout(timeoutDuration);
-      ;
+      
 
       //logger.i('Success marking timeSlot as not complete!');
       if (stripTime(DateTime.now()).isAfter(day.date))

@@ -49,7 +49,7 @@ class DayModel {
       catch(e){
         logger.w('Error getting timeSlots for custom day $date: $e');
       }
-      logger.f(getString());
+      
       sortTimeSlotList(timeSlots);
     } else {
       final List<TimeSlotModel> timeSlotList =

@@ -192,6 +192,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                         _localizations
                                             .cantStartSessionForFuture);
                                   }
+                                  bool completenessBefore = widget.timeSlot.completed;
                                   
                                   TimeSlotModel newTimeSlot =
                                       await showTimerDialog(context,
@@ -209,7 +210,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                     try {
                                       await _controller
                                           .saveTimeStudied(widget.timeSlot);
-                                      await _controller
+                                      if(widget.timeSlot.completed != completenessBefore )await _controller
                                           .updateTimeSlotCompleteness(
                                               widget.timeSlot);
                                     } catch (e) {

@@ -334,7 +334,7 @@ Future<TimeSlotModel> showTimerDialog(BuildContext context,
     if (timeSlot.timeStudied >= timeSlot.duration &&
         timeSlot.completed == false) {
       timeSlot.completed = true;
-    } else if (timeSlot.timeStudied < Duration(seconds: 5) &&
+    } else if (timeSlot.timeStudied < timeSlot.duration &&
         timeSlot.completed == true) {
       timeSlot.completed = false;
     }

@@ -174,6 +174,7 @@ class ExamsController {
           examDate: examDate,
           orderMatters: orderMatters,
           sessionsSplittable: sessionSplittable,
+          revisionTime: revisionTime,
           color: examColor);
 
       instanceManager.sessionStorage.examToAdd!.units = <UnitModel>[];
