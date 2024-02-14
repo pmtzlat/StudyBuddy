@@ -40,7 +40,7 @@ class ExamDetailView extends StatefulWidget {
 }
 
 class _ExamDetailViewState extends State<ExamDetailView> {
-  final _controller = instanceManager.examController;
+  final _controller = instanceManager.examsController;
   bool editMode = false;
   final editExamFormKey = GlobalKey<FormBuilderState>();
 
@@ -534,8 +534,13 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                     initialTime: revisionTime,
                                   ) ??
                                   revisionTime;
+                              if (revisionTime == Duration.zero) {
+                                revisionTime =
+                                    const Duration(minutes: 1);
+                                showRedSnackbar(context,
+                                    _localizations.sessionTimeCantBeZero);
+                              }
                               setState(() {
-                                revisionTime = revisionTime;
                               });
                             }
                           },
@@ -606,7 +611,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
       itemBuilder: (context, index, animation) {
         try {
           final unit = widget.exam.units[index];
-          
 
           return MediaQuery.removePadding(
             context: context,

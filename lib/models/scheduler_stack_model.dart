@@ -22,7 +22,7 @@ class SchedulerStackModel {
     .toList();
 
 revisions = exam.revisions
-    .where((unit) => !unit.completed)
+    
     .map((unit) => unit.deepCopy())
     .toList();
       daysUntilExam = getDaysUntilExam(exam.examDate);

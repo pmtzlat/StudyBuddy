@@ -27,7 +27,7 @@ class InstanceManager {
   final FirebaseCrudService firebaseCrudService = FirebaseCrudService();
   late SharedPreferences localStorage;
   final connectivity = Connectivity();
-  late ExamsController examController;
+  late ExamsController examsController;
   late CalendarController calendarController;
   late StudyPlanner studyPlanner;
   late LocalStorageService localStorageCustomOperations;
@@ -41,7 +41,7 @@ class InstanceManager {
 
   Future<void> startDependantInstances() async{
     localStorage =  await SharedPreferences.getInstance();
-    examController = ExamsController();
+    examsController = ExamsController();
     calendarController = CalendarController();
     studyPlanner = StudyPlanner(firebaseCrud: firebaseCrudService, uid: localStorage.getString('uid') ?? '');
     localStorageCustomOperations = LocalStorageService(localStorage: localStorage);

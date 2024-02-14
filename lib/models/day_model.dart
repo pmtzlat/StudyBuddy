@@ -27,7 +27,7 @@ class DayModel {
     String timesString = '';
     for (TimeSlotModel slot in timeSlots!) {
       timesString +=
-          '\n ${slot.startTime} - ${slot.endTime} : ${slot.examName ?? slot.examID} ${slot.unitName}';
+          '\n ${slot.startTime} - ${slot.endTime} : ${slot.examName ?? slot.examID} ${slot.unitName} - completed = ${slot.completed}';
     }
 
     return '$id -> $date: $weekday\n Times: $timesString \n Available Time: ${formatDuration(totalAvailableTime)}';

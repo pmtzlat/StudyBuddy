@@ -39,14 +39,7 @@ List<double> generateDescendingList(int n) {
   return resultList;
 }
 
-String getExamsListString(List<ExamModel>? list) {
-  String res = '';
-  if (list == null) list = instanceManager.sessionStorage.activeExams;
-  for (ExamModel exam in list!) {
-    res += '${exam.name} - ${exam.weight}\n';
-  }
-  return res;
-}
+
 
 String getPosition(ExamModel exam) {
   int position = instanceManager.sessionStorage.activeExams.indexOf(exam) + 1;

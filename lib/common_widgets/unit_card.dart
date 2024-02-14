@@ -10,6 +10,7 @@ import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/modules/exams/exam_detail_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
+import 'package:study_buddy/utils/error_&_success_messages.dart';
 
 class UnitCard extends StatefulWidget {
   UnitModel unit;
@@ -37,7 +38,7 @@ class UnitCard extends StatefulWidget {
 
 class _UnitCardState extends State<UnitCard>
     with SingleTickerProviderStateMixin {
-  final _controller = instanceManager.examController;
+  final _controller = instanceManager.examsController;
   var editMode = false;
 
   bool open = false;
@@ -203,6 +204,11 @@ class _UnitCardState extends State<UnitCard>
                                 initialTime: widget.unit.sessionTime,
                               ) ??
                               widget.unit.sessionTime;
+                          if(widget.unit.sessionTime == Duration.zero){
+                            widget.unit.sessionTime = const Duration(minutes:1);
+                            showRedSnackbar(context, _localizations.sessionTimeCantBeZero);
+
+                          }
                         }
                         setState(() {});
                       },

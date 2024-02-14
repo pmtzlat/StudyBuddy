@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:study_buddy/main.dart';
+import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/models/scheduler_stack_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
@@ -275,4 +277,14 @@ String getStringFromStackList(List<SchedulerStackModel> list){
   }
   return res;
   
+}
+
+String getStringForExams(List<ExamModel> examsList){
+  String res = '\n';
+  for(ExamModel exam in examsList){
+    res += '${exam.getString()}\n\n';
+
+  }
+
+  return res;
 }

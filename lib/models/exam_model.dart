@@ -17,7 +17,8 @@ class ExamModel {
   List<UnitModel> units;
   bool orderMatters;
   List<UnitModel> revisions;
-  bool sessionsSplittable; // determines if sessions should be splittable between days if a day doesn't have enough time
+  bool
+      sessionsSplittable; // determines if sessions should be splittable between days if a day doesn't have enough time
 
   /*
   var iconData = IconData(58717, fontFamily: 'MaterialIcons')
@@ -101,10 +102,10 @@ class ExamModel {
     try {
       if (units == null) {
         final newUnit = UnitModel(
-            name: ' ${_localizations.unit} 1',
-            order: 1,
-            sessionTime: revisionTime,
-            );
+          name: ' ${_localizations.unit} 1',
+          order: 1,
+          sessionTime: revisionTime,
+        );
         await firebaseCrud
             .addUnitToExam(newUnit: newUnit, examID: id)
             .timeout(timeoutDuration);
@@ -159,13 +160,33 @@ class ExamModel {
       res +=
           '\n       ${unit.name}: ${formatDuration(unit.sessionTime)}, completed: ${unit.completed}, order: ${unit.order} - ${unit.id}';
     }
-    res +=
-        '\n Revision days: ${revisions.length}\n Revision session: $revisionTime';
+    res += '\nRevisions:\n';
+    for (UnitModel unit in revisions) {
+      res +=
+          '\n       ${unit.name}: ${formatDuration(unit.sessionTime)}, completed: ${unit.completed}, order: ${unit.order} - ${unit.id}';
+    }
 
     logger.i(res);
   }
 
-  void updateUnitOrders(GlobalKey<FormBuilderState>? formKey, BuildContext context) {
+  String getString() {
+    String res =
+        'Exam $name: \n Date: $examDate:\n Order Matters: $orderMatters\n Units: ';
+    for (UnitModel unit in units) {
+      res +=
+          '\n       ${unit.name}: ${formatDuration(unit.sessionTime)}, completed: ${unit.completed}, order: ${unit.order} - ${unit.id}';
+    }
+    res += '\nRevisions:\n';
+    for (UnitModel unit in revisions) {
+      res +=
+          '\n       ${unit.name}: ${formatDuration(unit.sessionTime)}, completed: ${unit.completed}, order: ${unit.order} - ${unit.id}';
+    }
+
+    return res;
+  }
+
+  void updateUnitOrders(
+      GlobalKey<FormBuilderState>? formKey, BuildContext context) {
     final _localizations = AppLocalizations.of(context)!;
     String res = 'New unit order: \n';
     for (int i = 0; i < units.length; i++) {
@@ -175,7 +196,6 @@ class ExamModel {
       if (units[i].name == ' ${_localizations.unit} ${units[i].order + 1}')
         units[i].name = ' ${_localizations.unit} ${units[i].order}';
       res += '${units[i].name}: ${units[i].order}\n';
-      
     }
     //logger.i('$res');
   }

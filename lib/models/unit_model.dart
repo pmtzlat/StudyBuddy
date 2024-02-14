@@ -2,7 +2,6 @@ import 'package:study_buddy/main.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 
-
 class UnitModel {
   String name;
   Duration sessionTime;
@@ -22,7 +21,7 @@ class UnitModel {
     this.totalSessions = 1,
     this.completedSessions = 0,
     this.completed = false,
-  }) ;
+  });
 
   // Deserialize from JSON
   factory UnitModel.fromJson(Map<String, dynamic> json) {
@@ -53,18 +52,20 @@ class UnitModel {
     return UnitModel.fromJson(this.toJson());
   }
 
-  Future<void> editCompletedSessions(int x) async { //doesn't work properly with revisions, needs debugging
+  Future<void> editCompletedSessions(int x) async {
     completedSessions += x;
-    
-    await instanceManager.firebaseCrudService.changeUnitCompletedSessions(examID, id, completedSessions);
+
+    await instanceManager.firebaseCrudService
+        .changeUnitCompletedSessions(examID, id, completedSessions);
     bool newCompletion = (completedSessions == totalSessions);
-    logger.i(getString());
+
     await instanceManager.firebaseCrudService
         .changeUnitCompleteness(examID, id, newCompletion);
     
+    logger.i(getString());
   }
 
-  String getString(){
+  String getString() {
     return '\n\nUnit $name: \nSessions completed: $completedSessions / $totalSessions\nCompleted: $completed\nExam: $examID\n\n';
   }
 
@@ -85,6 +86,12 @@ class UnitModel {
       completedSessions: completedSessions ?? this.completedSessions,
     )..completed = (completedSessions == totalSessions);
   }
-
-  
 }
+
+
+///TODO: when a timeSlot is marked as complete, 
+///and then you change page, when you go back to the page, 
+///the timeSlot is marked as incomplete, so there is probably
+///an issue with the objects in local not updating correctly
+///
+///Also, units don't appear as completed in the exam detail view. 

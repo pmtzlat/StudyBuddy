@@ -622,10 +622,7 @@ class _CalendarViewState extends State<CalendarView>
                               padding: EdgeInsets.symmetric(
                                   vertical: screenHeight * 0.015,
                                   horizontal: screenHeight * 0.007),
-                              decoration: BoxDecoration(
-                                color: Color.fromARGB(255, 236, 236, 236),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
+                              
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.max,

@@ -8,11 +8,11 @@ import 'package:study_buddy/utils/error_&_success_messages.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TimeSlotCard extends StatefulWidget {
-  TimeSlotModel timeSlot;
+  int index;
 
   TimeSlotCard({
     super.key,
-    required TimeSlotModel this.timeSlot,
+    required this.index,
   });
 
   @override
@@ -24,12 +24,15 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
   final openTime = Duration(milliseconds: 200);
   bool open = false;
   late bool checked;
+  late TimeSlotModel timeSlot;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    checked = widget.timeSlot.completed;
+    timeSlot = instanceManager
+        .sessionStorage.loadedCalendarDay.timeSlots[widget.index];
+    checked = timeSlot.completed;
   }
 
   @override
@@ -37,7 +40,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    final cardColor = widget.timeSlot.examColor;
+    final cardColor = timeSlot.examColor;
     final lighterColor = lighten(cardColor, .05);
     final darkerColor = darken(cardColor, .15);
 
@@ -46,14 +49,25 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
     }
 
     Future<void> checkBox(bool checked) async {
-      if (stripTime(DateTime.now()).isAfter(widget.timeSlot.date!)) {
+      if (stripTime(DateTime.now()).isAfter(timeSlot.date!)) {
         showRedSnackbar(context, _localizations.editUnitCompletionInExamsPage);
         return;
       }
-      widget.timeSlot.changeCompleteness(checked);
+      try {
+        await timeSlot.changeCompleteness(checked);
+      } catch (e) {
+        logger.e('Error changing completeness: $e');
+      }
 
-      widget.timeSlot = await _controller.getTimeSlot(
-          widget.timeSlot.id, widget.timeSlot.dayID);
+      instanceManager.sessionStorage.loadedCalendarDay.timeSlots[widget.index] =
+          await _controller.getTimeSlot(timeSlot.id, timeSlot.dayID);
+
+     
+
+      setState(() {
+        timeSlot = instanceManager
+            .sessionStorage.loadedCalendarDay.timeSlots[widget.index];
+      });
     }
 
     return Container(
@@ -80,7 +94,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                 children: [
                   GestureDetector(
                       onTap: () {
-                        logger.i('open/close');
+                        
                         setState(() {
                           open = !open;
                         });
@@ -103,12 +117,12 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(widget.timeSlot.examName,
+                                      Text(timeSlot.examName,
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: screenWidth * 0.06,
                                               fontWeight: FontWeight.bold)),
-                                      Text(widget.timeSlot.unitName,
+                                      Text(timeSlot.unitName,
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.w300))
@@ -122,8 +136,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                               vertical: screenHeight * 0.002),
                                           child: AnimatedSwitcher(
                                             duration: openTime,
-                                            child: widget.timeSlot.completed &&
-                                                    !open
+                                            child: timeSlot.completed && !open
                                                 ? Container(
                                                     key: ValueKey<int>(0),
                                                     width: screenWidth * 0.215,
@@ -151,7 +164,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                                     width: screenWidth * 0.215,
                                                     height: screenHeight * 0.06,
                                                     child: Text(
-                                                        '${timeOfDayToStr(widget.timeSlot.startTime)} - ${timeOfDayToStr(widget.timeSlot.endTime)}',
+                                                        '${timeOfDayToStr(timeSlot.startTime)} - ${timeOfDayToStr(timeSlot.endTime)}',
                                                         style: TextStyle(
                                                             color:
                                                                 Colors.white)),
@@ -185,48 +198,46 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                         _localizations
                                             .cantStartSessionForFuture);
                                   }
-                                  bool completenessBefore = widget.timeSlot.completed;
-                                  
-                                  TimeSlotModel newTimeSlot =
-                                      await showTimerDialog(context,
-                                          widget.timeSlot, _controller);
-                                  
-                                  //after closing timer
-
-                                  logger.i(newTimeSlot.getString());
-
-                                  setState(() {
-                                    widget.timeSlot = newTimeSlot;
-                                    checked = widget.timeSlot.completed;
-                                  });
+                                  //bool completenessBefore = timeSlot.completed;
                                   try {
-                                    try {
-                                      await _controller
-                                          .saveTimeStudied(widget.timeSlot);
-                                      if(widget.timeSlot.completed != completenessBefore ) await _controller
-                                          .updateTimeSlotCompleteness(
-                                              widget.timeSlot);
-                                    } catch (e) {
-                                      logger.e(
-                                          'Error saving timeSlot new data: $e');
-                                      showRedSnackbar(
-                                          context, _localizations.errorSaving);
-                                    }
-                                    
+                                    await showTimerDialog(context, timeSlot, widget.index);
 
-                                    newTimeSlot = await _controller.getTimeSlot(
-                                        widget.timeSlot.id,
-                                        widget.timeSlot.dayID);
+                                    //after closing timer
 
                                     setState(() {
-                                      widget.timeSlot = newTimeSlot;
-                                      checked = widget.timeSlot.completed;
+                                      timeSlot = instanceManager
+                                          .sessionStorage
+                                          .loadedCalendarDay
+                                          .timeSlots[widget.index];
+                                      checked = timeSlot.completed;
                                     });
+                                    
+
+                                    // try {
+                                    //   await _controller
+                                    //       .saveTimeStudied(timeSlot);
+                                    //   if(timeSlot.completed != completenessBefore ) await _controller
+                                    //       .updateTimeSlotCompleteness(
+                                    //           timeSlot);
+                                    // } catch (e) {
+                                    //   logger.e(
+                                    //       'Error saving timeSlot new data: $e');
+                                    //   showRedSnackbar(
+                                    //       context, _localizations.errorSaving);
+                                    // }
+
+                                    // newTimeSlot = await _controller.getTimeSlot(
+                                    //     timeSlot.id,
+                                    //     timeSlot.dayID);
+
+                                    // setState(() {
+                                    //   timeSlot = newTimeSlot;
+                                    //   checked = timeSlot.completed;
+                                    // });
                                   } catch (e) {
                                     logger.e('Error updating timeSlot: $e');
                                     showRedSnackbar(
                                         context, _localizations.errorSaving);
-                                    
                                   }
 
                                   //logger.i(newTimeSlot.getString());
@@ -234,8 +245,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                 icon: Icon(Icons.timer_outlined,
                                     color: Colors.white),
                                 label: Text(
-                                  formatDurationNoWords(
-                                      widget.timeSlot.timeStudied),
+                                  formatDurationNoWords(timeSlot.timeStudied),
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: screenWidth * 0.05),
@@ -254,13 +264,13 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                     visualDensity: VisualDensity(
                                         horizontal: -4, vertical: -4),
                                     activeColor: Colors.black,
-                                    checkColor: widget.timeSlot
+                                    checkColor: timeSlot
                                         .examColor, // Color of the checkmark
                                     fillColor:
                                         MaterialStateProperty.all(Colors.white),
                                     value: checked,
                                     onChanged: (bool? newValue) async {
-                                      logger.i('Checked box!');
+                                      
                                       setState(() {
                                         checked = !checked;
                                       });
@@ -276,7 +286,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                       }
 
                                       setState(() {
-                                        checked = widget.timeSlot.completed;
+                                        checked = timeSlot.completed;
                                       });
                                     }),
                               )

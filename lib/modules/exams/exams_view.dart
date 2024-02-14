@@ -30,7 +30,7 @@ class ExamsView extends StatefulWidget {
 }
 
 class _ExamsViewState extends State<ExamsView> {
-  final _controller = instanceManager.examController;
+  final _controller = instanceManager.examsController;
   bool loading = false;
   bool prioritizing = false;
   List<ExamModel> activeExams = instanceManager.sessionStorage.activeExams;
@@ -105,7 +105,7 @@ class _ExamsViewState extends State<ExamsView> {
                               onPressed: () {
                                 logger.i('Cancel clicked!');
                                 logger.i(
-                                    'reorderExams after cancel clicked: ${getExamsListString(reorderExams)}');
+                                    'reorderExams after cancel clicked: ${getStringForExams(reorderExams)}');
                                 setState(() {
                                   prioritizing = false;
                                 });
@@ -170,7 +170,7 @@ class _ExamsViewState extends State<ExamsView> {
                                               (ExamModel a, ExamModel b) =>
                                                   b.weight.compareTo(a.weight));
                                           logger.i(
-                                              'reorderExams after confirm clicked: ${getExamsListString(reorderExams)}');
+                                              'reorderExams after confirm clicked: ${getStringForExams(reorderExams)}');
 
                                           setState(() {
                                             activeExams = reorderExams;

@@ -44,7 +44,7 @@ class _Page1State extends State<Page1> {
   final examCreationFormKey = GlobalKey<FormBuilderState>();
   Duration defaultStudyTime = Duration(hours: 1);
   Duration revisionTime = Duration(hours: 1);
-  final _controller = instanceManager.examController;
+  final _controller = instanceManager.examsController;
   Color examColor = Colors.redAccent;
   int revisions = 2;
 
@@ -407,7 +407,7 @@ class Page2 extends StatefulWidget {
 class Page2State extends State<Page2> {
   List<UnitModel> unitsToAdd = instanceManager.sessionStorage.examToAdd.units;
   final unitTimesFormKey = GlobalKey<FormBuilderState>();
-  final _controller = instanceManager.examController;
+  final _controller = instanceManager.examsController;
 
   void updateState() {
     setState(() {
@@ -604,7 +604,7 @@ class Page3 extends StatefulWidget {
 class Page3State extends State<Page3> {
   List<ExamModel> exams = instanceManager.sessionStorage.activeExams;
 
-  final _controller = instanceManager.examController;
+  final _controller = instanceManager.examsController;
 
   @override
   void initState() {

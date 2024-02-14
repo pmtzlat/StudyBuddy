@@ -3,6 +3,7 @@ import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
+import 'package:study_buddy/utils/datatype_utils.dart';
 
 class TimeSlotModel {
   String id;
@@ -57,21 +58,6 @@ class TimeSlotModel {
     duration = Duration(hours: hours, minutes: minutes);
   }
 
-  String getInfoString() {
-    final weekdays = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday'
-    ];
-    final result =
-        'TimeSlot: \n${weekdays[weekday - 1]} ${startTime.toString()} - ${endTime.toString()} : $examName';
-    return result;
-  }
-
   TimeSlotModel.from(TimeSlotModel other)
       : id = other.id,
         weekday = other.weekday,
@@ -97,21 +83,23 @@ class TimeSlotModel {
   String getString() {
     String res =
         'TimeSlot: $id: \n $startTime - $endTime \n $timeStudied \n $completed';
-        return res;
+    return res;
   }
 
   Future<void> changeCompleteness(bool newValue) async {
-
-    await instanceManager.firebaseCrudService.changeTimeSlotCompleteness(dayID, id, newValue);
-    UnitModel? parentUnit = instanceManager.examController.getUnitModelById(examID, unitID);
-    if(parentUnit == null) return;
+    await instanceManager.firebaseCrudService
+        .changeTimeSlotCompleteness(dayID, id, newValue);
+    UnitModel? parentUnit =
+        instanceManager.examsController.getUnitModelById(examID, unitID);
+    if (parentUnit == null) return;
     int x = -1;
-    if(newValue) x += 2;
-    parentUnit.editCompletedSessions(x);
-
+    if (newValue) x += 2;
+    await parentUnit.editCompletedSessions(x);
+    //unit in local is not updated after timeSlot change 
+    await instanceManager.examsController.changeUnitOrRevision(parentUnit);
+    logger.d(getStringForExams(instanceManager.sessionStorage.activeExams));
   }
 
-  
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

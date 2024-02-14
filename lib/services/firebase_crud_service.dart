@@ -97,14 +97,14 @@ class FirebaseCrudService {
       for (final unitDoc in unitQuerySnapshot.docs) {
         final unitData = unitDoc.data() as Map<String, dynamic>;
         final unit = UnitModel(
-          name: unitData['name'] ?? '',
-          sessionTime: parseTime(unitData['sessionTime']),
-          id: unitDoc.id,
-          order: unitData['order'] ?? 0,
-          totalSessions: unitData['totalSessions'] ?? 0,
-          completedSessions: unitData['completedSessions'] ?? 0,
-          examID: unitData['examID'],
-        );
+            name: unitData['name'] ?? '',
+            sessionTime: parseTime(unitData['sessionTime']),
+            id: unitDoc.id,
+            order: unitData['order'] ?? 0,
+            totalSessions: unitData['totalSessions'] ?? 0,
+            completedSessions: unitData['completedSessions'] ?? 0,
+            examID: unitData['examID'] ?? '',
+            completed: unitData['completed'] ?? false);
         units.add(unit);
       }
       return units;
@@ -142,6 +142,7 @@ class FirebaseCrudService {
           totalSessions: unitData['totalSessions'] ?? 0,
           completedSessions: unitData['completedSessions'] ?? 0,
           examID: unitData['examID'],
+          completed: unitData['completed'] ?? false
         );
       } else {
         return null;
@@ -172,14 +173,14 @@ class FirebaseCrudService {
       for (final revisionDoc in revisionQuerySnapshot.docs) {
         final unitData = revisionDoc.data() as Map<String, dynamic>;
         final unit = UnitModel(
-          name: unitData['name'] ?? '',
-          sessionTime: parseTime(unitData['sessionTime']),
-          id: revisionDoc.id,
-          order: unitData['order'] ?? 0,
-          totalSessions: unitData['totalSessions'] ?? 0,
-          completedSessions: unitData['completedSessions'] ?? 0,
-          examID: unitData['examID'] ?? '',
-        );
+            name: unitData['name'] ?? '',
+            sessionTime: parseTime(unitData['sessionTime']),
+            id: revisionDoc.id,
+            order: unitData['order'] ?? 0,
+            totalSessions: unitData['totalSessions'] ?? 0,
+            completedSessions: unitData['completedSessions'] ?? 0,
+            examID: unitData['examID'] ?? '',
+            completed: unitData['completed'] ?? false);
         revisions.add(unit);
       }
       return revisions;
@@ -445,7 +446,7 @@ class FirebaseCrudService {
   }
 
   Future<String?> addRevisionToExam(
-      { required String examID, required UnitModel newRevision}) async {
+      {required String examID, required UnitModel newRevision}) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -454,8 +455,6 @@ class FirebaseCrudService {
         .doc(uid)
         .collection('exams')
         .doc(examID);
-
-    
 
     final revisionData = {
       'name': newRevision.name,
@@ -1369,8 +1368,6 @@ class FirebaseCrudService {
           .collection('units')
           .doc(unitID);
 
-      
-
       final unitSnapshot = await unitReference.get();
 
       if (!unitSnapshot.exists) {
@@ -1383,7 +1380,6 @@ class FirebaseCrudService {
             .doc(unitID);
 
         final revisionSnapshot = await unitReference.get();
-        
 
         if (!revisionSnapshot.exists) {
           logger.i('Revision $examID: $unitID not found');

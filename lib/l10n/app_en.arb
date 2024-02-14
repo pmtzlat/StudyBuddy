@@ -68,6 +68,7 @@
     "unit": "Unit",
     "sessionSplittable":"Split study sessions if they don't fit in a day",
     "keepSessionsInDay": "Study sessions can be split:",
+    "sessionTimeCantBeZero": "Session time can't be zero!",
 
     
 

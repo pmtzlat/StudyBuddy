@@ -398,9 +398,9 @@ class CalendarController {
   Future<int> markTimeSlotListAsComplete(List<TimeSlotModel> arr) async {
     try {
       for (TimeSlotModel timeSlot in arr) {
-        logger.i(timeSlot.getInfoString());
-        int res = await markTimeSlotAsComplete(timeSlot.dayID, timeSlot);
-        if (res == -1) return -1;
+        logger.i(timeSlot.getString());
+        await timeSlot.changeCompleteness(true);
+        
       }
       return 1;
     } catch (e) {

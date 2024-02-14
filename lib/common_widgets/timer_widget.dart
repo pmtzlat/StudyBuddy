@@ -45,6 +45,7 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   bool timerWasRunning = false;
   late Screen _screen;
   late StreamSubscription<ScreenStateEvent>? _subscription;
+  bool loading = false;
 
   bool screenOn = true;
   DateTime? preLockTimeStamp;
@@ -308,55 +309,8 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   }
 }
 
-Future<TimeSlotModel> showTimerDialog(BuildContext context,
-    TimeSlotModel timeSlot, CalendarController controller) async {
-  final GlobalKey<TimerWidgetState> timerKey = GlobalKey<TimerWidgetState>();
-
-  var screenHeight = MediaQuery.of(context).size.height;
-  var screenWidth = MediaQuery.of(context).size.width;
-  final _localizations = AppLocalizations.of(context)!;
-  final lighterColor = lighten(timeSlot.examColor, .05);
-  final darkerColor = darken(timeSlot.examColor, .15);
-
-  List<int> formatDuration(Duration duration) {
-    int hours = duration.inHours;
-    int minutes = (duration.inMinutes - Duration(hours: hours).inMinutes) % 60;
-    int seconds = (duration.inSeconds -
-            Duration(hours: hours, minutes: minutes).inSeconds) %
-        60;
-
-    return [hours, minutes, seconds];
-  }
-
-  Future<void> saveChangesToTimeSlot(
-      Duration time, BuildContext context) async {
-    timeSlot.timeStudied = time;
-    if (timeSlot.timeStudied >= timeSlot.duration &&
-        timeSlot.completed == false) {
-      timeSlot.completed = true;
-    } else if (timeSlot.timeStudied < timeSlot.duration &&
-        timeSlot.completed == true) {
-      timeSlot.completed = false;
-    }
-  }
-
-  void completeAndClose(Duration time, BuildContext context) async {
-    await saveChangesToTimeSlot(time, context);
-    Navigator.pop(context, timeSlot);
-  }
-
-  List<int> formattedDuration = formatDuration(timeSlot.timeStudied);
-
-  TimerWidget timer = TimerWidget(
-    key: timerKey,
-    hours: formattedDuration[0],
-    minutes: formattedDuration[1],
-    seconds: formattedDuration[2],
-    sessionTime: timeSlot.duration, //timeSlot.duration,
-    completeAndClose: completeAndClose,
-    timeSlot: timeSlot,
-  );
-
+Future<void> showTimerDialog(
+    BuildContext context, TimeSlotModel timeSlot, int index) async {
   await showGeneralDialog(
       context: context,
       barrierDismissible: false,
@@ -369,85 +323,190 @@ Future<TimeSlotModel> showTimerDialog(BuildContext context,
         final int duration = timeSlot.duration.inSeconds;
         int initialValue = timeSlot.timeStudied.inSeconds;
 
-        return Center(
-          child: Card(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            child: Container(
-              decoration: BoxDecoration(
-                //borderRadius: BorderRadius.all(Radius.circular(20)),
-                gradient: LinearGradient(
-                    end: Alignment.bottomLeft,
-                    begin: Alignment.topRight,
-                    //stops: [ 0.1, 0.9],
-                    colors: [lighterColor, darkerColor]),
-              ),
-              child: Stack(
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(top: 10),
-                    margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
-                    child: Column(
+        return TimerDialog(timeSlot: timeSlot, index: index);
+      });
+}
+
+class TimerDialog extends StatefulWidget {
+  TimerDialog({
+    super.key,
+    required this.index,
+    required this.timeSlot,
+  });
+
+  TimeSlotModel timeSlot;
+  int index;
+
+  @override
+  State<TimerDialog> createState() => _TimerDialogState();
+}
+
+class _TimerDialogState extends State<TimerDialog> {
+  bool loading = false;
+  CalendarController controller = instanceManager.calendarController;
+
+  List<int> formatDuration(Duration duration) {
+    int hours = duration.inHours;
+    int minutes = (duration.inMinutes - Duration(hours: hours).inMinutes) % 60;
+    int seconds = (duration.inSeconds -
+            Duration(hours: hours, minutes: minutes).inSeconds) %
+        60;
+
+    return [hours, minutes, seconds];
+  }
+
+  late List<int> formattedDuration;
+  final GlobalKey<TimerWidgetState> timerKey = GlobalKey<TimerWidgetState>();
+
+  late TimerWidget timer;
+
+  Future<void> saveChangesToTimeSlot(
+      Duration time, BuildContext context) async {
+    widget.timeSlot.timeStudied = time;
+    if (widget.timeSlot.timeStudied >= widget.timeSlot.duration &&
+        widget.timeSlot.completed == false) {
+      await widget.timeSlot.changeCompleteness(true);
+    } else if (widget.timeSlot.timeStudied < widget.timeSlot.duration &&
+        widget.timeSlot.completed == true) {
+      await widget.timeSlot.changeCompleteness(false);
+    }
+  }
+
+  Future<void> completeAndClose(Duration time, BuildContext context) async {
+    setState(() {
+      loading = true;
+    });
+    //await Future.delayed(Duration(seconds:15));
+    await saveChangesToTimeSlot(time, context);
+    await controller.saveTimeStudied(widget.timeSlot);
+    instanceManager.sessionStorage.loadedCalendarDay.timeSlots[widget.index] =
+        await controller.getTimeSlot(widget.timeSlot.id, widget.timeSlot.dayID);
+    logger.i(
+        'Completed and closed!\n ${getStringFromTimeSlotList(instanceManager.sessionStorage.loadedCalendarDay.timeSlots)}');
+    setState(() {
+      loading = false;
+    });
+    Navigator.pop(context, widget.timeSlot);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    formattedDuration = formatDuration(widget.timeSlot.timeStudied);
+    timer = TimerWidget(
+      key: timerKey,
+      hours: formattedDuration[0],
+      minutes: formattedDuration[1],
+      seconds: formattedDuration[2],
+      sessionTime: widget.timeSlot.duration, //timeSlot.duration,
+      completeAndClose: completeAndClose,
+      timeSlot: widget.timeSlot,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var screenHeight = MediaQuery.of(context).size.height;
+    var screenWidth = MediaQuery.of(context).size.width;
+    final _localizations = AppLocalizations.of(context)!;
+    final lighterColor = lighten(widget.timeSlot.examColor, .05);
+    final darkerColor = darken(widget.timeSlot.examColor, .15);
+
+    return Center(
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        child: Container(
+          height: screenHeight*0.45,
+          width: screenWidth*0.91,
+          decoration: BoxDecoration(
+            //borderRadius: BorderRadius.all(Radius.circular(20)),
+            gradient: LinearGradient(
+                end: Alignment.bottomLeft,
+                begin: Alignment.topRight,
+                //stops: [ 0.1, 0.9],
+                colors: [lighterColor, darkerColor]),
+          ),
+          child: Stack(
+            children: [
+              Container(
+                padding: EdgeInsets.only(top: 10),
+                margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
                       mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                                width: screenWidth * 0.5,
-                                child: Text(
-                                  _localizations.dontCloseApp,
-                                  maxLines: 2,
-                                  textAlign: TextAlign.center,
-                                  softWrap: true,
-                                  overflow: TextOverflow.ellipsis,
-                                ))
-                          ],
-                        ),
-                        SizedBox(
-                          height: screenHeight * 0.05,
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            timer,
-                          ],
-                        )
+                        Container(
+                            width: screenWidth * 0.5,
+                            child: Text(
+                              _localizations.dontCloseApp,
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              softWrap: true,
+                              overflow: TextOverflow.ellipsis,
+                            ))
                       ],
                     ),
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      IconButton(
-                          onPressed: () async {
-                            timerKey.currentState?.stopListening();
-                            timerKey.currentState?.stopTimer();
+                    SizedBox(
+                      height: screenHeight * 0.05,
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        timer,
+                      ],
+                    )
+                  ],
+                ),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  IconButton(
+                      onPressed: () async {
+                        timerKey.currentState?.stopListening();
+                        timerKey.currentState?.stopTimer();
 
-                            await saveChangesToTimeSlot(
-                                timer.timerTime, context);
+                        await completeAndClose(timer.timerTime, context);
 
-                            Navigator.pop(context);
-                          },
-                          icon: Icon(
-                            Icons.close_rounded,
-                            size: screenWidth * 0.1,
-                            color: Colors.black,
-                          )),
-                    ],
-                  ),
+                       
+                      },
+                      icon: Icon(
+                        Icons.close_rounded,
+                        size: screenWidth * 0.1,
+                        color: Colors.black,
+                      )),
                 ],
               ),
-            ),
+              loading ? Container(
+                color: Colors.black.withOpacity(0.3),
+                child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                //mainAxisSize: MainAxisSize.max,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    //mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Container(
+                      height: screenHeight*0.1,
+                      width: screenHeight*0.1,
+                      child: CircularProgressIndicator(color: Colors.white))],
+                  )
+                ],),
+              ) : SizedBox()
+            
+            ],
           ),
-        );
-      });
-
-  return timeSlot;
+        ),
+      ),
+    );
+  }
 }

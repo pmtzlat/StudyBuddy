@@ -90,7 +90,7 @@ class ExamsController {
       }
       instanceManager.sessionStorage.activeExams
           .sort((ExamModel a, ExamModel b) => b.weight.compareTo(a.weight));
-      logger.i(getExamsListString(null));
+      logger.i(getStringForExams(instanceManager.sessionStorage.activeExams));
       return 3;
     } catch (e) {
       logger.e('Error in addExamScreen3: $e');
@@ -163,9 +163,9 @@ class ExamsController {
           examCreationFormKey.currentState!.fields['orderMatters']!.value ??
               false;
 
-      final bool sessionSplittable =
-          examCreationFormKey.currentState!.fields['sessionSplittable']!.value ??
-              false;
+      final bool sessionSplittable = examCreationFormKey
+              .currentState!.fields['sessionSplittable']!.value ??
+          false;
 
       //logger.i('Validation done');
 
@@ -295,6 +295,9 @@ class ExamsController {
       bool initialLoad = instanceManager.sessionStorage.initialExamsLoad;
       if (initialLoad == false) initialLoad = true;
 
+      logger.i(
+          'Got exams!: \n ${getStringForExams(instanceManager.sessionStorage.savedExams)}');
+
       return true;
     } catch (e) {
       logger.e('Error getting exams: $e');
@@ -363,17 +366,15 @@ class ExamsController {
     try {
       var res;
       int currentRevisions = exam.revisions.length;
-      
+
       if (revisions > currentRevisions) {
-        
-       
         while (revisions > currentRevisions) {
           currentRevisions++;
           final newUnit = UnitModel(
               name: 'Revision $currentRevisions',
               order: currentRevisions,
-              sessionTime: doubleToDuration(
-                  (durationToDouble(exam.revisionTime))));
+              sessionTime:
+                  doubleToDuration((durationToDouble(exam.revisionTime))));
           //logger.i('Adding new revision: ${newUnit.name}');
           res = await firebaseCrud
               .addRevisionToExam(newUnit: newUnit, examID: exam.id)
@@ -382,7 +383,6 @@ class ExamsController {
           if (res == null) return -1;
         }
       } else if (revisions < currentRevisions) {
-        
         //logger.i('new revisions is < current revisions');
         while (revisions < currentRevisions) {
           //logger.i('Removing new revision: ${currentRevisions}');
@@ -394,7 +394,7 @@ class ExamsController {
           currentRevisions--;
         }
       }
-      await firebaseCrud.checkRevisionSessionTimeUpdated(exam);
+     
       return 1;
     } catch (e) {
       logger.e('Error handling change in revisions: $e');
@@ -457,22 +457,67 @@ class ExamsController {
       orElse: () => ExamModel(name: 'examNotFound', examDate: DateTime.now()),
     );
 
-  if (targetExam.name != 'examNotFound') {
-    UnitModel targetUnit = targetExam.units.firstWhere(
-      (unit) => unit.id == unitID,
-      orElse: () => UnitModel(name: 'unitNotFound', order: 0),
-    );
-    if(targetUnit.name != 'unitNotFound') return targetUnit;
+    if (targetExam.name != 'examNotFound') {
+      UnitModel targetUnit = targetExam.units.firstWhere(
+        (unit) => unit.id == unitID,
+        orElse: () => UnitModel(name: 'unitNotFound', order: 0),
+      );
+      logger.f(targetUnit.getString());
+      if (targetUnit.name != 'unitNotFound') return targetUnit;
 
-    UnitModel targetRevision = targetExam.revisions.firstWhere(
-      (unit) => unit.id == unitID,
-      orElse: () => UnitModel(name: 'revisionNotFound', order: 0),
-    );
+      UnitModel targetRevision = targetExam.revisions.firstWhere(
+        (unit) => unit.id == unitID,
+        orElse: () => UnitModel(name: 'revisionNotFound', order: 0),
+      );
 
-    if(targetUnit.name != 'revisionNotFound') return targetRevision;
+      if (targetUnit.name != 'revisionNotFound') return targetRevision;
+    }
+
+    return null;
   }
 
-  return null;
-}
+  Future<void> changeUnitOrRevision(UnitModel newUnit) async {
+    try {
+      List<ExamModel> exams = instanceManager.sessionStorage.activeExams;
+      logger.i('New Unit: ${newUnit.getString()}');
 
+      // Variables to store indices
+      int examIndex = -1;
+      int unitIndex = -1;
+      int revisionIndex = -1;
+
+      // Find the exam with matching examID
+      examIndex = exams.indexWhere((exam) => exam.id == newUnit.examID);
+
+      if (examIndex != -1) {
+        ExamModel exam = exams[examIndex];
+
+        // Find the unit in exam.units with matching id
+        unitIndex = exam.units.indexWhere((unit) => unit.id == newUnit.id);
+        if (unitIndex != -1) {
+          // If found in exam.units, replace it with newUnit
+          logger.i('Unit found! ${(await firebaseCrud.getSpecificUnit(newUnit.examID, newUnit.id, 'units')).getString() }');
+          exams[examIndex].units[unitIndex] =
+              await firebaseCrud.getSpecificUnit(newUnit.examID, newUnit.id, 'units') ??
+                  exams[examIndex].units[unitIndex];
+        } else {
+          // If not found in exam.units, find in exam.revisions
+          revisionIndex = exam.revisions
+              .indexWhere((revision) => revision.id == newUnit.id);
+          if (revisionIndex != -1) {
+            // If found in exam.revisions, replace it with newUnit
+            logger.i('Revision found!');
+            exams[examIndex].revisions[revisionIndex] = await firebaseCrud.getSpecificUnit(newUnit.examID, newUnit.id, 'revisions') ??
+                  exams[examIndex].units[unitIndex];
+          } else {
+            // If not found in exam.revisions, return
+            logger.i('Unit not found!');
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      logger.e('Error setting local unit or revision: $e');
+    }
+  }
 }

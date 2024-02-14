@@ -138,7 +138,7 @@ class StudyPlanner {
       }
 
       await updateAllUnitSessionCompletionInfo();
-      await instanceManager.examController.getAllExams();
+      await instanceManager.examsController.getAllExams();
 
       return 1;
     } catch (e) {

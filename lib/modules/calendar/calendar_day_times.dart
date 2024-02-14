@@ -24,6 +24,7 @@ class CalendarDayTimes extends StatefulWidget {
 class CalendarDayTimesState extends State<CalendarDayTimes> {
   final _controller = instanceManager.calendarController;
   final dayFormKey = GlobalKey<FormBuilderState>();
+  final backgroundColor = Colors.transparent;
 
   @override
   void initState() {
@@ -42,6 +43,7 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
+    
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -52,8 +54,8 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
                 begin: Alignment.topCenter,
                 stops: const [0.2, 0.3],
                 colors: widget.needsRecalc
-                    ? [Colors.amber, Color.fromARGB(255, 236, 236, 236)]
-                    : [Color.fromARGB(255, 236, 236, 236), Color.fromARGB(255, 236, 236, 236)]),
+                    ? [Colors.amber, Colors.white.withOpacity(0.0)]
+                    : [backgroundColor, backgroundColor]),
         
         borderRadius: BorderRadius.circular(20),
       ),
@@ -96,7 +98,7 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
           ),
           instanceManager.sessionStorage.initialDayLoad
               ? TimeShower(
-                  times: instanceManager.sessionStorage.loadedCalendarDay.timeSlots,
+                  
                   updateAllParents: updateParent,
                 )
               : ReloadButton(
@@ -114,9 +116,8 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
 }
 
 class TimeShower extends StatefulWidget {
-  TimeShower({super.key, required this.times, required this.updateAllParents});
+  TimeShower({super.key,  required this.updateAllParents});
 
-  final List<TimeSlotModel> times;
   final Function updateAllParents;
 
   @override
@@ -136,7 +137,7 @@ class _TimeShowerState extends State<TimeShower> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    return widget.times.isEmpty
+    return instanceManager.sessionStorage.loadedCalendarDay.timeSlots.isEmpty
         ? Expanded(
             child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -156,12 +157,10 @@ class _TimeShowerState extends State<TimeShower> {
             child: MediaQuery.removePadding(
               context: context,
               removeTop: true,
-              removeBottom: true,
               child: ListView.builder(
-                  itemCount: widget.times.length,
+                  itemCount: instanceManager.sessionStorage.loadedCalendarDay.timeSlots.length,
                   itemBuilder: (context, index) {
-                    var timeSlot = widget.times[index];
-                    return TimeSlotCard(timeSlot: timeSlot);
+                    return TimeSlotCard(index: index);
                   }),
             ),
           );

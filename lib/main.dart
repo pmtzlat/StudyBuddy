@@ -56,7 +56,7 @@ Future<bool> handleAppStart() async {
           DateTime.parse(instanceManager.localStorage.getString('oldDate')));
 
       instanceManager.sessionStorage.initialExamsLoad =
-          await instanceManager.examController.getAllExams();
+          await instanceManager.examsController.getAllExams();
       instanceManager.sessionStorage.initialGapsLoad =
           await instanceManager.calendarController.getGaps();
       instanceManager.sessionStorage.initialCustomDaysLoad =
