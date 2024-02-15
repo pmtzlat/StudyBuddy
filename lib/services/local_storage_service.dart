@@ -13,7 +13,7 @@ class LocalStorageService {
     logger.i(
         'Previous Old date: ${localStorage.getString('oldDate') ?? 'Not found'}');
     logger.i(
-        'Previus New date: ${localStorage.getString('newDate') ?? 'Not found'}');
+        'Previous New date: ${localStorage.getString('newDate') ?? 'Not found'}');
 
     
     final String oldNewDate = localStorage.getString('newDate') ??
@@ -21,7 +21,7 @@ class LocalStorageService {
 
     //logger.i('Old newdate: ${oldNewDate}');
 
-    localStorage.setString('oldDate', oldNewDate);
+    localStorage.setString('oldDate', stripTime(DateTime.now().subtract(Duration(days:1))).toString());  //oldNewDate);
     //localStorage.setString('oldDate', '2023-11-18 00:00:00.000');
     localStorage.setString('newDate', stripTime(now).toString());
 

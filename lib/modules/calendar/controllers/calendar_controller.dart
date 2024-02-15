@@ -401,6 +401,7 @@ class CalendarController {
         logger.i(timeSlot.getString());
         await timeSlot.changeCompleteness(true);
         
+        
       }
       return 1;
     } catch (e) {

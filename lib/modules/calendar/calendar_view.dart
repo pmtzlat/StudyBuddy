@@ -38,7 +38,7 @@ class _CalendarViewState extends State<CalendarView>
   Duration scrollUpTime = const Duration(milliseconds: 700);
 
   @override
-  void initState() {
+  void initState()  {
     super.initState();
     autoRecalc = false;
     // dayLoaded = instanceManager.sessionStorage.initialDayLoad;
@@ -98,12 +98,14 @@ class _CalendarViewState extends State<CalendarView>
             instanceManager.sessionStorage.incompletePreviousDays
             //_testingIncompleteDays
             );
+            
       });
     }
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 50),
     );
+    
   }
 
   void _showRecalculationAdvice(BuildContext context) {
@@ -570,7 +572,7 @@ class _CalendarViewState extends State<CalendarView>
         ),
       ],
     );
-
+    
     return instanceManager.scaffold.getScaffold(
         context: context,
         activeIndex: 1,
