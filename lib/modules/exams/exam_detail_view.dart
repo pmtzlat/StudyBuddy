@@ -68,6 +68,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
     examDate = widget.exam.examDate;
     examColor = widget.exam.color;
     position = getPosition(widget.exam);
+    
   }
 
   void _scrollDown() {

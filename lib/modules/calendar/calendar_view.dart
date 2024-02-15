@@ -93,11 +93,13 @@ class _CalendarViewState extends State<CalendarView>
       //         examID: 'examID'),
       //   ]
       // };
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
-        _showPrevDayCompletionDialog(
+      WidgetsBinding.instance?.addPostFrameCallback((_) async {
+        final _localizations = AppLocalizations.of(context)!;
+        await _showPrevDayCompletionDialog(
             instanceManager.sessionStorage.incompletePreviousDays
             //_testingIncompleteDays
             );
+        await handleScheduleCalculation(context, _localizations);
             
       });
     }
@@ -108,10 +110,12 @@ class _CalendarViewState extends State<CalendarView>
     
   }
 
-  void _showRecalculationAdvice(BuildContext context) {
+ 
+
+  void _showRecalculationAdvice(BuildContext context) async{
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
-    showDialog(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -157,8 +161,8 @@ class _CalendarViewState extends State<CalendarView>
     );
   }
 
-  void _showPrevDayCompletionDialog(
-      Map<String, List<TimeSlotModel>> dictionary) {
+  Future<void> _showPrevDayCompletionDialog(
+      Map<String, List<TimeSlotModel>> dictionary) async {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
@@ -166,7 +170,7 @@ class _CalendarViewState extends State<CalendarView>
     bool leftDaysUnsaved = false;
     logger.i(dictionary);
 
-    showGeneralDialog(
+    await showGeneralDialog(
       context: context,
       barrierDismissible: true,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
@@ -447,6 +451,13 @@ class _CalendarViewState extends State<CalendarView>
 
     final result = await _controller.calculateSchedule();
 
+    
+    await _controller.getCalendarDay(stripTime(await NTP.now()));
+    await _controller.getAllCalendarDaySessionNumbers();
+    setState(() {
+      date = instanceManager.sessionStorage.currentDate;
+    });
+    Navigator.pop(context);
     switch (result) {
       case (1):
         showGreenSnackbar(context, _localizations.recalculationSuccessful);
@@ -472,12 +483,6 @@ class _CalendarViewState extends State<CalendarView>
         });
     }
 
-    await _controller.getCalendarDay(stripTime(await NTP.now()));
-    await _controller.getAllCalendarDaySessionNumbers();
-    setState(() {
-      date = instanceManager.sessionStorage.currentDate;
-    });
-    Navigator.pop(context);
 
     setState(() {
       _timesKey.currentState!.updateParent();

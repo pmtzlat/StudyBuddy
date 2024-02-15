@@ -1,11 +1,8 @@
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
-import 'package:study_buddy/common_widgets/scaffold.dart';
-import 'package:study_buddy/modules/exams/exam_detail_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:study_buddy/utils/general_utils.dart';
 import '../models/exam_model.dart';
 
 class ExamCard extends StatefulWidget {
@@ -17,7 +14,7 @@ class ExamCard extends StatefulWidget {
   Function giveDetails;
   ExamCard(
       {super.key,
-      required ExamModel this.exam,
+      required this.exam,
       required this.parentRefresh,
       required this.index,
       required this.prioritizing,
