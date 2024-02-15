@@ -38,7 +38,7 @@ class _CalendarViewState extends State<CalendarView>
   Duration scrollUpTime = const Duration(milliseconds: 700);
 
   @override
-  void initState()  {
+  void initState() {
     super.initState();
     autoRecalc = false;
     // dayLoaded = instanceManager.sessionStorage.initialDayLoad;
@@ -99,20 +99,17 @@ class _CalendarViewState extends State<CalendarView>
             instanceManager.sessionStorage.incompletePreviousDays
             //_testingIncompleteDays
             );
-        await handleScheduleCalculation(context, _localizations);
-            
+        if (autoRecalc)
+          await handleScheduleCalculation(context, _localizations);
       });
     }
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 50),
     );
-    
   }
 
- 
-
-  void _showRecalculationAdvice(BuildContext context) async{
+  void _showRecalculationAdvice(BuildContext context) async {
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
     await showDialog(
@@ -274,13 +271,9 @@ class _CalendarViewState extends State<CalendarView>
                                                             Alignment.topRight,
                                                         //stops: [ 0.1, 0.9],
                                                         colors: [
-                                                          colorOptions[
-                                                              dateInQuestion
-                                                                  .weekday],
+                                                          timeSlot.examColor,
                                                           darken(
-                                                              colorOptions[
-                                                                  dateInQuestion
-                                                                      .weekday],
+                                                              timeSlot.examColor,
                                                               0.15)
                                                         ]),
                                                   ),
@@ -451,7 +444,6 @@ class _CalendarViewState extends State<CalendarView>
 
     final result = await _controller.calculateSchedule();
 
-    
     await _controller.getCalendarDay(stripTime(await NTP.now()));
     await _controller.getAllCalendarDaySessionNumbers();
     setState(() {
@@ -482,7 +474,6 @@ class _CalendarViewState extends State<CalendarView>
           instanceManager.sessionStorage.setNeedsRecalc(true);
         });
     }
-
 
     setState(() {
       _timesKey.currentState!.updateParent();
@@ -577,7 +568,7 @@ class _CalendarViewState extends State<CalendarView>
         ),
       ],
     );
-    
+
     return instanceManager.scaffold.getScaffold(
         context: context,
         activeIndex: 1,
@@ -629,7 +620,6 @@ class _CalendarViewState extends State<CalendarView>
                               padding: EdgeInsets.symmetric(
                                   vertical: screenHeight * 0.015,
                                   horizontal: screenHeight * 0.007),
-                              
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.max,
