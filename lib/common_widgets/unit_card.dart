@@ -1,4 +1,5 @@
-import 'package:duration_picker/duration_picker.dart';
+import 'package:bottom_picker/bottom_picker.dart';
+import 'package:bottom_picker/resources/arrays.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
@@ -11,6 +12,7 @@ import 'package:study_buddy/models/unit_model.dart';
 import 'package:study_buddy/modules/exams/exam_detail_view.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/error_&_success_messages.dart';
+import 'package:study_buddy/utils/general_utils.dart';
 
 class UnitCard extends StatefulWidget {
   UnitModel unit;
@@ -149,7 +151,6 @@ class _UnitCardState extends State<UnitCard>
                                           fontSize: screenWidth * 0.05)),
                                 ),
                         ),
-                        
                         AnimatedSwitcher(
                           duration: openUnit,
                           child: widget.unit.completed && !open
@@ -199,15 +200,13 @@ class _UnitCardState extends State<UnitCard>
                   TextButton.icon(
                       onPressed: () async {
                         if (widget.editMode) {
-                          widget.unit.sessionTime = await showDurationPicker(
-                                context: context,
-                                initialTime: widget.unit.sessionTime,
-                              ) ??
-                              widget.unit.sessionTime;
-                          if(widget.unit.sessionTime == Duration.zero){
-                            widget.unit.sessionTime = const Duration(minutes:1);
-                            showRedSnackbar(context, _localizations.sessionTimeCantBeZero);
-
+                          
+                          widget.unit.sessionTime = await showTimerPicker(context, widget.unit.sessionTime);
+                          if (widget.unit.sessionTime == Duration.zero) {
+                            widget.unit.sessionTime =
+                                const Duration(minutes: 1);
+                            showRedSnackbar(
+                                context, _localizations.sessionTimeCantBeZero);
                           }
                         }
                         setState(() {});

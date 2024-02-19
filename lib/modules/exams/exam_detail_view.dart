@@ -1,4 +1,3 @@
-import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -68,7 +67,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
     examDate = widget.exam.examDate;
     examColor = widget.exam.color;
     position = getPosition(widget.exam);
-    
   }
 
   void _scrollDown() {
@@ -530,19 +528,13 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                         GestureDetector(
                           onTap: () async {
                             if (editMode) {
-                              revisionTime = await showDurationPicker(
-                                    context: context,
-                                    initialTime: revisionTime,
-                                  ) ??
-                                  revisionTime;
+                              revisionTime = await showTimerPicker(context, revisionTime);
                               if (revisionTime == Duration.zero) {
-                                revisionTime =
-                                    const Duration(minutes: 1);
+                                revisionTime = const Duration(minutes: 1);
                                 showRedSnackbar(context,
                                     _localizations.sessionTimeCantBeZero);
                               }
-                              setState(() {
-                              });
+                              setState(() {});
                             }
                           },
                           child: Text(formatDuration(revisionTime),

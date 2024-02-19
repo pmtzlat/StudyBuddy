@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/models/day_model.dart';
@@ -37,6 +38,30 @@ List<double> generateDescendingList(int n) {
   }
 
   return resultList;
+}
+
+
+
+
+Future<Duration> showTimerPicker(BuildContext context, Duration initialTime) {
+  Duration selectedTime = Duration.zero;;
+  return showModalBottomSheet(
+    context: context,
+    builder: (BuildContext builder) {
+      return Container(
+        height: 200,
+        child: CupertinoTimerPicker(
+          initialTimerDuration: initialTime,
+          mode: CupertinoTimerPickerMode.hm,
+          onTimerDurationChanged: (Duration duration) {
+            selectedTime = duration;
+          },
+        ),
+      );
+    },
+  ).then((value) {
+    return selectedTime;
+  });
 }
 
 

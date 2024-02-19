@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
@@ -281,11 +280,8 @@ class _Page1State extends State<Page1> {
                               icon: Icon(Icons.av_timer_rounded,
                                   color: Colors.white),
                               onPressed: () async {
-                                defaultStudyTime = await showDurationPicker(
-                                      context: context,
-                                      initialTime: defaultStudyTime,
-                                    ) ??
-                                    defaultStudyTime;
+                                defaultStudyTime =
+                                    await showTimerPicker(context, defaultStudyTime);
                                 setState(() {});
                               },
                             )
@@ -312,11 +308,7 @@ class _Page1State extends State<Page1> {
                               icon: Icon(Icons.av_timer_rounded,
                                   color: Colors.white),
                               onPressed: () async {
-                                revisionTime = await showDurationPicker(
-                                      context: context,
-                                      initialTime: revisionTime,
-                                    ) ??
-                                    revisionTime;
+                                revisionTime = await showTimerPicker(context, revisionTime);
                                 setState(() {});
                               },
                             )
@@ -515,13 +507,8 @@ class Page2State extends State<Page2> {
                                                 color: Colors.white),
                                             onPressed: () async {
                                               unit.sessionTime =
-                                                  await showDurationPicker(
-                                                        context: context,
-                                                        initialTime:
-                                                            const Duration(
-                                                                hours: 1),
-                                                      ) ??
-                                                      unit.sessionTime;
+                                                  await showTimerPicker(
+                                                      context, unit.sessionTime);
                                               setState(() {});
                                             },
                                           ))

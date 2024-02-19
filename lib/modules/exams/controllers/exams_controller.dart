@@ -394,7 +394,7 @@ class ExamsController {
           currentRevisions--;
         }
       }
-     
+
       return 1;
     } catch (e) {
       logger.e('Error handling change in revisions: $e');
@@ -496,10 +496,11 @@ class ExamsController {
         unitIndex = exam.units.indexWhere((unit) => unit.id == newUnit.id);
         if (unitIndex != -1) {
           // If found in exam.units, replace it with newUnit
-          logger.i('Unit found! ${(await firebaseCrud.getSpecificUnit(newUnit.examID, newUnit.id, 'units')).getString() }');
-          exams[examIndex].units[unitIndex] =
-              await firebaseCrud.getSpecificUnit(newUnit.examID, newUnit.id, 'units') ??
-                  exams[examIndex].units[unitIndex];
+          logger.i(
+              'Unit found! ${(await firebaseCrud.getSpecificUnit(newUnit.examID, newUnit.id, 'units')).getString()}');
+          exams[examIndex].units[unitIndex] = await firebaseCrud
+                  .getSpecificUnit(newUnit.examID, newUnit.id, 'units') ??
+              exams[examIndex].units[unitIndex];
         } else {
           // If not found in exam.units, find in exam.revisions
           revisionIndex = exam.revisions
@@ -507,8 +508,9 @@ class ExamsController {
           if (revisionIndex != -1) {
             // If found in exam.revisions, replace it with newUnit
             logger.i('Revision found!');
-            exams[examIndex].revisions[revisionIndex] = await firebaseCrud.getSpecificUnit(newUnit.examID, newUnit.id, 'revisions') ??
-                  exams[examIndex].units[unitIndex];
+            exams[examIndex].revisions[revisionIndex] = await firebaseCrud
+                    .getSpecificUnit(newUnit.examID, newUnit.id, 'revisions') ??
+                exams[examIndex].units[unitIndex];
           } else {
             // If not found in exam.revisions, return
             logger.i('Unit not found!');
@@ -519,5 +521,19 @@ class ExamsController {
     } catch (e) {
       logger.e('Error setting local unit or revision: $e');
     }
+  }
+
+  Color? getExamColorIfDateMatches(DateTime date) {
+    List<ExamModel> exams = instanceManager.sessionStorage.activeExams;
+    logger.d(date);
+   
+    for (ExamModel exam in exams) {
+       logger.f(exam.examDate);
+      if (exam.examDate == date) {
+        return exam.color;
+      }
+    }
+
+    return null;
   }
 }
