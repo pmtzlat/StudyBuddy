@@ -25,10 +25,19 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
   final _controller = instanceManager.calendarController;
   final dayFormKey = GlobalKey<FormBuilderState>();
   final backgroundColor = Colors.transparent;
+  late Color? dayHasExam;
+  // late List<double>? colorStops;
+  // late List<Color> colorsGradient;
 
   @override
   void initState() {
     super.initState();
+    dayHasExam = instanceManager.examsController.getExamColorIfDateMatches(instanceManager.sessionStorage.currentDate);
+
+  }
+
+  void generateGradient(){
+    //generate gradient stuff here
   }
 
   void updateParent() {
@@ -38,11 +47,18 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
     widget.updateParent();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
+
+
+
+
+
     
 
     return Container(
@@ -52,6 +68,8 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
         gradient: LinearGradient(
                 end: Alignment.bottomCenter,
                 begin: Alignment.topCenter,
+                // stops: colorStops,
+                // colors: colorsGradient),
                 stops: const [0.2, 0.3],
                 colors: widget.needsRecalc
                     ? [Colors.amber, Colors.white.withOpacity(0.0)]
@@ -96,6 +114,7 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
                   )),
             ),
           ),
+          
           instanceManager.sessionStorage.initialDayLoad
               ? TimeShower(
                   

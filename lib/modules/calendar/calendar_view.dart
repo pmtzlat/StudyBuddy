@@ -273,7 +273,8 @@ class _CalendarViewState extends State<CalendarView>
                                                         colors: [
                                                           timeSlot.examColor,
                                                           darken(
-                                                              timeSlot.examColor,
+                                                              timeSlot
+                                                                  .examColor,
                                                               0.15)
                                                         ]),
                                                   ),
@@ -587,19 +588,7 @@ class _CalendarViewState extends State<CalendarView>
                       firstDate: DateTime.now().subtract(Duration(days: 365)),
                       lastDate: DateTime.now().add(Duration(days: 365)),
                       onDateSelected: (newDate) async {
-                        if (!dayLoaded) return;
-                        setState(() {
-                          dayLoaded = false;
-                          date = newDate;
-                        });
-
-                        if (!await _controller.getCalendarDay(newDate))
-                          showRedSnackbar(
-                              context, _localizations.errorLoadingDay);
-                        setState(() {
-                          dayLoaded = true;
-                          date = instanceManager.sessionStorage.currentDate;
-                        });
+                        await loadDay(newDate, context, _localizations);
                       },
                       leftMargin: 20,
                       monthColor: Colors.blueGrey,
@@ -611,30 +600,41 @@ class _CalendarViewState extends State<CalendarView>
                     ),
                   ),
                   Expanded(
-                    child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
-                      child: dayLoaded
-                          ? events
-                          : Container(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: screenHeight * 0.015,
-                                  horizontal: screenHeight * 0.007),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Container(
-                                      child: Container(
-                                    height: screenWidth * 0.1,
-                                    width: screenWidth * 0.1,
-                                    child: const CircularProgressIndicator(
-                                      color: Colors.black12,
-                                    ),
-                                  )),
-                                ],
+                    child: GestureDetector(
+                      onHorizontalDragEnd: (details) async {
+                        if (details.primaryVelocity! > 0) {
+                          // Swiped right
+                          await loadDay(instanceManager.sessionStorage.currentDate.subtract(Duration(days:1)), context, _localizations);
+                        } else if (details.primaryVelocity! < 0) {
+                          // Swiped left
+                          await loadDay(instanceManager.sessionStorage.currentDate.add(Duration(days:1)), context, _localizations);
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05),
+                        child: dayLoaded
+                            ? events
+                            : Container(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: screenHeight * 0.015,
+                                    horizontal: screenHeight * 0.007),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Container(
+                                        child: Container(
+                                      height: screenWidth * 0.1,
+                                      width: screenWidth * 0.1,
+                                      child: const CircularProgressIndicator(
+                                        color: Colors.black12,
+                                      ),
+                                    )),
+                                  ],
+                                ),
                               ),
-                            ),
+                      ),
                     ),
                   ),
                   SizedBox(
@@ -706,6 +706,23 @@ class _CalendarViewState extends State<CalendarView>
           ],
         ));
   }
+
+  Future<void> loadDay(DateTime newDate, BuildContext context, AppLocalizations _localizations) async {
+    if (!dayLoaded) return;
+    setState(() {
+      dayLoaded = false;
+      date = newDate;
+    });
+    
+    if (!await _controller.getCalendarDay(newDate))
+      showRedSnackbar(
+          context, _localizations.errorLoadingDay);
+    setState(() {
+      dayLoaded = true;
+      date = instanceManager.sessionStorage.currentDate;
+    });
+    return;
+  }
 }
 
 class CalculatePlanButton extends StatefulWidget {
@@ -757,16 +774,16 @@ class _CalculatePlanButtonState extends State<CalculatePlanButton> {
         decoration: BoxDecoration(
           color: widget.backgroundColor,
           borderRadius: BorderRadius.circular(10.0),
-          boxShadow: widget.needsRecalc
-              ? [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5), // Shadow color
-                    spreadRadius: 3, // Spread of the shadow
-                    blurRadius: 7, // Blur radius of the shadow
-                    offset: const Offset(0, 0), // Offset of the shadow
-                  ),
-                ]
-              : [],
+          // boxShadow: widget.needsRecalc
+          //     ? [
+          //         BoxShadow(
+          //           color: Colors.grey.withOpacity(0.5), // Shadow color
+          //           spreadRadius: 3, // Spread of the shadow
+          //           blurRadius: 7, // Blur radius of the shadow
+          //           offset: const Offset(0, 0), // Offset of the shadow
+          //         ),
+          //       ]
+          //     : [],
         ),
         child: Row(
           children: [
@@ -795,10 +812,11 @@ class _CalculatePlanButtonState extends State<CalculatePlanButton> {
                   maxLines: 2,
                   softWrap: true,
                   style: TextStyle(
-                      fontWeight: widget.needsRecalc
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      color: widget.titleGrey)),
+                    fontWeight: widget.needsRecalc
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: widget.needsRecalc ? Colors.amber : widget.titleGrey,
+                  )),
             )
           ],
         ),
