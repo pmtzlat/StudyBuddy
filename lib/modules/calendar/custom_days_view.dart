@@ -24,7 +24,7 @@ class CustomDaysView extends StatefulWidget {
 
 class _CustomDaysViewState extends State<CustomDaysView> {
   final _controller = instanceManager.calendarController;
-  DateTime date = instanceManager.sessionStorage.currentDate;
+  DateTime date = instanceManager.sessionStorage.selectedDate;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime? _selectedDay;
   bool loading = false;

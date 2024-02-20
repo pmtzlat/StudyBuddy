@@ -746,7 +746,7 @@ class FirebaseCrudService {
 
         final timeGapsCollectionRef = userDocRef.collection('calendarDays');
 
-        final currentDate = stripTime(DateTime.now());
+        final selectedDate = stripTime(DateTime.now());
 
         await timeGapsCollectionRef.get().then((querySnapshot) {
           querySnapshot.docs.forEach((doc) async {
@@ -757,8 +757,8 @@ class FirebaseCrudService {
 
               // Compare with the current date and delete the document
               // if the date is equal to or after the current date
-              if (date.isAtSameMomentAs(currentDate) ||
-                  date.isAfter(currentDate)) {
+              if (date.isAtSameMomentAs(selectedDate) ||
+                  date.isAfter(selectedDate)) {
                 await clearTimesForCalendarDay(doc['id']);
                 doc.reference.delete();
               }

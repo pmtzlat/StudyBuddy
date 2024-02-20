@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
@@ -33,6 +31,19 @@ class StudyPlanner {
     // -1 = Error
 
     try {
+      if ((instanceManager.sessionStorage.activeExams.isEmpty) ||
+          (instanceManager.sessionStorage.weeklyGaps.isEmpty)) {
+        logger.i('No exams or no availability. ');
+        if (await firebaseCrud
+                .deleteNotPastCalendarDays()
+                .timeout(timeoutDuration) ==
+            -1) {
+          return -1;
+        }
+        instanceManager.sessionStorage.setNeedsRecalc(false);
+        return 1;
+      }
+      
       Map<String, Map<String, int>> unitTotalSessions = {};
 
       void fillTotalUnitSessions(TimeSlotModel timeSlot) {
@@ -264,11 +275,13 @@ class StudyPlanner {
 
   void calculateWeights(List<SchedulerStackModel> stacks, DayModel day) {
     try {
-      for (SchedulerStackModel stack in stacks) {
+      for (int i = stacks.length - 1; i >= 0; i--) {
+        SchedulerStackModel stack = stacks[i];
         final daysToExam = _getDaysToExam(day, stack);
         if (daysToExam > 0) {
           stack.weight = (stack.exam.weight + (1 / daysToExam));
         } else {
+          stacks.removeAt(i);
           logger.e(
               'Error: days until exam = 0 - day: ${day.date} , stack: ${stack.exam.name}, exam: ${stack.exam.examDate}');
         }
@@ -445,21 +458,21 @@ class StudyPlanner {
   }
 
   DateTime? getLastDayOfStudy(dynamic activeExams) {
-    DateTime? currentDate = null;
+    DateTime? selectedDate = null;
     for (ExamModel exam in activeExams) {
-      if (currentDate != null) {
-        if (exam.examDate.isAfter(currentDate)) {
-          currentDate = exam.examDate;
+      if (selectedDate != null) {
+        if (exam.examDate.isAfter(selectedDate)) {
+          selectedDate = exam.examDate;
         }
       } else {
-        currentDate = exam.examDate;
+        selectedDate = exam.examDate;
       }
     }
-    if (currentDate == null) {
+    if (selectedDate == null) {
       logger.e('No exams found!');
       return null;
     }
-    return currentDate!;
+    return selectedDate!;
   }
 
   void logResult(Map<String, dynamic> result) {

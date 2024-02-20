@@ -28,11 +28,11 @@ String? futureDateValidator(DateTime? value) {
     return '';
   }
 
-  final currentDate = DateTime.now();
+  final selectedDate = DateTime.now();
 
   //logger.i(getCurrentLocale());
 
-  if (value.isBefore(currentDate)) {
+  if (value.isBefore(selectedDate)) {
     // If the selected date is not in the future, return an error message
     if (getCurrentLocale() == 'en_US') return 'Choose date in the future';
     return 'Fecha debe ser futura';

@@ -26,7 +26,7 @@ class _CalendarViewState extends State<CalendarView>
   final _controller = instanceManager.calendarController;
   final GlobalKey<CalendarDayTimesState> _timesKey = GlobalKey();
   DayModel day = instanceManager.sessionStorage.loadedCalendarDay;
-  DateTime date = instanceManager.sessionStorage.currentDate;
+  DateTime date = instanceManager.sessionStorage.selectedDate;
   Duration recalcTime = const Duration(milliseconds: 150);
   bool needsRecalc = instanceManager.sessionStorage.needsRecalculation;
   Color titleGrey = const Color.fromARGB(255, 92, 92, 92);
@@ -448,7 +448,7 @@ class _CalendarViewState extends State<CalendarView>
     await _controller.getCalendarDay(stripTime(await NTP.now()));
     await _controller.getAllCalendarDaySessionNumbers();
     setState(() {
-      date = instanceManager.sessionStorage.currentDate;
+      date = instanceManager.sessionStorage.selectedDate;
     });
     Navigator.pop(context);
     switch (result) {
@@ -604,10 +604,10 @@ class _CalendarViewState extends State<CalendarView>
                       onHorizontalDragEnd: (details) async {
                         if (details.primaryVelocity! > 0) {
                           // Swiped right
-                          await loadDay(instanceManager.sessionStorage.currentDate.subtract(Duration(days:1)), context, _localizations);
+                          await loadDay(instanceManager.sessionStorage.selectedDate.subtract(Duration(days:1)), context, _localizations);
                         } else if (details.primaryVelocity! < 0) {
                           // Swiped left
-                          await loadDay(instanceManager.sessionStorage.currentDate.add(Duration(days:1)), context, _localizations);
+                          await loadDay(instanceManager.sessionStorage.selectedDate.add(Duration(days:1)), context, _localizations);
                         }
                       },
                       child: Container(
@@ -719,7 +719,7 @@ class _CalendarViewState extends State<CalendarView>
           context, _localizations.errorLoadingDay);
     setState(() {
       dayLoaded = true;
-      date = instanceManager.sessionStorage.currentDate;
+      date = instanceManager.sessionStorage.selectedDate;
     });
     return;
   }

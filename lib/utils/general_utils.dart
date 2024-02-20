@@ -7,20 +7,18 @@ import 'package:study_buddy/models/day_model.dart';
 import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 const colorOptions = [
   
   Colors.blueAccent,
-  Colors.cyan,
   Colors.deepOrangeAccent,
-  Colors.purple,
-  Colors.indigo,
   Colors.lightGreen,
   Colors.orangeAccent,
   Colors.pinkAccent,
+  Colors.blueGrey,
   Colors.purpleAccent,
   Colors.redAccent,
-  Colors.teal,
 ];
 
 Color getRandomColor() {
@@ -44,7 +42,7 @@ List<double> generateDescendingList(int n) {
 
 
 Future<Duration> showTimerPicker(BuildContext context, Duration initialTime) {
-  Duration selectedTime = Duration.zero;;
+  Duration selectedTime = Duration.zero;
   return showModalBottomSheet(
     context: context,
     builder: (BuildContext builder) {
@@ -60,11 +58,15 @@ Future<Duration> showTimerPicker(BuildContext context, Duration initialTime) {
       );
     },
   ).then((value) {
+    if(selectedTime == Duration.zero) return Duration(minutes:1);
     return selectedTime;
   });
 }
 
-
+List<ExamModel> filterExamsByDate(List<ExamModel> originalList, DateTime inputDate) {
+  logger.i('Filtering exams by date: ${stripTime(inputDate)}');
+  return originalList.where((exam) => isSameDay(exam.examDate, stripTime(inputDate))).toList();
+  }
 
 String getPosition(ExamModel exam) {
   int position = instanceManager.sessionStorage.activeExams.indexOf(exam) + 1;
@@ -90,8 +92,8 @@ extension HexColor on Color {
 }
 
 int getDaysUntilExam(DateTime examDate) {
-  DateTime currentDate = DateTime.now();
-  Duration difference = currentDate.difference(examDate);
+  DateTime selectedDate = DateTime.now();
+  Duration difference = selectedDate.difference(examDate);
   return difference.inDays.abs() + 1;
 }
 

@@ -27,7 +27,7 @@ class SessionStorage {
   DayModel loadedCalendarDay = DayModel(
       weekday: DateTime.now().weekday, date: DateTime.now(), id: 'Placeholder');
 
-  DateTime currentDate = stripTime(DateTime.now());
+  DateTime selectedDate = stripTime(DateTime.now());
   //bool dayLoaded = false;
 
   DateTime? prevDayDate = stripTime(DateTime.now());

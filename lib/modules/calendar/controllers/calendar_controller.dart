@@ -35,13 +35,7 @@ class CalendarController {
   }
 
   Future<int> calculateSchedule() async {
-    if ((instanceManager.sessionStorage.activeExams.isEmpty) ||
-        (instanceManager.sessionStorage.weeklyGaps.isEmpty)) {
-      logger.i('No exams or no availability. ');
-      instanceManager.sessionStorage.setNeedsRecalc(false);
-      return 1;
-    }
-    ;
+    
     var result = await instanceManager.studyPlanner.calculateSchedule();
     switch (result) {
       case (1):
@@ -115,15 +109,15 @@ class CalendarController {
       instanceManager.sessionStorage.prevDay =
           instanceManager.sessionStorage.loadedCalendarDay;
       instanceManager.sessionStorage.prevDayDate =
-          instanceManager.sessionStorage.currentDate;
+          instanceManager.sessionStorage.selectedDate;
 
-      instanceManager.sessionStorage.currentDate =
+      instanceManager.sessionStorage.selectedDate =
           DateTime(date.year, date.month, date.day);
 
       // var x = [];
       // var y = x[1];
 
-      var savedDate = instanceManager.sessionStorage.currentDate;
+      var savedDate = instanceManager.sessionStorage.selectedDate;
 
       instanceManager.sessionStorage.loadedCalendarDay = await _firebaseCrud
           .getCalendarDay(savedDate)
@@ -139,7 +133,7 @@ class CalendarController {
       logger.e('Error getting current days (in calendarController): $e');
       instanceManager.sessionStorage.loadedCalendarDay =
           instanceManager.sessionStorage.prevDay;
-      instanceManager.sessionStorage.currentDate =
+      instanceManager.sessionStorage.selectedDate =
           instanceManager.sessionStorage.prevDayDate;
       return false;
     }

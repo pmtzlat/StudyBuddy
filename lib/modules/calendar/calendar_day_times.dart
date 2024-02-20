@@ -1,12 +1,15 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:study_buddy/common_widgets/exam_time_slot_card.dart';
 import 'package:study_buddy/common_widgets/reload_button.dart';
 import 'package:study_buddy/common_widgets/time_slot_card.dart';
 import 'package:study_buddy/main.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:study_buddy/models/exam_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
+import 'package:study_buddy/utils/general_utils.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class CalendarDayTimes extends StatefulWidget {
   Function updateParent;
@@ -32,11 +35,11 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
   @override
   void initState() {
     super.initState();
-    dayHasExam = instanceManager.examsController.getExamColorIfDateMatches(instanceManager.sessionStorage.currentDate);
-
+    dayHasExam = instanceManager.examsController
+        .getExamColorIfDateMatches(instanceManager.sessionStorage.selectedDate);
   }
 
-  void generateGradient(){
+  void generateGradient() {
     //generate gradient stuff here
   }
 
@@ -47,34 +50,25 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
     widget.updateParent();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
 
-
-
-
-
-    
-
     return Container(
       padding: EdgeInsets.symmetric(
           vertical: screenHeight * 0.015, horizontal: screenHeight * 0.007),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-                end: Alignment.bottomCenter,
-                begin: Alignment.topCenter,
-                // stops: colorStops,
-                // colors: colorsGradient),
-                stops: const [0.2, 0.3],
-                colors: widget.needsRecalc
-                    ? [Colors.amber, Colors.white.withOpacity(0.0)]
-                    : [backgroundColor, backgroundColor]),
-        
+            end: Alignment.bottomCenter,
+            begin: Alignment.topCenter,
+            // stops: colorStops,
+            // colors: colorsGradient),
+            stops: const [0.2, 0.3],
+            colors: widget.needsRecalc
+                ? [Colors.amber, Colors.white.withOpacity(0.0)]
+                : [backgroundColor, backgroundColor]),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -114,10 +108,8 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
                   )),
             ),
           ),
-          
           instanceManager.sessionStorage.initialDayLoad
               ? TimeShower(
-                  
                   updateAllParents: updateParent,
                 )
               : ReloadButton(
@@ -135,7 +127,7 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
 }
 
 class TimeShower extends StatefulWidget {
-  TimeShower({super.key,  required this.updateAllParents});
+  TimeShower({super.key, required this.updateAllParents});
 
   final Function updateAllParents;
 
@@ -145,18 +137,33 @@ class TimeShower extends StatefulWidget {
 
 class _TimeShowerState extends State<TimeShower> {
   final _controller = instanceManager.calendarController;
+  
 
   void updateParents() {
     logger.i('TimeShower: updateParents');
     widget.updateAllParents();
   }
+  
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    
+   
+  }
+  
 
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    return instanceManager.sessionStorage.loadedCalendarDay.timeSlots.isEmpty
+    List<ExamModel> examsInDay = filterExamsByDate(instanceManager.sessionStorage.savedExams, instanceManager.sessionStorage.selectedDate);
+    
+
+    return (instanceManager.sessionStorage.loadedCalendarDay.timeSlots.isEmpty && examsInDay.isEmpty)
         ? Expanded(
             child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -177,9 +184,19 @@ class _TimeShowerState extends State<TimeShower> {
               context: context,
               removeTop: true,
               child: ListView.builder(
-                  itemCount: instanceManager.sessionStorage.loadedCalendarDay.timeSlots.length,
+                  itemCount: instanceManager
+                      .sessionStorage.loadedCalendarDay.timeSlots.length + examsInDay.length,
                   itemBuilder: (context, index) {
-                    return TimeSlotCard(index: index);
+                   
+                    if (index < examsInDay.length) {
+                      // Display dynamic entries at the start
+                      ExamModel examToShow = examsInDay[index];
+                      return ExamTimeSlotCard(exam: examToShow);
+                    } else {
+                      // Display original list entries after dynamic entries
+                      final originalIndex = index - examsInDay.length;
+                      return TimeSlotCard(index: originalIndex);
+                    }
                   }),
             ),
           );

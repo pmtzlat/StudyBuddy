@@ -64,7 +64,7 @@ Future<bool> handleAppStart() async {
       instanceManager.sessionStorage.initialDayLoad =
           await instanceManager.calendarController.getCalendarDay(now);
       instanceManager.sessionStorage.savedWeekday =
-          instanceManager.sessionStorage.currentDate.weekday - 1;
+          instanceManager.sessionStorage.selectedDate.weekday - 1;
       instanceManager.sessionStorage.initialCalendarDaySessions =
           await instanceManager.calendarController
               .getAllCalendarDaySessionNumbers();

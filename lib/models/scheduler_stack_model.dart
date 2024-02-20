@@ -77,11 +77,11 @@ revisions = exam.revisions
   }
 
   int getDaysUntilExam(DateTime date) {
-    DateTime currentDate = date;
+    DateTime selectedDate = date;
     DateTime date2 = exam.examDate;
 
     DateTime date1 =
-        DateTime(currentDate.year, currentDate.month, currentDate.day);
+        DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
 
     Duration difference = date2.difference(date1);
 
