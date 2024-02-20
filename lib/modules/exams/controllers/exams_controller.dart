@@ -525,10 +525,10 @@ class ExamsController {
 
   Color? getExamColorIfDateMatches(DateTime date) {
     List<ExamModel> exams = instanceManager.sessionStorage.activeExams;
-    logger.d(date);
+    
    
     for (ExamModel exam in exams) {
-       logger.f(exam.examDate);
+       
       if (exam.examDate == date) {
         return exam.color;
       }
