@@ -46,7 +46,7 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
   void updateParent() {
     logger.i('Calendar Day Times: updateParents');
 
-    //logger.d(instanceManager.sessionStorage.initialDayLoad);
+    
     widget.updateParent();
   }
 
@@ -108,18 +108,11 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
                   )),
             ),
           ),
-          instanceManager.sessionStorage.initialDayLoad
-              ? TimeShower(
+          
+              TimeShower(
                   updateAllParents: updateParent,
                 )
-              : ReloadButton(
-                  updateParent: updateParent,
-                  buttonAction: () async {
-                    await instanceManager.calendarController
-                        .getCalendarDay(DateTime.now());
-                  },
-                  bodyMessage: _localizations.errorLoadingDay,
-                  buttonMessage: _localizations.reload)
+              
         ],
       ),
     );

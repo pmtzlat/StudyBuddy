@@ -237,7 +237,7 @@ class _AddButtonState extends State<AddButton> {
         ExamModel(examDate: DateTime.now(), name: '');
 
     try {
-      await widget.controller.getAllExams().timeout(timeoutDuration);
+      await widget.controller.getAllExams() ;
     } catch (e) {
       logger.e('Error getting exams: $e');
     }

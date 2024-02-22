@@ -39,11 +39,7 @@ class SessionStorage {
   int? schedulePresent;
   List<String> leftoverExams = <String>[];
 
-  bool initialDayLoad = false;
-  bool initialExamsLoad = false;
-  bool initialGapsLoad = false;
-  bool initialCustomDaysLoad = false;
-  bool initialCalendarDaySessions = false;
+  
 
   ExamModel examToAdd = ExamModel(examDate: DateTime.now(), name: '');
   List<double> examWeightArray = [];
@@ -56,6 +52,7 @@ class SessionStorage {
 
   void setNeedsRecalc(bool value) async {
     try {
+      needsRecalculation = value;
       await instanceManager.firebaseCrudService.setNeedsRecalc(value);
     } catch (e) {
       logger.e('Error changing NeedsRecalc in firebase: $e');

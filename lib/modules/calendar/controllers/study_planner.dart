@@ -36,7 +36,7 @@ class StudyPlanner {
         logger.i('No exams or no availability. ');
         if (await firebaseCrud
                 .deleteNotPastCalendarDays()
-                .timeout(timeoutDuration) ==
+                  ==
             -1) {
           return -1;
         }
@@ -121,14 +121,14 @@ class StudyPlanner {
 
       if (await firebaseCrud
               .deleteNotPastCalendarDays()
-              .timeout(timeoutDuration) ==
+                ==
           -1) {
         return -1;
       }
 
       for (var day in result) {
         var dayID =
-            await firebaseCrud.addCalendarDay(day).timeout(timeoutDuration);
+            await firebaseCrud.addCalendarDay(day) ;
         if (dayID == null) {
           return -1;
         }
@@ -141,7 +141,7 @@ class StudyPlanner {
             timeSlot.date = day.date;
             res = await firebaseCrud
                 .addTimeSlotToCalendarDay(dayID, timeSlot)
-                .timeout(timeoutDuration);
+                 ;
 
             if (res == -1) return -1;
           }

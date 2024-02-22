@@ -41,7 +41,7 @@ class _CalendarViewState extends State<CalendarView>
   void initState() {
     super.initState();
     autoRecalc = false;
-    // dayLoaded = instanceManager.sessionStorage.initialDayLoad;
+    
     // Add a post frame callback to show the dialog after the page has been rendered.
     if (!instanceManager.sessionStorage.incompletePreviousDays.isEmpty
         //true
@@ -509,10 +509,10 @@ class _CalendarViewState extends State<CalendarView>
       updateParent: () {
         //logger.i(instanceManager.sessionStorage.needsRecalculation);
         day = instanceManager.sessionStorage.loadedCalendarDay;
-        if (instanceManager.sessionStorage.initialDayLoad) {
+        
           dayLoaded = !(instanceManager.sessionStorage.loadedCalendarDay.id ==
               'Placeholder');
-        }
+        
       },
     );
 

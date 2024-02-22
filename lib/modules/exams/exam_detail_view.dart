@@ -625,8 +625,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                       duration: Duration.zero,
                     );
 
-                    widget.exam.updateUnitOrders(editExamFormKey, context);
-
                     setState(() {});
                   }
                 },
@@ -859,10 +857,9 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                     setState(() {
                                                       loading = true;
                                                     });
-                                                    int res = 0;
 
                                                     try {
-                                                      res = await _controller
+                                                       await _controller
                                                           .handleEditExam(
                                                               editExamFormKey,
                                                               widget.exam,
@@ -1035,7 +1032,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                           ),
                           AnimatedContainer(
                             duration: editSwitchTime,
-                            height: editMode ? screenHeight * 0.03 : 0,
+                            height: editMode ? screenHeight * 0.05 : 0,
                             child: SingleChildScrollView(
                               child: Container(
                                 key: Key('0'),

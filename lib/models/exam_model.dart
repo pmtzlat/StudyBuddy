@@ -76,7 +76,7 @@ class ExamModel {
     try {
       units = await firebaseCrud
           .getUnitsForExam(examID: id)
-          .timeout(timeoutDuration);
+           ;
       //printUnits();
     } catch (e) {
       logger.e('Error getting units for exam: $name: $e');
@@ -88,8 +88,8 @@ class ExamModel {
     try {
       revisions = await firebaseCrud
           .getRevisionsForExam(examID: id)
-          .timeout(timeoutDuration)
-          .timeout(timeoutDuration);
+           
+           ;
       //printRevisions();
     } catch (e) {
       logger.e('Error getting revisions for exam: $name: $e');
@@ -108,7 +108,7 @@ class ExamModel {
         );
         await firebaseCrud
             .addUnitToExam(newUnit: newUnit, examID: id)
-            .timeout(timeoutDuration);
+             ;
       } else {
         final newUnit = UnitModel(
             name: ' ${_localizations.unit} ${units!.length + 1}',
@@ -116,7 +116,7 @@ class ExamModel {
             sessionTime: revisionTime);
         await firebaseCrud
             .addUnitToExam(newUnit: newUnit, examID: id)
-            .timeout(timeoutDuration);
+             ;
       }
       await getUnits();
     } catch (e) {
@@ -130,7 +130,7 @@ class ExamModel {
       final unitNum = unit.order;
       await firebaseCrud
           .deleteUnit(unit: unit, examID: id)
-          .timeout(timeoutDuration);
+           ;
       await getUnits();
     } catch (e) {
       logger.e('Error deleting unit $e');
@@ -185,18 +185,5 @@ class ExamModel {
     return res;
   }
 
-  void updateUnitOrders(
-      GlobalKey<FormBuilderState>? formKey, BuildContext context) {
-    final _localizations = AppLocalizations.of(context)!;
-    String res = 'New unit order: \n';
-    for (int i = 0; i < units.length; i++) {
-      units[i].order = i + 1;
-      //logger.i('$i: Unit ${units[i].order} name: ${units[i].name}');
-
-      if (units[i].name == ' ${_localizations.unit} ${units[i].order + 1}')
-        units[i].name = ' ${_localizations.unit} ${units[i].order}';
-      res += '${units[i].name}: ${units[i].order}\n';
-    }
-    //logger.i('$res');
-  }
+  
 }

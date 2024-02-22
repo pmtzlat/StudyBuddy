@@ -29,6 +29,8 @@ class FirebaseCrudService {
   //Exam Operations
 
   Future<String?> addExam({required ExamModel newExam}) async {
+    
+     
     // Check if the user document exists
     final uid = instanceManager.localStorage.getString('uid');
 
@@ -51,6 +53,7 @@ class FirebaseCrudService {
       });
 
       await newExamDocRef.update({'id': newExamDocRef.id});
+      logger.i("Added exam ${newExamDocRef.id as String}");
 
       return newExamDocRef.id as String;
     } else {
@@ -60,9 +63,13 @@ class FirebaseCrudService {
   }
 
   Future<int> deleteExam({required String examId}) async {
+    logger.i('Deleting exam $examId ...');
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
       try {
+        logger.w('Throwing error..');
+        throw FormatException("Testing error.");
+        
         if (uid == null) {
           return -1;
         }
@@ -95,12 +102,14 @@ class FirebaseCrudService {
         return 1;
       } catch (e) {
         logger.e('Error deleting exam in FirebaseCrud: $e');
-        return -1;
+        rethrow;
       }
   }
 
   Future<List<ExamModel>?> getAllExams() async {
       try {
+         
+        
         final uid = instanceManager.localStorage.getString('uid');
         final QuerySnapshot querySnapshot = await instanceManager.db
             .collection('users')
@@ -138,6 +147,8 @@ class FirebaseCrudService {
   }
 
   Future<void> editExamWeight(ExamModel exam) async {
+    
+     
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
       final examReference = firebaseInstance
@@ -153,6 +164,9 @@ class FirebaseCrudService {
   }
 
   Future<int?> editExam(String examID, ExamModel newExam) async {
+    
+    
+
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     final examReference = firebaseInstance
@@ -177,6 +191,9 @@ class FirebaseCrudService {
   }
 
   Future<ExamModel?> getExam(String examID) async {
+    
+   
+    
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     final docSnapshot = await firebaseInstance
@@ -243,6 +260,7 @@ class FirebaseCrudService {
   }
 
   Future<void> clearUnitsForExam(String examID) async {
+    
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -341,7 +359,9 @@ class FirebaseCrudService {
 
   Future<String?> addUnitToExam(
       {required UnitModel newUnit, required String examID}) async {
-    try {
+    
+      
+
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
@@ -366,10 +386,7 @@ class FirebaseCrudService {
       await unitRef.update({'id': unitRef.id});
 
       return unitRef.id;
-    } catch (e) {
-      logger.e('Error in Firebase CRUD when adding unit to exam $examID: $e');
-      return null;
-    }
+    
   }
 
   Future<bool> deleteUnit(
@@ -587,6 +604,8 @@ class FirebaseCrudService {
 
   Future<String?> addRevisionToExam(
       {required String examID, required UnitModel newRevision}) async {
+        
+    
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -616,7 +635,8 @@ class FirebaseCrudService {
   Future<int> clearRevisionsForExam(String examID) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
-
+    
+        
     try {
       if (uid != null) {
         final examDocRef = firebaseInstance

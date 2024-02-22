@@ -17,6 +17,7 @@ import 'package:study_buddy/modules/exams/exam_detail_view.dart';
 import 'package:study_buddy/modules/loader/loader.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
+import 'package:study_buddy/utils/error_&_success_messages.dart';
 import 'package:study_buddy/utils/general_utils.dart';
 import 'package:study_buddy/utils/validators.dart';
 import '../../common_widgets/exam_card.dart';
@@ -175,20 +176,13 @@ class _ExamsViewState extends State<ExamsView> {
                                             activeExams = reorderExams;
                                             prioritizing = false;
                                           });
-                                          if(await _controller
-                                              .replaceExams(activeExams) ==-1){
-                                              var snackbar = SnackBar(
-                                                content: Text(
-                                                    AppLocalizations.of(
-                                                            context)!
-                                                        .errorPrioritizing),
-                                                backgroundColor:
-                                                    Colors.redAccent,
-                                              );
-
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(snackbar);
-
+                                          if (await _controller
+                                                  .updateExamWeights() ==
+                                              -1) {
+                                            showRedSnackbar(
+                                                context,
+                                                _localizations
+                                                    .errorPrioritizing);
                                           }
 
                                           activeExams = instanceManager
@@ -319,7 +313,27 @@ class _ExamsViewState extends State<ExamsView> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
+
     ReorderableListView reorderableList() {
+      var dismmissibleCard = Container(
+        alignment: Alignment.centerRight,
+        padding: EdgeInsets.only(right: 20.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+            Container(
+                margin: EdgeInsets.only(left: 5),
+                child: Text(_localizations.delete,
+                    style: TextStyle(
+                        color: Colors.red, fontSize: screenWidth * 0.04)))
+          ],
+        ),
+      );
+
       Widget proxyDecorator(
           Widget child, int index, Animation<double> animation) {
         return AnimatedBuilder(
@@ -344,117 +358,78 @@ class _ExamsViewState extends State<ExamsView> {
           proxyDecorator: proxyDecorator,
           itemBuilder: (context, index) {
             ExamModel exam = examsList[index];
-            return Dismissible(
-              key: Key(exam.id),
-              direction: DismissDirection.endToStart,
-              background: Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Icon(
-                      Icons.delete,
-                      color: Colors.red,
-                    ),
-                    Container(
-                        margin: EdgeInsets.only(left: 5),
-                        child: Text(_localizations.delete,
-                            style: TextStyle(
-                                color: Colors.red,
-                                fontSize: screenWidth * 0.04)))
-                  ],
-                ),
-                alignment: Alignment.centerRight,
-                padding: EdgeInsets.only(right: 20.0),
-              ),
-              onDismissed: (direction) async {
-                if (!prioritizing) {
-                  setState(() {
-                    activeExams.remove(exam);
-                    instanceManager.sessionStorage.savedExams.remove(exam);
-                  });
-
-                  await _controller.deleteExam(
-                    name: exam.name,
-                    id: exam.id,
-                    index: index,
-                    context: context,
-                  );
-
-                  if (!instanceManager.sessionStorage.gettingAllExams) {
-                    instanceManager.sessionStorage.gettingAllExams = true;
-                    await Future.delayed(const Duration(seconds: 13));
-                    await _controller.getAllExams();
-                    instanceManager.sessionStorage.gettingAllExams = false;
-                  }
-
-                  setState(() {
-                    activeExams = instanceManager.sessionStorage.activeExams;
-                  });
-                } else {
-                  setState(() {
-                    reorderExams.remove(exam);
-                  });
-                }
-              },
-              child: ExamCard(
-                exam: examsList![index],
-                parentRefresh: loadExams,
-                index: index,
-                prioritizing: prioritizing,
-                pageController: examPageController,
-                giveDetails: giveDetails,
+            var dismissibleBackground = Container(
+              alignment: Alignment.centerRight,
+              padding: EdgeInsets.only(right: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
+                  Container(
+                      margin: EdgeInsets.only(left: 5),
+                      child: Text(_localizations.delete,
+                          style: TextStyle(
+                              color: Colors.red, fontSize: screenWidth * 0.04)))
+                ],
               ),
             );
+            var examCard = ExamCard(
+              exam: examsList![index],
+              parentRefresh: loadExams,
+              index: index,
+              prioritizing: prioritizing,
+              pageController: examPageController,
+              giveDetails: giveDetails,
+            );
 
-            // Container(
-            //     key: Key('$index'),
-            //     margin: EdgeInsets.symmetric(vertical: 8),
-            //     child: Card(
-            //         color: Color.fromARGB(255, 39, 39, 39),
-            //         child: Container(
-            //             padding: EdgeInsets.only(
-            //                 left: screenWidth * 0.05,
-            //                 top: screenWidth * 0.03,
-            //                 bottom: screenWidth * 0.03),
-            //             child: Row(
-            //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //               children: [
-            //                 Text(exam.name,
-            //                     style: TextStyle(
-            //                         color: Colors.white,
-            //                         fontSize: screenWidth * 0.06)),
-            //                 SingleChildScrollView(
-            //                   scrollDirection: Axis.horizontal,
-            //                   physics: NeverScrollableScrollPhysics(),
-            //                   child: Row(
-            //                     children: [
-            //                       AnimatedContainer(
-            //                         curve: Curves.decelerate,
-            //                         duration: prioritizeSwitchTime,
-            //                         width:
-            //                             prioritizing ? screenWidth * 0.05 : 0,
-            //                         child: SizedBox(),
-            //                       ),
-            //                       Text('${formatDateTime(contextexam.examDate)}',
-            //                           style: TextStyle(
-            //                               color: Colors.white,
-            //                               fontSize: screenWidth * 0.035)),
-            //                       SizedBox(
-            //                         width: screenWidth * 0.02,
-            //                       ),
-            //                       ReorderableDragStartListener(
-            //                           child: Padding(
-            //                             padding:
-            //                                 EdgeInsets.all(screenWidth * 0.02),
-            //                             child: Icon(Icons.drag_handle_rounded,
-            //                                 color: Colors.black),
-            //                           ),
-            //                           index: index),
-            //                     ],
-            //                   ),
-            //                 )
-            //               ],
-            //             ))));
+            if (prioritizing) {
+              return Container(key: Key(exam.id), child: examCard);
+            } else {
+              return Dismissible(
+                key: Key(exam.id),
+                direction: DismissDirection.endToStart,
+                background: dismissibleBackground,
+                onDismissed: (direction) async {
+                  if (!prioritizing) {
+                    setState(() {
+                      activeExams.remove(exam);
+                      instanceManager.sessionStorage.savedExams.remove(exam);
+                    });
+                    try {
+                      await _controller.deleteExam(
+                        name: exam.name,
+                        id: exam.id,
+                        index: index,
+                        context: context,
+                      );
+
+                      if (!instanceManager.sessionStorage.gettingAllExams) {
+                        instanceManager.sessionStorage.gettingAllExams = true;
+                        await Future.delayed(const Duration(seconds: 13));
+                        await _controller.getAllExams();
+                        instanceManager.sessionStorage.gettingAllExams = false;
+                      }
+                    } catch (e) {
+                      showRedSnackbar(
+                          context, _localizations.errorDeletingExam);
+                      await _controller.getAllExams();
+                    }
+
+                    setState(() {
+                      activeExams = instanceManager.sessionStorage.activeExams;
+                    });
+                  } else {
+                    setState(() {
+                      reorderExams.remove(exam);
+                    });
+                  }
+                },
+                child: examCard,
+              );
+            }
           },
           itemCount: examsList.length,
           onReorder: (int oldIndex, int newIndex) {
@@ -476,6 +451,25 @@ class _ExamsViewState extends State<ExamsView> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
+    var dismmissibleBackGround = Container(
+      alignment: Alignment.centerRight,
+      padding: EdgeInsets.only(right: 20.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Icon(
+            Icons.delete,
+            color: Colors.red,
+          ),
+          Container(
+              margin: EdgeInsets.only(left: 5),
+              child: Text(_localizations.delete,
+                  style: TextStyle(
+                      color: Colors.red, fontSize: screenWidth * 0.04)))
+        ],
+      ),
+    );
+
     return Stack(
       children: [
         Container(
@@ -490,59 +484,52 @@ class _ExamsViewState extends State<ExamsView> {
               itemCount: examList!.length,
               itemBuilder: (context, index) {
                 final exam = examList![index];
-                return Dismissible(
-                  key: Key(exam.id),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Icon(
-                          Icons.delete,
-                          color: Colors.red,
-                        ),
-                        Container(
-                            margin: EdgeInsets.only(left: 5),
-                            child: Text(_localizations.delete,
-                                style: TextStyle(
-                                    color: Colors.red,
-                                    fontSize: screenWidth * 0.04)))
-                      ],
-                    ),
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(right: 20.0),
-                  ),
-                  onDismissed: (direction) async {
-                    setState(() {
-                      pastExams.remove(exam);
-                      instanceManager.sessionStorage.savedExams.remove(exam);
-                    });
-
-                    await _controller.deleteExam(
-                      name: exam.name,
-                      id: exam.id,
-                      index: index,
-                      context: context,
-                    );
-                    if (!instanceManager.sessionStorage.gettingAllExams) {
-                      instanceManager.sessionStorage.gettingAllExams = true;
-                      await Future.delayed(const Duration(seconds: 13));
-                      await _controller.getAllExams();
-                      instanceManager.sessionStorage.gettingAllExams = false;
-                    }
-                    setState(() {
-                      pastExams = instanceManager.sessionStorage.pastExams;
-                    });
-                  },
-                  child: ExamCard(
-                    exam: examList![index],
-                    parentRefresh: loadExams,
-                    prioritizing: false,
-                    index: index,
-                    pageController: examPageController,
-                    giveDetails: giveDetails,
-                  ),
+                var examCard = ExamCard(
+                  exam: examList![index],
+                  parentRefresh: loadExams,
+                  prioritizing: false,
+                  index: index,
+                  pageController: examPageController,
+                  giveDetails: giveDetails,
                 );
+                if (prioritizing) {
+                  return examCard;
+                } else {
+                  return Dismissible(
+                    key: Key(exam.id),
+                    direction: DismissDirection.endToStart,
+                    background: dismmissibleBackGround,
+                    onDismissed: (direction) async {
+                      setState(() {
+                        pastExams.remove(exam);
+                        instanceManager.sessionStorage.savedExams.remove(exam);
+                      });
+                      try {
+                        await _controller.deleteExam(
+                          name: exam.name,
+                          id: exam.id,
+                          index: index,
+                          context: context,
+                        );
+                        if (!instanceManager.sessionStorage.gettingAllExams) {
+                          instanceManager.sessionStorage.gettingAllExams = true;
+                          await Future.delayed(const Duration(seconds: 13));
+                          await _controller.getAllExams();
+                          instanceManager.sessionStorage.gettingAllExams =
+                              false;
+                        }
+                      } catch (e) {
+                        showRedSnackbar(
+                            context, _localizations.errorDeletingExam);
+                        await _controller.getAllExams();
+                      }
+                      setState(() {
+                        pastExams = instanceManager.sessionStorage.pastExams;
+                      });
+                    },
+                    child: examCard,
+                  );
+                }
               },
             ),
           ),

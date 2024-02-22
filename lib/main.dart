@@ -55,18 +55,13 @@ Future<bool> handleAppStart() async {
       await instanceManager.calendarController.getIncompletePreviousDays(
           DateTime.parse(instanceManager.localStorage.getString('oldDate')));
 
-      instanceManager.sessionStorage.initialExamsLoad =
-          await instanceManager.examsController.getAllExams();
-      instanceManager.sessionStorage.initialGapsLoad =
-          await instanceManager.calendarController.getGaps();
-      instanceManager.sessionStorage.initialCustomDaysLoad =
-          await instanceManager.calendarController.getCustomDays();
-      instanceManager.sessionStorage.initialDayLoad =
-          await instanceManager.calendarController.getCalendarDay(now);
+      await instanceManager.examsController.getAllExams();
+      await instanceManager.calendarController.getGaps();
+      await instanceManager.calendarController.getCustomDays();
+      await instanceManager.calendarController.getCalendarDay(now);
       instanceManager.sessionStorage.savedWeekday =
           instanceManager.sessionStorage.selectedDate.weekday - 1;
-      instanceManager.sessionStorage.initialCalendarDaySessions =
-          await instanceManager.calendarController
+      await instanceManager.calendarController
               .getAllCalendarDaySessionNumbers();
 
       instanceManager.sessionStorage.needsRecalculation =

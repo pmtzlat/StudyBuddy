@@ -126,6 +126,8 @@ bool containsDayWithDate(List<DayModel> days, DateTime targetDate) {
   return days.any((day) => day.date == stripTime(targetDate));
 }
 
+
+
 class CustomShapeClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
