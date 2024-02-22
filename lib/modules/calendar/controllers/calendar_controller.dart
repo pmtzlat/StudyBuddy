@@ -213,7 +213,7 @@ class CalendarController {
       DateTime date, List<TimeSlotModel> customSchdule) async {
     try {
       if (await _firebaseCrud
-          .findDate(date.toString())
+          .findCustomDayWithDate(date.toString())
           .timeout(timeoutDuration)) {
         logger.e('Day Already in customdays list!');
         return 2;
@@ -266,7 +266,7 @@ class CalendarController {
         }
       }
       // If no match is found, you can return a special value or throw an exception.
-      // For simplicity, I'll return -1 in this example.
+      // For simplicity, I'll return -1.
       return -1;
     }
 

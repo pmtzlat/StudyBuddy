@@ -175,9 +175,8 @@ class _ExamsViewState extends State<ExamsView> {
                                             activeExams = reorderExams;
                                             prioritizing = false;
                                           });
-                                          switch (await _controller
-                                              .replaceExams(activeExams)) {
-                                            case (-1):
+                                          if(await _controller
+                                              .replaceExams(activeExams) ==-1){
                                               var snackbar = SnackBar(
                                                 content: Text(
                                                     AppLocalizations.of(
@@ -190,7 +189,6 @@ class _ExamsViewState extends State<ExamsView> {
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(snackbar);
 
-                                            default:
                                           }
 
                                           activeExams = instanceManager

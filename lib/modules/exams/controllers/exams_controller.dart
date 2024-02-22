@@ -223,10 +223,6 @@ class ExamsController {
     try {
       final exams = instanceManager.sessionStorage.activeExams;
 
-      // instanceManager.sessionStorage.activeExams.removeAt(instanceManager
-      //     .sessionStorage.activeExams
-      //     .indexOf(instanceManager.sessionStorage.examToAdd));
-
       for (ExamModel exam in exams) {
         ExamModel? alreadyInDB = await firebaseCrud.getExam(exam.id);
 
@@ -364,37 +360,22 @@ class ExamsController {
 
   Future<int> handleChangeInRevisions(int revisions, ExamModel exam) async {
     try {
-      var res;
-      int currentRevisions = exam.revisions.length;
-
-      if (revisions > currentRevisions) {
-        while (revisions > currentRevisions) {
-          currentRevisions++;
-          final newUnit = UnitModel(
-              name: 'Revision $currentRevisions',
-              order: currentRevisions,
-              sessionTime:
-                  doubleToDuration((durationToDouble(exam.revisionTime))));
+      
+      await firebaseCrud.clearRevisionsForExam(exam.id);
+      for(int i= 0; i<revisions; i++){
+        final newUnit = UnitModel(
+              name: 'Revision $i',
+              order: i,
+              sessionTime:exam.revisionTime);
           //logger.i('Adding new revision: ${newUnit.name}');
-          res = await firebaseCrud
-              .addRevisionToExam(newUnit: newUnit, examID: exam.id)
-              .timeout(timeoutDuration);
-          ;
-          if (res == null) return -1;
-        }
-      } else if (revisions < currentRevisions) {
-        //logger.i('new revisions is < current revisions');
-        while (revisions < currentRevisions) {
-          //logger.i('Removing new revision: ${currentRevisions}');
-          res = await firebaseCrud
-              .removeRevisionFromExam(currentRevisions, exam.id)
-              .timeout(timeoutDuration);
-          ;
-          if (res == null) return -1;
-          currentRevisions--;
-        }
+          if( await firebaseCrud
+              .addRevisionToExam(newRevision: newUnit, examID: exam.id)
+              .timeout(timeoutDuration) == null) return -1;
+        
+
       }
 
+    
       return 1;
     } catch (e) {
       logger.e('Error handling change in revisions: $e');
