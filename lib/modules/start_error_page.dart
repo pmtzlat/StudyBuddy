@@ -66,7 +66,7 @@ class _StartErrorPageState extends State<StartErrorPage> {
 
               }catch(e){
                 logger.e('Error handling app start: $e');
-                showRedSnackbar(context, _localizations.errorLoading);
+                  showRedSnackbar(context, _localizations.errorLoading);
               }
 
             },

@@ -3,7 +3,7 @@ import 'package:study_buddy/common_widgets/leftover_card.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
-void showRedSnackbar(BuildContext context, String message) {
+void  showRedSnackbar(BuildContext context, String message) {
   final snackBar = SnackBar(
     content: Text(message, style: TextStyle(color: Colors.white)),
     backgroundColor: Colors.red,

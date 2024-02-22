@@ -43,7 +43,7 @@ class _GapSelectorState extends State<GapSelector> {
       endTime = const TimeOfDay(hour: 23, minute: 59);
     }
 
-    if (!isTimeBefore(startTime, endTime)) {
+    if (!isTimeBefore(startTime, endTime) || startTime == endTime) {
       return false;
     }
     return true;
@@ -222,13 +222,14 @@ class _GapSelectorState extends State<GapSelector> {
                                                 int res = 1;
                                                 if (widget.generalOrCustomDay ==
                                                     'general') {
-                                                  res =
+                                                  res = 
                                                       await _controller.addGap(
                                                           restraintFormKey,
                                                           widget.day.weekday,
                                                           widget.day.timeSlots,);
                                                   logger.i('Added gap!');
-                                                  await _controller.getGaps();
+                                                  await _controller.getGapsForDay(widget.day.weekday);
+                                                  
                                                 } else {
                                                   res = await _controller
                                                       .updateCustomDay(widget.day,
@@ -247,8 +248,7 @@ class _GapSelectorState extends State<GapSelector> {
                                                 });
                                                 Navigator.of(context).pop();
                                                 if (res != 1) {
-                                                  showRedSnackbar(
-                                                      context,
+                                                   showRedSnackbar(context,
                                                       _localizations
                                                           .errorAddingGap);
                                                 }
@@ -271,7 +271,7 @@ class _GapSelectorState extends State<GapSelector> {
                                           key: shakeKey,
                                           shakeOffset: 10,
                                           child: Icon(
-                                            Icons.check,
+                                            Icons.done,
                                             color: Colors.lightGreen,
                                             size: screenWidth * 0.1,
                                           ),

@@ -35,18 +35,7 @@ class _GeneralAvailabilityViewState extends State<GeneralAvailabilityView> {
                   children: [
                     Text(_localizations.chooseFreeSchedule),
                     
-                    // ElevatedButton.icon(
-                    //     onPressed: () {
-                    //       Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //           builder: (context) =>
-                    //               CustomDaysView(), // Replace NewPage with the page you want to navigate to
-                    //         ),
-                    //       );
-                    //     },
-                    //     icon: Icon(Icons.calendar_month_outlined),
-                    //     label: Text(_localizations.viewCustomDays)),
+                    
                     Container(
                         width: screenWidth * 0.8,
                         height: screenHeight * 0.6,

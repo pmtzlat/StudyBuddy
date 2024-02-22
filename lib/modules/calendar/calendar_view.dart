@@ -715,8 +715,7 @@ class _CalendarViewState extends State<CalendarView>
     });
     
     if (!await _controller.getCalendarDay(newDate))
-      showRedSnackbar(
-          context, _localizations.errorLoadingDay);
+       showRedSnackbar(context, _localizations.errorLoadingDay);
     setState(() {
       dayLoaded = true;
       date = instanceManager.sessionStorage.selectedDate;

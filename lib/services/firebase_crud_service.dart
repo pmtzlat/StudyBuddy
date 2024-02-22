@@ -29,9 +29,8 @@ class FirebaseCrudService {
   //Exam Operations
 
   Future<String?> addExam({required ExamModel newExam}) async {
-    
-     
     // Check if the user document exists
+    
     final uid = instanceManager.localStorage.getString('uid');
 
     final userDocRef = instanceManager.db.collection('users').doc(uid);
@@ -64,109 +63,99 @@ class FirebaseCrudService {
 
   Future<int> deleteExam({required String examId}) async {
     logger.i('Deleting exam $examId ...');
-      final uid = instanceManager.localStorage.getString('uid');
-      final firebaseInstance = instanceManager.db;
-      try {
-        logger.w('Throwing error..');
-        throw FormatException("Testing error.");
-        
-        if (uid == null) {
-          return -1;
-        }
-
-        final userDocRef = firebaseInstance.collection('users').doc(uid);
-
-        final examDocRef = userDocRef.collection('exams').doc(examId);
-        final examDoc = await examDocRef.get();
-
-        if (!examDoc.exists) {
-          return 0;
-        }
-
-        final unitCollectionRef = examDocRef.collection('units');
-        final unitQuerySnapshot = await unitCollectionRef.get();
-
-        for (final unitDoc in unitQuerySnapshot.docs) {
-          await unitDoc.reference.delete();
-        }
-
-        final revisionCollectionRef = examDocRef.collection('revisions');
-        final revisionQuerySnapshot = await revisionCollectionRef.get();
-
-        for (final revisionDoc in revisionQuerySnapshot.docs) {
-          await revisionDoc.reference.delete();
-        }
-
-        await examDocRef.delete();
-
-        return 1;
-      } catch (e) {
-        logger.e('Error deleting exam in FirebaseCrud: $e');
-        rethrow;
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+    try {
+      if (uid == null) {
+        return -1;
       }
+
+      final userDocRef = firebaseInstance.collection('users').doc(uid);
+
+      final examDocRef = userDocRef.collection('exams').doc(examId);
+      final examDoc = await examDocRef.get();
+
+      if (!examDoc.exists) {
+        return 0;
+      }
+
+      final unitCollectionRef = examDocRef.collection('units');
+      final unitQuerySnapshot = await unitCollectionRef.get();
+
+      for (final unitDoc in unitQuerySnapshot.docs) {
+        await unitDoc.reference.delete();
+      }
+
+      final revisionCollectionRef = examDocRef.collection('revisions');
+      final revisionQuerySnapshot = await revisionCollectionRef.get();
+
+      for (final revisionDoc in revisionQuerySnapshot.docs) {
+        await revisionDoc.reference.delete();
+      }
+
+      await examDocRef.delete();
+
+      return 1;
+    } catch (e) {
+      logger.e('Error deleting exam in FirebaseCrud: $e');
+      rethrow;
+    }
   }
 
   Future<List<ExamModel>?> getAllExams() async {
-      try {
-         
-        
-        final uid = instanceManager.localStorage.getString('uid');
-        final QuerySnapshot querySnapshot = await instanceManager.db
-            .collection('users')
-            .doc(uid)
-            .collection('exams')
-            .get();
-
-        final List<ExamModel> exams = querySnapshot.docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-
-          final double weight = ((data['weight'] as double) / 10.0);
-
-          return ExamModel(
-              name: data['name'] as String,
-              weight: weight,
-              examDate: DateTime.parse((data['examDate'] as String)),
-              timeStudied: parseTime(data['timeStudied']),
-              color: HexColor.fromHex(data['color']),
-              revisionTime: parseTime(data['revisionTime']),
-              id: data['id'] as String,
-              orderMatters: data['orderMatters'] as bool,
-              sessionsSplittable: data['sessionSplittable'] as bool);
-        }).toList();
-
-        for (ExamModel exam in exams) {
-          exam.units = await getUnitsForExam(examID: exam.id) ?? <UnitModel>[];
-          exam.revisions =
-              await getRevisionsForExam(examID: exam.id) ?? <UnitModel>[];
-        }
-        return exams;
-      } catch (e) {
-        logger.e('Error getting exams: $e');
-        return null;
-      }
-  }
-
-  Future<void> editExamWeight(ExamModel exam) async {
-    
-     
+    try {
       final uid = instanceManager.localStorage.getString('uid');
-      final firebaseInstance = instanceManager.db;
-      final examReference = firebaseInstance
+      final QuerySnapshot querySnapshot = await instanceManager.db
           .collection('users')
           .doc(uid)
           .collection('exams')
-          .doc(exam.id);
+          .get();
 
-      await examReference.update({
-        'weight': exam.weight * 10,
-      });
-      return;
+      final List<ExamModel> exams = querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+
+        final double weight = ((data['weight'] as double) / 10.0);
+
+        return ExamModel(
+            name: data['name'] as String,
+            weight: weight,
+            examDate: DateTime.parse((data['examDate'] as String)),
+            timeStudied: parseTime(data['timeStudied']),
+            color: HexColor.fromHex(data['color']),
+            revisionTime: parseTime(data['revisionTime']),
+            id: data['id'] as String,
+            orderMatters: data['orderMatters'] as bool,
+            sessionsSplittable: data['sessionSplittable'] as bool);
+      }).toList();
+
+      for (ExamModel exam in exams) {
+        exam.units = await getUnitsForExam(examID: exam.id) ?? <UnitModel>[];
+        exam.revisions =
+            await getRevisionsForExam(examID: exam.id) ?? <UnitModel>[];
+      }
+      return exams;
+    } catch (e) {
+      logger.e('Error getting exams: $e');
+      return null;
+    }
+  }
+
+  Future<void> editExamWeight(ExamModel exam) async {
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
+    final examReference = firebaseInstance
+        .collection('users')
+        .doc(uid)
+        .collection('exams')
+        .doc(exam.id);
+
+    await examReference.update({
+      'weight': exam.weight * 10,
+    });
+    return;
   }
 
   Future<int?> editExam(String examID, ExamModel newExam) async {
-    
-    
-
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     final examReference = firebaseInstance
@@ -191,9 +180,6 @@ class FirebaseCrudService {
   }
 
   Future<ExamModel?> getExam(String examID) async {
-    
-   
-    
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     final docSnapshot = await firebaseInstance
@@ -260,7 +246,6 @@ class FirebaseCrudService {
   }
 
   Future<void> clearUnitsForExam(String examID) async {
-    
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -277,6 +262,8 @@ class FirebaseCrudService {
       await unitDoc.reference.delete();
     }
   }
+
+
 
 
   //Unit Operations
@@ -339,15 +326,14 @@ class FirebaseCrudService {
         final unitData = unitDoc.data() as Map<String, dynamic>;
 
         return UnitModel(
-          name: unitData['name'] ?? '',
-          sessionTime: parseTime(unitData['sessionTime']),
-          id: unitDoc.id,
-          order: unitData['order'] ?? 0,
-          totalSessions: unitData['totalSessions'] ?? 0,
-          completedSessions: unitData['completedSessions'] ?? 0,
-          examID: unitData['examID'],
-          completed: unitData['completed'] ?? false
-        );
+            name: unitData['name'] ?? '',
+            sessionTime: parseTime(unitData['sessionTime']),
+            id: unitDoc.id,
+            order: unitData['order'] ?? 0,
+            totalSessions: unitData['totalSessions'] ?? 0,
+            completedSessions: unitData['completedSessions'] ?? 0,
+            examID: unitData['examID'],
+            completed: unitData['completed'] ?? false);
       } else {
         return null;
       }
@@ -359,34 +345,30 @@ class FirebaseCrudService {
 
   Future<String?> addUnitToExam(
       {required UnitModel newUnit, required String examID}) async {
-    
-      
+    final uid = instanceManager.localStorage.getString('uid');
+    final firebaseInstance = instanceManager.db;
 
-      final uid = instanceManager.localStorage.getString('uid');
-      final firebaseInstance = instanceManager.db;
+    final examRef = firebaseInstance
+        .collection('users')
+        .doc(uid)
+        .collection('exams')
+        .doc(examID);
 
-      final examRef = firebaseInstance
-          .collection('users')
-          .doc(uid)
-          .collection('exams')
-          .doc(examID);
+    final unitData = {
+      'name': newUnit.name,
+      'sessionTime': newUnit.sessionTime.toString(),
+      'order': newUnit.order,
+      'id': '',
+      'completed': newUnit.completed,
+      'totalSessions': newUnit.totalSessions,
+      'completedSessions': newUnit.completedSessions,
+      'examID': examID,
+    };
 
-      final unitData = {
-        'name': newUnit.name,
-        'sessionTime': newUnit.sessionTime.toString(),
-        'order': newUnit.order,
-        'id': '',
-        'completed': newUnit.completed,
-        'totalSessions': newUnit.totalSessions,
-        'completedSessions': newUnit.completedSessions,
-        'examID': examID,
-      };
+    final unitRef = await examRef.collection('units').add(unitData);
+    await unitRef.update({'id': unitRef.id});
 
-      final unitRef = await examRef.collection('units').add(unitData);
-      await unitRef.update({'id': unitRef.id});
-
-      return unitRef.id;
-    
+    return unitRef.id;
   }
 
   Future<bool> deleteUnit(
@@ -563,6 +545,7 @@ class FirebaseCrudService {
   }
 
 
+
   //Revision operations
 
   Future<List<UnitModel>?> getRevisionsForExam({required String examID}) async {
@@ -604,8 +587,6 @@ class FirebaseCrudService {
 
   Future<String?> addRevisionToExam(
       {required String examID, required UnitModel newRevision}) async {
-        
-    
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -635,8 +616,7 @@ class FirebaseCrudService {
   Future<int> clearRevisionsForExam(String examID) async {
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
-    
-        
+
     try {
       if (uid != null) {
         final examDocRef = firebaseInstance
@@ -663,6 +643,8 @@ class FirebaseCrudService {
       return -1;
     }
   }
+
+
 
 
   //Calendar Operations
@@ -846,44 +828,44 @@ class FirebaseCrudService {
   }
 
   Future<int> addTimeSlotToCalendarDay(
-        String dayID, TimeSlotModel timeSlot) async {
-      try {
-        final uid = instanceManager.localStorage.getString('uid');
-        final firebaseInstance = instanceManager.db;
-        final color = await getExamColor(timeSlot.examID);
+      String dayID, TimeSlotModel timeSlot) async {
+    try {
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+      final color = await getExamColor(timeSlot.examID);
 
-        final dayRef = firebaseInstance
-            .collection('users')
-            .doc(uid)
-            .collection('calendarDays')
-            .doc(dayID);
+      final dayRef = firebaseInstance
+          .collection('users')
+          .doc(uid)
+          .collection('calendarDays')
+          .doc(dayID);
 
-        final Map<String, dynamic> timeSlotData = {
-          'weekday': timeSlot.weekday,
-          'startTime': timeSlot.timeOfDayToString(timeSlot.startTime),
-          'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
-          'duration': timeSlot.duration.toString(),
-          'examID': timeSlot.examID,
-          'unitID': timeSlot.unitID,
-          'examName': timeSlot.examName,
-          'unitName': timeSlot.unitName,
-          'completed': timeSlot.completed,
-          'id': '',
-          'dayID': dayID,
-          'date': timeSlot.date.toString(),
-          'timeStudied': timeSlot.timeStudied.toString(),
-          'examColor': color
-        };
+      final Map<String, dynamic> timeSlotData = {
+        'weekday': timeSlot.weekday,
+        'startTime': timeSlot.timeOfDayToString(timeSlot.startTime),
+        'endTime': timeSlot.timeOfDayToString(timeSlot.endTime),
+        'duration': timeSlot.duration.toString(),
+        'examID': timeSlot.examID,
+        'unitID': timeSlot.unitID,
+        'examName': timeSlot.examName,
+        'unitName': timeSlot.unitName,
+        'completed': timeSlot.completed,
+        'id': '',
+        'dayID': dayID,
+        'date': timeSlot.date.toString(),
+        'timeStudied': timeSlot.timeStudied.toString(),
+        'examColor': color
+      };
 
-        final timeSlotRef =
-            await dayRef.collection('timeSlots').add(timeSlotData);
-        await timeSlotRef.update({'id': timeSlotRef.id});
+      final timeSlotRef =
+          await dayRef.collection('timeSlots').add(timeSlotData);
+      await timeSlotRef.update({'id': timeSlotRef.id});
 
-        return 1;
-      } catch (e) {
-        logger.e('Error adding Time Slot: $e');
-        return -1;
-      }
+      return 1;
+    } catch (e) {
+      logger.e('Error adding Time Slot: $e');
+      return -1;
+    }
   }
 
   Future<List<TimeSlotModel>> getTimeSlotsForCalendarDay(String dayID) async {
@@ -1108,6 +1090,7 @@ class FirebaseCrudService {
   }
 
 
+
   //General Gaps Operations
 
   Future<int> clearGapsForWeekday(String weekday) async {
@@ -1136,6 +1119,7 @@ class FirebaseCrudService {
   }
 
   Future<int?> addTimeSlotGap({required TimeSlotModel timeSlot}) async {
+    
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -1192,32 +1176,23 @@ class FirebaseCrudService {
   }
 
   Future<List<List<TimeSlotModel>>> getGaps() async {
-    final uid = instanceManager.localStorage.getString('uid');
-    final firebaseInstance = instanceManager.db;
-
+    List<List<TimeSlotModel>> gaps = [
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+    ];
     try {
-      if ((await checkIfGapsExist(uid)) == false) {
-        return [
-          [],
-          [],
-          [],
-          [],
-          [],
-          [],
-          [],
-        ];
-      }
-      ;
+      
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
 
-      List<List<TimeSlotModel>> gaps = [
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-      ];
+      if ((await checkIfGapsExist(uid)) == false) {
+        return gaps;
+      }
 
       final userDoc = await firebaseInstance.collection('users').doc(uid).get();
 
@@ -1262,20 +1237,13 @@ class FirebaseCrudService {
       return gaps as List<List<TimeSlotModel>>;
     } catch (e) {
       logger.e('Error getting Gaps: $e');
-      return [
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
-      ];
+      return gaps;
     }
   }
 
   Future<int?> deleteGap(TimeSlotModel gap) async {
     try {
+      
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
       final id = gap.id;
@@ -1295,11 +1263,49 @@ class FirebaseCrudService {
 
       await timeSlotsCollectionRef.doc(id).delete();
 
-      return 1;
+      
     } catch (e) {
       logger.e('Error deleting gap: $e');
-      return -1;
+      rethrow;
     }
+  }
+
+  Future<List<TimeSlotModel>> getGapsForDay(int day) async {
+   
+    
+    List<TimeSlotModel> gaps = [];
+    day--;
+
+      final uid = instanceManager.localStorage.getString('uid');
+      final firebaseInstance = instanceManager.db;
+
+      final userDoc = await firebaseInstance.collection('users').doc(uid).get();
+
+      final timeSlotsDocRef =
+          userDoc.reference.collection('timeGaps').doc('timeGapsDoc');
+
+      final weekday = weekDays[day];
+      final timeGapsCollection = timeSlotsDocRef.collection(weekday);
+      final timeGapsQuery = await timeGapsCollection.get();
+
+      for (final doc in timeGapsQuery.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final timeSlot = TimeSlotModel(
+          id: doc.id,
+          weekday: day + 1,
+          startTime: stringToTimeOfDay24Hr(data['startTime']),
+          endTime: stringToTimeOfDay24Hr(data['endTime']),
+          examID: data['examID'] ?? '',
+          unitID: data['unitID'] ?? '',
+          examName: data['examName'] ?? '',
+          unitName: data['unitName'] ?? '',
+          completed: data['completed'] ?? false,
+        );
+        gaps.add(timeSlot);
+      }
+      
+      return gaps;
+    
   }
 
 
@@ -1399,6 +1405,7 @@ class FirebaseCrudService {
 
   Future<int> clearTimesForCustomDay(String dayID) async {
     try {
+      
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
@@ -1424,6 +1431,10 @@ class FirebaseCrudService {
 
   Future<int> deleteCustomDay(String dayID) async {
     try {
+      logger.w('Throwing error..');
+      throw FormatException("Testing error.");
+      
+      
       logger.i('deleting...');
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
@@ -1441,7 +1452,7 @@ class FirebaseCrudService {
       return 1;
     } catch (e) {
       logger.e('Error deleting Custom Day: $e');
-      return -1;
+      rethrow;
     }
   }
 
@@ -1500,6 +1511,7 @@ class FirebaseCrudService {
   }
 
   Future<bool> checkIfCustomDayExists(DateTime date) async {
+     
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -1517,7 +1529,6 @@ class FirebaseCrudService {
       return false;
     }
   }
-
 
   //Recalc Operations
 
@@ -1540,18 +1551,4 @@ class FirebaseCrudService {
       'calendarNeedsRecalc': value,
     });
   }
-
-
-  
-  
-  
- 
-  
-  
-  
- 
-  
-  
-  
-  
-  }
+}

@@ -33,6 +33,17 @@ class CalendarController {
     }
   }
 
+  Future<bool> getGapsForDay(int weekday) async {
+    try{
+      instanceManager.sessionStorage.weeklyGaps[weekday-1] = await _firebaseCrud.getGapsForDay(weekday);
+      return true;
+    }catch(e){
+      logger.e('Error getting gaps for weekday $weekday: $e');
+      return false;
+    }
+
+  }
+
   Future<int> calculateSchedule() async {
     
     var result = await instanceManager.studyPlanner.calculateSchedule();
@@ -52,10 +63,10 @@ class CalendarController {
     return result;
   }
 
-  Future<int?> deleteGap(TimeSlotModel timeSlot) async {
-    final res = await instanceManager.firebaseCrudService.deleteGap(timeSlot);
+  Future<void> deleteGap(TimeSlotModel timeSlot) async {
+    await instanceManager.firebaseCrudService.deleteGap(timeSlot);
     instanceManager.sessionStorage.setNeedsRecalc(true);
-    return res;
+    
   }
 
   Future<int> addGap(GlobalKey<FormBuilderState> key, int weekday,
@@ -255,6 +266,7 @@ class CalendarController {
     DayModel day,
     GlobalKey<FormBuilderState>? key,
   ) async {
+    
     int findIndexOfMatchingDate(List<DayModel> dayModels, DateTime targetDate) {
       for (int i = 0; i < dayModels.length; i++) {
         if (dayModels[i].date.isAtSameMomentAs(targetDate)) {
@@ -330,21 +342,11 @@ class CalendarController {
       return 1;
     } on Exception catch (e) {
       logger.e('Error updating Custom day $e');
-      return -1;
+      rethrow;
     }
   }
 
-  Future<int> deleteCustomDay(String dayID) async {
-    try {
-      instanceManager.sessionStorage.setNeedsRecalc(true);
-      return await _firebaseCrud
-          .deleteCustomDay(dayID)
-           ;
-    } on Exception catch (e) {
-      logger.e('Error deleting custom day: $e');
-      return -1;
-    }
-  }
+  
 
   Future<int> markTimeSlotAsComplete(
       String dayID, TimeSlotModel timeSlot) async {

@@ -225,23 +225,24 @@ class _DayFormState extends State<DayForm> {
                           timeSlotList.removeAt(index);
                         });
                         try {
-                          final res = await _controller.deleteGap(timeSlot);
-                          if (res != 1) {
-                            showRedSnackbar(
-                                context, _localizations.errorDeletingGap);
-                          }
-                        } catch (e) {
-                          logger.e('error deleting gap: $e');
-                          showRedSnackbar(
-                              context, _localizations.errorDeletingGap);
-                        }
-                        if(!instanceManager.sessionStorage.gettingAllGaps){
+                          await _controller.deleteGap(timeSlot);
+
+                          if(!instanceManager.sessionStorage.gettingAllGaps){
                           instanceManager.sessionStorage.gettingAllGaps = true;
                           await Future.delayed(Duration(seconds:10));
-                          await _controller.getGaps();
+                          await _controller.getGapsForDay(widget.dayNum+1);
                           instanceManager.sessionStorage.gettingAllGaps = false;
 
+                          }
+                          
+                          
+                        } catch (e) {
+                          
+                           showRedSnackbar(context, _localizations.errorDeletingGap);
+                          await _controller.getGapsForDay(widget.dayNum+1);
+                          
                         }
+                        
                         
                         setState(() {
                           timeSlotList = timeSlotList = instanceManager

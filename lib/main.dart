@@ -21,6 +21,7 @@ var now;
 String? status = null;
 late ConnectivityResult connectivityResult;
 Duration timeoutDuration = Duration(seconds: 10);
+GlobalKey<NavigatorState> navKey = GlobalKey();
 
 void main() async {
   Paint.enableDithering = true;
@@ -81,20 +82,11 @@ Future<bool> handleAppStart() async {
   }
 }
 
-class StudyBuddyApp extends StatefulWidget {
+class StudyBuddyApp extends StatelessWidget {
   StudyBuddyApp({super.key});
+  static GlobalKey<NavigatorState> navKey = GlobalKey();
 
-  @override
-  State<StudyBuddyApp> createState() => _StudyBuddyAppState();
-}
-
-class _StudyBuddyAppState extends State<StudyBuddyApp> {
   final User? user = FirebaseAuth.instance.currentUser;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   final uid = instanceManager.localStorage.getString('uid');
 
@@ -104,6 +96,7 @@ class _StudyBuddyAppState extends State<StudyBuddyApp> {
     if (status != null) {
       logger.i('Showing not connected');
       return MaterialApp(
+        navigatorKey: navKey,
         title: 'StudyBuddy',
         home: StartErrorPage(
             errorMsg: status!),

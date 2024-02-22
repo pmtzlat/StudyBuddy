@@ -531,7 +531,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                               revisionTime = await showTimerPicker(context, revisionTime);
                               if (revisionTime == Duration.zero) {
                                 revisionTime = const Duration(minutes: 1);
-                                showRedSnackbar(context,
+                                  showRedSnackbar(context,
                                     _localizations.sessionTimeCantBeZero);
                               }
                               setState(() {});
@@ -872,8 +872,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                       editExamFormKey
                                                           .currentState!
                                                           .reset();
-                                                      showRedSnackbar(
-                                                          context,
+                                                       showRedSnackbar(context,
                                                           _localizations
                                                               .errorEditingExam);
                                                     }

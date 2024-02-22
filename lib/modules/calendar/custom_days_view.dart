@@ -30,6 +30,7 @@ class _CustomDaysViewState extends State<CustomDaysView> {
   bool loading = false;
   late DayModel customDay;
   late List<TimeSlotModel> timeSlotList;
+  static GlobalKey<NavigatorState> navKey = GlobalKey();
 
   @override
   void initState() {
@@ -79,32 +80,25 @@ class _CustomDaysViewState extends State<CustomDaysView> {
                   setState(() {
                     timeSlotList.removeAt(index);
                   });
-                  try {
-                    final res =
-                        await _controller.updateCustomDay(customDay, null);
-                    if (res != 1) {
-                      showRedSnackbar(context, _localizations.errorDeletingGap);
+
+                  if (await _controller.updateCustomDay(customDay, null) !=
+                      -1) {
+                    if (!instanceManager.sessionStorage.gettingAllCustomDays) {
+                      instanceManager.sessionStorage.gettingAllCustomDays =
+                          true;
+
+                      await Future.delayed(Duration(seconds: 5));
+                      await _controller.getCustomDays();
+
+                      await refreshCustomDay();
+                      instanceManager.sessionStorage.gettingAllCustomDays =
+                          false;
                     }
-                  } catch (e) {
-                    logger.e('error deleting gap: $e');
-                    showRedSnackbar(context, _localizations.errorDeletingGap);
-                  }
-
-                  if (!instanceManager.sessionStorage.gettingAllCustomDays) {
-                    instanceManager.sessionStorage.gettingAllCustomDays = true;
+                  } else {
+                    logger.e('Error updating custom day');
                     
-
-                    await Future.delayed(Duration(seconds: 5));
-                    await _controller.getCustomDays();
-
-                    customDay = instanceManager.sessionStorage.customDays
-                        .firstWhere((element) => element.date == date,
-                            orElse: () => DayModel(
-                                weekday: date.weekday,
-                                date: date,
-                                id: 'empty'));
-                    await customDay.getGaps();
-                    instanceManager.sessionStorage.gettingAllCustomDays = false;
+                    showRedSnackbar(context, _localizations.errorDeletingGap);
+                    await refreshCustomDay();
                   }
 
                   setState(() {
@@ -141,6 +135,7 @@ class _CustomDaysViewState extends State<CustomDaysView> {
       firstDay: DateTime.now().subtract(Duration(days: 365)),
       lastDay: DateTime.now().add(Duration(days: 365)),
       calendarFormat: _calendarFormat,
+      
       headerStyle: const HeaderStyle(formatButtonShowsNext: false),
       calendarBuilders: CalendarBuilders(
         defaultBuilder: (context, day, focusedDay) {
@@ -215,7 +210,6 @@ class _CustomDaysViewState extends State<CustomDaysView> {
             date = stripTime(focusedDay);
             loading = true;
           });
-          
 
           customDay = instanceManager.sessionStorage.customDays.firstWhere(
               (element) => element.date == date,
@@ -230,7 +224,6 @@ class _CustomDaysViewState extends State<CustomDaysView> {
                 orElse: () =>
                     DayModel(weekday: date.weekday, date: date, id: 'empty'));
           }
-          
 
           setState(() {
             timeSlotList = customDay.timeSlots;
@@ -317,125 +310,153 @@ class _CustomDaysViewState extends State<CustomDaysView> {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            GestureDetector(
-                onTap: () {
-                  widget.pageController.previousPage(
-                      duration: Duration(milliseconds: 400),
-                      curve: Curves.decelerate);
-                },
-                child: Text(_localizations.backToWeeklyAvailability,
-                    style: TextStyle(
-                        color: Colors.blue, fontWeight: FontWeight.bold))),
-            Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 8),
-              child: ColoredLastTwoWords(
-                  inputString: _localizations.editCustomDays,
-                  firstColor: Colors.black,
-                  lastTwoColor: Colors.orange),
-            ),
-            tableCalendar,
-            Container(
-              margin: EdgeInsets.only(top: screenHeight * 0.01),
-              width: screenWidth,
-              padding: EdgeInsets.symmetric(
-                  vertical: screenWidth * 0.05, horizontal: screenWidth * 0.05),
-              decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(15.0),
+      child: Stack(
+        children: [
+          
+          SingleChildScrollView(
+          child: Column(
+            children: [
+              
+
+              
+              Padding(
+                padding: const EdgeInsets.only(top: 50, bottom: 8),
+                child: ColoredLastTwoWords(
+                    inputString: _localizations.editCustomDays,
+                    firstColor: Colors.black,
+                    lastTwoColor: Colors.orange),
               ),
-              child: Column(
-                children: [
-                  Text(
-                    formatDateTime(context, date),
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: screenWidth * 0.05,
-                        color: Colors.grey),
-                  ),
-                  SizedBox(
-                    height: screenHeight * 0.02,
-                  ),
-                  timeSlotList.isNotEmpty
-                      ? Container(
-                          child: Column(
-                          children: [
-                            Container(
-                                padding: EdgeInsets.only(bottom: 10),
-                                child: Text(
-                                  _localizations.swipeToDelete,
-                                  style: TextStyle(
-                                      color: Colors.grey[700],
-                                      fontSize: screenWidth * 0.035),
-                                )),
-                            !loading ? timeSlotsListView : loader,
-                            SizedBox(
-                              height: screenHeight * 0.02,
-                            ),
-                            Center(
-                              child: iconButton,
-                            ),
-                          ],
-                        ))
-                      : Container(
-                          child: Column(
-                          children: [
-                            !loading
-                                ? Center(
-                                    child: Text(
-                                      _localizations.nothingHereYet,
-                                      style: TextStyle(
-                                          fontSize: screenWidth * 0.05,
-                                          color: Colors.grey),
-                                    ),
-                                  )
-                                : loader,
-                            SizedBox(
-                              height: screenHeight * 0.02,
-                            ),
-                            Center(
-                              child: iconButton,
-                            ),
-                          ],
-                        )),
-                ],
+              tableCalendar,
+              Container(
+                margin: EdgeInsets.only(top: screenHeight * 0.01),
+                width: screenWidth,
+                padding: EdgeInsets.symmetric(
+                    vertical: screenWidth * 0.05, horizontal: screenWidth * 0.05),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      formatDateTime(context, date),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: screenWidth * 0.05,
+                          color: Colors.grey),
+                    ),
+                    SizedBox(
+                      height: screenHeight * 0.02,
+                    ),
+                    timeSlotList.isNotEmpty
+                        ? Container(
+                            child: Column(
+                            children: [
+                              Container(
+                                  padding: EdgeInsets.only(bottom: 10),
+                                  child: Text(
+                                    _localizations.swipeToDelete,
+                                    style: TextStyle(
+                                        color: Colors.grey[700],
+                                        fontSize: screenWidth * 0.035),
+                                  )),
+                              !loading ? timeSlotsListView : loader,
+                              SizedBox(
+                                height: screenHeight * 0.02,
+                              ),
+                              Center(
+                                child: iconButton,
+                              ),
+                            ],
+                          ))
+                        : Container(
+                            child: Column(
+                            children: [
+                              !loading
+                                  ? Center(
+                                      child: Text(
+                                        _localizations.nothingHereYet,
+                                        style: TextStyle(
+                                            fontSize: screenWidth * 0.05,
+                                            color: Colors.grey),
+                                      ),
+                                    )
+                                  : loader,
+                              SizedBox(
+                                height: screenHeight * 0.02,
+                              ),
+                              Center(
+                                child: iconButton,
+                              ),
+                            ],
+                          )),
+                  ],
+                ),
               ),
-            ),
-            TextButton(
-                onPressed: () async {
-                  try {
+              TextButton(
+                  onPressed: () async {
+                    try {
+                      setState(() {
+                        loading = true;
+                      });
+                      customDay.timeSlots = instanceManager
+                          .sessionStorage.weeklyGaps[customDay.date.weekday - 1];
+                      await _controller.updateCustomDay(customDay, null);
+                      await _controller.getCustomDays();
+      
+                      customDay = instanceManager.sessionStorage.customDays
+                          .firstWhere((element) => element.date == date,
+                              orElse: () => DayModel(
+                                  weekday: date.weekday,
+                                  date: date,
+                                  id: 'empty'));
+      
+                      await customDay.getGaps();
+                    } catch (e) {
+                      logger.e('Error adding/editing custom day: $e');
+                    }
+      
                     setState(() {
-                      loading = true;
+                      timeSlotList = customDay.timeSlots;
+                      loading = false;
                     });
-                    customDay.timeSlots = instanceManager
-                        .sessionStorage.weeklyGaps[customDay.date.weekday - 1];
-                    await _controller.updateCustomDay(customDay, null);
-                    await _controller.getCustomDays();
-
-                    customDay = instanceManager.sessionStorage.customDays
-                        .firstWhere((element) => element.date == date,
-                            orElse: () => DayModel(
-                                weekday: date.weekday,
-                                date: date,
-                                id: 'empty'));
-
-                    await customDay.getGaps();
-                  } catch (e) {
-                    logger.e('Error adding/editing custom day: $e');
-                  }
-
-                  setState(() {
-                    timeSlotList = customDay.timeSlots;
-                    loading = false;
-                  });
-                },
-                child: Text(_localizations.resetToDefault))
-          ],
+                  },
+                  child: Text(_localizations.resetToDefault))
+            ],
+          ),
         ),
-      ),
+          Container(
+            padding: EdgeInsets.only(bottom: 15),
+            color: Colors.white,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                GestureDetector(
+                        onTap: () {
+                          widget.pageController.previousPage(
+                              duration: Duration(milliseconds: 400),
+                              curve: Curves.decelerate);
+                        },
+                        child: Text(_localizations.backToWeeklyAvailability,
+                            style: TextStyle(
+                                color: Colors.blue, fontWeight: FontWeight.bold))),
+              ],
+            ),
+          ),
+      ]),
+        
     );
+  }
+
+  Future<void> refreshCustomDay() async {
+    customDay = instanceManager.sessionStorage.customDays
+        .firstWhere((element) => element.date == date,
+            orElse: () => DayModel(
+                weekday: date.weekday,
+                date: date,
+                id: 'empty'));
+    await customDay.getGaps();
   }
 
   void refresh() async {

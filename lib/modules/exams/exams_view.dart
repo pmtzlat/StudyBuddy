@@ -179,8 +179,7 @@ class _ExamsViewState extends State<ExamsView> {
                                           if (await _controller
                                                   .updateExamWeights() ==
                                               -1) {
-                                            showRedSnackbar(
-                                                context,
+                                             showRedSnackbar(context,
                                                 _localizations
                                                     .errorPrioritizing);
                                           }
@@ -413,8 +412,7 @@ class _ExamsViewState extends State<ExamsView> {
                         instanceManager.sessionStorage.gettingAllExams = false;
                       }
                     } catch (e) {
-                      showRedSnackbar(
-                          context, _localizations.errorDeletingExam);
+                       showRedSnackbar(context, _localizations.errorDeletingExam);
                       await _controller.getAllExams();
                     }
 
@@ -519,8 +517,7 @@ class _ExamsViewState extends State<ExamsView> {
                               false;
                         }
                       } catch (e) {
-                        showRedSnackbar(
-                            context, _localizations.errorDeletingExam);
+                         showRedSnackbar(context,_localizations.errorDeletingExam);
                         await _controller.getAllExams();
                       }
                       setState(() {

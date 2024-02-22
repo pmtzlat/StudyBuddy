@@ -205,8 +205,7 @@ class _UnitCardState extends State<UnitCard>
                           if (widget.unit.sessionTime == Duration.zero) {
                             widget.unit.sessionTime =
                                 const Duration(minutes: 1);
-                            showRedSnackbar(
-                                context, _localizations.sessionTimeCantBeZero);
+                             showRedSnackbar(context,_localizations.sessionTimeCantBeZero);
                           }
                         }
                         setState(() {});

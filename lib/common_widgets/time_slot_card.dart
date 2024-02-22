@@ -50,7 +50,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
 
     Future<void> checkBox(bool checked) async {
       if (stripTime(DateTime.now()).isAfter(timeSlot.date!)) {
-        showRedSnackbar(context, _localizations.editUnitCompletionInExamsPage);
+          showRedSnackbar(context, _localizations.editUnitCompletionInExamsPage);
         return;
       }
       try {
@@ -191,8 +191,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                 if (instanceManager
                                         .sessionStorage.selectedDate !=
                                     stripTime(DateTime.now())) {
-                                  return showRedSnackbar(
-                                      context,
+                                  return  showRedSnackbar(context,
                                       _localizations
                                           .cantStartSessionForFuture);
                                 }
@@ -220,7 +219,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                   // } catch (e) {
                                   //   logger.e(
                                   //       'Error saving timeSlot new data: $e');
-                                  //   showRedSnackbar(
+                                  //    showRedSnackbar(context,
                                   //       context, _localizations.errorSaving);
                                   // }
 
@@ -234,8 +233,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                   // });
                                 } catch (e) {
                                   logger.e('Error updating timeSlot: $e');
-                                  showRedSnackbar(
-                                      context, _localizations.errorSaving);
+                                   showRedSnackbar(context,_localizations.errorSaving);
                                 }
 
                                 //logger.i(newTimeSlot.getString());
@@ -277,8 +275,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                     } catch (e) {
                                       logger.e(
                                           'Error changing timeslot state: $e');
-                                      showRedSnackbar(
-                                          context,
+                                       showRedSnackbar(context,
                                           _localizations
                                               .errorChangingTimeSlotCompletion);
                                     }
