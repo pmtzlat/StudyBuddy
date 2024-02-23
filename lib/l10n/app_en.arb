@@ -108,7 +108,7 @@
     "noTimeSlotsInDay": "Free time!",
     "recalculationSuccessful":"New schedule created!",
     "recalcErrorTitle":"Error",
-    "recalcErrorBody":"There was an error when recalculating your schedule. \nTry again later. ",
+    "recalcErrorBody":"There was an error recalculating your schedule. \nTry again later. ",
     "recalcNoTimeTitle": "No time!",
     "recalcNoTimeBody":"Based on your availability, the days left until your exams, and the amount of time you want to dedicate to each topic/exam, there is not enough time to study everything. You can reduce the session time or the number of revision days for some exams, or change your availablity to suit your needs. These are the exams that didn't have any space left: ",
     "completePreviousDaysTitle":"Mark previous days as complete?",
@@ -133,6 +133,7 @@
     "busy": "Busy",
     "resetToDefault": "Reset to default",
     "errorResettingToDefault": "Error resetting to default!",
+    "error":"An error occurred. Try again later",
     
 
 

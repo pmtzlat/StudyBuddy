@@ -111,8 +111,8 @@ class CalendarController {
 
   Future<bool?> getCalendarDay(DateTime date) async {
     try {
-      await Future.delayed(Duration(milliseconds: 500));
-      await Future.delayed(Duration(seconds: 2));
+      
+      
       instanceManager.sessionStorage.prevDay =
           instanceManager.sessionStorage.loadedCalendarDay;
       instanceManager.sessionStorage.prevDayDate =

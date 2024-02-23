@@ -31,15 +31,16 @@ class StudyPlanner {
     // -1 = Error
 
     try {
+      if (await firebaseCrud
+              .deleteNotPastCalendarDays()
+                ==
+          -1) {
+        return -1;
+      }
       if ((instanceManager.sessionStorage.activeExams.isEmpty) ||
           (instanceManager.sessionStorage.weeklyGaps.isEmpty)) {
         logger.i('No exams or no availability. ');
-        if (await firebaseCrud
-                .deleteNotPastCalendarDays()
-                  ==
-            -1) {
-          return -1;
-        }
+        
         instanceManager.sessionStorage.setNeedsRecalc(false);
         return 1;
       }
@@ -119,12 +120,7 @@ class StudyPlanner {
         return 0;
       }
 
-      if (await firebaseCrud
-              .deleteNotPastCalendarDays()
-                ==
-          -1) {
-        return -1;
-      }
+      
 
       for (var day in result) {
         var dayID =

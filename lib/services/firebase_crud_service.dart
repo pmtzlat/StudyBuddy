@@ -304,11 +304,13 @@ class FirebaseCrudService {
 
   Future<UnitModel?> getSpecificUnit(
       String examID, String unitID, String revisionOrUnit) async {
+        
     logger.i(
         'Getting specific unit: examID: $examID, unitID: $unitID, $revisionOrUnit');
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
     try {
+      
       final unitDoc = await firebaseInstance
           .collection('users')
           .doc(uid)
@@ -336,7 +338,7 @@ class FirebaseCrudService {
       }
     } catch (e) {
       logger.e('Error getting specific unit $unitID: $e');
-      return null;
+      rethrow;
     }
   }
 
@@ -469,6 +471,7 @@ class FirebaseCrudService {
   Future<int> changeUnitCompletedSessions(
       String examID, String unitID, int value) async {
     try {
+     
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
@@ -505,12 +508,13 @@ class FirebaseCrudService {
       return 1;
     } catch (e) {
       logger.e('Error marking Unit as complete: $e');
-      return -1;
+      rethrow;
     }
   }
 
   Future<void> updateUnitSessionCompletionInfo(
       String examID, String unitID, int totalSessions) async {
+        
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 
@@ -648,6 +652,7 @@ class FirebaseCrudService {
 
   Future<String?> addCalendarDay(DayModel day) async {
     try {
+      
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
@@ -788,6 +793,7 @@ class FirebaseCrudService {
     final firebaseInstance = instanceManager.db;
 
     try {
+     
       if (uid != null) {
         final userDocRef = firebaseInstance.collection('users').doc(uid);
 
@@ -827,6 +833,7 @@ class FirebaseCrudService {
   Future<int> addTimeSlotToCalendarDay(
       String dayID, TimeSlotModel timeSlot) async {
     try {
+      
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
       final color = await getExamColor(timeSlot.examID);
@@ -955,6 +962,8 @@ class FirebaseCrudService {
   Future<int> changeTimeSlotCompleteness(
       String dayID, String timeSlotID, bool newValue) async {
     try {
+      
+      
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
@@ -971,7 +980,7 @@ class FirebaseCrudService {
     } catch (e) {
       logger.e(
           'Error marking calendar timeSlot as complete: $e\n dayID: $dayID, timeSlotID: $timeSlotID');
-      return -1;
+      rethrow;
     }
   }
 
@@ -1436,8 +1445,7 @@ class FirebaseCrudService {
   Future<int> deleteCustomDay(String dayID) async {
     try {
       
-       logger.w('Throwing error..');
-      throw FormatException("Testing error.");
+       
 
       logger.i('deleting...');
       final uid = instanceManager.localStorage.getString('uid');

@@ -436,8 +436,7 @@ class ExamsController {
         unitIndex = exam.units.indexWhere((unit) => unit.id == newUnit.id);
         if (unitIndex != -1) {
           // If found in exam.units, replace it with newUnit
-          logger.i(
-              'Unit found! ${(await firebaseCrud.getSpecificUnit(newUnit.examID, newUnit.id, 'units')).getString()}');
+          
           exams[examIndex].units[unitIndex] = await firebaseCrud
                   .getSpecificUnit(newUnit.examID, newUnit.id, 'units') ??
               exams[examIndex].units[unitIndex];
@@ -460,6 +459,7 @@ class ExamsController {
       }
     } catch (e) {
       logger.e('Error setting local unit or revision: $e');
+      rethrow;
     }
   }
 

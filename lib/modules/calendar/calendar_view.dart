@@ -165,7 +165,9 @@ class _CalendarViewState extends State<CalendarView>
     final _localizations = AppLocalizations.of(context)!;
     List<String> keys = dictionary.keys.toList();
     bool leftDaysUnsaved = false;
-    logger.i(dictionary);
+    bool loadingButton1 = false;
+    bool loadingButton2 = false;
+
 
     await showGeneralDialog(
       context: context,
@@ -339,10 +341,18 @@ class _CalendarViewState extends State<CalendarView>
                                 children: [
                                   TextButton(
                                       onPressed: () {
+                                        if(loadingButton2) return;
+                                        setState(() {
+                                          loadingButton1 = true;
+                                        });
                                         _controller
                                             .markDayAsNotified(dateInQuestion);
 
                                         leftDaysUnsaved = true;
+
+                                        setState(() {
+                                          loadingButton1 = false;
+                                        });
                                         if (index < keys.length - 1) {
                                           dateInQuestion = dateInQuestion
                                               .add(Duration(days: 1));
@@ -364,9 +374,13 @@ class _CalendarViewState extends State<CalendarView>
                                           setState(() {});
                                         }
                                       },
-                                      child: Text(_localizations.leaveAsIs)),
+                                      child: loadingButton1 ? CircularProgressIndicator() : Text(_localizations.leaveAsIs)),
                                   TextButton(
                                       onPressed: () async {
+                                        if(loadingButton1) return;
+                                        setState(() {
+                                          loadingButton2 = true;
+                                        });
                                         _controller
                                             .markDayAsNotified(dateInQuestion);
                                         logger.i(dictionary[
@@ -375,6 +389,9 @@ class _CalendarViewState extends State<CalendarView>
                                             .markTimeSlotListAsComplete(
                                                 dictionary[
                                                     dateInQuestion.toString()]);
+                                        setState(() {
+                                          loadingButton1 = false;
+                                        });
                                         if (index < keys.length - 1) {
                                           dateInQuestion = dateInQuestion
                                               .add(Duration(days: 1));
@@ -394,7 +411,7 @@ class _CalendarViewState extends State<CalendarView>
                                         }
                                       },
                                       child:
-                                          Text(_localizations.markAsComplete)),
+                                          loadingButton2 ? CircularProgressIndicator() :Text(_localizations.markAsComplete)),
                                 ],
                               )
                             ],
@@ -438,11 +455,7 @@ class _CalendarViewState extends State<CalendarView>
       },
     );
 
-    while (instanceManager.sessionStorage.gettingAllExams ||
-        instanceManager.sessionStorage.gettingAllGaps ||
-        instanceManager.sessionStorage.gettingAllCustomDays)
-      await Future.delayed(Duration(seconds: 2));
-
+    
     final result = await _controller.calculateSchedule();
 
     await _controller.getCalendarDay(stripTime(await NTP.now()));
@@ -459,8 +472,8 @@ class _CalendarViewState extends State<CalendarView>
         });
 
       case (-1):
-        showErrorDialogForRecalc(context, _localizations.recalcErrorTitle,
-            _localizations.recalcErrorBody, false);
+        showRedSnackbar(context, 
+            _localizations.recalcErrorBody);
         setState(() {
           instanceManager.sessionStorage.setNeedsRecalc(true);
         });

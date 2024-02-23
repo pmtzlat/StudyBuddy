@@ -57,6 +57,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
         await timeSlot.changeCompleteness(checked);
       } catch (e) {
         logger.e('Error changing completeness: $e');
+        showRedSnackbar(context, _localizations.error);
       }
 
       instanceManager.sessionStorage.loadedCalendarDay.timeSlots[widget.index] =
@@ -209,28 +210,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                     checked = timeSlot.completed;
                                   });
                                   
-
-                                  // try {
-                                  //   await _controller
-                                  //       .saveTimeStudied(timeSlot);
-                                  //   if(timeSlot.completed != completenessBefore ) await _controller
-                                  //       .updateTimeSlotCompleteness(
-                                  //           timeSlot);
-                                  // } catch (e) {
-                                  //   logger.e(
-                                  //       'Error saving timeSlot new data: $e');
-                                  //    showRedSnackbar(context,
-                                  //       context, _localizations.errorSaving);
-                                  // }
-
-                                  // newTimeSlot = await _controller.getTimeSlot(
-                                  //     timeSlot.id,
-                                  //     timeSlot.dayID);
-
-                                  // setState(() {
-                                  //   timeSlot = newTimeSlot;
-                                  //   checked = timeSlot.completed;
-                                  // });
+                                
                                 } catch (e) {
                                   logger.e('Error updating timeSlot: $e');
                                    showRedSnackbar(context,_localizations.errorSaving);
