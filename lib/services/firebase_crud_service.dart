@@ -1098,6 +1098,8 @@ class FirebaseCrudService {
     final firebaseInstance = instanceManager.db;
 
     try {
+     
+      
       final dayDocRef = firebaseInstance
           .collection('users')
           .doc(uid)
@@ -1114,7 +1116,7 @@ class FirebaseCrudService {
       return 1;
     } catch (e) {
       logger.e('Error clearing time gaps for day $weekday: $e');
-      return -1;
+      rethrow;
     }
   }
 
@@ -1156,6 +1158,7 @@ class FirebaseCrudService {
 
   Future<bool?> checkIfGapsExist(String uid) async {
     try {
+       
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
       final userDocRef = firebaseInstance.collection('users').doc(uid);
@@ -1171,7 +1174,7 @@ class FirebaseCrudService {
       return true;
     } catch (e) {
       logger.e('Error checking for Gaps: $e');
-      return null;
+      rethrow;
     }
   }
 
@@ -1340,6 +1343,7 @@ class FirebaseCrudService {
 
   Future<String?> addCustomDay(DayModel day) async {
     try {
+      
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
@@ -1357,13 +1361,14 @@ class FirebaseCrudService {
       return newDocumentRef.id;
     } catch (e) {
       logger.e('Error adding custom day: $e');
-      return null;
+      rethrow;
     }
   }
 
   Future<int> addTimeSlotToCustomDay(
       String dayID, TimeSlotModel timeSlot) async {
     try {
+      
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
@@ -1399,13 +1404,15 @@ class FirebaseCrudService {
       return 1;
     } catch (e) {
       logger.e('Error adding Time Slot: $e');
-      return -1;
+      rethrow;
     }
   }
 
   Future<int> clearTimesForCustomDay(String dayID) async {
     try {
       
+      
+
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
 
@@ -1425,16 +1432,16 @@ class FirebaseCrudService {
       return 1;
     } catch (e) {
       logger.e('Error clearing Times for day: $e');
-      return -1;
+      rethrow;
     }
   }
 
   Future<int> deleteCustomDay(String dayID) async {
     try {
-      logger.w('Throwing error..');
+      
+       logger.w('Throwing error..');
       throw FormatException("Testing error.");
-      
-      
+
       logger.i('deleting...');
       final uid = instanceManager.localStorage.getString('uid');
       final firebaseInstance = instanceManager.db;
@@ -1511,7 +1518,9 @@ class FirebaseCrudService {
   }
 
   Future<bool> checkIfCustomDayExists(DateTime date) async {
-     
+    
+
+    
     final uid = instanceManager.localStorage.getString('uid');
     final firebaseInstance = instanceManager.db;
 

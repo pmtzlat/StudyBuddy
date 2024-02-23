@@ -21,7 +21,6 @@ var now;
 String? status = null;
 late ConnectivityResult connectivityResult;
 Duration timeoutDuration = Duration(seconds: 10);
-GlobalKey<NavigatorState> navKey = GlobalKey();
 
 void main() async {
   Paint.enableDithering = true;

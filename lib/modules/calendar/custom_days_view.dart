@@ -75,35 +75,46 @@ class _CustomDaysViewState extends State<CustomDaysView> {
               final timeSlot = timeSlotList[index];
 
               return Dismissible(
-                key: Key(timeSlot.id),
+                key: UniqueKey(),
                 onDismissed: (direction) async {
                   setState(() {
                     timeSlotList.removeAt(index);
                   });
+                  
 
-                  if (await _controller.updateCustomDay(customDay, null) !=
-                      -1) {
+                  try {
+                    if (await _controller.updateCustomDay(customDay, null) ==
+                        -1) {
+                      throw Exception;
+                    }
+
                     if (!instanceManager.sessionStorage.gettingAllCustomDays) {
                       instanceManager.sessionStorage.gettingAllCustomDays =
                           true;
 
                       await Future.delayed(Duration(seconds: 5));
                       await _controller.getCustomDays();
-
                       await refreshCustomDay();
+
                       instanceManager.sessionStorage.gettingAllCustomDays =
                           false;
                     }
-                  } else {
-                    logger.e('Error updating custom day');
-                    
+                  } catch (e) {
+                    logger.e('Error updating custom day after dismissing: $e');
                     showRedSnackbar(context, _localizations.errorDeletingGap);
+                    
+                    await _controller.getCustomDays();
                     await refreshCustomDay();
+                    
+                   
+                    
                   }
 
+                  // Move the state update inside the try-catch block to ensure it happens after async operations
                   setState(() {
                     timeSlotList = customDay.timeSlots;
                   });
+                  
                 },
                 child: Card(
                     elevation: 0,
@@ -135,7 +146,6 @@ class _CustomDaysViewState extends State<CustomDaysView> {
       firstDay: DateTime.now().subtract(Duration(days: 365)),
       lastDay: DateTime.now().add(Duration(days: 365)),
       calendarFormat: _calendarFormat,
-      
       headerStyle: const HeaderStyle(formatButtonShowsNext: false),
       calendarBuilders: CalendarBuilders(
         defaultBuilder: (context, day, focusedDay) {
@@ -310,15 +320,10 @@ class _CustomDaysViewState extends State<CustomDaysView> {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: Stack(
-        children: [
-          
-          SingleChildScrollView(
+      child: Stack(children: [
+        SingleChildScrollView(
           child: Column(
             children: [
-              
-
-              
               Padding(
                 padding: const EdgeInsets.only(top: 50, bottom: 8),
                 child: ColoredLastTwoWords(
@@ -331,7 +336,8 @@ class _CustomDaysViewState extends State<CustomDaysView> {
                 margin: EdgeInsets.only(top: screenHeight * 0.01),
                 width: screenWidth,
                 padding: EdgeInsets.symmetric(
-                    vertical: screenWidth * 0.05, horizontal: screenWidth * 0.05),
+                    vertical: screenWidth * 0.05,
+                    horizontal: screenWidth * 0.05),
                 decoration: BoxDecoration(
                   color: Colors.grey.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(15.0),
@@ -395,27 +401,31 @@ class _CustomDaysViewState extends State<CustomDaysView> {
               ),
               TextButton(
                   onPressed: () async {
+                    List<TimeSlotModel> preChangeTimeSlots = List.from(customDay.timeSlots);
                     try {
                       setState(() {
                         loading = true;
                       });
-                      customDay.timeSlots = instanceManager
-                          .sessionStorage.weeklyGaps[customDay.date.weekday - 1];
-                      await _controller.updateCustomDay(customDay, null);
+
+                      customDay.timeSlots = instanceManager.sessionStorage
+                          .weeklyGaps[customDay.date.weekday - 1];
+                      if(await _controller.updateCustomDay(customDay, null) == -1) throw Exception;
                       await _controller.getCustomDays();
-      
+
                       customDay = instanceManager.sessionStorage.customDays
                           .firstWhere((element) => element.date == date,
                               orElse: () => DayModel(
                                   weekday: date.weekday,
                                   date: date,
                                   id: 'empty'));
-      
+
                       await customDay.getGaps();
                     } catch (e) {
                       logger.e('Error adding/editing custom day: $e');
+                      customDay.timeSlots = preChangeTimeSlots;
+                      showRedSnackbar(context, _localizations.errorResettingToDefault);
                     }
-      
+
                     setState(() {
                       timeSlotList = customDay.timeSlots;
                       loading = false;
@@ -425,37 +435,33 @@ class _CustomDaysViewState extends State<CustomDaysView> {
             ],
           ),
         ),
-          Container(
-            padding: EdgeInsets.only(bottom: 15),
-            color: Colors.white,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                GestureDetector(
-                        onTap: () {
-                          widget.pageController.previousPage(
-                              duration: Duration(milliseconds: 400),
-                              curve: Curves.decelerate);
-                        },
-                        child: Text(_localizations.backToWeeklyAvailability,
-                            style: TextStyle(
-                                color: Colors.blue, fontWeight: FontWeight.bold))),
-              ],
-            ),
+        Container(
+          padding: EdgeInsets.only(bottom: 15),
+          color: Colors.white,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              GestureDetector(
+                  onTap: () {
+                    widget.pageController.previousPage(
+                        duration: Duration(milliseconds: 400),
+                        curve: Curves.decelerate);
+                  },
+                  child: Text(_localizations.backToWeeklyAvailability,
+                      style: TextStyle(
+                          color: Colors.blue, fontWeight: FontWeight.bold))),
+            ],
           ),
+        ),
       ]),
-        
     );
   }
 
   Future<void> refreshCustomDay() async {
-    customDay = instanceManager.sessionStorage.customDays
-        .firstWhere((element) => element.date == date,
-            orElse: () => DayModel(
-                weekday: date.weekday,
-                date: date,
-                id: 'empty'));
+    customDay = instanceManager.sessionStorage.customDays.firstWhere(
+        (element) => element.date == date,
+        orElse: () => DayModel(weekday: date.weekday, date: date, id: 'empty'));
     await customDay.getGaps();
   }
 

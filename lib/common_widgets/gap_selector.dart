@@ -227,7 +227,7 @@ class _GapSelectorState extends State<GapSelector> {
                                                           restraintFormKey,
                                                           widget.day.weekday,
                                                           widget.day.timeSlots,);
-                                                  logger.i('Added gap!');
+                                                  //logger.i('Added gap!');
                                                   await _controller.getGapsForDay(widget.day.weekday);
                                                   
                                                 } else {
@@ -235,7 +235,7 @@ class _GapSelectorState extends State<GapSelector> {
                                                       .updateCustomDay(widget.day,
                                                           restraintFormKey
                                                           );
-                                                  logger.i('Added gap!');
+                                                  //logger.i('Added gap!');
                                                   await _controller
                                                       .getCustomDays();
                                                 }

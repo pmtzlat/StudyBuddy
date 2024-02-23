@@ -132,6 +132,7 @@
     "backToWeeklyAvailability": "Back to weekly view",
     "busy": "Busy",
     "resetToDefault": "Reset to default",
+    "errorResettingToDefault": "Error resetting to default!",
     
 
 

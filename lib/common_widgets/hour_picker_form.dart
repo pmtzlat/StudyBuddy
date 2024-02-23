@@ -245,7 +245,7 @@ class _DayFormState extends State<DayForm> {
                         
                         
                         setState(() {
-                          timeSlotList = timeSlotList = instanceManager
+                          timeSlotList = instanceManager
                               .sessionStorage.weeklyGaps[widget.dayNum];
                         });
                       },

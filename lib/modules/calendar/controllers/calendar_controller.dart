@@ -83,17 +83,15 @@ class CalendarController {
         endTime = const TimeOfDay(hour: 23, minute: 59);
       }
 
-      provisionalList =
-          await checkGapClash(startTime, endTime, weekday, provisionalList);
+      var newProvisionalList = List<TimeSlotModel>.from(provisionalList);
 
-      if (await _firebaseCrud
-              .clearGapsForWeekday(_firebaseCrud.weekDays[weekday - 1])
-                ==
-          -1) {
-        return -1;
-      }
+      newProvisionalList = checkGapClash(startTime, endTime, weekday, newProvisionalList);
 
-      for (var timeSlot in provisionalList) {
+      await _firebaseCrud
+              .clearGapsForWeekday(_firebaseCrud.weekDays[weekday - 1]);
+                
+
+      for (var timeSlot in newProvisionalList) {
         logger.f(
             '${timeSlot.startTime.toString()} - ${timeSlot.endTime.toString()}');
         final res = await _firebaseCrud
@@ -216,52 +214,6 @@ class CalendarController {
     }
   }
 
-  Future<int> addCustomDay(
-      DateTime date, List<TimeSlotModel> customSchdule) async {
-    try {
-      if (await _firebaseCrud
-          .findCustomDayWithDate(date.toString())
-           ) {
-        logger.e('Day Already in customdays list!');
-        return 2;
-      }
-
-      if (customSchdule.isEmpty) {
-        logger.e('No timeSlots added to day!');
-        return 3;
-      }
-
-      DayModel customDay = DayModel(
-          date: date, weekday: date.weekday, id: date.toString(), times: []);
-
-      final res =
-          await _firebaseCrud.addCustomDay(customDay) ;
-      if (res == null) {
-        logger.e('Error: addCustomDay returned error');
-        return -1;
-      }
-
-      for (var timeSlot in customSchdule) {
-        timeSlot.date = date;
-        final result = await _firebaseCrud
-            .addTimeSlotToCustomDay(res, timeSlot)
-             ;
-        ;
-        if (result != 1) {
-          logger.e(
-              'Error: addTimeSlot for TimeSlot ${timeSlot.startTime.toString()} - ${timeSlot.endTime.toString()} returned error');
-          return -1;
-        }
-      }
-      logger.i('Added custom day!');
-      instanceManager.sessionStorage.setNeedsRecalc(true);
-      return 1;
-    } catch (e) {
-      logger.e('Error adding custom day: $e');
-      return -1;
-    }
-  }
-
   Future<int> updateCustomDay(
     DayModel day,
     GlobalKey<FormBuilderState>? key,
@@ -326,7 +278,7 @@ class CalendarController {
           dayObject.getTotalAvailableTime();
           instanceManager.sessionStorage.customDays.add(dayObject);
           day.id = await _firebaseCrud.addCustomDay(day);
-          await _firebaseCrud.clearTimesForCustomDay(day.id);
+          
           for (TimeSlotModel timeSlot in day.timeSlots) {
             timeSlot.date = day.date;
             await _firebaseCrud.addTimeSlotToCustomDay(day.id, timeSlot);
@@ -342,7 +294,7 @@ class CalendarController {
       return 1;
     } on Exception catch (e) {
       logger.e('Error updating Custom day $e');
-      rethrow;
+      return -1;
     }
   }
 

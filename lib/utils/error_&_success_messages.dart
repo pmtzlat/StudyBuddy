@@ -3,13 +3,18 @@ import 'package:study_buddy/common_widgets/leftover_card.dart';
 import 'package:study_buddy/main.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
-void  showRedSnackbar(BuildContext context, String message) {
+void  showRedSnackbar(BuildContext? context, String message) {
+  if (context == null) {
+    final context = StudyBuddyApp.navKey.currentContext;
+    logger.i("Context: $context");
+
+  }
   final snackBar = SnackBar(
     content: Text(message, style: TextStyle(color: Colors.white)),
     backgroundColor: Colors.red,
   );
 
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  if(context != null) ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
 void showGreenSnackbar(BuildContext context, String message) {
