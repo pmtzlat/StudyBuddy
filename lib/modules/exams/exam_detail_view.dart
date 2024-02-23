@@ -1018,6 +1018,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                           name:
                                               ' ${_localizations.unit} ${widget.exam.units.length + 1}',
                                           order: widget.exam.units.length + 1,
+                                          sessionTime: widget.exam.unitTime,
                                           id: generateRandomString()));
                                     },
                                     icon: Icon(Icons.add, color: Colors.white)),

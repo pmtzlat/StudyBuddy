@@ -11,6 +11,7 @@ class ExamModel {
   double weight;
   DateTime examDate;
   Color color;
+  Duration unitTime;
   Duration revisionTime;
   final String id;
   List<UnitModel> units;
@@ -40,6 +41,7 @@ class ExamModel {
     this.orderMatters = false,
     this.revisions = const [],
     this.sessionsSplittable = true,
+    this.unitTime = Duration.zero,
   });
 
   ExamModel.copy(ExamModel other)
@@ -52,6 +54,7 @@ class ExamModel {
         units = List<UnitModel>.from(other.units),
         orderMatters = other.orderMatters,
         revisions = List<UnitModel>.from(other.revisions),
+        unitTime = other.unitTime,
         sessionsSplittable = other.sessionsSplittable;
 
   bool inFuture(DateTime date) {

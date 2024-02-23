@@ -145,6 +145,7 @@ class ExamsController {
           examDate: examDate,
           orderMatters: orderMatters,
           sessionsSplittable: sessionSplittable,
+          unitTime: sessionTime,
           revisionTime: revisionTime,
           color: examColor);
 
