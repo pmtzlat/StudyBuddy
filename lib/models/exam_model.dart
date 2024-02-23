@@ -10,7 +10,6 @@ class ExamModel {
   String name;
   double weight;
   DateTime examDate;
-  Duration timeStudied;
   Color color;
   Duration revisionTime;
   final String id;
@@ -34,7 +33,6 @@ class ExamModel {
     required this.name,
     this.weight = 2.0,
     required this.examDate,
-    this.timeStudied = const Duration(seconds: 0),
     this.color = Colors.redAccent,
     this.revisionTime = const Duration(hours: 2), //one hour
     this.id = '0',
@@ -48,7 +46,6 @@ class ExamModel {
       : name = other.name,
         weight = other.weight,
         examDate = other.examDate,
-        timeStudied = other.timeStudied,
         color = other.color,
         revisionTime = other.revisionTime,
         id = other.id,

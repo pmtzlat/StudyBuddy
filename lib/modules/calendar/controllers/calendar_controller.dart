@@ -415,8 +415,9 @@ class CalendarController {
     try {
       await _firebaseCrud
           .updateTimeStudiedForTimeSlot(
-              timeSlot.id, timeSlot.dayID, timeSlot.timeStudied)
-           ;
+              timeSlot.id, timeSlot.dayID, timeSlot.timeStudied);
+      
+           
     } catch (e) {
       logger.e('Error saving time Studied for timeslot: $e');
     }

@@ -251,7 +251,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
             ),
             AnimatedContainer(
               duration: editSwitchTime,
-              height: !editMode ? screenHeight * 0.2 : screenHeight * 0.04,
+              height: !editMode ? screenHeight * 0.15 : screenHeight * 0.04,
               child: SingleChildScrollView(
                 physics: NeverScrollableScrollPhysics(),
                 reverse: true,
@@ -313,31 +313,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                     Container(
                       height: screenHeight * 0.015,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.timer,
-                              color: Colors.white,
-                              size: screenWidth * 0.08,
-                            ),
-                            SizedBox(width: 10),
-                            Text(_localizations.timeStudied,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: screenWidth * 0.05))
-                          ],
-                        ),
-                        Text(formatDuration(widget.exam.timeStudied),
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w400,
-                                fontSize: screenWidth * 0.05))
-                      ],
-                    ),
+                    
                     AnimatedContainer(
                       duration: editSwitchTime,
                       margin:
