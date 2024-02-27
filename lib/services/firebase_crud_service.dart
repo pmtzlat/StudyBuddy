@@ -779,11 +779,11 @@ class FirebaseCrudService {
           .doc(dayID);
 
       final timeSlotCollectionRef = dayDocRef.collection('timeSlots');
-      final timeSlotQuerySnapshot = await timeSlotCollectionRef.get();
-
-      for (final timeSlotDoc in timeSlotQuerySnapshot.docs) {
-        await timeSlotDoc.reference.delete();
-      }
+      final timeSlotQuerySnapshot = await timeSlotCollectionRef.get().then((querySnapshot) {
+          querySnapshot.docs.forEach((doc) {
+            doc.reference.delete();
+          });
+        });
 
       return 1;
     } catch (e) {
@@ -816,8 +816,9 @@ class FirebaseCrudService {
               // if the date is equal to or after the current date
               if (date.isAtSameMomentAs(selectedDate) ||
                   date.isAfter(selectedDate)) {
+                logger.i('Deleting calendar day : ${date} (with id: ${doc['id']}because it\'s after ${selectedDate}...');
                 await clearTimesForCalendarDay(doc['id']);
-                doc.reference.delete();
+                await doc.reference.delete();
               }
             }
           });
@@ -1076,6 +1077,8 @@ class FirebaseCrudService {
       // Query calendarDays subcollection
       QuerySnapshot calendarDaysSnapshot =
           await userDocument.collection('calendarDays').get();
+      
+      logger.w('calendarDaySnapshots = ${calendarDaysSnapshot.size}');
 
       for (QueryDocumentSnapshot calendarDayDoc in calendarDaysSnapshot.docs) {
         // Extract date from calendarDay document
@@ -1093,7 +1096,7 @@ class FirebaseCrudService {
         resultMap[DateTime.parse(date)] = numberOfTimeSlots;
       }
     } catch (e) {
-      logger.e('Error gettimg Calendar days sessions: $e');
+      logger.e('Error getting Calendar days sessions: $e');
     }
 
     return resultMap;

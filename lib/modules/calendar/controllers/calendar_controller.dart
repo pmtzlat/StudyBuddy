@@ -26,6 +26,8 @@ class CalendarController {
       instanceManager.sessionStorage.weeklyGaps =
           await _firebaseCrud.getGaps() ;
       
+
+      
       return true;
     } catch (e) {
       logger.e('Error getting gaps: $e');
@@ -465,7 +467,7 @@ class CalendarController {
   Future<bool> getAllCalendarDaySessionNumbers() async {
     instanceManager.sessionStorage.calendarDaySessions =
         await _firebaseCrud.getAllCalendarDaySessionsNumbers();
-    logger.i(
+    logger.w(
         'Got calendar Day sessions!\n ${instanceManager.sessionStorage.calendarDaySessions}');
     return true;
   }

@@ -30,6 +30,31 @@ class StudyPlanner {
     // 0 = No time
     // -1 = Error
 
+    void fillTotalUnitSessions(TimeSlotModel timeSlot, Map<String, Map<String, int>> unitTotalSessions) {
+        if (unitTotalSessions.containsKey(timeSlot.examID)) {
+          if (unitTotalSessions[timeSlot.examID]!
+              .containsKey(timeSlot.unitID)) {
+            unitTotalSessions[timeSlot.examID]![timeSlot.unitID] =
+                (unitTotalSessions[timeSlot.examID]![timeSlot.unitID] ?? 0) + 1;
+          } else {
+            unitTotalSessions[timeSlot.examID]![timeSlot.unitID] = 1;
+          }
+        } else {
+          unitTotalSessions[timeSlot.examID] = {timeSlot.unitID: 1};
+        }
+      }
+
+      Future<void> updateAllUnitSessionCompletionInfo(Map<String, Map<String, int>> unitTotalSessions) async {
+        for (var examID in unitTotalSessions.keys) {
+          for (var unitID in unitTotalSessions[examID]!.keys) {
+            final totalSessions = unitTotalSessions[examID]![unitID]!;
+            await firebaseCrud.updateUnitSessionCompletionInfo(
+                examID, unitID, totalSessions);
+          }
+        }
+      }
+
+
     try {
       if (await firebaseCrud
               .deleteNotPastCalendarDays()
@@ -47,30 +72,7 @@ class StudyPlanner {
       
       Map<String, Map<String, int>> unitTotalSessions = {};
 
-      void fillTotalUnitSessions(TimeSlotModel timeSlot) {
-        if (unitTotalSessions.containsKey(timeSlot.examID)) {
-          if (unitTotalSessions[timeSlot.examID]!
-              .containsKey(timeSlot.unitID)) {
-            unitTotalSessions[timeSlot.examID]![timeSlot.unitID] =
-                (unitTotalSessions[timeSlot.examID]![timeSlot.unitID] ?? 0) + 1;
-          } else {
-            unitTotalSessions[timeSlot.examID]![timeSlot.unitID] = 1;
-          }
-        } else {
-          unitTotalSessions[timeSlot.examID] = {timeSlot.unitID: 1};
-        }
-      }
-
-      Future<void> updateAllUnitSessionCompletionInfo() async {
-        for (var examID in unitTotalSessions.keys) {
-          for (var unitID in unitTotalSessions[examID]!.keys) {
-            final totalSessions = unitTotalSessions[examID]![unitID]!;
-            await firebaseCrud.updateUnitSessionCompletionInfo(
-                examID, unitID, totalSessions);
-          }
-        }
-      }
-
+      
       generalStacks = await generateStacks();
       logger.f('Stacks generated! \n${getStringFromStackList(generalStacks)}');
 
@@ -120,38 +122,40 @@ class StudyPlanner {
         return 0;
       }
 
-      
-
-      for (var day in result) {
-        var dayID =
-            await firebaseCrud.addCalendarDay(day) ;
-        if (dayID == null) {
-          return -1;
-        }
-
-        var res = 1;
-        for (var timeSlot in day.timeSlots) {
-          if (timeSlot.examID != 'free') {
-            fillTotalUnitSessions(timeSlot);
-
-            timeSlot.date = day.date;
-            res = await firebaseCrud
-                .addTimeSlotToCalendarDay(dayID, timeSlot)
-                 ;
-
-            if (res == -1) return -1;
-          }
-        }
-      }
-
-      await updateAllUnitSessionCompletionInfo();
-      await instanceManager.examsController.getAllExams();
-
-      return 1;
+      return await savePlanToDB(result, fillTotalUnitSessions, unitTotalSessions, updateAllUnitSessionCompletionInfo);
     } catch (e) {
       logger.e('Error recalculating schedule: $e');
       return -1;
     }
+  }
+
+  Future<int> savePlanToDB(List<DayModel> result, void fillTotalUnitSessions(TimeSlotModel timeSlot, Map<String, Map<String, int>> unitTotalSessions), Map<String, Map<String, int>> unitTotalSessions, Future<void> updateAllUnitSessionCompletionInfo(Map<String, Map<String, int>> unitTotalSessions)) async {
+    for (var day in result) {
+      var dayID =
+          await firebaseCrud.addCalendarDay(day) ;
+      if (dayID == null) {
+        return -1;
+      }
+    
+      var res = 1;
+      for (var timeSlot in day.timeSlots) {
+        if (timeSlot.examID != 'free') {
+          fillTotalUnitSessions(timeSlot, unitTotalSessions);
+    
+          timeSlot.date = day.date;
+          res = await firebaseCrud
+              .addTimeSlotToCalendarDay(dayID, timeSlot)
+               ;
+    
+          if (res == -1) return -1;
+        }
+      }
+    }
+    
+    await updateAllUnitSessionCompletionInfo(unitTotalSessions);
+    await instanceManager.examsController.getAllExams();
+    
+    return 1;
   }
 
   Future<DayModel> getGeneralOrCustomday(DateTime startDate) async {
