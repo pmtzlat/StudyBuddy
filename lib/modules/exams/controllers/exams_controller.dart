@@ -134,6 +134,10 @@ class ExamsController {
           examCreationFormKey.currentState!.fields['orderMatters']!.value ??
               false;
 
+      final bool revisionInDayBefore =
+          examCreationFormKey.currentState!.fields['revisionInPreviousDay']!.value ??
+              false;
+
       final bool sessionSplittable = examCreationFormKey
               .currentState!.fields['sessionSplittable']!.value ??
           false;
@@ -147,6 +151,7 @@ class ExamsController {
           sessionsSplittable: sessionSplittable,
           unitTime: sessionTime,
           revisionTime: revisionTime,
+          revisionInDayBeforeExam: revisionInDayBefore,
           color: examColor);
 
       instanceManager.sessionStorage.examToAdd!.units = <UnitModel>[];
@@ -302,6 +307,8 @@ class ExamsController {
           examFormKey.currentState!.fields['orderMatters']!.value;
       newExam.sessionsSplittable =
           examFormKey.currentState!.fields['sessionSplittable']!.value;
+      newExam.revisionInDayBeforeExam =
+          examFormKey.currentState!.fields['revisionDayBefore']!.value;
       newExam.color = examColor;
 
       newExam.units = List<UnitModel>.from(exam.units);
@@ -336,7 +343,7 @@ class ExamsController {
       await firebaseCrud.clearRevisionsForExam(exam.id);
       for (int i = 0; i < revisions; i++) {
         final newUnit = UnitModel(
-            name: 'Revision $i', order: i, sessionTime: exam.revisionTime);
+            name: 'Revision ${i+1}', order: i, sessionTime: exam.revisionTime);
         //logger.i('Adding new revision: ${newUnit.name}');
         await firebaseCrud.addRevisionToExam(
             newRevision: newUnit, examID: exam.id);

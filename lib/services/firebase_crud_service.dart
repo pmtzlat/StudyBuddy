@@ -48,6 +48,7 @@ class FirebaseCrudService {
         'color': newExam.color.toHex(),
         'id': '',
         'orderMatters': newExam.orderMatters,
+        'revisionInDayBeforeExam': newExam.revisionInDayBeforeExam,
         'sessionSplittable': newExam.sessionsSplittable,
       });
 
@@ -125,6 +126,7 @@ class FirebaseCrudService {
             revisionTime: parseTime(data['revisionTime']),
             id: data['id'] as String,
             orderMatters: data['orderMatters'] as bool,
+            revisionInDayBeforeExam: data['revisionInDayBeforeExam'] as bool,
             sessionsSplittable: data['sessionSplittable'] as bool);
       }).toList();
 
@@ -171,6 +173,7 @@ class FirebaseCrudService {
       'revisionTime': newExam.revisionTime.toString(),
       'unitTime': newExam.unitTime.toString(),
       'orderMatters': newExam.orderMatters,
+      'revisionInDayBeforeExam': newExam.revisionInDayBeforeExam,
       'color': newExam.color.toHex(),
       'sessionSplittable': newExam.sessionsSplittable,
     });
@@ -203,6 +206,7 @@ class FirebaseCrudService {
           revisionTime: parseTime(data['revisionTime']),
           id: data['id'] as String,
           orderMatters: data['orderMatters'] as bool,
+          revisionInDayBeforeExam: data['revisionInDayBeforeExam'] as bool,
           sessionsSplittable: data['sessionSplittable'] as bool);
 
       exam.units = await getUnitsForExam(examID: exam.id) ?? <UnitModel>[];

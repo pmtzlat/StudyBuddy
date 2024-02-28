@@ -342,6 +342,19 @@ class _Page1State extends State<Page1> {
                                 fontSize: screenHeight * 0.022),
                           )),
                     ),
+                    Container(
+                      margin: EdgeInsets.only(top: screenHeight * 0.05),
+                      width: screenWidth * 0.7,
+                      child: FormBuilderCheckbox(
+                          name: 'revisionInPreviousDay',
+                          initialValue: false,
+                          title: Text(
+                            _localizations.revisionInPreviousDay,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: screenHeight * 0.022),
+                          )),
+                    ),
                   ],
                 )),
             Center(

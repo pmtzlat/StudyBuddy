@@ -35,13 +35,17 @@ class plusMinusField extends StatelessWidget {
                 color: toggle ? Colors.white : Colors.transparent),
           ),
         ),
-        SizedBox(width: screenWidth * 0.03),
+        AnimatedContainer(
+            duration: duration,
+            width: toggle ? screenWidth * 0.03 : screenWidth * 0.015),
         Text(number.toString(),
             style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w400,
                 fontSize: screenWidth * 0.05)),
-        SizedBox(width: screenWidth * 0.03),
+        AnimatedContainer(
+            duration: duration,
+            width: toggle ? screenWidth * 0.03 : screenWidth * 0.015),
         GestureDetector(
           onTap: () {
             if (number < max && toggle) addNumberToParent(1);

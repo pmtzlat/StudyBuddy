@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:study_buddy/main.dart';
@@ -30,51 +32,44 @@ class StudyPlanner {
     // 0 = No time
     // -1 = Error
 
-    void fillTotalUnitSessions(TimeSlotModel timeSlot, Map<String, Map<String, int>> unitTotalSessions) {
-        if (unitTotalSessions.containsKey(timeSlot.examID)) {
-          if (unitTotalSessions[timeSlot.examID]!
-              .containsKey(timeSlot.unitID)) {
-            unitTotalSessions[timeSlot.examID]![timeSlot.unitID] =
-                (unitTotalSessions[timeSlot.examID]![timeSlot.unitID] ?? 0) + 1;
-          } else {
-            unitTotalSessions[timeSlot.examID]![timeSlot.unitID] = 1;
-          }
+    void fillTotalUnitSessions(TimeSlotModel timeSlot,
+        Map<String, Map<String, int>> unitTotalSessions) {
+      if (unitTotalSessions.containsKey(timeSlot.examID)) {
+        if (unitTotalSessions[timeSlot.examID]!.containsKey(timeSlot.unitID)) {
+          unitTotalSessions[timeSlot.examID]![timeSlot.unitID] =
+              (unitTotalSessions[timeSlot.examID]![timeSlot.unitID] ?? 0) + 1;
         } else {
-          unitTotalSessions[timeSlot.examID] = {timeSlot.unitID: 1};
+          unitTotalSessions[timeSlot.examID]![timeSlot.unitID] = 1;
+        }
+      } else {
+        unitTotalSessions[timeSlot.examID] = {timeSlot.unitID: 1};
+      }
+    }
+
+    Future<void> updateAllUnitSessionCompletionInfo(
+        Map<String, Map<String, int>> unitTotalSessions) async {
+      for (var examID in unitTotalSessions.keys) {
+        for (var unitID in unitTotalSessions[examID]!.keys) {
+          final totalSessions = unitTotalSessions[examID]![unitID]!;
+          await firebaseCrud.updateUnitSessionCompletionInfo(
+              examID, unitID, totalSessions);
         }
       }
-
-      Future<void> updateAllUnitSessionCompletionInfo(Map<String, Map<String, int>> unitTotalSessions) async {
-        for (var examID in unitTotalSessions.keys) {
-          for (var unitID in unitTotalSessions[examID]!.keys) {
-            final totalSessions = unitTotalSessions[examID]![unitID]!;
-            await firebaseCrud.updateUnitSessionCompletionInfo(
-                examID, unitID, totalSessions);
-          }
-        }
-      }
-
+    }
 
     try {
-      if (await firebaseCrud
-              .deleteNotPastCalendarDays()
-                ==
-          -1) {
+      if (await firebaseCrud.deleteNotPastCalendarDays() == -1) {
         return -1;
       }
       if ((instanceManager.sessionStorage.activeExams.isEmpty) ||
           (instanceManager.sessionStorage.weeklyGaps.isEmpty)) {
         logger.i('No exams or no availability. ');
-        
+
         instanceManager.sessionStorage.setNeedsRecalc(false);
         return 1;
       }
-      
-      Map<String, Map<String, int>> unitTotalSessions = {};
 
-      
-      generalStacks = await generateStacks();
-      logger.f('Stacks generated! \n${getStringFromStackList(generalStacks)}');
+      Map<String, Map<String, int>> unitTotalSessions = {};
 
       List<DayModel> result = [];
 
@@ -88,6 +83,9 @@ class StudyPlanner {
       }
 
       logger.i('Start date: ${startDate}');
+      generalStacks = await generateStacks(startDate);
+      logger.f('Stacks generated! \n${getStringFromStackList(generalStacks)}');
+
       await instanceManager.calendarController.getCustomDays();
 
       DayModel dayToAdd = await getGeneralOrCustomday(startDate);
@@ -106,7 +104,11 @@ class StudyPlanner {
             dayToAdd.getTotalAvailableTime();
           }
         }
-        singularDayStacks = List.from(generalStacks);
+        logger
+            .f('General stacks: \n\n${getStringFromStackList(generalStacks)}');
+        singularDayStacks = copyStackList(generalStacks);
+        logger.f(
+            'Singular Day stacks: \n\n${getStringFromStackList(generalStacks)}');
 
         await fillDayWithSessions(dayToAdd, singularDayStacks);
         logger.w('Full day to add: \n\n ${dayToAdd.getString()}');
@@ -122,39 +124,43 @@ class StudyPlanner {
         return 0;
       }
 
-      return await savePlanToDB(result, fillTotalUnitSessions, unitTotalSessions, updateAllUnitSessionCompletionInfo);
+      return await savePlanToDB(result, fillTotalUnitSessions,
+          unitTotalSessions, updateAllUnitSessionCompletionInfo);
     } catch (e) {
       logger.e('Error recalculating schedule: $e');
       return -1;
     }
   }
 
-  Future<int> savePlanToDB(List<DayModel> result, void fillTotalUnitSessions(TimeSlotModel timeSlot, Map<String, Map<String, int>> unitTotalSessions), Map<String, Map<String, int>> unitTotalSessions, Future<void> updateAllUnitSessionCompletionInfo(Map<String, Map<String, int>> unitTotalSessions)) async {
+  Future<int> savePlanToDB(
+      List<DayModel> result,
+      void fillTotalUnitSessions(TimeSlotModel timeSlot,
+          Map<String, Map<String, int>> unitTotalSessions),
+      Map<String, Map<String, int>> unitTotalSessions,
+      Future<void> updateAllUnitSessionCompletionInfo(
+          Map<String, Map<String, int>> unitTotalSessions)) async {
     for (var day in result) {
-      var dayID =
-          await firebaseCrud.addCalendarDay(day) ;
+      var dayID = await firebaseCrud.addCalendarDay(day);
       if (dayID == null) {
         return -1;
       }
-    
+
       var res = 1;
       for (var timeSlot in day.timeSlots) {
         if (timeSlot.examID != 'free') {
           fillTotalUnitSessions(timeSlot, unitTotalSessions);
-    
+
           timeSlot.date = day.date;
-          res = await firebaseCrud
-              .addTimeSlotToCalendarDay(dayID, timeSlot)
-               ;
-    
+          res = await firebaseCrud.addTimeSlotToCalendarDay(dayID, timeSlot);
+
           if (res == -1) return -1;
         }
       }
     }
-    
+
     await updateAllUnitSessionCompletionInfo(unitTotalSessions);
     await instanceManager.examsController.getAllExams();
-    
+
     return 1;
   }
 
@@ -235,11 +241,35 @@ class StudyPlanner {
     }
   }
 
+  List<SchedulerStackModel> getStacksWithRevisionInDayBefore(
+      List<SchedulerStackModel> filteredStacks, DayModel day) {
+    List<SchedulerStackModel> result = <SchedulerStackModel>[];
+    for (int i = 0; i < filteredStacks.length; i++) {
+      var stack = filteredStacks[i];
+
+      if (stack.revisionNeedsToBePutInDayBefore == true) {
+        logger.i('${stack.exam.name} days unitl exam: ${stack.daysUntilExam}');
+        if (stack.getDaysUntilExam(day.date) == 1) result.add(stack);
+      }
+    }
+
+    return result;
+  }
+
   TimeSlotModel? getTimeSlotWithUnit(TimeSlotModel gap,
       List<SchedulerStackModel> filteredStacks, DayModel day) {
     try {
-      Map<String, dynamic>? selectedUnit =
-          selectExamAndUnit(filteredStacks, gap, day.totalAvailableTime);
+      late Map<String, dynamic>? selectedUnit;
+      List<SchedulerStackModel> stacksWithRevisionInDayBefore =
+          getStacksWithRevisionInDayBefore(filteredStacks, day);
+
+      if (stacksWithRevisionInDayBefore.isEmpty) {
+        selectedUnit =
+            selectExamAndUnit(filteredStacks, gap, day.totalAvailableTime);
+      } else {
+        selectedUnit = selectExamAndUnit(
+            stacksWithRevisionInDayBefore, gap, day.totalAvailableTime);
+      }
 
       if (selectedUnit == null) {
         day.timeSlots.remove(gap);
@@ -277,9 +307,12 @@ class StudyPlanner {
     try {
       for (int i = stacks.length - 1; i >= 0; i--) {
         SchedulerStackModel stack = stacks[i];
-        final daysToExam = _getDaysToExam(day, stack);
+        final daysToExam = stack.getDaysUntilExam(day.date);
         if (daysToExam > 0) {
-          stack.weight = (stack.exam.weight + (1 / daysToExam));
+          logger.f(
+              'Calculating stack weight for ${stack.exam.name}: (${stack.exam.weight} / ${daysToExam}) / ${pow(2, stack.unitsInDay)}');
+          stack.weight =
+              (stack.exam.weight / daysToExam) / pow(2, stack.unitsInDay);
         } else {
           stacks.removeAt(i);
           logger.e(
@@ -292,18 +325,6 @@ class StudyPlanner {
           .f('Stacks sorted by weight: \n\n${getStringFromStackList(stacks)}');
     } catch (e) {
       logger.e('Error calculating weights: $e');
-    }
-  }
-
-  int _getDaysToExam(DayModel day, SchedulerStackModel stack) {
-    try {
-      Duration difference = stack.exam.examDate.difference(day.date);
-      int daysDifference = difference.inDays;
-
-      return daysDifference;
-    } catch (e) {
-      logger.e('Error getting Days to Exam: $e');
-      return 0;
     }
   }
 
@@ -326,6 +347,7 @@ class StudyPlanner {
           stacks.removeAt(
               i); //THIS LINE GIVES PROBLEMS WHEN UNITS ARE SELECTED - stacks and generalstacks are the same
         }
+
         return selectedUnit;
       }
     }
@@ -335,88 +357,87 @@ class StudyPlanner {
   Map<String, dynamic>? selectUnit(
       SchedulerStackModel stack, TimeSlotModel gap, Duration availableTime) {
     if (stack.revisions.length == 0) {
-      for (int i = stack.units.length - 1; i >= 0; i--) {
-        final candidateUnit = stack.units[i];
-        if (candidateUnit.sessionTime == Duration.zero ||
-            candidateUnit.completed == true) {
-          continue;
-        }
-        if (candidateUnit.sessionTime <= availableTime) {
-          final result = {
-            'unit': candidateUnit,
-            'sessionTime': calculateSessionTime(candidateUnit, gap, stack),
-            'examID': stack.exam.id,
-            'sessionInfo': [stack.exam.name, candidateUnit.name],
-            'unitID': candidateUnit.id,
-          };
+      return extractUnit(stack, availableTime, gap);
+    } else {
+      return extractRevision(stack, availableTime, gap);
+    }
+  }
 
-          logResult(result);
-          if (candidateUnit.sessionTime == Duration.zero)
-            stack.units.removeAt(i);
+  Map<String, Object>? extractUnit(
+      SchedulerStackModel stack, Duration availableTime, TimeSlotModel gap) {
+    for (int i = stack.units.length - 1; i >= 0; i--) {
+      final candidateUnit = stack.units[i];
+      if (candidateUnit.sessionTime == Duration.zero ||
+          candidateUnit.completed == true) {
+        continue;
+      }
+      if (candidateUnit.sessionTime <= availableTime) {
+        final result = {
+          'unit': candidateUnit,
+          'sessionTime': calculateSessionTime(candidateUnit, gap, stack),
+          'examID': stack.exam.id,
+          'sessionInfo': [stack.exam.name, candidateUnit.name],
+          'unitID': candidateUnit.id,
+        };
 
-          return result;
-        } else {
-          if (!stack.exam.sessionsSplittable) {
-            if (stack.exam.orderMatters) {
-              return null;
-            } else {
-              continue;
-            }
+        logResult(result);
+        if (candidateUnit.sessionTime == Duration.zero) stack.units.removeAt(i);
+
+        return result;
+      } else {
+        if (!stack.exam.sessionsSplittable) {
+          if (stack.exam.orderMatters) {
+            return null;
           } else {
-            if (stack.exam.orderMatters) {
-              return null;
-            } else {
-              final result = {
-                'unit': candidateUnit,
-                'sessionTime': calculateSessionTime(candidateUnit, gap, stack),
-                'examID': stack.exam.id,
-                'sessionInfo': [stack.exam.name, candidateUnit.name],
-                'unitID': candidateUnit.id,
-              };
+            continue;
+          }
+        } else {
+          if (stack.exam.orderMatters) {
+            return null;
+          } else {
+            final result = {
+              'unit': candidateUnit,
+              'sessionTime': calculateSessionTime(candidateUnit, gap, stack),
+              'examID': stack.exam.id,
+              'sessionInfo': [stack.exam.name, candidateUnit.name],
+              'unitID': candidateUnit.id,
+            };
 
-              logResult(result);
-              if (candidateUnit.sessionTime == Duration.zero)
-                stack.units.removeAt(i);
+            logResult(result);
+            if (candidateUnit.sessionTime == Duration.zero)
+              stack.units.removeAt(i);
 
-              return result;
-            }
+            return result;
           }
         }
       }
-    } else {
-      for (int i = stack.revisions.length - 1; i >= 0; i--) {
-        final candidateRevision = stack.revisions[i];
-
-        if (candidateRevision.sessionTime == Duration.zero) {
-          continue;
-        }
-        if (candidateRevision.sessionTime <= availableTime) {
-          final result = {
-            'unit': candidateRevision,
-            'sessionTime': calculateSessionTime(candidateRevision, gap, stack),
-            'examID': stack.exam.id,
-            'sessionInfo': [stack.exam.name, candidateRevision.name],
-            'unitID': candidateRevision.id
-          };
-          logResult(result);
-          if (candidateRevision.sessionTime == Duration.zero)
-            stack.revisions.removeAt(i);
-          return result;
-        } else {
-          final result = {
-            'unit': candidateRevision,
-            'sessionTime': calculateSessionTime(candidateRevision, gap, stack),
-            'examID': stack.exam.id,
-            'sessionInfo': [stack.exam.name, candidateRevision.name],
-            'unitID': candidateRevision.id
-          };
-          logResult(result);
-          if (candidateRevision.sessionTime == Duration.zero)
-            stack.revisions.removeAt(i);
-          return result;
-        }
-      }
     }
+    return null;
+  }
+
+  Map<String, Object>? extractRevision(
+      SchedulerStackModel stack, Duration availableTime, TimeSlotModel gap) {
+    for (int i = stack.revisions.length - 1; i >= 0; i--) {
+      final candidateRevision = stack.revisions[i];
+
+      if (candidateRevision.sessionTime == Duration.zero) {
+        continue;
+      }
+
+      final result = {
+        'unit': candidateRevision,
+        'sessionTime': calculateSessionTime(candidateRevision, gap, stack),
+        'examID': stack.exam.id,
+        'sessionInfo': [stack.exam.name, candidateRevision.name],
+        'unitID': candidateRevision.id
+      };
+      logResult(result);
+      if (candidateRevision.sessionTime == Duration.zero)
+        stack.revisions.removeAt(i);
+      stack.revisionNeedsToBePutInDayBefore = false;
+      return result;
+    }
+    return null;
   }
 
   Duration calculateSessionTime(
@@ -440,14 +461,14 @@ class StudyPlanner {
     }
   }
 
-  Future<List<SchedulerStackModel>> generateStacks() async {
+  Future<List<SchedulerStackModel>> generateStacks(DateTime date) async {
     try {
       List<SchedulerStackModel> result = [];
       for (ExamModel exam in instanceManager.sessionStorage.activeExams) {
         await exam.getUnits();
         await exam.getRevisions();
         SchedulerStackModel stack = SchedulerStackModel(exam: exam);
-        await stack.initializeUnitsAndRevision(exam);
+        await stack.intializeDependantParameters(exam, date);
         result.add(stack);
       }
       return result;
@@ -479,5 +500,14 @@ class StudyPlanner {
     String output =
         'Selected unit: \n ${result['sessionInfo'][0]}: ${result['sessionInfo'][1]}\nDuration: ${formatDuration(result['sessionTime'])}';
     logger.d(output);
+  }
+
+  List<SchedulerStackModel> copyStackList(
+      List<SchedulerStackModel> originalList) {
+    List<SchedulerStackModel> newList = [];
+    for (SchedulerStackModel stack in originalList) {
+      newList.add(stack.customDeepCopy());
+    }
+    return newList;
   }
 }

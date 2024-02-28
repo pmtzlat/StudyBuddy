@@ -8,24 +8,24 @@ class SchedulerStackModel {
   late List<UnitModel> units;
   late List<UnitModel> revisions;
   int? daysUntilExam;
-  double? weight;
-  ExamModel exam;
+  double weight = 1.0;
+  ExamModel exam ;
   int unitsInDay = 0;
+  bool revisionNeedsToBePutInDayBefore = false;
 
   SchedulerStackModel({required this.exam});
 
-  Future<void> initializeUnitsAndRevision(ExamModel exam) async {
+  Future<void> intializeDependantParameters(ExamModel exam, DateTime date) async {
     try {
       units = exam.units
-    .where((unit) => !unit.completed)
-    .map((unit) => unit.deepCopy())
-    .toList();
+          .where((unit) => !unit.completed)
+          .map((unit) => unit.deepCopy())
+          .toList();
 
-revisions = exam.revisions
-    
-    .map((unit) => unit.deepCopy())
-    .toList();
-      daysUntilExam = getDaysUntilExam(exam.examDate);
+      revisions = exam.revisions.map((unit) => unit.deepCopy()).toList();
+      daysUntilExam = getDaysUntilExam(date);
+      revisionNeedsToBePutInDayBefore = exam.revisionInDayBeforeExam;
+      weight = exam.weight;
 
     } catch (e) {
       logger.e('Error initializing unitsWithRevision: $e');
@@ -33,59 +33,56 @@ revisions = exam.revisions
     }
   }
 
-  
-
-  Future<List<UnitModel>> extractUnitsWithRevision(ExamModel exam) async {
-    try {
-      List<UnitModel> units = [];
-      final examUnits = await instanceManager.firebaseCrudService
-          .getUnitsForExam(examID: exam.id);
-      units += examUnits;
-      logger.i('Revisons for exam ${exam.name}: ${exam.revisions}');
-
-      return units;
-    } catch (e) {
-      logger.e('extractUnitsWithRevision error: $e');
-      return []; // Return an empty list as a default value.
-    }
-  }
-
   void print() {
     String unitString = 'Units:';
     for (UnitModel unit in units) {
-      unitString += '\n ${unit.name}, hours: ${formatDuration(unit.sessionTime)}';
+      unitString +=
+          '\n ${unit.name}, hours: ${formatDuration(unit.sessionTime)}';
     }
     unitString += '\n Revisons: ';
     for (UnitModel revision in revisions) {
-      unitString += '\n ${revision.name}, hours: ${formatDuration(revision.sessionTime)}';
+      unitString +=
+          '\n ${revision.name}, hours: ${formatDuration(revision.sessionTime)}';
     }
     logger.f(
         'Stack ${exam.name} \n Session Time: ${formatDuration(exam.revisionTime)} \n Exam date: ${exam.examDate} \n Order matters: ${exam.orderMatters} \n Weight: ${exam.weight}\n $unitString');
   }
 
+  SchedulerStackModel customDeepCopy() {
+
+    SchedulerStackModel newStack = SchedulerStackModel(exam: exam);
+    newStack.units = units;
+    newStack.revisions = revisions;
+    newStack.daysUntilExam = daysUntilExam;
+    newStack.weight = weight;
+    
+    newStack.unitsInDay = unitsInDay;
+    newStack.revisionNeedsToBePutInDayBefore = revisionNeedsToBePutInDayBefore;
+    return newStack;
+  }
+
   String getString() {
     String unitString = 'Units:';
     for (UnitModel unit in units) {
-      unitString += '\n ${unit.name}, hours: ${formatDuration(unit.sessionTime)}';
+      unitString +=
+          '\n ${unit.name}, hours: ${formatDuration(unit.sessionTime)}';
     }
     unitString += '\n Revisons: ';
     for (UnitModel revision in revisions) {
-      unitString += '\n ${revision.name}, hours: ${formatDuration(revision.sessionTime)}';
+      unitString +=
+          '\n ${revision.name}, hours: ${formatDuration(revision.sessionTime)}';
     }
-    return 
-        'Stack ${exam.name} \n Session Time: ${formatDuration(exam.revisionTime)} \n Exam date: ${exam.examDate} \n Order matters: ${exam.orderMatters} \n Weight: ${exam.weight}\n $unitString';
+    return 'Stack ${exam.name} \n Session Time: ${formatDuration(exam.revisionTime)} \n Exam date: ${exam.examDate} \n Order matters: ${exam.orderMatters} \n Weight: ${weight}\n $unitString\nUnits in day: $unitsInDay';
   }
 
   int getDaysUntilExam(DateTime date) {
-    DateTime selectedDate = date;
-    DateTime date2 = exam.examDate;
-
-    DateTime date1 =
-        DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
-
-    Duration difference = date2.difference(date1);
+    
+    
+    Duration difference = exam.examDate.difference(date);
+    //logger.i('${exam.examDate} , $date : $difference');
 
     int numberOfDays = difference.inDays;
+     //logger.i(numberOfDays);
 
     return numberOfDays;
   }

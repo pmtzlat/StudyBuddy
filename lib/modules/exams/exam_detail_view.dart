@@ -46,6 +46,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
   bool loading = false;
   Duration editSwitchTime = Duration(milliseconds: 300);
   bool orderMatters = false;
+  bool revisionInDayBeforeExam = false;
   bool sessionsSplittable = false;
   int revisions = 0;
   Duration revisionTime = Duration(seconds: 0);
@@ -61,6 +62,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
   void initState() {
     super.initState();
     orderMatters = widget.exam.orderMatters;
+    revisionInDayBeforeExam = widget.exam.revisionInDayBeforeExam;
     sessionsSplittable = widget.exam.sessionsSplittable;
     revisions = widget.exam.revisions.length;
     revisionTime = widget.exam.revisionTime;
@@ -341,7 +343,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                         Row(
                           children: [
                             Icon(
-                              Icons.my_library_books_rounded,
+                              Icons.splitscreen,
                               color: Colors.white,
                               size: screenWidth * 0.08,
                             ),
@@ -422,6 +424,56 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                     if (editMode) {
                                       setState(() {
                                         orderMatters = newValue ?? false;
+                                      });
+                                      field.didChange(newValue);
+                                    }
+                                  });
+                            })
+                      ],
+                    ),
+                    AnimatedContainer(
+                      duration: editSwitchTime,
+                      height: !editMode
+                          ? screenHeight * 0.015
+                          : screenHeight * 0.04,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.repeat_one_sharp,
+                              color: Colors.white,
+                              size: screenWidth * 0.08,
+                            ),
+                            SizedBox(width: 10),
+                            Text(_localizations.revisionDayBefore,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: screenWidth * 0.045))
+                          ],
+                        ),
+                        FormBuilderField<bool>(
+                            name: 'revisionDayBefore',
+                            enabled: editMode,
+                            initialValue: widget.exam.revisionInDayBeforeExam,
+                            builder: (FormFieldState<dynamic> field) {
+                              return Checkbox(
+                                  visualDensity: VisualDensity(
+                                      horizontal: -4, vertical: -4),
+                                  activeColor: Colors.white,
+                                  checkColor: Colors.black,
+                                  fillColor:
+                                      MaterialStateProperty.all(Colors.white),
+                                  value: !editMode
+                                      ? widget.exam.revisionInDayBeforeExam
+                                      : revisionInDayBeforeExam,
+                                  onChanged: (bool? newValue) {
+                                    if (editMode) {
+                                      setState(() {
+                                        revisionInDayBeforeExam = newValue ?? false;
                                       });
                                       field.didChange(newValue);
                                     }

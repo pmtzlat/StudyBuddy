@@ -70,6 +70,8 @@
     "keepSessionsInDay": "Study sessions can be split:",
     "sessionTimeCantBeZero": "Session time can't be zero!",
     "exam":"Exam",
+    "revisionInPreviousDay":"Always have a revision the day before the exam",
+    "revisionDayBefore": "Revision in day before:",
 
     
 
