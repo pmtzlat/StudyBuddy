@@ -315,7 +315,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                     Container(
                       height: screenHeight * 0.015,
                     ),
-                    
                     AnimatedContainer(
                       duration: editSwitchTime,
                       margin:
@@ -473,7 +472,8 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                   onChanged: (bool? newValue) {
                                     if (editMode) {
                                       setState(() {
-                                        revisionInDayBeforeExam = newValue ?? false;
+                                        revisionInDayBeforeExam =
+                                            newValue ?? false;
                                       });
                                       field.didChange(newValue);
                                     }
@@ -556,10 +556,11 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                         GestureDetector(
                           onTap: () async {
                             if (editMode) {
-                              revisionTime = await showTimerPicker(context, revisionTime);
+                              revisionTime =
+                                  await showTimerPicker(context, revisionTime);
                               if (revisionTime == Duration.zero) {
                                 revisionTime = const Duration(minutes: 1);
-                                  showRedSnackbar(context,
+                                showRedSnackbar(context,
                                     _localizations.sessionTimeCantBeZero);
                               }
                               setState(() {});
@@ -887,7 +888,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                     });
 
                                                     try {
-                                                       await _controller
+                                                      await _controller
                                                           .handleEditExam(
                                                               editExamFormKey,
                                                               widget.exam,
@@ -900,7 +901,8 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                       editExamFormKey
                                                           .currentState!
                                                           .reset();
-                                                       showRedSnackbar(context,
+                                                      showRedSnackbar(
+                                                          context,
                                                           _localizations
                                                               .errorEditingExam);
                                                     }
@@ -1066,10 +1068,19 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                 height: screenHeight * 0.05,
                                 child: IconButton(
                                     onPressed: () {
+                                      int unitNumber = 0;
+                                      if (widget.exam.units.isNotEmpty) {
+                                        unitNumber = widget
+                                                .exam
+                                                .units[
+                                                    widget.exam.units.length -
+                                                        1]
+                                                .order;
+                                      }
                                       addUnit(UnitModel(
                                           name:
-                                              ' ${_localizations.unit} ${widget.exam.units.length + 1}',
-                                          order: widget.exam.units.length + 1,
+                                              ' ${_localizations.unit} ${unitNumber + 1}',
+                                          order: unitNumber + 1,
                                           sessionTime: widget.exam.unitTime,
                                           id: generateRandomString()));
                                     },

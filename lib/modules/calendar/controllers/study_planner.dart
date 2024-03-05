@@ -58,9 +58,6 @@ class StudyPlanner {
     }
 
     try {
-      if (await firebaseCrud.deleteNotPastCalendarDays() == -1) {
-        return -1;
-      }
       if ((instanceManager.sessionStorage.activeExams.isEmpty) ||
           (instanceManager.sessionStorage.weeklyGaps.isEmpty)) {
         logger.i('No exams or no availability. ');
@@ -139,6 +136,9 @@ class StudyPlanner {
       Map<String, Map<String, int>> unitTotalSessions,
       Future<void> updateAllUnitSessionCompletionInfo(
           Map<String, Map<String, int>> unitTotalSessions)) async {
+    if (await firebaseCrud.deleteNotPastCalendarDays() == -1) {
+      return -1;
+    }
     for (var day in result) {
       var dayID = await firebaseCrud.addCalendarDay(day);
       if (dayID == null) {
@@ -465,6 +465,7 @@ class StudyPlanner {
     try {
       List<SchedulerStackModel> result = [];
       for (ExamModel exam in instanceManager.sessionStorage.activeExams) {
+        if (exam.units.isEmpty && exam.revisions.isEmpty) continue;
         await exam.getUnits();
         await exam.getRevisions();
         SchedulerStackModel stack = SchedulerStackModel(exam: exam);

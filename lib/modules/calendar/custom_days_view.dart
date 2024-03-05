@@ -80,7 +80,6 @@ class _CustomDaysViewState extends State<CustomDaysView> {
                   setState(() {
                     timeSlotList.removeAt(index);
                   });
-                  
 
                   try {
                     if (await _controller.updateCustomDay(customDay, null) ==
@@ -102,43 +101,45 @@ class _CustomDaysViewState extends State<CustomDaysView> {
                   } catch (e) {
                     logger.e('Error updating custom day after dismissing: $e');
                     showRedSnackbar(context, _localizations.errorDeletingGap);
-                    
+
                     await _controller.getCustomDays();
                     await refreshCustomDay();
-                    
-                   
-                    
                   }
 
                   // Move the state update inside the try-catch block to ensure it happens after async operations
                   setState(() {
                     timeSlotList = customDay.timeSlots;
                   });
-                  
                 },
-                child: Card(
-                    elevation: 0,
-                    margin: const EdgeInsets.symmetric(vertical: 5),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                          color: Color.fromARGB(255, 92, 107, 192)),
-                      child: Padding(
-                          padding: EdgeInsets.all(screenWidth * 0.02),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                  '${timeSlot.timeOfDayToString(timeSlot.startTime)} - ${timeSlot.timeOfDayToString(timeSlot.endTime)}',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: screenWidth * 0.05,
-                                      fontWeight: FontWeight.w300)),
-                            ],
-                          )),
-                    )),
+                child: GestureDetector(
+                  onTap: () async {
+                    await showTimePickerDialog(
+                        context, timeSlot.startTime, timeSlot.endTime);
+                  },
+                  child: Card(
+                      elevation: 0,
+                      margin: const EdgeInsets.symmetric(vertical: 5),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                            color: Color.fromARGB(255, 92, 107, 192)),
+                        child: Padding(
+                            padding: EdgeInsets.all(screenWidth * 0.02),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                    '${timeSlot.timeOfDayToString(timeSlot.startTime)} - ${timeSlot.timeOfDayToString(timeSlot.endTime)}',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: screenWidth * 0.05,
+                                        fontWeight: FontWeight.w300)),
+                              ],
+                            )),
+                      )),
+                ),
               );
             }));
     var tableCalendar = TableCalendar(
@@ -257,47 +258,7 @@ class _CustomDaysViewState extends State<CustomDaysView> {
     var iconButton = IconButton(
       icon: Icon(Icons.add),
       onPressed: () async {
-        bool wrongDatesMessageShown = false;
-        final restraintFormKey = GlobalKey<FormBuilderState>();
-
-        await showGeneralDialog(
-          context: context,
-          barrierDismissible: true,
-          barrierLabel:
-              MaterialLocalizations.of(context).modalBarrierDismissLabel,
-          barrierColor: Colors.black.withOpacity(0.5),
-
-          transitionDuration: Duration(milliseconds: 200),
-
-          // Create the dialog's content
-          pageBuilder: (context, animation, secondaryAnimation) {
-            return GapSelector(
-              color: const Color.fromARGB(255, 0, 85, 150),
-              day: customDay,
-              updateParent: () async {
-                try {
-                  setState(() {
-                    loading = true;
-                  });
-
-                  customDay = instanceManager.sessionStorage.customDays
-                      .firstWhere((element) => element.date == date,
-                          orElse: () => DayModel(
-                              weekday: date.weekday, date: date, id: 'empty'));
-                  await customDay.getGaps();
-                } catch (e) {
-                  logger.e('Error adding/editing custom day: $e');
-                }
-
-                setState(() {
-                  timeSlotList = customDay.timeSlots;
-                  loading = false;
-                });
-              },
-              generalOrCustomDay: 'custom',
-            );
-          },
-        );
+        await showTimePickerDialog(context, null, null);
       },
     );
     var loader = Padding(
@@ -401,7 +362,8 @@ class _CustomDaysViewState extends State<CustomDaysView> {
               ),
               TextButton(
                   onPressed: () async {
-                    List<TimeSlotModel> preChangeTimeSlots = List.from(customDay.timeSlots);
+                    List<TimeSlotModel> preChangeTimeSlots =
+                        List.from(customDay.timeSlots);
                     try {
                       setState(() {
                         loading = true;
@@ -409,7 +371,8 @@ class _CustomDaysViewState extends State<CustomDaysView> {
 
                       customDay.timeSlots = instanceManager.sessionStorage
                           .weeklyGaps[customDay.date.weekday - 1];
-                      if(await _controller.updateCustomDay(customDay, null) == -1) throw Exception;
+                      if (await _controller.updateCustomDay(customDay, null) ==
+                          -1) throw Exception;
                       await _controller.getCustomDays();
 
                       customDay = instanceManager.sessionStorage.customDays
@@ -423,7 +386,8 @@ class _CustomDaysViewState extends State<CustomDaysView> {
                     } catch (e) {
                       logger.e('Error adding/editing custom day: $e');
                       customDay.timeSlots = preChangeTimeSlots;
-                      showRedSnackbar(context, _localizations.errorResettingToDefault);
+                      showRedSnackbar(
+                          context, _localizations.errorResettingToDefault);
                     }
 
                     setState(() {
@@ -455,6 +419,52 @@ class _CustomDaysViewState extends State<CustomDaysView> {
           ),
         ),
       ]),
+    );
+  }
+
+  Future<void> showTimePickerDialog(
+      BuildContext context, TimeOfDay? startTime, TimeOfDay? endTime) async {
+    bool wrongDatesMessageShown = false;
+    final restraintFormKey = GlobalKey<FormBuilderState>();
+
+    await showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black.withOpacity(0.5),
+
+      transitionDuration: Duration(milliseconds: 200),
+
+      // Create the dialog's content
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return GapSelector(
+          color: const Color.fromARGB(255, 0, 85, 150),
+          day: customDay,
+          startTime: startTime,
+          endTime: endTime,
+          updateParent: () async {
+            try {
+              setState(() {
+                loading = true;
+              });
+
+              customDay = instanceManager.sessionStorage.customDays.firstWhere(
+                  (element) => element.date == date,
+                  orElse: () =>
+                      DayModel(weekday: date.weekday, date: date, id: 'empty'));
+              await customDay.getGaps();
+            } catch (e) {
+              logger.e('Error adding/editing custom day: $e');
+            }
+
+            setState(() {
+              timeSlotList = customDay.timeSlots;
+              loading = false;
+            });
+          },
+          generalOrCustomDay: 'custom',
+        );
+      },
     );
   }
 
