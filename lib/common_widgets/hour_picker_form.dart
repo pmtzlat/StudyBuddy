@@ -111,8 +111,7 @@ class _DayFormState extends State<DayForm> {
     final color = widget.color;
     final darkerColor = darken(color, 0.1);
 
-    Future<void> showPopUp(int weekday, Function updateParent,
-        TimeOfDay? startTime, TimeOfDay? endTime) async {
+    Future<void> showPopUp(int weekday, Function updateParent) async {
       bool wrongDatesMessageShown = false;
       final restraintFormKey = GlobalKey<FormBuilderState>();
 
@@ -128,11 +127,8 @@ class _DayFormState extends State<DayForm> {
         // Create the dialog's content
         pageBuilder: (context, animation, secondaryAnimation) {
           return GapSelector(
-            startTime: startTime,
-            endTime: endTime,
             color: color,
-            day: DayModel(
-                weekday: weekday, date: DateTime.now(), times: timeSlotList),
+            day: DayModel(weekday: weekday, date: DateTime.now(), times: timeSlotList),
             updateParent: updateParent,
             generalOrCustomDay: 'general',
           );
@@ -231,63 +227,56 @@ class _DayFormState extends State<DayForm> {
                         try {
                           await _controller.deleteGap(timeSlot);
 
-                          if (!instanceManager.sessionStorage.gettingAllGaps) {
-                            instanceManager.sessionStorage.gettingAllGaps =
-                                true;
-                            await Future.delayed(Duration(seconds: 10));
-                            await _controller.getGapsForDay(widget.dayNum + 1);
-                            instanceManager.sessionStorage.gettingAllGaps =
-                                false;
-                          }
-                        } catch (e) {
-                          showRedSnackbar(
-                              context, _localizations.errorDeletingGap);
-                          await _controller.getGapsForDay(widget.dayNum + 1);
-                        }
+                          if(!instanceManager.sessionStorage.gettingAllGaps){
+                          instanceManager.sessionStorage.gettingAllGaps = true;
+                          await Future.delayed(Duration(seconds:10));
+                          await _controller.getGapsForDay(widget.dayNum+1);
+                          instanceManager.sessionStorage.gettingAllGaps = false;
 
+                          }
+                          
+                          
+                        } catch (e) {
+                          
+                           showRedSnackbar(context, _localizations.errorDeletingGap);
+                          await _controller.getGapsForDay(widget.dayNum+1);
+                          
+                        }
+                        
+                        
                         setState(() {
                           timeSlotList = instanceManager
                               .sessionStorage.weeklyGaps[widget.dayNum];
                         });
                       },
-                      child: GestureDetector(
-                        onTap: () {
-                          showPopUp((daysStrToNum[widget.dayString])! + 1, () {
-                            setState(() {
-                              timeSlotList = instanceManager.sessionStorage
-                                  .weeklyGaps[daysStrToNum[widget.dayString]];
-                            });
-                          }, timeSlot.startTime, timeSlot.endTime);
-                        },
-                        child: Card(
-                            elevation: 0,
-                            margin: const EdgeInsets.symmetric(vertical: 5),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            clipBehavior: Clip.antiAliasWithSaveLayer,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                    end: Alignment.bottomLeft,
-                                    begin: Alignment.topRight,
-                                    //stops: [ 0.1, 0.9],
-                                    colors: [color, darkerColor]),
-                              ),
-                              child: Padding(
-                                  padding: EdgeInsets.all(screenWidth * 0.02),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                          '${timeSlot.timeOfDayToString(timeSlot.startTime)} - ${timeSlot.timeOfDayToString(timeSlot.endTime)}',
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: screenWidth * 0.05,
-                                              fontWeight: FontWeight.w300)),
-                                    ],
-                                  )),
-                            )),
-                      ),
+                      child: Card(
+                          elevation: 0,
+                          margin: const EdgeInsets.symmetric(vertical: 5),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                          clipBehavior: Clip.antiAliasWithSaveLayer,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                  end: Alignment.bottomLeft,
+                                  begin: Alignment.topRight,
+                                  //stops: [ 0.1, 0.9],
+                                  colors: [color, darkerColor]),
+                            ),
+                            child: Padding(
+                                padding: EdgeInsets.all(screenWidth * 0.02),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                        '${timeSlot.timeOfDayToString(timeSlot.startTime)} - ${timeSlot.timeOfDayToString(timeSlot.endTime)}',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: screenWidth * 0.05,
+                                            fontWeight: FontWeight.w300)),
+                                  ],
+                                )),
+                          )),
                     );
                   }),
             ),
@@ -304,7 +293,7 @@ class _DayFormState extends State<DayForm> {
                     timeSlotList = instanceManager.sessionStorage
                         .weeklyGaps[daysStrToNum[widget.dayString]];
                   });
-                }, null, null);
+                });
               },
             ),
           ),
@@ -313,3 +302,4 @@ class _DayFormState extends State<DayForm> {
     );
   }
 }
+

@@ -15,17 +15,12 @@ class GapSelector extends StatefulWidget {
   Color color;
   String generalOrCustomDay;
   DayModel day;
-  TimeOfDay? startTime;
-  TimeOfDay? endTime;
-
   GapSelector(
       {super.key,
       required this.day,
       required this.generalOrCustomDay,
       required this.color,
-      required this.updateParent,
-      this.startTime,
-      this.endTime});
+      required this.updateParent});
 
   @override
   State<GapSelector> createState() => _GapSelectorState();
@@ -143,14 +138,12 @@ class _GapSelectorState extends State<GapSelector> {
                                             fontSize: screenWidth * 0.09,
                                             color: color,
                                             fontWeight: FontWeight.bold),
-                                        decoration: InputDecoration.collapsed(
-                                            hintText: widget.startTime != null
-                                                ? timeOfDayToStr(
-                                                    widget.startTime!)
-                                                : '00:00',
-                                            hintStyle: TextStyle(
-                                                color: Color.fromARGB(
-                                                    255, 181, 181, 181))),
+                                        decoration:
+                                            const InputDecoration.collapsed(
+                                                hintText: '00:00',
+                                                hintStyle: TextStyle(
+                                                    color: Color.fromARGB(
+                                                        255, 181, 181, 181))),
                                       ),
                                     ),
                                   ),
@@ -170,13 +163,12 @@ class _GapSelectorState extends State<GapSelector> {
                                           fontSize: screenWidth * 0.09,
                                           color: color,
                                           fontWeight: FontWeight.bold),
-                                      decoration: InputDecoration.collapsed(
-                                          hintText: widget.endTime != null
-                                              ? timeOfDayToStr(widget.endTime!)
-                                              : '00:00',
-                                          hintStyle: TextStyle(
-                                              color: Color.fromARGB(
-                                                  255, 181, 181, 181))),
+                                      decoration:
+                                          const InputDecoration.collapsed(
+                                              hintText: '00:00',
+                                              hintStyle: TextStyle(
+                                                  color: Color.fromARGB(
+                                                      255, 181, 181, 181))),
                                     ),
                                   ),
                                 ]),
@@ -230,28 +222,25 @@ class _GapSelectorState extends State<GapSelector> {
                                                 int res = 1;
                                                 if (widget.generalOrCustomDay ==
                                                     'general') {
-                                                  res =
+                                                  res = 
                                                       await _controller.addGap(
-                                                    restraintFormKey,
-                                                    widget.day.weekday,
-                                                    widget.day.timeSlots,
-                                                  );
+                                                          restraintFormKey,
+                                                          widget.day.weekday,
+                                                          widget.day.timeSlots,);
                                                   //logger.i('Added gap!');
-                                                  await _controller
-                                                      .getGapsForDay(
-                                                          widget.day.weekday);
+                                                  await _controller.getGapsForDay(widget.day.weekday);
+                                                  
                                                 } else {
                                                   res = await _controller
-                                                      .updateCustomDay(
-                                                          widget.day,
-                                                          restraintFormKey);
+                                                      .updateCustomDay(widget.day,
+                                                          restraintFormKey
+                                                          );
                                                   //logger.i('Added gap!');
                                                   await _controller
                                                       .getCustomDays();
                                                 }
-
-                                                instanceManager.sessionStorage
-                                                    .setNeedsRecalc(true);
+                                                
+                                                instanceManager.sessionStorage.setNeedsRecalc(true);
                                                 widget.updateParent();
 
                                                 setState(() {
@@ -259,11 +248,12 @@ class _GapSelectorState extends State<GapSelector> {
                                                 });
                                                 Navigator.of(context).pop();
                                                 if (res != 1) {
-                                                  showRedSnackbar(
-                                                      context,
+                                                   showRedSnackbar(context,
                                                       _localizations
                                                           .errorAddingGap);
                                                 }
+
+
                                               } else {
                                                 //shake
 
