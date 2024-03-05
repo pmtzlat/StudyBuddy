@@ -702,7 +702,7 @@ class _CalendarViewState extends State<CalendarView>
                                     width: 5,
                                   ),
                                   Icon(
-                                    Icons.settings,
+                                    Icons.access_time,
                                     color: titleGrey,
                                     size: screenWidth * 0.12,
                                   )
@@ -803,7 +803,7 @@ class _CalculatePlanButtonState extends State<CalculatePlanButton> {
               width: widget.screenWidth * 0.12,
               height: widget.screenWidth * 0.12,
               child: !loading
-                  ? Icon(Icons.calculate,
+                  ? Icon(Icons.calculate_outlined,
                       color:
                           widget.needsRecalc ? Colors.amber : widget.titleGrey,
                       size: widget.screenWidth * 0.12)

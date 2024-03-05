@@ -131,7 +131,7 @@ class BottomNavBar extends StatelessWidget {
         },
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.list),
+            icon: Icon(Icons.menu_book_outlined),
             label: 'List',
           ),
           BottomNavigationBarItem(
@@ -139,7 +139,7 @@ class BottomNavBar extends StatelessWidget {
             label: 'Calendar',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.settings),
             label: 'User',
           ),
         ],
