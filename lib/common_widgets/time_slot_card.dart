@@ -32,6 +32,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
     super.initState();
     timeSlot = instanceManager
         .sessionStorage.loadedCalendarDay.timeSlots[widget.index];
+
     checked = timeSlot.completed;
   }
 
@@ -43,6 +44,9 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
     final cardColor = timeSlot.examColor;
     final lighterColor = lighten(cardColor, .05);
     final darkerColor = darken(cardColor, .15);
+    timeSlot = instanceManager
+        .sessionStorage.loadedCalendarDay.timeSlots[widget.index];
+    logger.f('timeSlot loaded: ${timeSlot.id}');
 
     void update() {
       setState(() {});
@@ -50,7 +54,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
 
     Future<void> checkBox(bool checked) async {
       if (stripTime(DateTime.now()).isAfter(timeSlot.date!)) {
-          showRedSnackbar(context, _localizations.editUnitCompletionInExamsPage);
+        showRedSnackbar(context, _localizations.editUnitCompletionInExamsPage);
         return;
       }
       try {
@@ -62,8 +66,6 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
 
       instanceManager.sessionStorage.loadedCalendarDay.timeSlots[widget.index] =
           await _controller.getTimeSlot(timeSlot.id, timeSlot.dayID);
-
-     
 
       setState(() {
         timeSlot = instanceManager
@@ -93,7 +95,6 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
               children: [
                 GestureDetector(
                     onTap: () {
-                      
                       setState(() {
                         open = !open;
                       });
@@ -108,23 +109,29 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                           mainAxisSize: MainAxisSize.max,
                           children: [
                             Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(timeSlot.examName,
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: screenWidth * 0.06,
-                                            fontWeight: FontWeight.bold)),
-                                    Text(timeSlot.unitName,
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w400))
+                                    Container(
+                                      width: screenWidth*0.5,
+                                      child: Text(timeSlot.examName,
+                                      overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: screenWidth * 0.06,
+                                              fontWeight: FontWeight.bold)),
+                                    ),
+                                    Container(
+                                      width: screenWidth*0.45,
+                                      child: Text(timeSlot.unitName,
+                                      overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w400)),
+                                    )
                                   ],
                                 ),
                                 Column(
@@ -151,8 +158,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                                     children: [
                                                       Icon(
                                                         Icons.done,
-                                                        size:
-                                                            screenWidth * 0.1,
+                                                        size: screenWidth * 0.1,
                                                         color: Colors.white,
                                                       ),
                                                     ],
@@ -165,8 +171,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                                   child: Text(
                                                       '${timeOfDayToStr(timeSlot.startTime)} - ${timeOfDayToStr(timeSlot.endTime)}',
                                                       style: TextStyle(
-                                                          color:
-                                                              Colors.white)),
+                                                          color: Colors.white)),
                                                 ),
                                         )),
                                   ],
@@ -192,13 +197,14 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                 if (instanceManager
                                         .sessionStorage.selectedDate !=
                                     stripTime(DateTime.now())) {
-                                  return  showRedSnackbar(context,
-                                      _localizations
-                                          .cantStartSessionForFuture);
+                                  return showRedSnackbar(context,
+                                      _localizations.cantStartSessionForFuture);
                                 }
                                 //bool completenessBefore = timeSlot.completed;
                                 try {
-                                  await showTimerDialog(context, timeSlot, widget.index);
+                                  logger.i(timeSlot.getString());
+                                  await showTimerDialog(
+                                      context, timeSlot, widget.index);
 
                                   //after closing timer
 
@@ -209,11 +215,10 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                         .timeSlots[widget.index];
                                     checked = timeSlot.completed;
                                   });
-                                  
-                                
                                 } catch (e) {
                                   logger.e('Error updating timeSlot: $e');
-                                   showRedSnackbar(context,_localizations.errorSaving);
+                                  showRedSnackbar(
+                                      context, _localizations.errorSaving);
                                 }
 
                                 //logger.i(newTimeSlot.getString());
@@ -246,7 +251,6 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                       MaterialStateProperty.all(Colors.white),
                                   value: checked,
                                   onChanged: (bool? newValue) async {
-                                    
                                     setState(() {
                                       checked = !checked;
                                     });
@@ -255,7 +259,8 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                     } catch (e) {
                                       logger.e(
                                           'Error changing timeslot state: $e');
-                                       showRedSnackbar(context,
+                                      showRedSnackbar(
+                                          context,
                                           _localizations
                                               .errorChangingTimeSlotCompletion);
                                     }

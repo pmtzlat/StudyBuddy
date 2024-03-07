@@ -178,6 +178,7 @@ class _Page1State extends State<Page1> {
                                 autovalidateMode:
                                     AutovalidateMode.onUserInteraction,
                                 keyboardType: TextInputType.number,
+                                
                                 initialValue: '1',
                                 decoration: InputDecoration(
                                     labelText: _localizations.numberOfUnits,
@@ -318,7 +319,7 @@ class _Page1State extends State<Page1> {
                     ),
                     Container(
                       margin: EdgeInsets.only(top: screenHeight * 0.05),
-                      width: screenWidth * 0.7,
+                      width: screenWidth * 0.85,
                       child: FormBuilderCheckbox(
                           name: 'orderMatters',
                           initialValue: false,
@@ -331,7 +332,7 @@ class _Page1State extends State<Page1> {
                     ),
                     Container(
                       margin: EdgeInsets.only(top: screenHeight * 0.05),
-                      width: screenWidth * 0.7,
+                      width: screenWidth * 0.85,
                       child: FormBuilderCheckbox(
                           name: 'sessionSplittable',
                           initialValue: false,
@@ -344,7 +345,7 @@ class _Page1State extends State<Page1> {
                     ),
                     Container(
                       margin: EdgeInsets.only(top: screenHeight * 0.05),
-                      width: screenWidth * 0.7,
+                      width: screenWidth * 0.85,
                       child: FormBuilderCheckbox(
                           name: 'revisionInPreviousDay',
                           initialValue: false,

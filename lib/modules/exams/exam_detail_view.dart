@@ -98,6 +98,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
     final lighterColor = lighten(cardColor, .04);
     final darkerColor = darken(cardColor, .2);
     ExamModel exam = widget.exam;
+    String currentLocale = Localizations.localeOf(context).languageCode;
 
     void _openDialog(String title, Widget content) {
       showDialog(
@@ -176,6 +177,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                   initialValue: widget.exam.name,
                                   readOnly: !editMode,
                                   decoration: InputDecoration(),
+                                  textCapitalization: TextCapitalization.words,
                                   style: TextStyle(
                                     height: 1,
                                     color: Colors.white,
@@ -315,7 +317,6 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                     Container(
                       height: screenHeight * 0.015,
                     ),
-                    
                     AnimatedContainer(
                       duration: editSwitchTime,
                       margin:
@@ -332,7 +333,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
             ),
             AnimatedContainer(
               duration: editSwitchTime,
-              height: !editMode ? screenHeight * 0.2 : screenHeight * 0.36,
+              height: !editMode ? screenHeight * 0.2 : screenHeight * 0.45,
               child: SingleChildScrollView(
                 physics: NeverScrollableScrollPhysics(),
                 child: Column(
@@ -473,7 +474,8 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                   onChanged: (bool? newValue) {
                                     if (editMode) {
                                       setState(() {
-                                        revisionInDayBeforeExam = newValue ?? false;
+                                        revisionInDayBeforeExam =
+                                            newValue ?? false;
                                       });
                                       field.didChange(newValue);
                                     }
@@ -556,10 +558,11 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                         GestureDetector(
                           onTap: () async {
                             if (editMode) {
-                              revisionTime = await showTimerPicker(context, revisionTime);
+                              revisionTime =
+                                  await showTimerPicker(context, revisionTime);
                               if (revisionTime == Duration.zero) {
                                 revisionTime = const Duration(minutes: 1);
-                                  showRedSnackbar(context,
+                                showRedSnackbar(context,
                                     _localizations.sessionTimeCantBeZero);
                               }
                               setState(() {});
@@ -617,6 +620,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                         ],
                       ),
                     ),
+                    
                   ],
                 ),
               ),
@@ -834,7 +838,9 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                     duration: editSwitchTime,
                     child: !editMode
                         ? Container(
-                            width: screenWidth * 0.36,
+                            width: currentLocale == 'es'
+                                ? screenWidth * 0.41
+                                : screenWidth * 0.36,
                             key: ValueKey<int>(0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -860,7 +866,9 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                             ),
                           )
                         : Container(
-                            width: screenWidth * 0.36,
+                            width: currentLocale == 'es'
+                                ? screenWidth * 0.41
+                                : screenWidth * 0.36,
                             key: ValueKey<int>(1),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -869,7 +877,9 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                     duration: editSwitchTime,
                                     child: !loading
                                         ? Container(
-                                            width: screenWidth * 0.36,
+                                            width: currentLocale == 'es'
+                                                ? screenWidth * 0.41
+                                                : screenWidth * 0.36,
                                             child: TextButton.icon(
                                                 key: ValueKey<int>(0),
                                                 onPressed: () async {
@@ -887,7 +897,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                     });
 
                                                     try {
-                                                       await _controller
+                                                      await _controller
                                                           .handleEditExam(
                                                               editExamFormKey,
                                                               widget.exam,
@@ -900,7 +910,8 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                       editExamFormKey
                                                           .currentState!
                                                           .reset();
-                                                       showRedSnackbar(context,
+                                                      showRedSnackbar(
+                                                          context,
                                                           _localizations
                                                               .errorEditingExam);
                                                     }
@@ -977,7 +988,9 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                                                 )),
                                           )
                                         : Container(
-                                            width: screenWidth * 0.36,
+                                            width: currentLocale == 'es'
+                                                ? screenWidth * 0.41
+                                                : screenWidth * 0.36,
                                             child: TextButton.icon(
                                                 key: ValueKey<int>(1),
                                                 onPressed: () {},

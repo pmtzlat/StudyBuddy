@@ -160,6 +160,7 @@ class StudyPlanner {
 
     await updateAllUnitSessionCompletionInfo(unitTotalSessions);
     await instanceManager.examsController.getAllExams();
+    await instanceManager.calendarController.getCalendarDay(stripTime(DateTime.now()));
 
     return 1;
   }

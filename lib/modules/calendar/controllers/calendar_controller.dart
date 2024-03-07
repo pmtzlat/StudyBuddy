@@ -123,8 +123,6 @@ class CalendarController {
       instanceManager.sessionStorage.selectedDate =
           DateTime(date.year, date.month, date.day);
 
-      // var x = [];
-      // var y = x[1];
 
       var savedDate = instanceManager.sessionStorage.selectedDate;
 
@@ -415,6 +413,7 @@ class CalendarController {
 
   Future<void> saveTimeStudied(TimeSlotModel timeSlot) async {
     try {
+      logger.i('Saving time studied for timeslot ${timeSlot.id}, in day ${timeSlot.dayID}');
       await _firebaseCrud
           .updateTimeStudiedForTimeSlot(
               timeSlot.id, timeSlot.dayID, timeSlot.timeStudied);

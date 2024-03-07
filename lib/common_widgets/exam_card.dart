@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
@@ -36,6 +35,7 @@ class _ExamCardState extends State<ExamCard> {
     final _localizations = AppLocalizations.of(context)!;
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
+    String currentLocale = Localizations.localeOf(context).languageCode;
 
     return GestureDetector(
       onTap: () {
@@ -74,46 +74,40 @@ class _ExamCardState extends State<ExamCard> {
                         style: TextStyle(
                             color: Colors.white, fontSize: screenWidth * 0.06)),
                   ),
-                  SizedBox(width: screenWidth*0.1,),
+                  SizedBox(
+                    width: screenWidth * 0.1,
+                  ),
                   AnimatedContainer(
                     curve: Curves.decelerate,
                     duration: Duration(milliseconds: 300),
                     width: !widget.prioritizing
-                        ? screenWidth * 0.35
-                        : screenWidth * 0.45,
+                        ? (currentLocale == 'es' ? screenWidth * 0.38 : screenWidth * 0.28)
+                        : (currentLocale == 'es' ? screenWidth * 0.5 : screenWidth * 0.4),
 
                     // color: Colors.yellow,
                     child: SingleChildScrollView(
+                      key: Key('1'),
                       scrollDirection: Axis.horizontal,
                       physics: NeverScrollableScrollPhysics(),
                       child: Row(
                         children: [
                           Container(
-                            width: screenWidth * 0.313,
-                            child: Row(
-                              // widget 1
-                              children: [
-                                Text('${formatDateTime(context, widget.exam.examDate)}',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: screenWidth * 0.035)),
-                                SizedBox(
-                                  width: screenWidth * 0.02,
-                                ),
-                              ],
-                            ),
+                            width: (currentLocale == 'es' ? screenWidth * 0.36 : screenWidth * 0.26),
+                            child: Text(
+                                '${formatDateTime(context, widget.exam.examDate)}',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: screenWidth * 0.035)),
                           ),
-                          Container(
-                            width: screenWidth * 0.12,
-                            child: ReorderableDragStartListener(
-                                // widget 2
-                                index: widget.index,
-                                child: Padding(
-                                  padding: EdgeInsets.all(screenWidth * 0.02),
-                                  child: Icon(Icons.drag_handle_rounded,
-                                      color: Colors.black),
-                                )),
-                          ),
+                          SizedBox(width: screenWidth*0.02),
+                          ReorderableDragStartListener(
+                              // widget 2
+                              index: widget.index,
+                              child: Padding(
+                                padding: EdgeInsets.all(screenWidth * 0.02),
+                                child: Icon(Icons.drag_handle_rounded,
+                                    color: Colors.black),
+                              ))
                         ],
                       ),
                     ),

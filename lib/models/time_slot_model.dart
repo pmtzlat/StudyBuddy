@@ -87,6 +87,7 @@ class TimeSlotModel {
   }
 
   Future<void> changeCompleteness(bool newValue) async {
+    logger.i('Changing completeness of time slot: $id in day $dayID');
     await instanceManager.firebaseCrudService
         .changeTimeSlotCompleteness(dayID, id, newValue);
     UnitModel? parentUnit =

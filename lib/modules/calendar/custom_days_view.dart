@@ -142,6 +142,7 @@ class _CustomDaysViewState extends State<CustomDaysView> {
               );
             }));
     var tableCalendar = TableCalendar(
+      locale: Localizations.localeOf(context).languageCode,
       focusedDay: date,
       firstDay: DateTime.now().subtract(Duration(days: 365)),
       lastDay: DateTime.now().add(Duration(days: 365)),

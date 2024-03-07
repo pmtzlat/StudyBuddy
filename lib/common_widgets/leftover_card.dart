@@ -56,6 +56,8 @@ class LeftOverCard extends StatelessWidget {
               children: [
                 Text(
                   title,
+                  overflow: TextOverflow.ellipsis,
+
                   style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: screenWidth*0.05),
                 ),
                 SizedBox(height: 20,),

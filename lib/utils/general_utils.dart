@@ -58,7 +58,7 @@ Future<Duration> showTimerPicker(BuildContext context, Duration initialTime) {
       );
     },
   ).then((value) {
-    if(selectedTime == Duration.zero) return Duration(minutes:1);
+    if(selectedTime == Duration.zero) return initialTime;
     return selectedTime;
   });
 }

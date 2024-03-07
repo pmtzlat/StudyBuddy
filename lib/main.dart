@@ -33,7 +33,7 @@ void main() async {
 
   instanceManager = InstanceManager();
 
-  await instanceManager.startDependantInstances();
+  
   await handleAppStart();
 
   runApp(StudyBuddyApp());
@@ -41,6 +41,7 @@ void main() async {
 
 Future<bool> handleAppStart() async {
   try {
+    await instanceManager.startDependantInstances();
     connectivityResult = await (Connectivity().checkConnectivity()); //this line
     if (connectivityResult == ConnectivityResult.wifi ||
         connectivityResult == ConnectivityResult.ethernet ||
@@ -92,8 +93,9 @@ class StudyBuddyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    if (status != null) {
-      logger.i('Showing not connected');
+    
+    if (status != null && user != null) {
+      logger.i('Showing not connected!\Status: $status, USer: $user');
       return MaterialApp(
         navigatorKey: navKey,
         title: 'StudyBuddy',

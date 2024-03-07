@@ -77,7 +77,7 @@ class _ExamsViewState extends State<ExamsView> {
                   ? Container(
                       // add course
                       key: ValueKey<int>(0),
-                      width: screenWidth * 0.4,
+                      width: screenWidth * 0.43,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
@@ -96,7 +96,7 @@ class _ExamsViewState extends State<ExamsView> {
                   : Container(
                       // cancel prioritize
                       key: ValueKey<int>(1),
-                      width: screenWidth * 0.4,
+                      width: screenWidth * 0.43,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
@@ -179,7 +179,8 @@ class _ExamsViewState extends State<ExamsView> {
                                           if (await _controller
                                                   .updateExamWeights() ==
                                               -1) {
-                                             showRedSnackbar(context,
+                                            showRedSnackbar(
+                                                context,
                                                 _localizations
                                                     .errorPrioritizing);
                                           }
@@ -384,50 +385,48 @@ class _ExamsViewState extends State<ExamsView> {
               giveDetails: giveDetails,
             );
 
-            if (prioritizing) {
-              return Container(key: Key(exam.id), child: examCard);
-            } else {
-              return Dismissible(
-                key: Key(exam.id),
-                direction: DismissDirection.endToStart,
-                background: dismissibleBackground,
-                onDismissed: (direction) async {
-                  if (!prioritizing) {
-                    setState(() {
-                      activeExams.remove(exam);
-                      instanceManager.sessionStorage.savedExams.remove(exam);
-                    });
-                    try {
-                      await _controller.deleteExam(
-                        name: exam.name,
-                        id: exam.id,
-                        index: index,
-                        context: context,
-                      );
+            return Dismissible(
+              key: Key(exam.id),
+              direction: prioritizing
+                  ? DismissDirection.none
+                  : DismissDirection.endToStart,
+              background: dismissibleBackground,
+              onDismissed: (direction) async {
+                if (!prioritizing) {
+                  setState(() {
+                    activeExams.remove(exam);
+                    instanceManager.sessionStorage.savedExams.remove(exam);
+                  });
+                  try {
+                    await _controller.deleteExam(
+                      name: exam.name,
+                      id: exam.id,
+                      index: index,
+                      context: context,
+                    );
 
-                      if (!instanceManager.sessionStorage.gettingAllExams) {
-                        instanceManager.sessionStorage.gettingAllExams = true;
-                        await Future.delayed(const Duration(seconds: 13));
-                        await _controller.getAllExams();
-                        instanceManager.sessionStorage.gettingAllExams = false;
-                      }
-                    } catch (e) {
-                       showRedSnackbar(context, _localizations.errorDeletingExam);
+                    if (!instanceManager.sessionStorage.gettingAllExams) {
+                      instanceManager.sessionStorage.gettingAllExams = true;
+                      await Future.delayed(const Duration(seconds: 13));
                       await _controller.getAllExams();
+                      instanceManager.sessionStorage.gettingAllExams = false;
                     }
-
-                    setState(() {
-                      activeExams = instanceManager.sessionStorage.activeExams;
-                    });
-                  } else {
-                    setState(() {
-                      reorderExams.remove(exam);
-                    });
+                  } catch (e) {
+                    showRedSnackbar(context, _localizations.errorDeletingExam);
+                    await _controller.getAllExams();
                   }
-                },
-                child: examCard,
-              );
-            }
+
+                  setState(() {
+                    activeExams = instanceManager.sessionStorage.activeExams;
+                  });
+                } else {
+                  setState(() {
+                    reorderExams.remove(exam);
+                  });
+                }
+              },
+              child: examCard,
+            );
           },
           itemCount: examsList.length,
           onReorder: (int oldIndex, int newIndex) {
@@ -517,7 +516,8 @@ class _ExamsViewState extends State<ExamsView> {
                               false;
                         }
                       } catch (e) {
-                         showRedSnackbar(context,_localizations.errorDeletingExam);
+                        showRedSnackbar(
+                            context, _localizations.errorDeletingExam);
                         await _controller.getAllExams();
                       }
                       setState(() {

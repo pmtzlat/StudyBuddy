@@ -41,7 +41,7 @@ class _CalendarViewState extends State<CalendarView>
   void initState() {
     super.initState();
     autoRecalc = false;
-    
+
     // Add a post frame callback to show the dialog after the page has been rendered.
     if (!instanceManager.sessionStorage.incompletePreviousDays.isEmpty
         //true
@@ -167,7 +167,6 @@ class _CalendarViewState extends State<CalendarView>
     bool leftDaysUnsaved = false;
     bool loadingButton1 = false;
     bool loadingButton2 = false;
-
 
     await showGeneralDialog(
       context: context,
@@ -299,12 +298,12 @@ class _CalendarViewState extends State<CalendarView>
                                                             Text(
                                                                 timeSlot
                                                                     .examName,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
                                                                 style: TextStyle(
                                                                     color: Colors
                                                                         .white,
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
                                                                     fontSize:
                                                                         screenWidth *
                                                                             0.05,
@@ -314,10 +313,10 @@ class _CalendarViewState extends State<CalendarView>
                                                             Text(
                                                                 timeSlot
                                                                     .unitName,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
                                                                 style: TextStyle(
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
                                                                     color: Colors
                                                                         .white,
                                                                     fontWeight:
@@ -341,7 +340,7 @@ class _CalendarViewState extends State<CalendarView>
                                 children: [
                                   TextButton(
                                       onPressed: () {
-                                        if(loadingButton2) return;
+                                        if (loadingButton2) return;
                                         setState(() {
                                           loadingButton1 = true;
                                         });
@@ -374,10 +373,12 @@ class _CalendarViewState extends State<CalendarView>
                                           setState(() {});
                                         }
                                       },
-                                      child: loadingButton1 ? CircularProgressIndicator() : Text(_localizations.leaveAsIs)),
+                                      child: loadingButton1
+                                          ? CircularProgressIndicator()
+                                          : Text(_localizations.leaveAsIs)),
                                   TextButton(
                                       onPressed: () async {
-                                        if(loadingButton1) return;
+                                        if (loadingButton1) return;
                                         setState(() {
                                           loadingButton2 = true;
                                         });
@@ -410,8 +411,10 @@ class _CalendarViewState extends State<CalendarView>
                                           }
                                         }
                                       },
-                                      child:
-                                          loadingButton2 ? CircularProgressIndicator() :Text(_localizations.markAsComplete)),
+                                      child: loadingButton2
+                                          ? CircularProgressIndicator()
+                                          : Text(
+                                              _localizations.markAsComplete)),
                                 ],
                               )
                             ],
@@ -455,7 +458,6 @@ class _CalendarViewState extends State<CalendarView>
       },
     );
 
-    
     final result = await _controller.calculateSchedule();
 
     await _controller.getCalendarDay(stripTime(await NTP.now()));
@@ -472,8 +474,7 @@ class _CalendarViewState extends State<CalendarView>
         });
 
       case (-1):
-        showRedSnackbar(context, 
-            _localizations.recalcErrorBody);
+        showRedSnackbar(context, _localizations.recalcErrorBody);
         setState(() {
           instanceManager.sessionStorage.setNeedsRecalc(true);
         });
@@ -492,7 +493,9 @@ class _CalendarViewState extends State<CalendarView>
     setState(() {
       _timesKey.currentState!.updateParent();
       needsRecalc = instanceManager.sessionStorage.needsRecalculation;
+      day = instanceManager.sessionStorage.loadedCalendarDay;
     });
+    logger.f('Updated day: ${day.id}');
   }
 
   void moveSheetUp() {
@@ -522,10 +525,9 @@ class _CalendarViewState extends State<CalendarView>
       updateParent: () {
         //logger.i(instanceManager.sessionStorage.needsRecalculation);
         day = instanceManager.sessionStorage.loadedCalendarDay;
-        
-          dayLoaded = !(instanceManager.sessionStorage.loadedCalendarDay.id ==
-              'Placeholder');
-        
+
+        dayLoaded = !(instanceManager.sessionStorage.loadedCalendarDay.id ==
+            'Placeholder');
       },
     );
 
@@ -617,10 +619,18 @@ class _CalendarViewState extends State<CalendarView>
                       onHorizontalDragEnd: (details) async {
                         if (details.primaryVelocity! > 0) {
                           // Swiped right
-                          await loadDay(instanceManager.sessionStorage.selectedDate.subtract(Duration(days:1)), context, _localizations);
+                          await loadDay(
+                              instanceManager.sessionStorage.selectedDate
+                                  .subtract(Duration(days: 1)),
+                              context,
+                              _localizations);
                         } else if (details.primaryVelocity! < 0) {
                           // Swiped left
-                          await loadDay(instanceManager.sessionStorage.selectedDate.add(Duration(days:1)), context, _localizations);
+                          await loadDay(
+                              instanceManager.sessionStorage.selectedDate
+                                  .add(Duration(days: 1)),
+                              context,
+                              _localizations);
                         }
                       },
                       child: Container(
@@ -688,7 +698,7 @@ class _CalendarViewState extends State<CalendarView>
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   Container(
-                                    width: screenWidth * 0.22,
+                                    width: screenWidth * 0.25,
                                     child: Text(
                                         _localizations.changeAvailability,
                                         maxLines: 2,
@@ -720,15 +730,16 @@ class _CalendarViewState extends State<CalendarView>
         ));
   }
 
-  Future<void> loadDay(DateTime newDate, BuildContext context, AppLocalizations _localizations) async {
+  Future<void> loadDay(DateTime newDate, BuildContext context,
+      AppLocalizations _localizations) async {
     if (!dayLoaded) return;
     setState(() {
       dayLoaded = false;
       date = newDate;
     });
-    
+
     if (!await _controller.getCalendarDay(newDate))
-       showRedSnackbar(context, _localizations.errorLoadingDay);
+      showRedSnackbar(context, _localizations.errorLoadingDay);
     setState(() {
       dayLoaded = true;
       date = instanceManager.sessionStorage.selectedDate;

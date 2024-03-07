@@ -5,18 +5,12 @@ import '../../common_widgets/scaffold.dart';
 import '../../main.dart';
 
 class SignInController {
-  Future<void> signIn(BuildContext context) async {
+  Future<void> signIn(BuildContext context, Function updateParent) async {
     try {
       await instanceManager.authService.signInWithGoogle();
-
-      await instanceManager.startDependantInstances();
-
-      await instanceManager.examsController.getAllExams();
-      await instanceManager.calendarController.getGaps();
-      await instanceManager.calendarController.getCustomDays();
-      await instanceManager.calendarController.getCalendarDay(now);
-      await instanceManager.localStorageCustomOperations.updateDateHandling();
-
+      await updateParent();
+      if (await handleAppStart()!= true) throw Exception('Error handling app start');
+      
       Navigator.of(context).pushReplacement(
         fadePageRouteBuilder(CalendarView()),
       );
