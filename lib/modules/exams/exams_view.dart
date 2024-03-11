@@ -188,6 +188,7 @@ class _ExamsViewState extends State<ExamsView> {
                                           activeExams = instanceManager
                                               .sessionStorage.activeExams;
                                           reorderExams = <ExamModel>[];
+                                          await instanceManager.sessionStorage.setNeedsRecalc(true);
 
                                           loadExams();
                                         },

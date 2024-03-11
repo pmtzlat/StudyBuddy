@@ -73,6 +73,8 @@ class _CustomDaysViewState extends State<CustomDaysView> {
             itemCount: timeSlotList.length,
             itemBuilder: (context, index) {
               final timeSlot = timeSlotList[index];
+              bool isCustom = containsDayWithDate(
+              instanceManager.sessionStorage.customDays, date);
 
               return Dismissible(
                 key: UniqueKey(),
@@ -123,8 +125,8 @@ class _CustomDaysViewState extends State<CustomDaysView> {
                         borderRadius: BorderRadius.circular(10)),
                     clipBehavior: Clip.antiAliasWithSaveLayer,
                     child: Container(
-                      decoration: const BoxDecoration(
-                          color: Color.fromARGB(255, 92, 107, 192)),
+                      decoration:  BoxDecoration(
+                          color: isCustom ? Colors.orange.withOpacity(0.9) : const Color.fromARGB(255, 92, 107, 192)),
                       child: Padding(
                           padding: EdgeInsets.all(screenWidth * 0.02),
                           child: Row(
@@ -149,10 +151,49 @@ class _CustomDaysViewState extends State<CustomDaysView> {
       calendarFormat: _calendarFormat,
       headerStyle: const HeaderStyle(formatButtonShowsNext: false),
       calendarBuilders: CalendarBuilders(
+        selectedBuilder: (context, day, focusedDay) {
+          if (containsDayWithDate(
+              instanceManager.sessionStorage.customDays, day)) {
+            
+            return Container(
+              margin: const EdgeInsets.all(4.0),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              child: Center(
+                child: Text(
+                  '${day.day}',
+                  style: TextStyle(
+                      color: Colors.orange, fontSize: screenWidth * 0.04),
+                ),
+              ),
+            );
+          } else {
+            // Default styling for other days
+           return Container(
+              margin: const EdgeInsets.all(4.0),
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 92, 107, 192)
+                          .withOpacity(0.2),
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              child: Center(
+                child: Text(
+                  '${day.day}',
+                  style: TextStyle(
+                      color: const Color.fromARGB(255, 92, 107, 192), fontSize: screenWidth * 0.04),
+                ),
+              ),
+            );
+          }
+        
+          
+        },
         defaultBuilder: (context, day, focusedDay) {
           if (containsDayWithDate(
               instanceManager.sessionStorage.customDays, day)) {
-            // Style for the 6th day of the month
+            
             return Container(
               margin: const EdgeInsets.all(4.0),
               decoration: BoxDecoration(
@@ -188,7 +229,7 @@ class _CustomDaysViewState extends State<CustomDaysView> {
                       instanceManager.sessionStorage.customDays, day)
                   ? BoxDecoration(
                       color: const Color.fromARGB(255, 92, 107, 192)
-                          .withOpacity(0.1),
+                          .withOpacity(0.05),
                       borderRadius: BorderRadius.circular(20.0),
                     )
                   : BoxDecoration(

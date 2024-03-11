@@ -132,21 +132,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
       _openDialog(
         _localizations.chooseColor,
         MaterialColorPicker(
-          colors: const [
-            Colors.amberAccent,
-            Colors.blueAccent,
-            Colors.cyan,
-            Colors.deepOrangeAccent,
-            Colors.deepPurpleAccent,
-            Colors.indigo,
-            Colors.lightGreen,
-            Colors.lime,
-            Colors.orangeAccent,
-            Colors.pinkAccent,
-            Colors.purpleAccent,
-            Colors.redAccent,
-            Colors.teal,
-          ],
+          colors: colorOptions,
           selectedColor: examColor,
           allowShades: false,
           onMainColorChange: (color) => setState(() => examColor = color!),

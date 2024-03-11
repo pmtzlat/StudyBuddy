@@ -41,12 +41,12 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    final cardColor = timeSlot.examColor;
-    final lighterColor = lighten(cardColor, .05);
-    final darkerColor = darken(cardColor, .15);
+    
+    
+    
     timeSlot = instanceManager
         .sessionStorage.loadedCalendarDay.timeSlots[widget.index];
-    logger.f('timeSlot loaded: ${timeSlot.id}');
+    logger.f('timeSlot loaded: ${timeSlot.examColor}');
 
     void update() {
       setState(() {});
@@ -87,7 +87,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                 end: Alignment.bottomLeft,
                 begin: Alignment.topRight,
                 //stops: [ 0.1, 0.9],
-                colors: [cardColor, darkerColor]),
+                colors: [timeSlot.examColor, darken(timeSlot.examColor, .15)]),
           ),
           child: SingleChildScrollView(
             physics: NeverScrollableScrollPhysics(),

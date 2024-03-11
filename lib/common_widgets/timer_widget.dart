@@ -46,7 +46,7 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   late Screen _screen;
   late StreamSubscription<ScreenStateEvent>? _subscription;
   bool loading = false;
-
+  bool continueTimer = false;
   bool screenOn = true;
   DateTime? preLockTimeStamp;
   DateTime? postLockTimeStamp;
@@ -107,6 +107,7 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
           preLockTimeStamp = null;
           postLockTimeStamp = null;
         }
+
         startTimer();
       }
     }
@@ -261,6 +262,7 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   final stopwatch = Stopwatch();
 
   void updatetimer() async {
+    
     setState(() {
       if (stopwatch.isRunning) {
         widget.timerTime = widget.timerTime + Duration(seconds: 1);
@@ -276,8 +278,8 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
     while (stopwatch.isRunning) {
       await Future.delayed(Duration(seconds: 1));
       updatetimer();
-      if (widget.timerTime == widget.timeSlot.duration) {
-        bool continueTimer = await showContinueDialog();
+      if (widget.timerTime >= widget.timeSlot.duration && continueTimer == false) {
+        continueTimer = await showContinueDialog();
         if (!continueTimer) {
           widget.completeAndClose(widget.timerTime, context);
           return;
@@ -300,6 +302,7 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
     widget.timerTime = Duration(hours: 0, minutes: 0, seconds: 0);
     setState(() {
       play = true;
+      continueTimer = false;
     });
     updatetimer();
   }
