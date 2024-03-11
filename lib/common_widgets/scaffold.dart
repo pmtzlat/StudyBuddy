@@ -77,7 +77,7 @@ class MyScaffold {
           bottomNavigationBar: BottomNavBar(activeIndex: activeIndex),
           body: Container(
               padding: EdgeInsets.only(
-                  top: screenHeight * 0.08,
+                  top: screenHeight * 0.04,
                   left: padding ? screenWidth * 0.03 : 0,
                   right: padding ? screenWidth * 0.03 : 0),
               child: body)),

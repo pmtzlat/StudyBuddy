@@ -1,6 +1,8 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -36,7 +38,12 @@ void main() async {
   
   await handleAppStart();
 
-  runApp(StudyBuddyApp());
+  runApp(
+    DevicePreview(
+    enabled: !kReleaseMode,
+    builder: (context) => StudyBuddyApp(), // Wrap your app
+  ),
+);
 }
 
 Future<bool> handleAppStart() async {
@@ -97,6 +104,9 @@ class StudyBuddyApp extends StatelessWidget {
     if (status != null && user != null) {
       logger.i('Showing not connected!\Status: $status, USer: $user');
       return MaterialApp(
+        useInheritedMediaQuery: true,
+        locale: DevicePreview.locale(context),
+        builder: DevicePreview.appBuilder,
         navigatorKey: navKey,
         title: 'StudyBuddy',
         home: StartErrorPage(
@@ -123,15 +133,15 @@ class StudyBuddyApp extends StatelessWidget {
         closeKeyboard(context);
       },
       child: MaterialApp(
+        useInheritedMediaQuery: true,
+        locale: DevicePreview.locale(context),
+        builder: DevicePreview.appBuilder,
         title: 'StudyBuddy',
         home: (user != null) ? CalendarView() : SignInView(),
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromARGB(255, 46, 46, 46)),
           useMaterial3: true,
-          textSelectionTheme: TextSelectionThemeData(
-            selectionHandleColor: Colors.transparent,
-          ),
         ),
         supportedLocales: [Locale('es'), Locale('en')],
         localizationsDelegates: [
