@@ -635,7 +635,7 @@ class _CalendarViewState extends State<CalendarView>
                       },
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.05),
+                            horizontal: screenWidth * 0.02),
                         child: dayLoaded
                             ? events
                             : Container(

@@ -48,9 +48,9 @@ class _ExamCardState extends State<ExamCard> {
       },
       child: Card(
           elevation: 0,
-          margin: const EdgeInsets.symmetric(vertical: 10),
+          margin: const EdgeInsets.symmetric(vertical: 7),
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           clipBehavior: Clip.antiAliasWithSaveLayer,
           child: Container(
               decoration: BoxDecoration(
@@ -62,8 +62,8 @@ class _ExamCardState extends State<ExamCard> {
               ),
               padding: EdgeInsets.only(
                   left: screenWidth * 0.05,
-                  top: screenWidth * 0.03,
-                  bottom: screenWidth * 0.03),
+                  top: screenWidth * 0.045,
+                  bottom: screenWidth * 0.045),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
