@@ -361,6 +361,8 @@ class FirebaseCrudService {
         .collection('exams')
         .doc(examID);
 
+    int completedSessions = 0;
+    if(newUnit.completed ) completedSessions = newUnit.completedSessions;
     final unitData = {
       'name': newUnit.name,
       'sessionTime': newUnit.sessionTime.toString(),
@@ -368,7 +370,7 @@ class FirebaseCrudService {
       'id': '',
       'completed': newUnit.completed,
       'totalSessions': newUnit.totalSessions,
-      'completedSessions': newUnit.completedSessions,
+      'completedSessions': completedSessions,
       'examID': examID,
     };
 

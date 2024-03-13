@@ -27,6 +27,13 @@ Color getRandomColor() {
   return colorOptions[index];
 }
 
+double durationToHours(Duration duration) {
+  // Convert duration to hours
+  double hours = duration.inSeconds / Duration.secondsPerHour;
+  return hours;
+}
+
+
 TimeOfDay dateTimeToTimeOfDay(DateTime dateTime) {
   final hour = dateTime.hour;
   final minute = dateTime.minute;

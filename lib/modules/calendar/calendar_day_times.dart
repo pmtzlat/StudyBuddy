@@ -94,7 +94,7 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.black,
-                              fontSize: screenWidth * 0.03,
+                              fontSize: screenWidth * 0.035,
                             ),
                           )),
                       Icon(Icons.warning_rounded,

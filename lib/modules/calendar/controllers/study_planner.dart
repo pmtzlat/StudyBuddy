@@ -69,6 +69,7 @@ class StudyPlanner {
       Map<String, Map<String, int>> unitTotalSessions = {};
 
       List<DayModel> result = [];
+      instanceManager.examsController.applyWeights(instanceManager.sessionStorage.activeExams);
 
       DateTime? startDate =
           getLastDayOfStudy(instanceManager.sessionStorage.activeExams)!
@@ -310,8 +311,8 @@ class StudyPlanner {
         SchedulerStackModel stack = stacks[i];
         final daysToExam = stack.getDaysUntilExam(day.date);
         if (daysToExam > 0) {
-          logger.f(
-              'Calculating stack weight for ${stack.exam.name}: (${stack.exam.weight} / ${daysToExam}) / ${pow(2, stack.unitsInDay)}');
+          // logger.f(
+          //     'Calculating stack weight for ${stack.exam.name}: (${stack.exam.weight} / ${daysToExam}) / ${pow(2, stack.unitsInDay)}');
           stack.weight =
               (stack.exam.weight / daysToExam) / pow(2, stack.unitsInDay);
         } else {
@@ -338,6 +339,7 @@ class StudyPlanner {
       if (i != stacks.length - 1 &&
           (stacks[i].weight == stacks[i + 1].weight &&
               stacks[i].unitsInDay > stacks[i + 1].unitsInDay)) continue;
+      logger.i('_____________considering stack ${stacks[i].exam.name}');
       selectedUnit = selectUnit(stacks[i], gap, availableTime);
 
       if (selectedUnit != null) {

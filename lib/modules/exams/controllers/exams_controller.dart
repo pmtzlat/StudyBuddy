@@ -472,7 +472,7 @@ class ExamsController {
   }
 
   Color? getExamColorIfDateMatches(DateTime date) {
-    List<ExamModel> exams = instanceManager.sessionStorage.activeExams;
+    List<ExamModel> exams = instanceManager.sessionStorage.savedExams;
 
     for (ExamModel exam in exams) {
       if (exam.examDate == date) {

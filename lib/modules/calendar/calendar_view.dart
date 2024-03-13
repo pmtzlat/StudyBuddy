@@ -597,20 +597,23 @@ class _CalendarViewState extends State<CalendarView>
               child: Column(
                 children: [
                   CalendarTimeline(
-                  initialDate: date,
-                  firstDate: DateTime.now().subtract(Duration(days: 365)),
-                  lastDate: DateTime.now().add(Duration(days: 365)),
-                  onDateSelected: (newDate) async {
-                    await loadDay(newDate, context, _localizations);
-                  },
-                  leftMargin: 20,
-                  monthColor: Colors.blueGrey,
-                  dayColor: Colors.teal[200],
-                  activeDayColor: Colors.white,
-                  activeBackgroundDayColor: Color.fromARGB(255, 33, 33, 33),
-                  dotsColor: Color.fromARGB(255, 100, 100, 100),
-                  locale: Localizations.localeOf(context).countryCode,
-                    ),
+                    initialDate: date,
+                    firstDate: DateTime.now().subtract(Duration(days: 365)),
+                    lastDate: DateTime.now().add(Duration(days: 365)),
+                    onDateSelected: (newDate) async {
+                      await loadDay(newDate, context, _localizations);
+                    },
+                    leftMargin: 20,
+                    monthColor: Colors.blueGrey,
+                    dayColor: Colors.teal[200],
+                    activeDayColor: Colors.white,
+                    activeBackgroundDayColor: Color.fromARGB(255, 33, 33, 33),
+                    dotsColor: Color.fromARGB(255, 100, 100, 100),
+                    locale: Localizations.localeOf(context).countryCode,
+                  ),
+                  SizedBox(
+                    height: 7,
+                  ),
                   Expanded(
                     child: GestureDetector(
                       onHorizontalDragEnd: (details) async {
@@ -657,7 +660,6 @@ class _CalendarViewState extends State<CalendarView>
                       ),
                     ),
                   ),
-                  
                   Container(
                     padding:
                         EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
