@@ -684,7 +684,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
                 begin: Alignment.topRight,
                 stops: const [0.05, 0.3, 0.9],
                 colors: !editMode
-                    ? [lighterColor, cardColor, darkerColor]
+                    ? [increaseColorSaturation(cardColor, .2), cardColor, darkerColor]
                     : [Colors.black, darken(darkerColor, .5), darkerColor]),
           ),
           child: Column(

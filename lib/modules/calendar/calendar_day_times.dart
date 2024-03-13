@@ -39,14 +39,9 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
         .getExamColorIfDateMatches(instanceManager.sessionStorage.selectedDate);
   }
 
-  void generateGradient() {
-    //generate gradient stuff here
-  }
-
   void updateParent() {
     logger.i('Calendar Day Times: updateParents');
 
-    
     widget.updateParent();
   }
 
@@ -108,11 +103,9 @@ class CalendarDayTimesState extends State<CalendarDayTimes> {
                   )),
             ),
           ),
-          
-              TimeShower(
-                  updateAllParents: updateParent,
-                )
-              
+          TimeShower(
+            updateAllParents: updateParent,
+          )
         ],
       ),
     );
@@ -130,33 +123,30 @@ class TimeShower extends StatefulWidget {
 
 class _TimeShowerState extends State<TimeShower> {
   final _controller = instanceManager.calendarController;
-  
 
   void updateParents() {
     logger.i('TimeShower: updateParents');
     widget.updateAllParents();
   }
-  
-
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    
-   
   }
-  
 
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    List<ExamModel> examsInDay = filterExamsByDate(instanceManager.sessionStorage.savedExams, instanceManager.sessionStorage.selectedDate);
-    
+    List<ExamModel> examsInDay = filterExamsByDate(
+        instanceManager.sessionStorage.savedExams,
+        instanceManager.sessionStorage.selectedDate);
 
-    return (instanceManager.sessionStorage.loadedCalendarDay.timeSlots.isEmpty && examsInDay.isEmpty)
+    return (instanceManager
+                .sessionStorage.loadedCalendarDay.timeSlots.isEmpty &&
+            examsInDay.isEmpty)
         ? Expanded(
             child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -178,9 +168,9 @@ class _TimeShowerState extends State<TimeShower> {
               removeTop: true,
               child: ListView.builder(
                   itemCount: instanceManager
-                      .sessionStorage.loadedCalendarDay.timeSlots.length + examsInDay.length,
+                          .sessionStorage.loadedCalendarDay.timeSlots.length +
+                      examsInDay.length,
                   itemBuilder: (context, index) {
-                   
                     if (index < examsInDay.length) {
                       // Display dynamic entries at the start
                       ExamModel examToShow = examsInDay[index];

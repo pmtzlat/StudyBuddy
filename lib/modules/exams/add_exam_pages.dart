@@ -700,15 +700,9 @@ class Page3State extends State<Page3> {
                                           gradient: LinearGradient(
                                               end: Alignment.bottomLeft,
                                               begin: Alignment.topRight,
-                                              stops: const [
-                                                0.2,
-                                                0.3,
-                                                0.9,
-                                              ],
+                                              
                                               colors: [
-                                                lighterColor,
-                                                cardColor,
-                                                darkerColor
+                                                increaseColorSaturation(cardColor, .2), darken(cardColor, 0.15)
                                               ]),
                                         ),
                                         padding: EdgeInsets.only(

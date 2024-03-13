@@ -413,8 +413,7 @@ class _TimerDialogState extends State<TimerDialog> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    final lighterColor = lighten(widget.timeSlot.examColor, .05);
-    final darkerColor = darken(widget.timeSlot.examColor, .15);
+    
 
     return Center(
       child: Card(
@@ -429,7 +428,7 @@ class _TimerDialogState extends State<TimerDialog> {
                 end: Alignment.bottomLeft,
                 begin: Alignment.topRight,
                 //stops: [ 0.1, 0.9],
-                colors: [lighterColor, darkerColor]),
+                colors: [increaseColorSaturation(widget.timeSlot.examColor, .2), darken(widget.timeSlot.examColor, 0.15)]),
           ),
           child: Stack(
             children: [

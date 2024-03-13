@@ -45,7 +45,7 @@ class LeftOverCard extends StatelessWidget {
                   end: Alignment.bottomLeft,
                   begin: Alignment.topRight,
                   //stops: [ 0.1, 0.9],
-                  colors: [cardColor, darkerColor]),
+                  colors: [increaseColorSaturation(cardColor, .2), darken(cardColor, 0.15)]),
             ),
             padding: EdgeInsets.symmetric(
               horizontal: screenWidth * 0.05,

@@ -593,27 +593,24 @@ class _CalendarViewState extends State<CalendarView>
           children: [
             Container(
               //padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
-              height: screenHeight * 0.82,
+              height: screenHeight * 0.828,
               child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 5, bottom: 15),
-                    child: CalendarTimeline(
-                      initialDate: date,
-                      firstDate: DateTime.now().subtract(Duration(days: 365)),
-                      lastDate: DateTime.now().add(Duration(days: 365)),
-                      onDateSelected: (newDate) async {
-                        await loadDay(newDate, context, _localizations);
-                      },
-                      leftMargin: 20,
-                      monthColor: Colors.blueGrey,
-                      dayColor: Colors.teal[200],
-                      activeDayColor: Colors.white,
-                      activeBackgroundDayColor: Color.fromARGB(255, 33, 33, 33),
-                      dotsColor: Color.fromARGB(255, 100, 100, 100),
-                      locale: Localizations.localeOf(context).countryCode,
+                  CalendarTimeline(
+                  initialDate: date,
+                  firstDate: DateTime.now().subtract(Duration(days: 365)),
+                  lastDate: DateTime.now().add(Duration(days: 365)),
+                  onDateSelected: (newDate) async {
+                    await loadDay(newDate, context, _localizations);
+                  },
+                  leftMargin: 20,
+                  monthColor: Colors.blueGrey,
+                  dayColor: Colors.teal[200],
+                  activeDayColor: Colors.white,
+                  activeBackgroundDayColor: Color.fromARGB(255, 33, 33, 33),
+                  dotsColor: Color.fromARGB(255, 100, 100, 100),
+                  locale: Localizations.localeOf(context).countryCode,
                     ),
-                  ),
                   Expanded(
                     child: GestureDetector(
                       onHorizontalDragEnd: (details) async {
@@ -660,9 +657,7 @@ class _CalendarViewState extends State<CalendarView>
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: screenHeight * 0.02,
-                  ),
+                  
                   Container(
                     padding:
                         EdgeInsets.symmetric(horizontal: screenWidth * 0.06),

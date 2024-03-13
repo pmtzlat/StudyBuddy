@@ -91,7 +91,9 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var screenHeight = MediaQuery.of(context).size.height;
     return Container(
+      height: screenHeight * 0.08,
         decoration: BoxDecoration(
           boxShadow: <BoxShadow>[
             BoxShadow(

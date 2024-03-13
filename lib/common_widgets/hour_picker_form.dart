@@ -261,7 +261,7 @@ class _DayFormState extends State<DayForm> {
                                   end: Alignment.bottomLeft,
                                   begin: Alignment.topRight,
                                   //stops: [ 0.1, 0.9],
-                                  colors: [color, darkerColor]),
+                                  colors: [increaseColorSaturation(color, .2), darken(color, 0.15)]),
                             ),
                             child: Padding(
                                 padding: EdgeInsets.all(screenWidth * 0.02),

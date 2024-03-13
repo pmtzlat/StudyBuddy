@@ -9,23 +9,7 @@ import 'package:study_buddy/services/logging_service.dart';
 import 'package:study_buddy/utils/datatype_utils.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-const colorOptions = [
-  
-  Colors.blueAccent,
-  Colors.deepOrangeAccent,
-  Colors.lightGreen,
-  Colors.orangeAccent,
-  Colors.pinkAccent,
-  Colors.blueGrey,
-  Colors.purpleAccent,
-  Colors.redAccent,
-];
 
-Color getRandomColor() {
-  final random = Random();
-  final index = random.nextInt(colorOptions.length);
-  return colorOptions[index];
-}
 
 List<double> generateDescendingList(int n) {
   List<double> resultList = [];

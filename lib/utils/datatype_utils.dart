@@ -8,6 +8,25 @@ import 'package:study_buddy/models/scheduler_stack_model.dart';
 import 'package:study_buddy/models/time_slot_model.dart';
 import 'package:study_buddy/services/logging_service.dart';
 
+
+const colorOptions = [
+  
+  Colors.blueAccent,
+  Colors.deepOrangeAccent,
+  Colors.lightGreen,
+  Colors.orangeAccent,
+  Colors.pinkAccent,
+  Colors.blueGrey,
+  Colors.purpleAccent,
+  Colors.redAccent,
+];
+
+Color getRandomColor() {
+  final random = Random();
+  final index = random.nextInt(colorOptions.length);
+  return colorOptions[index];
+}
+
 TimeOfDay dateTimeToTimeOfDay(DateTime dateTime) {
   final hour = dateTime.hour;
   final minute = dateTime.minute;
@@ -204,6 +223,12 @@ Color lighten(Color color, [double amount = .1]) {
   final hslLight = hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
 
   return hslLight.toColor();
+}
+
+Color increaseColorSaturation(Color color, double increment) {
+  var hslColor = HSLColor.fromColor(color);
+  var newValue = min(max(hslColor.saturation + increment, 0.0), 1.0);
+  return hslColor.withSaturation(newValue).toColor();
 }
 
 String formatDurationNoWords(Duration duration) {

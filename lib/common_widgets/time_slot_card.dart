@@ -73,210 +73,213 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
       });
     }
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      clipBehavior: Clip.antiAliasWithSaveLayer,
-      child: AnimatedContainer(
-          duration: openTime,
-          curve: Curves.decelerate,
-          height: open ? screenHeight * 0.185 : screenHeight * 0.095,
-          padding: EdgeInsets.symmetric(vertical: 5),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-                end: Alignment.bottomLeft,
-                begin: Alignment.topRight,
-                //stops: [ 0.1, 0.9],
-                colors: [timeSlot.examColor, darken(timeSlot.examColor, .15)]),
-          ),
-          child: SingleChildScrollView(
-            physics: NeverScrollableScrollPhysics(),
-            child: Column(
-              children: [
-                GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        open = !open;
-                      });
-                    },
-                    child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.04),
-                        color: Colors.transparent,
-                        height: screenHeight * 0.08,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: screenWidth*0.5,
-                                      child: Text(timeSlot.examName,
-                                      overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: screenWidth * 0.06,
-                                              fontWeight: FontWeight.bold)),
-                                    ),
-                                    Container(
-                                      width: screenWidth*0.45,
-                                      child: Text(timeSlot.unitName,
-                                      overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w400)),
-                                    )
-                                  ],
-                                ),
-                                Column(
-                                  // this column
-                                  children: [
-                                    Container(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: screenHeight * 0.002),
-                                        child: AnimatedSwitcher(
-                                          duration: openTime,
-                                          child: timeSlot.completed && !open
-                                              ? Container(
-                                                  key: ValueKey<int>(0),
-                                                  width: screenWidth * 0.215,
-                                                  height: screenHeight * 0.06,
-                                                  // margin:
-                                                  //     EdgeInsets.only(bottom: screenHeight * 0.005),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.end,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Icon(
-                                                        Icons.done,
-                                                        size: screenWidth * 0.1,
-                                                        color: Colors.white,
-                                                      ),
-                                                    ],
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 4),
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        child: AnimatedContainer(
+            duration: openTime,
+            curve: Curves.decelerate,
+            height: open ? screenHeight * 0.185 : screenHeight * 0.095,
+            padding: EdgeInsets.symmetric(vertical: 4),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  end: Alignment.bottomLeft,
+                  begin: Alignment.topRight,
+                  //stops: [ 0.1, 0.9],
+                  colors: [increaseColorSaturation(timeSlot.examColor, .2), darken(timeSlot.examColor, 0.15)]),
+            ),
+            child: SingleChildScrollView(
+              physics: NeverScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          open = !open;
+                        });
+                      },
+                      child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.04),
+                          color: Colors.transparent,
+                          height: screenHeight * 0.08,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: screenWidth*0.5,
+                                        child: Text(timeSlot.examName,
+                                        overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: screenWidth * 0.06,
+                                                fontWeight: FontWeight.bold)),
+                                      ),
+                                      Container(
+                                        width: screenWidth*0.45,
+                                        child: Text(timeSlot.unitName,
+                                        overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w400)),
+                                      )
+                                    ],
+                                  ),
+                                  Column(
+                                    // this column
+                                    children: [
+                                      Container(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: screenHeight * 0.002),
+                                          child: AnimatedSwitcher(
+                                            duration: openTime,
+                                            child: timeSlot.completed && !open
+                                                ? Container(
+                                                    key: ValueKey<int>(0),
+                                                    width: screenWidth * 0.215,
+                                                    height: screenHeight * 0.06,
+                                                    // margin:
+                                                    //     EdgeInsets.only(bottom: screenHeight * 0.005),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.end,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Icon(
+                                                          Icons.done,
+                                                          size: screenWidth * 0.1,
+                                                          color: Colors.white,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                : Container(
+                                                    key: ValueKey<int>(1),
+                                                    width: screenWidth * 0.215,
+                                                    height: screenHeight * 0.06,
+                                                    child: Text(
+                                                        '${timeOfDayToStr(timeSlot.startTime)} - ${timeOfDayToStr(timeSlot.endTime)}',
+                                                        style: TextStyle(
+                                                            color: Colors.white)),
                                                   ),
-                                                )
-                                              : Container(
-                                                  key: ValueKey<int>(1),
-                                                  width: screenWidth * 0.215,
-                                                  height: screenHeight * 0.06,
-                                                  child: Text(
-                                                      '${timeOfDayToStr(timeSlot.startTime)} - ${timeOfDayToStr(timeSlot.endTime)}',
-                                                      style: TextStyle(
-                                                          color: Colors.white)),
-                                                ),
-                                        )),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ))),
-                Container(
-                    padding: EdgeInsets.symmetric(
-                        vertical: screenHeight * 0.02,
-                        horizontal: screenWidth * 0.03),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(20.0)),
-                          child: TextButton.icon(
-                              onPressed: () async {
-                                if (instanceManager
-                                        .sessionStorage.selectedDate !=
-                                    stripTime(DateTime.now())) {
-                                  return showRedSnackbar(context,
-                                      _localizations.cantStartSessionForFuture);
-                                }
-                                //bool completenessBefore = timeSlot.completed;
-                                try {
-                                  logger.i(timeSlot.getString());
-                                  await showTimerDialog(
-                                      context, timeSlot, widget.index);
-
-                                  //after closing timer
-
-                                  setState(() {
-                                    timeSlot = instanceManager
-                                        .sessionStorage
-                                        .loadedCalendarDay
-                                        .timeSlots[widget.index];
-                                    checked = timeSlot.completed;
-                                  });
-                                } catch (e) {
-                                  logger.e('Error updating timeSlot: $e');
-                                  showRedSnackbar(
-                                      context, _localizations.errorSaving);
-                                }
-
-                                //logger.i(newTimeSlot.getString());
-                              },
-                              icon: Icon(Icons.timer_outlined,
-                                  color: Colors.white),
-                              label: Text(
-                                formatDurationNoWords(timeSlot.timeStudied),
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: screenWidth * 0.05),
-                              )),
-                        ),
-                        Row(
-                          children: [
-                            Text(_localizations.completed,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: screenWidth * 0.05,
-                                    fontWeight: FontWeight.w400)),
-                            Container(
-                              padding: EdgeInsets.all(1),
-                              child: Checkbox(
-                                  visualDensity: VisualDensity(
-                                      horizontal: -4, vertical: -4),
-                                  activeColor: Colors.black,
-                                  checkColor: timeSlot
-                                      .examColor, // Color of the checkmark
-                                  fillColor:
-                                      MaterialStateProperty.all(Colors.white),
-                                  value: checked,
-                                  onChanged: (bool? newValue) async {
+                                          )),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ))),
+                  Container(
+                      padding: EdgeInsets.symmetric(
+                          vertical: screenHeight * 0.02,
+                          horizontal: screenWidth * 0.03),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(20.0)),
+                            child: TextButton.icon(
+                                onPressed: () async {
+                                  if (instanceManager
+                                          .sessionStorage.selectedDate !=
+                                      stripTime(DateTime.now())) {
+                                    return showRedSnackbar(context,
+                                        _localizations.cantStartSessionForFuture);
+                                  }
+                                  //bool completenessBefore = timeSlot.completed;
+                                  try {
+                                    logger.i(timeSlot.getString());
+                                    await showTimerDialog(
+                                        context, timeSlot, widget.index);
+    
+                                    //after closing timer
+    
                                     setState(() {
-                                      checked = !checked;
-                                    });
-                                    try {
-                                      await checkBox(newValue!);
-                                    } catch (e) {
-                                      logger.e(
-                                          'Error changing timeslot state: $e');
-                                      showRedSnackbar(
-                                          context,
-                                          _localizations
-                                              .errorChangingTimeSlotCompletion);
-                                    }
-
-                                    setState(() {
+                                      timeSlot = instanceManager
+                                          .sessionStorage
+                                          .loadedCalendarDay
+                                          .timeSlots[widget.index];
                                       checked = timeSlot.completed;
                                     });
-                                  }),
-                            )
-                          ],
-                        ),
-                      ],
-                    )),
-              ],
-            ),
-          )),
+                                  } catch (e) {
+                                    logger.e('Error updating timeSlot: $e');
+                                    showRedSnackbar(
+                                        context, _localizations.errorSaving);
+                                  }
+    
+                                  //logger.i(newTimeSlot.getString());
+                                },
+                                icon: Icon(Icons.timer_outlined,
+                                    color: Colors.white),
+                                label: Text(
+                                  formatDurationNoWords(timeSlot.timeStudied),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: screenWidth * 0.05),
+                                )),
+                          ),
+                          Row(
+                            children: [
+                              Text(_localizations.completed,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: screenWidth * 0.05,
+                                      fontWeight: FontWeight.w400)),
+                              Container(
+                                padding: EdgeInsets.all(1),
+                                child: Checkbox(
+                                    visualDensity: VisualDensity(
+                                        horizontal: -4, vertical: -4),
+                                    activeColor: Colors.black,
+                                    checkColor: timeSlot
+                                        .examColor, // Color of the checkmark
+                                    fillColor:
+                                        MaterialStateProperty.all(Colors.white),
+                                    value: checked,
+                                    onChanged: (bool? newValue) async {
+                                      setState(() {
+                                        checked = !checked;
+                                      });
+                                      try {
+                                        await checkBox(newValue!);
+                                      } catch (e) {
+                                        logger.e(
+                                            'Error changing timeslot state: $e');
+                                        showRedSnackbar(
+                                            context,
+                                            _localizations
+                                                .errorChangingTimeSlotCompletion);
+                                      }
+    
+                                      setState(() {
+                                        checked = timeSlot.completed;
+                                      });
+                                    }),
+                              )
+                            ],
+                          ),
+                        ],
+                      )),
+                ],
+              ),
+            )),
+      ),
     );
   }
 }
