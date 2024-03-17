@@ -131,6 +131,7 @@
     "resetToDefault": "Cambiar a predeterminado",
     "errorResettingToDefault": "Error al restablecer a predeterminado!",
     "error": "Ocurrió un error. Inténtalo de nuevo más tarde",
+    "cantWithNeedsUpdate":"Actualiza tu plan primero!",
     "progressTitle": "Progreso",
     "timerTitle": "Temporizador",
     "start": "Comenzar",

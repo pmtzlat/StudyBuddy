@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:alarm/alarm.dart';
+import 'package:alarm/model/alarm_settings.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:screen_state/screen_state.dart';
@@ -50,6 +52,7 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   bool screenOn = true;
   DateTime? preLockTimeStamp;
   DateTime? postLockTimeStamp;
+  late AlarmSettings alarmSettings;
 
   void onData(ScreenStateEvent event) {
     if (event == ScreenStateEvent.SCREEN_OFF) {
@@ -77,6 +80,36 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     startListening();
+    configAlarm();
+  }
+
+  void configAlarm() {
+    alarmSettings = AlarmSettings(
+      id: 1,
+      dateTime: calculateAlarmDateTime(),
+      assetAudioPath: 'assets/alarm.mp3',
+      loopAudio: false,
+      vibrate: true,
+      volume: 0.8,
+      fadeDuration: 3.0,
+      notificationTitle: 'StudyBuddy',
+      notificationBody: 'Alarm',
+      enableNotificationOnKill: false,
+      androidFullScreenIntent: true,
+    );
+
+  }
+
+  void startAlarm() async {
+    await Alarm.set(alarmSettings: alarmSettings);
+  }
+
+  void stopAlarm() async {
+    await Alarm.stop(1);
+  }
+
+  DateTime calculateAlarmDateTime() {
+    return DateTime.now().add(widget.sessionTime - widget.timerTime);
   }
 
   @override
@@ -90,11 +123,13 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
       await Future.delayed(Duration(seconds: 1));
-      if (!screenOn) {
-        preLockTimeStamp = DateTime.now();
-      }
-
       stopTimer();
+      if (!screenOn) {
+        
+        preLockTimeStamp = DateTime.now();
+      }else{
+        stopAlarm();
+      }
 
       //}
     } else if (state == AppLifecycleState.resumed) {
@@ -106,9 +141,10 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
           widget.timerTime += timePassed;
           preLockTimeStamp = null;
           postLockTimeStamp = null;
+          startTimer();
         }
 
-        startTimer();
+        
       }
     }
   }
@@ -190,10 +226,13 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
             IconButton(
                 onPressed: play
                     ? () {
+                        configAlarm();
+                        if(!continueTimer&& !widget.timeSlot.completed) startAlarm();
                         startTimer();
                         timerWasRunning = true;
                       }
                     : () {
+                        stopAlarm();
                         stopTimer();
                         timerWasRunning = false;
                       },
@@ -225,6 +264,7 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   Future<bool> showContinueDialog() async {
     bool result = false;
     final _localizations = AppLocalizations.of(context)!;
+    
     await showDialog(
         context: context,
         builder: (context) {
@@ -262,7 +302,6 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   final stopwatch = Stopwatch();
 
   void updatetimer() async {
-    
     setState(() {
       if (stopwatch.isRunning) {
         widget.timerTime = widget.timerTime + Duration(seconds: 1);
@@ -274,11 +313,14 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
     setState(() {
       play = false;
     });
+
     stopwatch.start();
+
     while (stopwatch.isRunning) {
       await Future.delayed(Duration(seconds: 1));
       updatetimer();
-      if (widget.timerTime >= widget.timeSlot.duration && continueTimer == false) {
+      if (widget.timerTime >= widget.timeSlot.duration &&
+          !continueTimer && !widget.timeSlot.completed) {
         continueTimer = await showContinueDialog();
         if (!continueTimer) {
           widget.completeAndClose(widget.timerTime, context);
@@ -298,6 +340,7 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
 
   void resetTimer() {
     stopwatch.stop();
+    stopAlarm();
     stopwatch.reset();
     widget.timerTime = Duration(hours: 0, minutes: 0, seconds: 0);
     setState(() {
@@ -305,10 +348,6 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
       continueTimer = false;
     });
     updatetimer();
-  }
-
-  void pauseTimer() {
-    stopwatch.stop();
   }
 }
 
@@ -413,22 +452,24 @@ class _TimerDialogState extends State<TimerDialog> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    
 
     return Center(
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         clipBehavior: Clip.antiAliasWithSaveLayer,
         child: Container(
-          height: screenHeight*0.45,
-          width: screenWidth*0.91,
+          height: screenHeight * 0.45,
+          width: screenWidth * 0.91,
           decoration: BoxDecoration(
             //borderRadius: BorderRadius.all(Radius.circular(20)),
             gradient: LinearGradient(
                 end: Alignment.bottomLeft,
                 begin: Alignment.topRight,
                 //stops: [ 0.1, 0.9],
-                colors: [increaseColorSaturation(widget.timeSlot.examColor, .2), darken(widget.timeSlot.examColor, 0.15)]),
+                colors: [
+                  increaseColorSaturation(widget.timeSlot.examColor, .2),
+                  darken(widget.timeSlot.examColor, 0.15)
+                ]),
           ),
           child: Stack(
             children: [
@@ -478,8 +519,6 @@ class _TimerDialogState extends State<TimerDialog> {
                         timerKey.currentState?.stopTimer();
 
                         await completeAndClose(timer.timerTime, context);
-
-                       
                       },
                       icon: Icon(
                         Icons.close_rounded,
@@ -488,23 +527,28 @@ class _TimerDialogState extends State<TimerDialog> {
                       )),
                 ],
               ),
-              loading ? Container(
-                color: Colors.black.withOpacity(0.3),
-                child: Column(mainAxisAlignment: MainAxisAlignment.center,
-                //mainAxisSize: MainAxisSize.max,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    //mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Container(
-                      height: screenHeight*0.1,
-                      width: screenHeight*0.1,
-                      child: CircularProgressIndicator(color: Colors.white))],
-                  )
-                ],),
-              ) : SizedBox()
-            
+              loading
+                  ? Container(
+                      color: Colors.black.withOpacity(0.3),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        //mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            //mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Container(
+                                  height: screenHeight * 0.1,
+                                  width: screenHeight * 0.1,
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white))
+                            ],
+                          )
+                        ],
+                      ),
+                    )
+                  : SizedBox()
             ],
           ),
         ),

@@ -26,42 +26,39 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
   final openTime = Duration(milliseconds: 200);
   late bool checked;
   late TimeSlotModel timeSlot;
-  
-  
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    timeSlot = instanceManager
-        .sessionStorage.loadedCalendarDay.timeSlots[widget.index];
-
-    checked = timeSlot.completed;
-  }
+  bool changing = false;
 
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     final _localizations = AppLocalizations.of(context)!;
-    final timeSize = screenWidth*0.04;
+    final timeSize = screenWidth * 0.04;
     final timeColor = Color.fromARGB(255, 109, 109, 109);
-    final timeStyle = TextStyle( fontSize: timeSize, color: timeColor);
-
+    final timeStyle = TextStyle(fontSize: timeSize, color: timeColor);
+    
 
     timeSlot = instanceManager
         .sessionStorage.loadedCalendarDay.timeSlots[widget.index];
-    //logger.f('timeSlot loaded: ${durationToHours(timeSlot.duration)}');
+    logger.f('timeSlot loaded: ${durationToHours(timeSlot.duration)}');
+    if (!changing) checked = timeSlot.completed;
 
     void update() {
       setState(() {});
     }
 
     Future<void> checkBox(bool checked) async {
-      if (stripTime(DateTime.now()).isAfter(timeSlot.date!)) {
-        showRedSnackbar(context, _localizations.editUnitCompletionInExamsPage);
-        return;
-      }
       try {
+        if (stripTime(DateTime.now()).isAfter(timeSlot.date!)) {
+          showRedSnackbar(
+              context, _localizations.editUnitCompletionInExamsPage);
+          return;
+        }
+        if (instanceManager.sessionStorage.needsRecalculation) {
+          showRedSnackbar(context, _localizations.cantWithNeedsUpdate);
+          return;
+        }
+
         await timeSlot.changeCompleteness(checked);
       } catch (e) {
         logger.e('Error changing completeness: $e');
@@ -84,7 +81,8 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
         children: [
           Container(
             height: max(screenHeight * 0.18,
-                screenHeight * 0.18 * durationToHours(timeSlot.duration)) + screenHeight*0.01,
+                    screenHeight * 0.18 * durationToHours(timeSlot.duration)) +
+                screenHeight * 0.01,
             padding: EdgeInsets.symmetric(
                 vertical: 20, horizontal: screenWidth * 0.025),
             child: Column(
@@ -95,8 +93,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                   timeOfDayToStr(timeSlot.startTime),
                   style: timeStyle,
                 ),
-                Text(timeOfDayToStr(timeSlot.endTime),
-                    style: timeStyle)
+                Text(timeOfDayToStr(timeSlot.endTime), style: timeStyle)
               ],
             ),
           ),
@@ -173,6 +170,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                       value: checked,
                                       onChanged: (bool? newValue) async {
                                         setState(() {
+                                          changing = true;
                                           checked = !checked;
                                         });
                                         try {
@@ -187,6 +185,7 @@ class _TimeSlotCardState extends State<TimeSlotCard> {
                                         }
 
                                         setState(() {
+                                          changing = false;
                                           checked = timeSlot.completed;
                                         });
                                       }),

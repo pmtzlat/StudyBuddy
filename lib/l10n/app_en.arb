@@ -136,6 +136,7 @@
     "resetToDefault": "Reset to default",
     "errorResettingToDefault": "Error resetting to default!",
     "error":"An error occurred. Try again later",
+    "cantWithNeedsUpdate":"Update your plan first!",
     
 
 

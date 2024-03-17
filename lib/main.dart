@@ -1,3 +1,4 @@
+import 'package:alarm/alarm.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -32,7 +33,7 @@ void main() async {
   FirebaseDatabase.instance.setPersistenceEnabled(true);
 
   instanceManager = InstanceManager();
-
+  await Alarm.init();
   
   await handleAppStart();
 
