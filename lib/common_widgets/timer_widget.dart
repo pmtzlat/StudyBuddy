@@ -97,7 +97,6 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
       enableNotificationOnKill: false,
       androidFullScreenIntent: true,
     );
-
   }
 
   void startAlarm() async {
@@ -125,9 +124,8 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
       await Future.delayed(Duration(seconds: 1));
       stopTimer();
       if (!screenOn) {
-        
         preLockTimeStamp = DateTime.now();
-      }else{
+      } else {
         stopAlarm();
       }
 
@@ -143,8 +141,6 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
           postLockTimeStamp = null;
           startTimer();
         }
-
-        
       }
     }
   }
@@ -227,7 +223,8 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
                 onPressed: play
                     ? () {
                         configAlarm();
-                        if(!continueTimer&& !widget.timeSlot.completed) startAlarm();
+                        if (!continueTimer && !widget.timeSlot.completed)
+                          startAlarm();
                         startTimer();
                         timerWasRunning = true;
                       }
@@ -264,7 +261,7 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
   Future<bool> showContinueDialog() async {
     bool result = false;
     final _localizations = AppLocalizations.of(context)!;
-    
+
     await showDialog(
         context: context,
         builder: (context) {
@@ -320,7 +317,8 @@ class TimerWidgetState extends State<TimerWidget> with WidgetsBindingObserver {
       await Future.delayed(Duration(seconds: 1));
       updatetimer();
       if (widget.timerTime >= widget.timeSlot.duration &&
-          !continueTimer && !widget.timeSlot.completed) {
+          !continueTimer &&
+          !widget.timeSlot.completed) {
         continueTimer = await showContinueDialog();
         if (!continueTimer) {
           widget.completeAndClose(widget.timerTime, context);
@@ -415,20 +413,29 @@ class _TimerDialogState extends State<TimerDialog> {
   }
 
   Future<void> completeAndClose(Duration time, BuildContext context) async {
+    final _localizations = AppLocalizations.of(context)!;
+    bool error = false;
     setState(() {
       loading = true;
     });
     //await Future.delayed(Duration(seconds:15));
-    await saveChangesToTimeSlot(time, context);
-    await controller.saveTimeStudied(widget.timeSlot);
-    instanceManager.sessionStorage.loadedCalendarDay.timeSlots[widget.index] =
-        await controller.getTimeSlot(widget.timeSlot.id, widget.timeSlot.dayID);
+    try {
+      await saveChangesToTimeSlot(time, context);
+      await controller.saveTimeStudied(widget.timeSlot);
+      instanceManager.sessionStorage.loadedCalendarDay.timeSlots[widget.index] =
+          await controller.getTimeSlot(
+              widget.timeSlot.id, widget.timeSlot.dayID);
+    } catch (e) {
+      error = true;
+    }
     logger.i(
         'Completed and closed!\n ${getStringFromTimeSlotList(instanceManager.sessionStorage.loadedCalendarDay.timeSlots)}');
     setState(() {
       loading = false;
     });
     Navigator.pop(context, widget.timeSlot);
+    if (error)
+      showRedSnackbar(context, _localizations.errorChangingTimeSlotCompletion);
   }
 
   @override
