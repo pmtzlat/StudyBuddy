@@ -670,6 +670,7 @@ class _ExamDetailViewState extends State<ExamDetailView> {
     return Container(
       height: screenHeight * 0.8,
       width: screenWidth * 0.9,
+      padding: EdgeInsets.all(screenWidth*0.02),
       child: Card(
         elevation: 0,
         child: AnimatedContainer(

@@ -78,8 +78,8 @@ class MyScaffold {
           body: Container(
               padding: EdgeInsets.only(
                   top: screenHeight * 0.08,
-                  left: padding ? screenWidth * 0.03 : 0,
-                  right: padding ? screenWidth * 0.03 : 0),
+                  left:  0,
+                  right:  0),
               child: body)),
     );
   }

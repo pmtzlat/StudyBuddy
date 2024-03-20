@@ -63,147 +63,151 @@ class _ExamsViewState extends State<ExamsView> {
       children: [
         Container(
           margin: EdgeInsets.all(screenWidth * 0.05),
+          padding: EdgeInsets.symmetric(horizontal: screenWidth*0.02),
           child: Text(
             _localizations.examsTitle,
             style: Theme.of(context).textTheme.displayMedium,
           ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            AnimatedSwitcher(
-              duration: prioritizeSwitchTime,
-              child: !prioritizing
-                  ? Container(
-                      // add course
-                      key: ValueKey<int>(0),
-                      width: screenWidth * 0.43,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          TextButton.icon(
-                              key: ValueKey<int>(0),
-                              onPressed: () {
-                                showAddExamSheet(context);
-                              },
-                              label: Text(_localizations.addExam,
-                                  style: TextStyle(color: buttonColor)),
-                              icon:
-                                  Icon(Icons.add_rounded, color: buttonColor)),
-                        ],
-                      ),
-                    )
-                  : Container(
-                      // cancel prioritize
-                      key: ValueKey<int>(1),
-                      width: screenWidth * 0.43,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          TextButton.icon(
-                              key: ValueKey<int>(1),
-                              onPressed: () {
-                                logger.i('Cancel clicked!');
-                                logger.i(
-                                    'reorderExams after cancel clicked: ${getStringForExams(reorderExams)}');
-                                setState(() {
-                                  prioritizing = false;
-                                });
-                                loadExams();
-                              },
-                              label: Text(_localizations.cancel,
-                                  style: TextStyle(color: Colors.redAccent)),
-                              icon: Icon(Icons.close_rounded,
-                                  color: Colors.redAccent)),
-                        ],
-                      ),
-                    ),
-            ),
-            AnimatedSwitcher(
-                duration: Duration(milliseconds: 500),
-                child: instanceManager.sessionStorage.activeOrAllExams == 0
-                    ? AnimatedSwitcher(
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: screenWidth*0.02),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              AnimatedSwitcher(
+                duration: prioritizeSwitchTime,
+                child: !prioritizing
+                    ? Container(
+                        // add course
                         key: ValueKey<int>(0),
-                        duration: prioritizeSwitchTime,
-                        child: !prioritizing
-                            ? Container(
-                                //Prioritize
+                        width: screenWidth * 0.43,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            TextButton.icon(
                                 key: ValueKey<int>(0),
-                                width: screenWidth * 0.4,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    TextButton.icon(
-                                        key: ValueKey<int>(0),
-                                        onPressed: () {
-                                          reorderExams = List.from(activeExams);
-
-                                          logger.i('Prioritize clicked!');
-
-                                          setState(() {
-                                            prioritizing = true;
-                                          });
-                                        },
-                                        label: Text(
-                                            _localizations.prioritizeButton,
-                                            style:
-                                                TextStyle(color: buttonColor)),
-                                        icon: Icon(Icons.format_list_numbered,
-                                            color: buttonColor))
-                                  ],
-                                ),
-                              )
-                            : Container(
-                                //finishPrioritize
-                                key: ValueKey<int>(1),
-                                width: screenWidth * 0.4,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    TextButton.icon(
-                                        key: ValueKey<int>(1),
-                                        onPressed: () async {
-                                          logger.i('Confirm clicked!');
-                                          _controller
-                                              .applyWeights(reorderExams);
-                                          reorderExams.sort(
-                                              (ExamModel a, ExamModel b) =>
-                                                  b.weight.compareTo(a.weight));
-                                          logger.i(
-                                              'reorderExams after confirm clicked: ${getStringForExams(reorderExams)}');
-
-                                          setState(() {
-                                            activeExams = reorderExams;
-                                            prioritizing = false;
-                                          });
-                                          if (await _controller
-                                                  .updateExamWeights() ==
-                                              -1) {
-                                            showRedSnackbar(
-                                                context,
-                                                _localizations
-                                                    .errorPrioritizing);
-                                          }
-
-                                          activeExams = instanceManager
-                                              .sessionStorage.activeExams;
-                                          reorderExams = <ExamModel>[];
-                                          await instanceManager.sessionStorage.setNeedsRecalc(true);
-
-                                          loadExams();
-                                        },
-                                        label: Text(_localizations.confirm,
-                                            style: TextStyle(
-                                                color: Colors.greenAccent)),
-                                        icon: Icon(Icons.done_rounded,
-                                            color: Colors.greenAccent)),
-                                  ],
-                                ),
-                              ),
+                                onPressed: () {
+                                  showAddExamSheet(context);
+                                },
+                                label: Text(_localizations.addExam,
+                                    style: TextStyle(color: buttonColor)),
+                                icon:
+                                    Icon(Icons.add_rounded, color: buttonColor)),
+                          ],
+                        ),
                       )
-                    : Text('fasdf',
-                        style: TextStyle(color: Colors.transparent))), //hotfix
-          ],
+                    : Container(
+                        // cancel prioritize
+                        key: ValueKey<int>(1),
+                        width: screenWidth * 0.43,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            TextButton.icon(
+                                key: ValueKey<int>(1),
+                                onPressed: () {
+                                  logger.i('Cancel clicked!');
+                                  logger.i(
+                                      'reorderExams after cancel clicked: ${getStringForExams(reorderExams)}');
+                                  setState(() {
+                                    prioritizing = false;
+                                  });
+                                  loadExams();
+                                },
+                                label: Text(_localizations.cancel,
+                                    style: TextStyle(color: Colors.redAccent)),
+                                icon: Icon(Icons.close_rounded,
+                                    color: Colors.redAccent)),
+                          ],
+                        ),
+                      ),
+              ),
+              AnimatedSwitcher(
+                  duration: Duration(milliseconds: 500),
+                  child: instanceManager.sessionStorage.activeOrAllExams == 0
+                      ? AnimatedSwitcher(
+                          key: ValueKey<int>(0),
+                          duration: prioritizeSwitchTime,
+                          child: !prioritizing
+                              ? Container(
+                                  //Prioritize
+                                  key: ValueKey<int>(0),
+                                  width: screenWidth * 0.4,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      TextButton.icon(
+                                          key: ValueKey<int>(0),
+                                          onPressed: () {
+                                            reorderExams = List.from(activeExams);
+        
+                                            logger.i('Prioritize clicked!');
+        
+                                            setState(() {
+                                              prioritizing = true;
+                                            });
+                                          },
+                                          label: Text(
+                                              _localizations.prioritizeButton,
+                                              style:
+                                                  TextStyle(color: buttonColor)),
+                                          icon: Icon(Icons.format_list_numbered,
+                                              color: buttonColor))
+                                    ],
+                                  ),
+                                )
+                              : Container(
+                                  //finishPrioritize
+                                  key: ValueKey<int>(1),
+                                  width: screenWidth * 0.4,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      TextButton.icon(
+                                          key: ValueKey<int>(1),
+                                          onPressed: () async {
+                                            logger.i('Confirm clicked!');
+                                            _controller
+                                                .applyWeights(reorderExams);
+                                            reorderExams.sort(
+                                                (ExamModel a, ExamModel b) =>
+                                                    b.weight.compareTo(a.weight));
+                                            logger.i(
+                                                'reorderExams after confirm clicked: ${getStringForExams(reorderExams)}');
+        
+                                            setState(() {
+                                              activeExams = reorderExams;
+                                              prioritizing = false;
+                                            });
+                                            if (await _controller
+                                                    .updateExamWeights() ==
+                                                -1) {
+                                              showRedSnackbar(
+                                                  context,
+                                                  _localizations
+                                                      .errorPrioritizing);
+                                            }
+        
+                                            activeExams = instanceManager
+                                                .sessionStorage.activeExams;
+                                            reorderExams = <ExamModel>[];
+                                            await instanceManager.sessionStorage.setNeedsRecalc(true);
+        
+                                            loadExams();
+                                          },
+                                          label: Text(_localizations.confirm,
+                                              style: TextStyle(
+                                                  color: Colors.greenAccent)),
+                                          icon: Icon(Icons.done_rounded,
+                                              color: Colors.greenAccent)),
+                                    ],
+                                  ),
+                                ),
+                        )
+                      : Text('fasdf',
+                          style: TextStyle(color: Colors.transparent))), //hotfix
+            ],
+          ),
         ),
         activeExams == null
             ? loadingScreen()

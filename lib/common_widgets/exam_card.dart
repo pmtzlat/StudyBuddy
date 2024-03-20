@@ -47,8 +47,9 @@ class _ExamCardState extends State<ExamCard> {
         }
       },
       child: Card(
-          elevation: 0,
-          margin: const EdgeInsets.symmetric(vertical: 7),
+          elevation: 30,
+          shadowColor: Color.fromARGB(130, 246, 246, 246),
+          margin:  EdgeInsets.symmetric(vertical: 7, horizontal: screenWidth*0.03),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           clipBehavior: Clip.antiAliasWithSaveLayer,
@@ -59,6 +60,7 @@ class _ExamCardState extends State<ExamCard> {
                     begin: Alignment.topRight,
                     //stops: [ 0.1, 0.9],
                     colors: [increaseColorSaturation(cardColor, .2), darken(cardColor, 0.15)]),
+                    
               ),
               padding: EdgeInsets.only(
                   left: screenWidth * 0.05,
